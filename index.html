@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -35,6 +35,1518 @@
       --r-md: 14px;
       --r-sm: 10px;
       --font: 'Outfit', -apple-system, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); min-height: 100vh; color: var(--text); -webkit-font-smoothing: antialiased; }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background: radial-gradient(ellipse 80% 35% at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 55%);
+      pointer-events: none; z-index: 0;
+    }
+    .app { max-width: 960px; margin: 0 auto; padding: 14px 14px 56px; position: relative; z-index: 1; }
+
+    /* ── BANNER COM IMAGEM (ESTILO NEWBOX) ── */
+    .banner {
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,168,76,0.2);
+      background: #000;
+      line-height: 0;
+      position: relative;
+      border: 1px solid var(--border);
+    }
+    .banner img {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 140px;
+      object-fit: cover;
+    }
+    .banner-overlay-top {
+      position: absolute; top: 12px; right: 14px;
+      display: flex; align-items: center; gap: 8px;
+      z-index: 10;
+    }
+    .user-pill {
+      font-size: 11px; font-weight: 700; color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
+      padding: 5px 12px; border-radius: 999px;
+      border: 1px solid rgba(201,168,76,0.3);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-sair {
+      font-size: 11px; font-weight: 700; color: #fff;
+      background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 5px 12px; border-radius: 999px; cursor: pointer;
+      font-family: var(--font); transition: all 0.2s;
+    }
+    .btn-sair:hover { background: rgba(224,68,68,0.6); border-color: rgba(224,68,68,0.8); }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex; gap: 4px; margin-bottom: 14px;
+      background: var(--card); padding: 5px; border-radius: var(--r-md);
+      border: 1px solid var(--border-s); flex-wrap: wrap;
+    }
+    .tab {
+      flex: 1; padding: 11px 6px; border-radius: 10px; border: none;
+      background: transparent; color: var(--muted); font-size: 11.5px; font-weight: 700;
+      cursor: pointer; text-align: center; transition: all 0.2s; font-family: var(--font);
+      display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 85px;
+    }
+    .tab.active {
+      background: linear-gradient(135deg, rgba(201,168,76,0.22), rgba(201,168,76,0.11));
+      color: var(--gold-light); border: 1px solid rgba(201,168,76,0.28);
+      box-shadow: 0 2px 14px rgba(201,168,76,0.12);
+    }
+    .tab:not(.active):hover { background: rgba(255,255,255,0.04); color: var(--text2); }
+
+    /* ── PANELS ── */
+    .panel { display: none; }
+    .panel.active { display: block; animation: fadeUp 0.25s ease; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card); border-radius: var(--r-md); padding: 18px;
+      margin-bottom: 14px; border: 1px solid var(--border-s);
+      box-shadow: 0 2px 14px rgba(0,0,0,0.32); overflow-x: auto;
+    }
+    .card-title {
+      font-size: 14px; font-weight: 800; color: var(--gold-light);
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.01em;
+    }
+    .num-badge {
+      margin-left: auto; background: rgba(201,168,76,0.13); color: var(--gold-light);
+      font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 999px;
+      border: 1px solid rgba(201,168,76,0.2);
+    }
+
+    /* ── FIELDS ── */
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .field-row.single { grid-template-columns: 1fr; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: 10.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+    .field input, .field select, .field textarea {
+      padding: 11px 13px; border: 1.5px solid rgba(255,255,255,0.07);
+      border-radius: var(--r-sm); font-size: 14px; font-family: var(--font);
+      color: var(--text); background: var(--surface); transition: all 0.15s;
+    }
+    .field input::placeholder { color: #252035; }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none; border-color: var(--gold);
+      background: #0f0f1d; box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+    }
+
+    /* ── OS NUMBER BAR ── */
+    .os-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.2);
+      border-radius: var(--r-sm); padding: 10px 16px; margin-bottom: 14px;
+    }
+    .os-bar .lbl { font-size: 10.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+    .os-bar .val { font-size: 20px; font-weight: 900; color: var(--gold-light); letter-spacing: 0.04em; }
+
+    /* ── TABLE GRID COM METRO QUADRADO (SPREADSHEET DESIGN) ── */
+    .calc-table-wrap {
+      overflow-x: auto; margin-bottom: 12px; width: 100%; border-radius: var(--r-sm);
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+    .calc-table {
+      width: 100%; border-collapse: collapse; min-width: 860px; font-size: 12.5px;
+    }
+    .calc-table th {
+      background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.08));
+      color: var(--gold-light); font-weight: 800; font-size: 10.5px; text-transform: uppercase;
+      letter-spacing: 0.05em; padding: 10px 8px; text-align: left; border-bottom: 1px solid rgba(201,168,76,0.2);
+    }
+    .calc-table td {
+      padding: 6px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); background: var(--surface);
+    }
+    .calc-table input {
+      width: 100%; padding: 8px 8px; border: 1.5px solid rgba(255,255,255,0.07);
+      border-radius: 7px; font-size: 13px; font-family: var(--font); color: var(--text);
+      background: #08080f; transition: border-color 0.15s;
+      -moz-appearance: textfield; appearance: textfield;
+    }
+    .calc-table input::-webkit-inner-spin-button,
+    .calc-table input::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .calc-table input:focus { outline: none; border-color: var(--gold); background: #0c0c16; }
+    .item-save {
+      background: rgba(201,168,76,0.14); border: 1px solid rgba(201,168,76,0.25); color: var(--gold-light);
+      font-size: 12px; cursor: pointer; width: 28px; height: 28px; border-radius: 6px;
+      display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s;
+    }
+    .item-save:hover { background: rgba(201,168,76,0.32); border-color: var(--gold); }
+    .item-del {
+      background: rgba(224,68,68,0.12); border: none; color: var(--red);
+      font-size: 13px; cursor: pointer; width: 28px; height: 28px; border-radius: 6px;
+      display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s;
+    }
+    .item-del:hover { background: var(--red); color: #fff; }
+
+
+    /* ── QUICK SERVICE CHIPS ── */
+    .svc-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 13px; }
+    .svc-chip {
+      padding: 5px 12px; border-radius: 999px;
+      border: 1px solid rgba(201,168,76,0.2); background: rgba(201,168,76,0.06);
+      color: var(--text2); font-size: 11.5px; font-weight: 600; cursor: pointer;
+      transition: all 0.15s; font-family: var(--font);
+    }
+    .svc-chip:hover { border-color: var(--gold); background: rgba(201,168,76,0.14); color: var(--gold-light); }
+
+    /* ── PAYMENT CHIPS ── */
+    .chips { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 8px; }
+    .chip {
+      padding: 6px 14px; border-radius: 999px;
+      border: 1.5px solid rgba(201,168,76,0.22); background: rgba(201,168,76,0.05);
+      color: var(--gold); font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; font-family: var(--font);
+    }
+    .chip:hover { border-color: var(--gold); background: rgba(201,168,76,0.12); }
+    .chip.on {
+      background: linear-gradient(135deg, rgba(201,168,76,0.24), rgba(201,168,76,0.14));
+      color: var(--gold-light); border-color: var(--gold); box-shadow: 0 2px 10px rgba(201,168,76,0.15);
+    }
+
+    /* ── TOTAL BAR ── */
+    .total-bar {
+      background: linear-gradient(135deg, rgba(201,168,76,0.16) 0%, rgba(201,168,76,0.07) 100%);
+      border: 1.5px solid rgba(201,168,76,0.3); border-radius: var(--r-sm);
+      padding: 16px 20px; display: flex; justify-content: space-between;
+      align-items: center; margin-top: 12px; flex-wrap: wrap; gap: 10px;
+    }
+    .total-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+    .total-val { font-size: 28px; font-weight: 900; color: var(--gold-light); letter-spacing: -0.01em; }
+    .forma-badge {
+      background: rgba(201,168,76,0.13); border: 1px solid rgba(201,168,76,0.22);
+      color: var(--gold); padding: 6px 16px; border-radius: 999px; font-size: 12.5px; font-weight: 700; white-space: nowrap;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      padding: 11px 18px; border-radius: var(--r-sm); border: none; cursor: pointer;
+      font-size: 13.5px; font-weight: 700; font-family: var(--font);
+      display: inline-flex; align-items: center; gap: 7px;
+      transition: all 0.15s; text-decoration: none; justify-content: center;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(232,210,122,0.9), rgba(201,168,76,0.8));
+      color: #1a0e00;
+    }
+    .btn-primary:hover { background: linear-gradient(135deg, var(--gold-light), var(--gold)); box-shadow: 0 4px 18px rgba(201,168,76,0.32); }
+    .btn-whats { background: linear-gradient(135deg, #25D366, #1cb85a); color: #fff; }
+    .btn-whats:hover { box-shadow: 0 4px 18px rgba(37,211,102,0.32); }
+    .btn-sec { background: rgba(255,255,255,0.05); color: var(--text2); border: 1.5px solid rgba(255,255,255,0.08); }
+    .btn-sec:hover { background: rgba(255,255,255,0.09); }
+    .btn-danger { background: rgba(224,68,68,0.14); color: var(--red); border: 1px solid rgba(224,68,68,0.2); }
+    .btn-danger:hover { background: var(--red); color: #fff; }
+    .btn-gold {
+      background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.1));
+      color: var(--gold-light); border: 1px solid rgba(201,168,76,0.25);
+    }
+    .btn-gold:hover { background: linear-gradient(135deg, rgba(201,168,76,0.3), rgba(201,168,76,0.18)); box-shadow: 0 4px 16px rgba(201,168,76,0.15); }
+    .btn-sm { padding: 7px 12px; font-size: 12px; }
+    .btn-full { width: 100%; }
+    .btn-ia {
+      background: linear-gradient(135deg, rgba(201,168,76,0.22), rgba(201,168,76,0.11));
+      color: var(--gold-light); border: 1px solid rgba(201,168,76,0.3);
+      width: 100%; justify-content: center; font-size: 15px; padding: 14px;
+      margin-top: 12px; box-shadow: 0 4px 24px rgba(201,168,76,0.1);
+    }
+    .btn-ia:hover { background: linear-gradient(135deg, rgba(201,168,76,0.32), rgba(201,168,76,0.18)); box-shadow: 0 8px 32px rgba(201,168,76,0.22); }
+    .btn-ia:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .actions { display: flex; gap: 9px; margin-top: 12px; flex-wrap: wrap; }
+
+    /* ── CARDS HISTÓRICO, CLIENTES E PRODUTOS ── */
+    .hist-card, .cli-card, .prod-card {
+      background: var(--surface); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--r-sm); padding: 14px 16px; margin-bottom: 9px; transition: border-color 0.2s;
+    }
+    .hist-card:hover, .cli-card:hover, .prod-card:hover { border-color: rgba(201,168,76,0.2); }
+    .hist-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+    .hist-num {
+      font-size: 12.5px; font-weight: 900; color: var(--gold);
+      background: rgba(201,168,76,0.11); border: 1px solid rgba(201,168,76,0.2);
+      padding: 3px 10px; border-radius: 999px; letter-spacing: 0.03em;
+    }
+    .hist-date { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+    .hist-client { font-size: 14.5px; font-weight: 700; color: var(--text); margin-top: 8px; }
+    .hist-total { font-size: 15px; font-weight: 800; color: var(--gold-light); margin-top: 2px; }
+    .cli-card, .prod-card { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .cli-name, .prod-name { font-size: 14.5px; font-weight: 800; color: var(--gold-light); }
+    .cli-det, .prod-det { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .cli-btns, .prod-btns { display: flex; gap: 6px; flex-shrink: 0; }
+
+    /* ── MESSAGES E SPINNER ── */
+    .msg-ok { background: var(--ok-bg); border: 1px solid rgba(74,222,128,0.18); color: var(--ok-fg); border-radius: var(--r-sm); padding: 10px 14px; font-size: 13px; font-weight: 700; margin-top: 10px; }
+    .msg-err { background: var(--err-bg); border: 1px solid rgba(224,68,68,0.2); color: var(--err-fg); border-radius: var(--r-sm); padding: 10px 14px; font-size: 13px; font-weight: 700; margin-top: 10px; }
+    .empty { text-align: center; color: var(--muted); font-size: 13.5px; padding: 32px 14px; }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(201,168,76,0.28); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .contrato-box {
+      background: var(--surface); border: 1px solid rgba(201,168,76,0.2);
+      border-radius: var(--r-sm); padding: 16px; font-size: 12px;
+      line-height: 1.85; color: var(--text2); white-space: pre-wrap;
+      font-family: 'Courier New', monospace; max-height: 62vh; overflow-y: auto; margin-top: 12px;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(5px); z-index: 200;
+      display: flex; align-items: flex-end; justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 22px 22px 0 0; padding: 26px 20px 32px;
+      width: 100%; max-width: 800px; max-height: 75vh; overflow-y: auto;
+      animation: slideModal 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-title { font-size: 16px; font-weight: 800; color: var(--gold-light); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+    .modal-close { background: rgba(255,255,255,0.07); border: none; color: var(--muted); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .modal-close:hover { background: rgba(224,68,68,0.18); color: #ff8080; }
+
+    footer.credits { text-align: center; font-size: 11px; color: rgba(106,98,117,0.5); margin-top: 28px; padding-top: 14px; letter-spacing: 0.05em; }
+
+    @media(max-width: 650px) {
+      .app { padding: 10px 10px 44px; }
+      .total-val { font-size: 22px; }
+      .field-row { grid-template-columns: 1fr; gap: 9px; }
+      .tab { font-size: 10.5px; padding: 9px 4px; min-width: 65px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- DATALIST FOR PRODUCT & SERVICE AUTOCOMPLETE -->
+<datalist id="lista-produtos-sugeridos"></datalist>
+
+<!-- AUTH GUARD -->
+<script>
+  (function() {
+    if (!sessionStorage.getItem('sdv_token')) { window.location.replace('login.html'); throw new Error('redirect'); }
+  })();
+</script>
+
+<div class="app">
+
+  <!-- BANNER GRÁFICO (ESTILO NEWBOX DA SD VIDROS) -->
+  <div class="banner">
+    <img src="banner.jpg" alt="SD Vidros – Alumínio e Vidraçaria | Box de vidro e acrílico, Corrimão, Portão automático, Janelas, Grades, Fechamento de área. Tel/WhatsApp: (85) 99611-9824 - Itaitinga - CE">
+    <div class="banner-overlay-top">
+      <div class="user-pill">
+        <span id="usuario-logado">👤 Admin</span>
+      </div>
+      <button class="btn-sair" onclick="sair()">🚪 Sair</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button id="tab-orcamento" class="tab active" data-tab="orcamento" onclick="goTab('orcamento')">📋 Orçamento</button>
+    <button id="tab-historico" class="tab" data-tab="historico" onclick="goTab('historico')">🗂️ Histórico</button>
+    <button id="tab-produtos" class="tab" data-tab="produtos" onclick="goTab('produtos')">📦 Produtos & Serviços</button>
+    <button id="tab-clientes" class="tab" data-tab="clientes" onclick="goTab('clientes')">👤 Clientes</button>
+    <button id="tab-contratos" class="tab" data-tab="contratos" onclick="goTab('contratos')">📄 Contratos</button>
+    <button id="tab-usuarios" class="tab" data-tab="usuarios" onclick="goTab('usuarios')">👥 Usuários</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANEL: ORÇAMENTO -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="panel-orcamento" class="panel active">
+
+    <div class="os-bar">
+      <span class="lbl">Orçamento / O.S. Nº</span>
+      <span class="val" id="orc-numero-display">#0001</span>
+    </div>
+
+    <!-- Client search button -->
+    <div style="margin-bottom:12px;">
+      <button class="btn btn-gold btn-full" onclick="abrirModalCliente()" id="btn-buscar-cli">
+        🔍 Buscar Cliente Cadastrado
+      </button>
+    </div>
+
+    <!-- Client data -->
+    <div class="card">
+      <div class="card-title">👤 Dados do Cliente e Local</div>
+      <div class="field-row">
+        <div class="field"><label>Cliente / Condomínio</label><input id="o-nome" placeholder="Nome completo" /></div>
+        <div class="field"><label>CPF / CNPJ</label><input id="o-cnpj" placeholder="000.000.000-00" /></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>WhatsApp / Tel</label><input id="o-tel" placeholder="(85) 99999-9999" /></div>
+        <div class="field"><label>Bairro / Cidade</label><input id="o-bairro" placeholder="Bairro, Itaitinga" /></div>
+      </div>
+      <div class="field-row single">
+        <div class="field"><label>Endereço</label><input id="o-end" placeholder="Rua, número, complemento" /></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Nº</label><input id="o-num" placeholder="123" /></div>
+        <div class="field"><label>Apto / Complemento</label><input id="o-apto" placeholder="Apto 101" /></div>
+      </div>
+      <div class="field-row single">
+        <div class="field"><label>Responsável (opcional)</label><input id="o-resp" placeholder="Nome do responsável" /></div>
+      </div>
+    </div>
+
+    <!-- Services / Calculations -->
+    <div class="card">
+      <div class="card-title">🔧 Itens, Metro Quadrado (m²) e Valores</div>
+
+      <div style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;">Adicionar Rápido do Catálogo</div>
+      <div class="svc-chips" id="quick-catalog-chips"></div>
+
+      <!-- SPREADSHEET CALCULATION TABLE -->
+      <div class="calc-table-wrap">
+        <table class="calc-table">
+          <thead>
+            <tr>
+              <th style="width:48px;text-align:center">QTD</th>
+              <th style="min-width:180px">DESCRIÇÃO (PRODUTO / SERVIÇO)</th>
+              <th style="width:90px">COR</th>
+              <th style="width:65px">ALT.(m)</th>
+              <th style="width:65px">LARG.(m)</th>
+              <th style="width:75px">M² (ÁREA)</th>
+              <th style="width:85px">V. M² (R$)</th>
+              <th style="width:85px">V. UNIT.(R$)</th>
+              <th style="width:90px">BIZT./LAP.</th>
+              <th style="width:95px">TOTAL (R$)</th>
+              <th style="width:36px;text-align:center"></th>
+            </tr>
+          </thead>
+          <tbody id="itens-lista"></tbody>
+        </table>
+      </div>
+
+      <button class="btn btn-sec btn-sm" onclick="addItem()" style="margin-top:8px">+ Adicionar linha</button>
+
+      <div class="total-bar">
+        <div>
+          <div class="total-label">Total do Orçamento</div>
+          <div class="total-val" id="total">R$ 0,00</div>
+        </div>
+        <div class="forma-badge" id="forma-badge">À vista</div>
+      </div>
+    </div>
+
+    <!-- Payment -->
+    <div class="card">
+      <div class="card-title">💳 Pagamento, Prazo e Garantia</div>
+      <div class="chips" id="chips">
+        <button class="chip on" onclick="selChip(this,'À vista')">À vista</button>
+        <button class="chip" onclick="selChip(this,'Entrada 50% / Restante 50% na entrega')">50% + 50%</button>
+        <button class="chip" onclick="selChip(this,'3x no cartão')">3x cartão</button>
+        <button class="chip" onclick="selChip(this,'Entrada 30% / Restante 70% na entrega')">30% + 70%</button>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label>Outra forma de pagamento</label>
+        <input id="forma-outro" placeholder="Ex: 30/60/90 dias..." oninput="if(this.value){formaAtual=this.value;atualizarBadge()}">
+      </div>
+      <div class="field-row" style="margin-top:12px">
+        <div class="field"><label>Prazo de Entrega</label><input id="o-prazo" placeholder="Ex: 15 dias úteis"></div>
+        <div class="field"><label>Garantia</label><input id="o-garantia" placeholder="Ex: 1 Ano"></div>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label>Observações</label>
+        <input id="o-obs" placeholder="Ex: Instalação inclusa, vidro temperado 8mm...">
+      </div>
+    </div>
+
+    <!-- Send / Save -->
+    <div class="card">
+      <div class="card-title">📤 Enviar / Salvar</div>
+      <button class="btn btn-whats btn-full" onclick="enviarWhatsApp()">📱 Enviar Orçamento pelo WhatsApp</button>
+      <button class="btn btn-primary btn-full" id="btn-salvar-os" onclick="salvarOrdem()" style="margin-top:10px">✅ Salvar Ordem de Serviço</button>
+      <button class="btn btn-sec btn-full" id="btn-cancelar-os" onclick="cancelarEdicaoOs()" style="margin-top:8px;display:none">✕ Cancelar Edição</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANEL: HISTÓRICO -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="panel-historico" class="panel">
+    <div class="card">
+      <div class="card-title">🗂️ Orçamentos e Ordens de Serviço <span class="num-badge" id="hist-count">0</span></div>
+      <div id="hist-lista"><div class="empty">Nenhum orçamento salvo ainda.</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANEL: PRODUTOS E SERVIÇOS (CATÁLOGO DA SEGUNDA IMAGEM) -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="panel-produtos" class="panel">
+    <div class="card">
+      <div class="card-title">➕ Cadastrar / Editar Produto ou Serviço</div>
+      <div class="field-row">
+        <div class="field"><label>Nome do Produto / Serviço</label><input id="p-nome" placeholder="Ex: Box de Vidro Temperado 8mm" /></div>
+        <div class="field"><label>Categoria</label><input id="p-cat" placeholder="Ex: Box, Espelhos, Janelas..." /></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Valor Padrão m² (R$)</label><input id="p-vm2" type="text" inputmode="decimal" placeholder="0,00" /></div>
+        <div class="field"><label>Valor Unitário Padrão (R$)</label><input id="p-vunit" type="text" inputmode="decimal" placeholder="0,00" /></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="btn-salvar-prod" onclick="salvarProduto()">💾 Salvar no Catálogo</button>
+        <button class="btn btn-sec" onclick="limparProd()">Limpar</button>
+      </div>
+      <div id="prod-msg"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📦 Produtos e Serviços Cadastrados <span class="num-badge" id="prod-count">0</span></div>
+      <div id="prod-lista"><div class="empty">Nenhum produto cadastrado.</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANEL: CLIENTES -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="panel-clientes" class="panel">
+    <div class="card">
+      <div class="card-title">➕ Cadastrar / Editar Cliente</div>
+      <div class="field-row">
+        <div class="field"><label>Nome</label><input id="c-nome" placeholder="Nome completo" /></div>
+        <div class="field"><label>WhatsApp</label><input id="c-tel" placeholder="(85) 99999-9999" /></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Bairro</label><input id="c-bairro" placeholder="Bairro" /></div>
+        <div class="field"><label>Cidade</label><input id="c-cidade" placeholder="Itaitinga" /></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="btn-salvar-cli" onclick="salvarCliente()">💾 Salvar cliente</button>
+        <button class="btn btn-sec" onclick="limparCli()">Limpar</button>
+      </div>
+      <div id="cli-msg"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Clientes salvos <span class="num-badge" id="cli-count">0</span></div>
+      <div id="cli-lista"><div class="empty">Nenhum cliente cadastrado.</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANEL: CONTRATOS -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="panel-contratos" class="panel">
+    <div class="card">
+      <div class="card-title">📄 Gerador de Contrato</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+        Selecione uma Ordem de Serviço salva para gerar o contrato completo de prestação de serviços, pronto para impressão e assinatura.
+      </p>
+      <div class="field" style="margin-bottom:14px">
+        <label>Selecione a Ordem de Serviço</label>
+        <select id="sel-orcamento-contrato">
+          <option value="">-- Selecione uma Ordem de Serviço --</option>
+        </select>
+      </div>
+      <button class="btn btn-ia" id="btn-gerar-contrato" onclick="gerarContrato()">
+        <span id="contrato-spinner" class="spinner" style="display:none"></span>
+        <span id="contrato-btn-text">✨ Gerar Contrato</span>
+      </button>
+
+      <div id="contrato-resultado-area" style="display:none;margin-top:4px;">
+        <div class="contrato-box" id="contrato-texto"></div>
+        <div class="actions" style="margin-top:12px;flex-wrap:wrap;">
+          <button class="btn btn-gold btn-sm" onclick="copiarContrato()">📋 Copiar Contrato</button>
+          <button class="btn btn-whats btn-sm" onclick="enviarContratoWhats()">📱 Enviar via WhatsApp</button>
+          <button class="btn btn-gold btn-sm" onclick="enviarParaAssinatura()" id="btn-assinatura-digital">
+            <span id="assinatura-spinner" class="spinner" style="display:none"></span>
+            <span id="assinatura-btn-text">✍️ Enviar para Assinatura Digital</span>
+          </button>
+          <button class="btn btn-sec btn-sm" onclick="document.getElementById('contrato-resultado-area').style.display='none'">✕ Ocultar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANEL: USUÁRIOS -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="panel-usuarios" class="panel">
+    <div class="card">
+      <div class="card-title">➕ Novo Usuário</div>
+      <div class="field-row">
+        <div class="field"><label>Usuário (login)</label><input id="u-username" placeholder="ex: maria" autocapitalize="none" /></div>
+        <div class="field"><label>Nome completo</label><input id="u-nome" placeholder="ex: Maria Silva" /></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Senha</label><input id="u-senha" type="password" placeholder="Mínimo 6 caracteres" /></div>
+        <div class="field"><label>Confirmar senha</label><input id="u-senha2" type="password" placeholder="Repita a senha" /></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="btn-salvar-user" onclick="salvarUsuario()">💾 Salvar usuário</button>
+        <button class="btn btn-sec" onclick="limparUsuario()">Limpar</button>
+      </div>
+      <div id="user-msg"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">👥 Usuários do sistema <span class="num-badge" id="user-count">0</span></div>
+      <div id="user-lista"><div class="empty">Nenhum usuário.</div></div>
+    </div>
+  </div>
+
+  <footer class="credits">SD Vidros · Itaitinga - CE · (85) 99611-9824 · @sdvidros</footer>
+</div>
+
+<!-- ══ CLIENT PICKER MODAL ══ -->
+<div id="modal-cliente" class="modal-overlay" style="display:none" onclick="fecharModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">
+      🔍 Selecionar Cliente
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
+    <div id="modal-cli-lista"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  STORAGE & KEYS
+// ══════════════════════════════════════════════
+const K = {
+  users: 'sdv_users',
+  clients: 'sdv_clientes',
+  orders: 'sdv_ordens',
+  nextNum: 'sdv_next_num',
+  products: 'sdv_produtos'
+};
+function load(k, d=[]) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }
+function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let clientes = [];
+let produtos = [];
+let historico = [];
+let proxNumero = 1;
+let formaAtual = 'À vista';
+let itemId = 0;
+let editandoOsId = null;
+let editandoCliId = null;
+let editandoProdId = null;
+let editandoUserId = null;
+
+// ══════════════════════════════════════════════
+//  DEFAULT CATALOG (PRODUTOS E SERVIÇOS DA 2ª IMAGEM)
+// ══════════════════════════════════════════════
+const PRODUTOS_PADRAO = [
+  { id: 1,  nome: 'Box de Vidro Temperado 8mm Frontal (2 Folhas)', cat: 'Box', vm2: 200, vunit: 0 },
+  { id: 2,  nome: 'Box de Vidro Temperado 8mm Canto (4 Folhas)',   cat: 'Box', vm2: 220, vunit: 0 },
+  { id: 3,  nome: 'Box de Vidro Temperado 8mm de Abrir',           cat: 'Box', vm2: 240, vunit: 0 },
+  { id: 4,  nome: 'Porta de Vidro Temperado 8mm De Correr',        cat: 'Portas', vm2: 230, vunit: 0 },
+  { id: 5,  nome: 'Porta de Vidro Temperado 8mm Pivotante',        cat: 'Portas', vm2: 250, vunit: 0 },
+  { id: 6,  nome: 'Janela de Vidro Temperado 8mm (2 Folhas)',      cat: 'Janelas', vm2: 180, vunit: 0 },
+  { id: 7,  nome: 'Janela de Vidro Temperado 8mm (4 Folhas)',      cat: 'Janelas', vm2: 190, vunit: 0 },
+  { id: 8,  nome: 'Fechamento de Sacada / Varanda em Vidro',       cat: 'Fechamentos', vm2: 320, vunit: 0 },
+  { id: 9,  nome: 'Espelho Lapidado 4mm / 5mm',                    cat: 'Espelhos', vm2: 250, vunit: 0 },
+  { id: 10, nome: 'Espelho Bisotado 4mm / 5mm',                    cat: 'Espelhos', vm2: 290, vunit: 0 },
+  { id: 11, nome: 'Corrimão / Guarda-Corpo de Vidro',              cat: 'Corrimão', vm2: 350, vunit: 0 },
+  { id: 12, nome: 'Portão de Alumínio Automático',                cat: 'Portões', vm2: 0, vunit: 1500 },
+  { id: 13, nome: 'Grade de Alumínio / Fachada',                   cat: 'Grades', vm2: 280, vunit: 0 },
+  { id: 14, nome: 'Manutenção / Troca de Roldanas e Vedação',      cat: 'Serviços', vm2: 0, vunit: 150 }
+];
+
+// ══════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════
+function sair() {
+  sessionStorage.removeItem('sdv_token');
+  sessionStorage.removeItem('sdv_user');
+  window.location.replace('login.html');
+}
+function getUser() { try { return JSON.parse(sessionStorage.getItem('sdv_user') || '{}'); } catch { return {}; } }
+
+// ══════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════
+function goTab(t) {
+  ['orcamento','historico','produtos','clientes','contratos','usuarios'].forEach(p => {
+    const pan = document.getElementById('panel-'+p);
+    if (pan) pan.classList.toggle('active', p===t);
+    const tab = document.getElementById('tab-'+p);
+    if (tab) tab.classList.toggle('active', p===t);
+  });
+  if (t==='historico') renderHist();
+  if (t==='produtos')  renderProdutos();
+  if (t==='clientes')  renderCli();
+  if (t==='contratos') { renderHist(); renderSelectContratos(); }
+  if (t==='usuarios')  renderUsuarios();
+}
+
+// ══════════════════════════════════════════════
+//  PAYMENT CHIPS
+// ══════════════════════════════════════════════
+function selChip(el, f) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  if (el) el.classList.add('on');
+  formaAtual = f;
+  document.getElementById('forma-outro').value = '';
+  atualizarBadge();
+}
+function atualizarBadge() {
+  document.getElementById('forma-badge').textContent = document.getElementById('forma-outro').value || formaAtual;
+}
+
+// ══════════════════════════════════════════════
+//  ITEMS & M² CALCULATIONS (EXCEL SPREADSHEET FORMULA)
+// ══════════════════════════════════════════════
+function esc(s) { return String(s||'').replace(/"/g,'&quot;'); }
+
+function parseNum(val) {
+  if (!val) return 0;
+  const cleaned = String(val).replace(/\s/g, '').replace(',', '.');
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? 0 : n;
+}
+
+function updateDatalistProdutos() {
+  const dl = document.getElementById('lista-produtos-sugeridos');
+  if (!dl) return;
+  dl.innerHTML = produtos.map(p => `<option value="${esc(p.nome)}">${p.cat ? p.cat + ' - ' : ''}R$ ${p.vm2 ? p.vm2 + '/m²' : p.vunit + ' un'}</option>`).join('');
+
+  // Update quick catalog chips
+  const chipsDiv = document.getElementById('quick-catalog-chips');
+  if (chipsDiv) {
+    chipsDiv.innerHTML = produtos.slice(0, 8).map(p => `
+      <button class="svc-chip" onclick="addProdutoDoCatalogo(${p.id})">
+        ✨ ${esc(p.nome.split(' ')[0])} ${esc(p.nome.split(' ')[1]||'')}
+      </button>
+    `).join('');
+  }
+}
+
+function addProdutoDoCatalogo(id) {
+  const p = produtos.find(x => x.id === id);
+  if (p) {
+    addItem(p.nome, '1', '', '', '', p.vm2 ? String(p.vm2) : '', p.vunit ? String(p.vunit) : '');
+  }
+}
+
+function aoMudarDescricaoItem(id) {
+  const tr = document.getElementById('item-' + id);
+  if (!tr) return;
+  const ins = tr.querySelectorAll('input');
+  const descVal = ins[1].value.trim();
+
+  // Auto-fill price if matched in catalog
+  const prod = produtos.find(p => p.nome.toLowerCase() === descVal.toLowerCase());
+  if (prod) {
+    if (prod.vm2 && !ins[6].value)   ins[6].value = prod.vm2;
+    if (prod.vunit && !ins[7].value) ins[7].value = prod.vunit;
+  }
+  calcItem(id);
+}
+
+function salvarItemNoCatalogo(id) {
+  const tr = document.getElementById('item-' + id);
+  if (!tr) return;
+  const ins = tr.querySelectorAll('input');
+  const desc = ins[1].value.trim();
+  if (!desc) { alert('Digite a descrição do produto/serviço antes de salvar no catálogo.'); return; }
+
+  const v_m2   = parseNum(ins[6].value);
+  const v_unit = parseNum(ins[7].value);
+
+  const idx = produtos.findIndex(p => p.nome.toLowerCase() === desc.toLowerCase());
+  if (idx !== -1) {
+    if (v_m2)   produtos[idx].vm2 = v_m2;
+    if (v_unit) produtos[idx].vunit = v_unit;
+    alert(`✅ Produto "${desc}" atualizado no catálogo!`);
+  } else {
+    produtos.push({
+      id: Date.now(),
+      nome: desc,
+      cat: 'Geral',
+      vm2: v_m2,
+      vunit: v_unit
+    });
+    alert(`✅ Produto "${desc}" salvo com sucesso no catálogo!`);
+  }
+  save(K.products, produtos);
+  updateDatalistProdutos();
+  renderProdutos();
+}
+
+function addItem(desc='', qtd='1', cor='', alt='', larg='', v_m2='', v_unit='', bizt='') {
+  const id = ++itemId;
+  const tr = document.createElement('tr');
+  tr.id = 'item-' + id;
+  tr.innerHTML = `
+    <td style="text-align:center">
+      <input type="text" inputmode="numeric" value="${esc(qtd)}" oninput="calcItem(${id})" style="text-align:center">
+    </td>
+    <td>
+      <input list="lista-produtos-sugeridos" placeholder="Digite ou selecione o produto/serviço..." value="${esc(desc)}" oninput="aoMudarDescricaoItem(${id})" change="aoMudarDescricaoItem(${id})">
+    </td>
+    <td>
+      <input placeholder="Ex: Incolor" value="${esc(cor)}">
+    </td>
+    <td>
+      <input type="text" inputmode="decimal" placeholder="1,00" value="${esc(alt)}" oninput="calcItem(${id})">
+    </td>
+    <td>
+      <input type="text" inputmode="decimal" placeholder="1,50" value="${esc(larg)}" oninput="calcItem(${id})">
+    </td>
+    <td>
+      <input id="m2-${id}" readonly value="0,00 m²" style="text-align:center">
+    </td>
+    <td>
+      <input type="text" inputmode="decimal" placeholder="0,00" value="${esc(v_m2)}" oninput="calcItem(${id})">
+    </td>
+    <td>
+      <input type="text" inputmode="decimal" placeholder="0,00" value="${esc(v_unit)}" oninput="calcItem(${id})">
+    </td>
+    <td>
+      <input placeholder="Ex: Lapidado" value="${esc(bizt)}">
+    </td>
+    <td>
+      <input id="total-${id}" readonly value="R$ 0,00" style="text-align:right">
+    </td>
+    <td style="text-align:center;white-space:nowrap">
+      <div style="display:flex;gap:3px;justify-content:center">
+        <button class="item-save" onclick="salvarItemNoCatalogo(${id})" title="Salvar este produto no Catálogo">💾</button>
+        <button class="item-del" onclick="document.getElementById('item-${id}').remove();calcTotal()" title="Remover">✕</button>
+      </div>
+    </td>`;
+  document.getElementById('itens-lista').appendChild(tr);
+  calcItem(id);
+}
+
+
+function calcItem(id) {
+  const tr = document.getElementById('item-' + id);
+  if (!tr) return;
+  const ins = tr.querySelectorAll('input');
+
+  const qtd    = parseNum(ins[0].value) || 1;
+  const alt    = parseNum(ins[3].value);
+  const larg   = parseNum(ins[4].value);
+  const v_m2   = parseNum(ins[6].value);
+  const v_unit = parseNum(ins[7].value);
+
+  // m² = Altura * Largura
+  const m2 = alt * larg;
+  ins[5].value = m2 > 0 ? m2.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' m²' : '0,00 m²';
+
+  // Subtotal por m²
+  const sub_m2 = m2 > 0 ? (m2 * v_m2) : 0;
+
+  // Total da linha = Qtd * (Subtotal m² + V. Unit)
+  let lineTotal = 0;
+  if (sub_m2 > 0 && v_unit > 0) {
+    lineTotal = qtd * (sub_m2 + v_unit);
+  } else if (sub_m2 > 0) {
+    lineTotal = qtd * sub_m2;
+  } else if (v_unit > 0) {
+    lineTotal = qtd * v_unit;
+  }
+
+  ins[9].value = 'R$ ' + lineTotal.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  calcTotal();
+}
+
+function calcTotal() {
+  let t = 0;
+  document.querySelectorAll('#itens-lista tr').forEach(tr => {
+    const ins = tr.querySelectorAll('input');
+    if (!ins || ins.length < 10) return;
+    const qtd    = parseNum(ins[0].value) || 1;
+    const alt    = parseNum(ins[3].value);
+    const larg   = parseNum(ins[4].value);
+    const v_m2   = parseNum(ins[6].value);
+    const v_unit = parseNum(ins[7].value);
+
+    const m2 = alt * larg;
+    const sub_m2 = m2 > 0 ? (m2 * v_m2) : 0;
+
+    if (sub_m2 > 0 && v_unit > 0) {
+      t += qtd * (sub_m2 + v_unit);
+    } else if (sub_m2 > 0) {
+      t += qtd * sub_m2;
+    } else if (v_unit > 0) {
+      t += qtd * v_unit;
+    }
+  });
+
+  document.getElementById('total').textContent = 'R$ ' + t.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  return t;
+}
+
+function getItens() {
+  const arr = [];
+  document.querySelectorAll('#itens-lista tr').forEach(tr => {
+    const ins = tr.querySelectorAll('input');
+    if (!ins || ins.length < 10) return;
+    const desc = ins[1].value.trim();
+    if (desc) {
+      arr.push({
+        qtd:    ins[0].value || '1',
+        desc,
+        cor:    ins[2].value.trim(),
+        alt:    ins[3].value || '',
+        larg:   ins[4].value || '',
+        m2:     ins[5].value || '0,00 m²',
+        v_m2:   ins[6].value || '',
+        v_unit: ins[7].value || '',
+        bizt:   ins[8].value.trim(),
+        total:  ins[9].value || 'R$ 0,00'
+      });
+    }
+  });
+  return arr;
+}
+
+function getOrc() {
+  return {
+    numero: document.getElementById('orc-numero-display').textContent,
+    nome:   document.getElementById('o-nome').value.trim(),
+    cnpj:   document.getElementById('o-cnpj').value.trim(),
+    tel:    document.getElementById('o-tel').value.trim(),
+    bairro: document.getElementById('o-bairro').value.trim(),
+    end:    document.getElementById('o-end').value.trim(),
+    num:    document.getElementById('o-num').value.trim(),
+    apto:   document.getElementById('o-apto').value.trim(),
+    resp:   document.getElementById('o-resp').value.trim(),
+    forma:  document.getElementById('forma-outro').value.trim() || formaAtual,
+    prazo:  document.getElementById('o-prazo').value.trim(),
+    garantia: document.getElementById('o-garantia').value.trim(),
+    obs:    document.getElementById('o-obs').value.trim(),
+    total:  document.getElementById('total').textContent,
+    itens:  getItens(),
+    data:   new Date().toLocaleDateString('pt-BR')
+  };
+}
+
+// ══════════════════════════════════════════════
+//  NUMERAÇÃO
+// ══════════════════════════════════════════════
+function formatNum(n) { return '#'+String(n).padStart(4,'0'); }
+function atualizarNumeroDisplay() {
+  if (!editandoOsId) document.getElementById('orc-numero-display').textContent = formatNum(proxNumero);
+}
+
+// ══════════════════════════════════════════════
+//  WHATSAPP
+// ══════════════════════════════════════════════
+function abrirWhats(tel, msg) {
+  const num = tel.replace(/\D/g,'');
+  if (!num || num.length < 10) { alert('Número de WhatsApp inválido: "'+tel+'". Verifique o campo WhatsApp/Tel do cliente.'); return; }
+  window.open('https://wa.me/55'+num+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+function enviarWhatsApp() {
+  const o = getOrc();
+  if (!o.tel) { alert('Informe o WhatsApp do cliente.'); return; }
+  let m = '*SD VIDROS — ALUMÍNIO & VIDRAÇARIA* 🪟\n';
+  m += 'Orçamento / O.S. '+o.numero+'\n';
+  m += '📅 '+o.data+'  |  👤 '+(o.nome||'—')+'\n\n';
+  m += '*Itens / Serviços:*\n';
+  o.itens.forEach(it => {
+    let detalhe = '';
+    if (it.alt && it.larg) detalhe += ' (' + it.alt + 'm × ' + it.larg + 'm = ' + it.m2 + ')';
+    if (it.cor) detalhe += ' · Cor: ' + it.cor;
+    m += '▸ ' + it.qtd + 'x ' + it.desc + detalhe + '\n';
+    m += '   Total item: ' + it.total + '\n';
+  });
+  if (!o.itens.length) m += '▸ (sem itens)\n';
+  m += '\n*Total do Orçamento: '+o.total+'*\n';
+  m += '💳 Pagamento: '+o.forma+'\n';
+  if (o.prazo) m += '⏳ Prazo: '+o.prazo+'\n';
+  if (o.garantia) m += '🛡️ Garantia: '+o.garantia+'\n';
+  if (o.obs) m += '\n📋 Obs: '+o.obs+'\n';
+  m += '\n💠 *Chave Pix:* (85) 99760-2237\n';
+  m += '\n_Orçamento válido por 7 dias_\n';
+  m += '\n📱 (85) 99611-9824 · @sdvidros · Itaitinga - CE';
+  abrirWhats(o.tel, m);
+}
+
+// ══════════════════════════════════════════════
+//  ORDERS – SAVE / EDIT / DELETE
+// ══════════════════════════════════════════════
+function salvarOrdem() {
+  const o = getOrc();
+  if (!o.nome && !o.itens.length) { alert('Preencha pelo menos o nome do cliente ou um item antes de salvar.'); return; }
+  const btn = document.getElementById('btn-salvar-os');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Salvando...';
+  setTimeout(() => {
+    // Auto-save any custom items in this OS to the product catalog
+    (o.itens || []).forEach(it => {
+      if (it.desc && !produtos.some(p => p.nome.toLowerCase() === it.desc.toLowerCase())) {
+        produtos.push({
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          nome: it.desc,
+          cat: 'Geral',
+          vm2: parseNum(it.v_m2),
+          vunit: parseNum(it.v_unit)
+        });
+      }
+    });
+    save(K.products, produtos);
+    updateDatalistProdutos();
+    renderProdutos();
+
+    if (editandoOsId) {
+      const idx = historico.findIndex(x => x.id===editandoOsId);
+      if (idx!==-1) historico[idx] = {...historico[idx], nome:o.nome, total:o.total, data_orc:o.data, dados:o};
+      save(K.orders, historico);
+      alert('✅ Ordem '+o.numero+' atualizada com sucesso!');
+      cancelarEdicaoOs();
+    } else {
+      const ord = { id: Date.now(), numero:o.numero, nome:o.nome, total:o.total, data_orc:o.data, dados:o };
+      historico.push(ord);
+      save(K.orders, historico);
+      proxNumero++;
+      save(K.nextNum, proxNumero);
+      alert('✅ Ordem '+o.numero+' salva com sucesso!');
+      cancelarEdicaoOs();
+    }
+
+    renderHist(); renderSelectContratos();
+    btn.disabled = false; btn.innerHTML = orig;
+    goTab('historico');
+  }, 300);
+}
+
+function cancelarEdicaoOs() {
+  editandoOsId = null;
+  document.getElementById('btn-salvar-os').innerHTML = '✅ Salvar Ordem de Serviço';
+  document.getElementById('btn-cancelar-os').style.display = 'none';
+  ['o-nome','o-cnpj','o-tel','o-bairro','o-end','o-num','o-apto','o-resp','o-prazo','o-garantia','o-obs','forma-outro']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('itens-lista').innerHTML = '';
+  itemId = 0; addItem();
+  selChip(document.querySelector('.chip'),'À vista');
+  atualizarNumeroDisplay();
+}
+
+function editarOs(id) {
+  const o = historico.find(x => x.id===id);
+  if (!o || !o.dados) return;
+  editandoOsId = id;
+  const d = o.dados;
+  document.getElementById('orc-numero-display').textContent = d.numero;
+  [['o-nome','nome'],['o-cnpj','cnpj'],['o-tel','tel'],['o-bairro','bairro'],
+   ['o-end','end'],['o-num','num'],['o-apto','apto'],['o-resp','resp'],
+   ['o-prazo','prazo'],['o-garantia','garantia'],['o-obs','obs']
+  ].forEach(([fid,key]) => { const el=document.getElementById(fid); if(el) el.value=d[key]||''; });
+  formaAtual = d.forma||'À vista';
+  document.getElementById('forma-outro').value = '';
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  atualizarBadge();
+  document.getElementById('itens-lista').innerHTML = ''; itemId = 0;
+  if (d.itens && d.itens.length) {
+    d.itens.forEach(it=>addItem(it.desc, it.qtd, it.cor, it.alt, it.larg, it.v_m2, it.v_unit, it.bizt));
+  } else {
+    addItem();
+  }
+  document.getElementById('btn-salvar-os').innerHTML = '💾 Atualizar Ordem de Serviço';
+  document.getElementById('btn-cancelar-os').style.display = 'block';
+  goTab('orcamento');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function deletarOs(id) {
+  if (!confirm('Tem certeza que deseja excluir esta Ordem de Serviço?')) return;
+  historico = historico.filter(x=>x.id!==id);
+  save(K.orders, historico); renderHist(); renderSelectContratos();
+}
+
+// ══════════════════════════════════════════════
+//  RENDER HISTORY
+// ══════════════════════════════════════════════
+function renderHist() {
+  const el = document.getElementById('hist-lista');
+  const badge = document.getElementById('hist-count');
+  if (badge) badge.textContent = historico.length;
+  if (!historico.length) { el.innerHTML = '<div class="empty">Nenhuma ordem de serviço salva ainda.</div>'; return; }
+  el.innerHTML = historico.slice().reverse().map(o => `
+    <div class="hist-card">
+      <div class="hist-top">
+        <span class="hist-num">${o.numero}</span>
+        <span class="hist-date">${o.data_orc}</span>
+      </div>
+      <div class="hist-client">${o.nome||'Cliente não identificado'}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:8px">
+        <div class="hist-total">${o.total}</div>
+        <div style="display:flex;gap:7px">
+          <button class="btn btn-sec btn-sm" onclick="editarOs(${o.id})">✏️ Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="deletarOs(${o.id})">✕</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+//  PRODUCTS & SERVICES (CATÁLOGO DA SEGUNDA IMAGEM)
+// ══════════════════════════════════════════════
+function salvarProduto() {
+  const nome = document.getElementById('p-nome').value.trim();
+  if (!nome) { showMsg('prod-msg','Informe o nome do produto ou serviço.',false); return; }
+  const novo = {
+    nome,
+    cat:   document.getElementById('p-cat').value.trim() || 'Geral',
+    vm2:   parseNum(document.getElementById('p-vm2').value),
+    vunit: parseNum(document.getElementById('p-vunit').value)
+  };
+  if (editandoProdId) {
+    const idx = produtos.findIndex(x => x.id === editandoProdId);
+    if (idx !== -1) produtos[idx] = { ...produtos[idx], ...novo };
+    showMsg('prod-msg', '✅ Produto atualizado no catálogo!', true);
+  } else {
+    novo.id = Date.now();
+    produtos.push(novo);
+    showMsg('prod-msg', '✅ Produto cadastrado no catálogo!', true);
+  }
+  save(K.products, produtos);
+  updateDatalistProdutos();
+  renderProdutos();
+  limparProd();
+}
+
+function limparProd() {
+  editandoProdId = null;
+  ['p-nome','p-cat','p-vm2','p-vunit'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('btn-salvar-prod').innerHTML = '💾 Salvar no Catálogo';
+}
+
+function editarProd(id) {
+  const p = produtos.find(x => x.id === id);
+  if (!p) return;
+  editandoProdId = id;
+  document.getElementById('p-nome').value  = p.nome || '';
+  document.getElementById('p-cat').value   = p.cat || '';
+  document.getElementById('p-vm2').value   = p.vm2 ? String(p.vm2) : '';
+  document.getElementById('p-vunit').value = p.vunit ? String(p.vunit) : '';
+  document.getElementById('btn-salvar-prod').innerHTML = '💾 Atualizar Produto';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function deletarProd(id) {
+  if (!confirm('Tem certeza que deseja excluir este produto do catálogo?')) return;
+  produtos = produtos.filter(x => x.id !== id);
+  save(K.products, produtos);
+  updateDatalistProdutos();
+  renderProdutos();
+}
+
+function renderProdutos() {
+  const el = document.getElementById('prod-lista');
+  const badge = document.getElementById('prod-count');
+  if (badge) badge.textContent = produtos.length;
+  if (!produtos.length) { el.innerHTML = '<div class="empty">Nenhum produto cadastrado no catálogo.</div>'; return; }
+  el.innerHTML = produtos.slice().reverse().map(p => `
+    <div class="prod-card">
+      <div>
+        <div class="prod-name">${p.nome}</div>
+        <div class="prod-det">Categoria: <strong>${p.cat||'Geral'}</strong> · ${p.vm2 ? 'R$ '+p.vm2+' /m²' : ''} ${p.vunit ? 'R$ '+p.vunit+' unit' : ''}</div>
+      </div>
+      <div class="prod-btns">
+        <button class="btn btn-gold btn-sm" onclick="addItem('${esc(p.nome)}', '1', '', '', '', '${p.vm2||''}', '${p.vunit||''}'); goTab('orcamento');">📋 Usar</button>
+        <button class="btn btn-sec btn-sm" onclick="editarProd(${p.id})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deletarProd(${p.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+//  CLIENTS
+// ══════════════════════════════════════════════
+function salvarCliente() {
+  const nome = document.getElementById('c-nome').value.trim();
+  if (!nome) { showMsg('cli-msg','Informe o nome do cliente.',false); return; }
+  const novo = { nome, whatsapp:document.getElementById('c-tel').value.trim(), bairro:document.getElementById('c-bairro').value.trim(), cidade:document.getElementById('c-cidade').value.trim()||'Itaitinga' };
+  if (editandoCliId) {
+    const idx = clientes.findIndex(x=>x.id===editandoCliId);
+    if (idx!==-1) clientes[idx]={...clientes[idx],...novo};
+    showMsg('cli-msg','✅ Cliente atualizado com sucesso!',true);
+  } else {
+    novo.id = Date.now(); clientes.push(novo);
+    showMsg('cli-msg','✅ Cliente salvo com sucesso!',true);
+  }
+  save(K.clients, clientes); renderCli(); limparCli();
+}
+
+function limparCli() {
+  editandoCliId = null;
+  ['c-nome','c-tel','c-bairro','c-cidade'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('btn-salvar-cli').innerHTML = '💾 Salvar cliente';
+}
+
+function editarCli(id) {
+  const c = clientes.find(x=>x.id===id);
+  if (!c) return;
+  editandoCliId = id;
+  document.getElementById('c-nome').value = c.nome||'';
+  document.getElementById('c-tel').value = c.whatsapp||'';
+  document.getElementById('c-bairro').value = c.bairro||'';
+  document.getElementById('c-cidade').value = c.cidade||'';
+  document.getElementById('btn-salvar-cli').innerHTML = '💾 Atualizar cliente';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function deletarCli(id) {
+  if (!confirm('Tem certeza que deseja excluir este cliente?')) return;
+  clientes = clientes.filter(x=>x.id!==id);
+  save(K.clients, clientes); renderCli();
+}
+
+function usarCliente(id) {
+  const c = clientes.find(x=>x.id===id);
+  if (!c) return;
+  document.getElementById('o-nome').value = c.nome||'';
+  document.getElementById('o-tel').value = c.whatsapp||'';
+  document.getElementById('o-bairro').value = (c.bairro ? c.bairro + ', ' : '') + (c.cidade || 'Itaitinga');
+  goTab('orcamento');
+}
+
+function renderCli(container='cli-lista', modoModal=false) {
+  const el = document.getElementById(container);
+  if (!el) return;
+  const badge = document.getElementById('cli-count');
+  if (badge && !modoModal) badge.textContent = clientes.length;
+  if (!clientes.length) { el.innerHTML = '<div class="empty">Nenhum cliente cadastrado.</div>'; return; }
+  el.innerHTML = clientes.slice().reverse().map(c => `
+    <div class="cli-card">
+      <div>
+        <div class="cli-name">${c.nome}</div>
+        <div class="cli-det">${c.whatsapp||(c.bairro?'':'(sem tel)')}${c.bairro?' · '+c.bairro:''} ${c.cidade?'· '+c.cidade:''}</div>
+      </div>
+      <div class="cli-btns">
+        ${modoModal
+          ? `<button class="btn btn-gold btn-sm" onclick="selecionarClienteModal(${c.id})">Selecionar</button>`
+          : `<button class="btn btn-gold btn-sm" onclick="usarCliente(${c.id})">📋 Usar</button>
+             <button class="btn btn-sec btn-sm" onclick="editarCli(${c.id})">✏️</button>
+             <button class="btn btn-danger btn-sm" onclick="deletarCli(${c.id})">✕</button>`
+        }
+      </div>
+    </div>`).join('');
+}
+
+function abrirModalCliente() {
+  document.getElementById('modal-cliente').style.display = 'flex';
+  renderCli('modal-cli-lista', true);
+}
+function fecharModal(e) {
+  if (!e || e.target===document.getElementById('modal-cliente'))
+    document.getElementById('modal-cliente').style.display = 'none';
+}
+function selecionarClienteModal(id) {
+  const c = clientes.find(x=>x.id===id);
+  if (c) {
+    document.getElementById('o-nome').value = c.nome||'';
+    document.getElementById('o-tel').value = c.whatsapp||'';
+    document.getElementById('o-bairro').value = (c.bairro ? c.bairro + ', ' : '') + (c.cidade || 'Itaitinga');
+  }
+  document.getElementById('modal-cliente').style.display = 'none';
+}
+
+function showMsg(id, txt, ok) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = ok ? 'msg-ok' : 'msg-err';
+  el.textContent = txt;
+  setTimeout(() => { if(el) { el.className=''; el.textContent=''; } }, 3500);
+}
+
+// ══════════════════════════════════════════════
+//  CONTRACTS
+// ══════════════════════════════════════════════
+function renderSelectContratos() {
+  const sel = document.getElementById('sel-orcamento-contrato');
+  if (!historico.length) { sel.innerHTML = '<option value="">-- Nenhuma OS salva --</option>'; return; }
+  sel.innerHTML = '<option value="">-- Selecione uma Ordem de Serviço --</option>' +
+    historico.slice().reverse().map(o=>`<option value="${o.id}">${o.numero} – ${o.nome||'Cliente sem nome'} (${o.total})</option>`).join('');
+}
+
+function gerarContrato() {
+  const id = document.getElementById('sel-orcamento-contrato').value;
+  if (!id) { alert('Selecione uma Ordem de Serviço para gerar o contrato.'); return; }
+  const os = historico.find(x=>String(x.id)===String(id));
+  if (!os||!os.dados) { alert('Dados da OS não encontrados.'); return; }
+  const btn = document.getElementById('btn-gerar-contrato');
+  const spinner = document.getElementById('contrato-spinner');
+  const btnTxt = document.getElementById('contrato-btn-text');
+  btn.disabled = true; spinner.style.display = 'inline-block'; btnTxt.textContent = ' Gerando...';
+  setTimeout(() => {
+    const d = os.dados;
+    const hoje = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+    const endCliente = [d.end,d.num,d.apto,d.bairro].filter(Boolean).join(', ');
+    const itensStr = (d.itens||[]).map((it,i)=>{
+      let detalhe = '';
+      if (it.alt && it.larg) detalhe += ` [Dimensões: ${it.alt}m x ${it.larg}m = ${it.m2}]`;
+      if (it.cor) detalhe += ` [Cor: ${it.cor}]`;
+      if (it.bizt) detalhe += ` [Lapidação/Bizotê: ${it.bizt}]`;
+      return `  ${i+1}. ${it.desc}${detalhe} - Qtd: ${it.qtd} - Total: ${it.total}`;
+    }).join('\n') || '  (itens não especificados)';
+
+    const contrato = `CONTRATO DE PRESTAÇÃO DE SERVIÇOS
+N° ${d.numero}
+Itaitinga - CE, ${hoje}
+
+══════════════════════════════════════════════════════════════
+
+CONTRATADA:
+Razão Social.....: SD Vidros
+WhatsApp.........: (85) 99611-9824
+Instagram........: @sdvidros
+Cidade...........: Itaitinga - CE
+
+CONTRATANTE (CLIENTE):
+Nome.............: ${d.nome||'Não informado'}
+${d.cnpj?'CPF/CNPJ.........: '+d.cnpj+'\n':''}WhatsApp/Tel.....: ${d.tel||'Não informado'}
+Endereço.........: ${endCliente||'Não informado'}
+${d.resp?'Responsável......: '+d.resp:''}
+
+══════════════════════════════════════════════════════════════
+
+CLÁUSULA 1ª – DO OBJETO
+
+A CONTRATADA obriga-se a fornecer e instalar ao CONTRATANTE os seguintes
+serviços de vidraçaria e esquadrias:
+
+${itensStr}
+
+══════════════════════════════════════════════════════════════
+
+CLÁUSULA 2ª – DO VALOR E FORMA DE PAGAMENTO
+
+Valor Total: ${d.total||'R$ 0,00'}
+Forma de Pagamento: ${d.forma||'À vista'}
+${d.obs?'\nObservações: '+d.obs:''}
+
+A CONTRATANTE efetuará o pagamento conforme a forma descrita acima.
+Chave Pix para pagamento: (85) 99760-2237
+
+══════════════════════════════════════════════════════════════
+
+CLÁUSULA 3ª – DO PRAZO DE ENTREGA E EXECUÇÃO
+
+O prazo para execução e entrega dos serviços é de ${d.prazo||'a combinar'},
+contados a partir da confirmação do pagamento/sinal e da aprovação de
+todos os detalhes técnicos do projeto.
+
+══════════════════════════════════════════════════════════════
+
+CLÁUSULA 4ª – DA GARANTIA
+
+A CONTRATADA oferece garantia de ${d.garantia||'1 (um) ano'} contra defeitos de
+fabricação e instalação, excluindo danos causados por mau uso, vandalismo,
+acidentes ou fenômenos naturais.
+
+══════════════════════════════════════════════════════════════
+
+CLÁUSULA 5ª – DAS OBRIGAÇÕES DAS PARTES
+
+5.1 – A CONTRATADA executará os serviços com materiais de alta qualidade e mão de obra especializada;
+5.2 – A CONTRATANTE garantirá o acesso ao local nos dias combinados e efetuará o pagamento acordado.
+
+══════════════════════════════════════════════════════════════
+
+Itaitinga - CE, ${hoje}
+
+
+_________________________________________________
+CONTRATADA: SD Vidros
+WhatsApp: (85) 99611-9824
+
+
+_________________________________________________
+CONTRATANTE: ${d.nome||'_______________________________'}
+WhatsApp: ${d.tel||'_________________________________'}`;
+
+    document.getElementById('contrato-texto').textContent = contrato;
+    document.getElementById('contrato-resultado-area').style.display = 'block';
+    btn.disabled = false; spinner.style.display = 'none'; btnTxt.textContent = '✨ Gerar Contrato';
+  }, 600);
+}
+
+function copiarContrato() {
+  const txt = document.getElementById('contrato-texto').textContent;
+  navigator.clipboard.writeText(txt).then(()=>alert('📋 Contrato copiado para a área de transferência!'));
+}
+
+function enviarContratoWhats() {
+  const id = document.getElementById('sel-orcamento-contrato').value;
+  const os = historico.find(x=>String(x.id)===String(id));
+  if (!os||!os.dados||!os.dados.tel) { alert('WhatsApp do cliente não localizado.'); return; }
+  const txt = document.getElementById('contrato-texto').textContent;
+  const resumo = '*CONTRATO DE PRESTAÇÃO DE SERVIÇOS – SD VIDROS* 📄\n\nSegue a minuta do contrato referente à OS '+os.numero+':\n\n'+txt.substring(0,2800)+(txt.length>2800?'...':'');
+  abrirWhats(os.dados.tel, resumo);
+}
+
+function enviarParaAssinatura() {
+  const id = document.getElementById('sel-orcamento-contrato').value;
+  const os = historico.find(x => String(x.id) === String(id));
+  if (!os || !os.dados) { alert('Selecione uma Ordem de Serviço e gere o contrato primeiro.'); return; }
+  if (!os.dados.tel) { alert('Este cliente não tem WhatsApp cadastrado.'); return; }
+
+  const texto = document.getElementById('contrato-texto').textContent;
+  if (!texto) { alert('Gere o contrato primeiro.'); return; }
+
+  const btn = document.getElementById('btn-assinatura-digital');
+  const spinner = document.getElementById('assinatura-spinner');
+  const btnTxt = document.getElementById('assinatura-btn-text');
+  btn.disabled = true;
+  spinner.style.display = 'inline-block';
+  btnTxt.textContent = ' Enviando...';
+
+  fetch('/api/criar-contrato', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      numero_os: os.numero,
+      cliente_nome: os.dados.nome || '',
+      cliente_tel: os.dados.tel || '',
+      texto: texto
+    })
+  })
+    .then(r => r.json().then(data => ({ ok: r.ok, data })))
+    .then(({ ok, data }) => {
+      if (!ok) throw new Error(data.error || 'Erro ao criar contrato para assinatura.');
+      const link = window.location.origin + '/assinar.html?id=' + data.id;
+      const msg = '*SD VIDROS — ASSINATURA DIGITAL* ✍️\n\n'
+        + 'Olá' + (os.dados.nome ? ', ' + os.dados.nome : '') + '! Segue o link para revisar e assinar seu contrato ' + os.numero + ':\n\n'
+        + link + '\n\n'
+        + 'É rápido: toca no link, lê o contrato e assina com o dedo na tela.';
+      abrirWhats(os.dados.tel, msg);
+    })
+    .catch(err => alert(err.message || 'Erro ao enviar para assinatura.'))
+    .finally(() => {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      btnTxt.textContent = '✍️ Enviar para Assinatura Digital';
+    });
+}
+
+// ══════════════════════════════════════════════
+//  USERS
+// ══════════════════════════════════════════════
+function salvarUsuario() {
+  const username = document.getElementById('u-username').value.trim().toLowerCase();
+  const nome = document.getElementById('u-nome').value.trim();
+  const senha = document.getElementById('u-senha').value;
+  const senha2 = document.getElementById('u-senha2').value;
+  const users = load(K.users);
+  if (!editandoUserId && !username) { showMsg('user-msg','Informe o usuário.',false); return; }
+  if (!editandoUserId && !senha)    { showMsg('user-msg','Informe a senha.',false); return; }
+  if (senha && senha!==senha2)       { showMsg('user-msg','As senhas não coincidem.',false); return; }
+  if (senha && senha.length<6)       { showMsg('user-msg','Senha mínima: 6 caracteres.',false); return; }
+  if (!editandoUserId && users.find(u=>u.username===username)) { showMsg('user-msg','Usuário já existe.',false); return; }
+  if (editandoUserId) {
+    const idx = users.findIndex(u=>u.id===editandoUserId);
+    if (idx!==-1) { users[idx].nome=nome||users[idx].nome; if(senha) users[idx].senha=senha; }
+    showMsg('user-msg','✅ Usuário atualizado!',true);
+  } else {
+    users.push({ id:Date.now(), username, nome:nome||username, senha, ativo:true, role:'user' });
+    showMsg('user-msg','✅ Usuário criado!',true);
+  }
+  save(K.users, users); renderUsuarios(); limparUsuario();
+}
+
+function limparUsuario() {
+  editandoUserId = null;
+  ['u-username','u-nome','u-senha','u-senha2'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.value=''; el.disabled=false; } });
+  document.getElementById('btn-salvar-user').innerHTML = '💾 Salvar usuário';
+}
+
+function editarUsuario(id) {
+  const users = load(K.users);
+  const u = users.find(x=>x.id===id);
+  if (!u) return;
+  editandoUserId = id;
+  document.getElementById('u-username').value = u.username; document.getElementById('u-username').disabled = true;
+  document.getElementById('u-nome').value = u.nome||'';
+  document.getElementById('u-senha').value = ''; document.getElementById('u-senha2').value = '';
+  document.getElementById('btn-salvar-user').innerHTML = '💾 Atualizar usuário';
+}
+
+function toggleUsuario(id) {
+  const users = load(K.users);
+  const idx = users.findIndex(u=>u.id===id);
+  if (idx!==-1) { users[idx].ativo = !users[idx].ativo; save(K.users,users); renderUsuarios(); }
+}
+
+function renderUsuarios() {
+  const users = load(K.users);
+  const el = document.getElementById('user-lista');
+  const badge = document.getElementById('user-count');
+  if (badge) badge.textContent = users.length;
+  if (!users.length) { el.innerHTML = '<div class="empty">Nenhum usuário cadastrado.</div>'; return; }
+  el.innerHTML = users.map(u=>`
+    <div class="cli-card">
+      <div>
+        <div class="cli-name">${u.nome||u.username}</div>
+        <div class="cli-det">@${u.username} · ${u.ativo?'🟢 Ativo':'🔴 Inativo'}</div>
+      </div>
+      <div class="cli-btns">
+        <button class="btn btn-sec btn-sm" onclick="editarUsuario(${u.id})">✏️ Editar</button>
+        <button class="btn ${u.ativo?'btn-danger':'btn-gold'} btn-sm" onclick="toggleUsuario(${u.id})">${u.ativo?'✕':'✓'}</button>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', function() {
+  const users = load(K.users);
+  if (!users.length) save(K.users,[{id:1,username:'admin',nome:'Administrador',senha:'admin123',ativo:true,role:'admin'}]);
+
+  // Load catalog products or initialize defaults
+  produtos = load(K.products);
+  if (!produtos || !produtos.length) {
+    produtos = PRODUTOS_PADRAO;
+    save(K.products, produtos);
+  }
+
+  clientes = load(K.clients);
+  historico = load(K.orders);
+  proxNumero = load(K.nextNum, 1);
+  if (typeof proxNumero !== 'number' || proxNumero < 1) proxNumero = 1;
+
+  if (historico.length) {
+    const last = Math.max(...historico.map(o=>{const n=parseInt((o.numero||'').replace('#',''));return isNaN(n)?0:n;}));
+    if (last >= proxNumero) proxNumero = last + 1;
+  }
+
+  updateDatalistProdutos();
+
+  document.getElementById('itens-lista').innerHTML = '';
+  itemId = 0; addItem();
+  atualizarNumeroDisplay();
+
+  renderHist();
+  renderProdutos();
+  renderCli();
+  renderSelectContratos();
+  renderUsuarios();
+
+  const user = getUser();
+  const el = document.getElementById('usuario-logado');
+  if (el) el.textContent = '👤 ' + (user.nome || user.username || 'Usuário');
+});
+</script>
+</body>
+</html>     --font: 'Outfit', -apple-system, sans-serif;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: var(--font); background: var(--bg); min-height: 100vh; color: var(--text); -webkit-font-smoothing: antialiased; }
