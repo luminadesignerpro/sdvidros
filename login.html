@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SD Vidros – Acesso ao Sistema</title>
+  <meta name="description" content="Sistema de Gestão SD Vidros – Orçamentos, Clientes e Contratos. Itaitinga - CE.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #C9A84C;
+      --gold-light: #E8D27A;
+      --gold-dim: #a07828;
+      --bg: #07070b;
+      --card: #101018;
+      --border: rgba(201,168,76,0.22);
+      --text: #f0ece4;
+      --muted: #6a6275;
+      --font: 'Outfit', -apple-system, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: hidden;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 25% 15%, rgba(201,168,76,0.09) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 75% 85%, rgba(201,168,76,0.06) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .particles { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,168,76,0.5), transparent 70%);
+      animation: rise linear infinite;
+    }
+    @keyframes rise {
+      0% { transform: translateY(110vh) scale(0); opacity: 0; }
+      8% { opacity: 1; }
+      88% { opacity: 0.4; }
+      100% { transform: translateY(-10vh) scale(1.4); opacity: 0; }
+    }
+    .login-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 44px 38px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.75), 0 0 0 1px rgba(201,168,76,0.08), inset 0 1px 0 rgba(255,255,255,0.04);
+      position: relative;
+      animation: appear 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .login-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 10%; right: 10%;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, var(--gold-light), var(--gold), transparent);
+      border-radius: 999px;
+    }
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(36px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .logo-area { text-align: center; margin-bottom: 32px; }
+    .logo-img-wrap {
+      width: 130px; height: 130px;
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      border: 3px solid var(--gold);
+      box-shadow: 0 0 40px rgba(201,168,76,0.35), inset 0 0 15px rgba(0,0,0,0.5);
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      background: #000;
+      animation: glowing 3.5s ease-in-out infinite;
+    }
+    @keyframes glowing {
+      0%, 100% { box-shadow: 0 0 40px rgba(201,168,76,0.35); }
+      50% { box-shadow: 0 0 65px rgba(201,168,76,0.55); }
+    }
+    .logo-img-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .brand-name {
+      font-size: 30px; font-weight: 900;
+      background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 55%, var(--gold-dim) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      letter-spacing: 0.1em;
+    }
+    .brand-sub { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; margin-top: 4px; }
+    .form-title { font-size: 13.5px; font-weight: 600; color: rgba(240,236,228,0.55); text-align: center; margin-bottom: 24px; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 10.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 7px; }
+    .field input {
+      width: 100%; padding: 14px 16px;
+      background: #0a0a13; border: 1.5px solid rgba(201,168,76,0.16);
+      border-radius: 13px; font-size: 15px; font-family: var(--font); color: var(--text); transition: all 0.2s;
+    }
+    .field input::placeholder { color: #28243a; }
+    .field input:focus {
+      outline: none; border-color: var(--gold);
+      background: #0d0d18; box-shadow: 0 0 0 3.5px rgba(201,168,76,0.11);
+    }
+    .btn-login {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 60%, var(--gold-dim) 100%);
+      color: #1a0e00; font-size: 15px; font-weight: 800; font-family: var(--font);
+      border: none; border-radius: 13px; cursor: pointer; transition: all 0.2s;
+      letter-spacing: 0.04em; margin-top: 6px; position: relative; overflow: hidden;
+    }
+    .btn-login::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%);
+      border-radius: 13px 13px 0 0;
+    }
+    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(201,168,76,0.42); }
+    .btn-login:active { transform: scale(0.97); }
+    .btn-login:disabled { opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: none; }
+    .msg { border-radius: 11px; padding: 11px 16px; font-size: 13px; font-weight: 700; margin-top: 14px; text-align: center; }
+    .msg.err { background: rgba(224,64,64,0.12); border: 1px solid rgba(224,64,64,0.22); color: #ff7878; }
+    .footer-area { text-align: center; margin-top: 28px; }
+    .footer-area p { font-size: 11px; color: rgba(106,98,117,0.55); letter-spacing: 0.06em; }
+    .hint { font-size: 10px; color: rgba(106,98,117,0.35); margin-top: 8px; font-style: italic; }
+    @media(max-width: 480px) { .login-box { padding: 34px 24px; border-radius: 22px; } .brand-name { font-size: 26px; } }
+  </style>
+</head>
+<body>
+<div class="particles" id="particles"></div>
+<div class="login-box">
+  <div class="logo-area">
+    <div class="logo-img-wrap">
+      <img src="logo.jpg" alt="SD Vidros Logo">
+    </div>
+    <div class="brand-name">SD VIDROS</div>
+    <div class="brand-sub">Sistema de Gestão & Orçamentos</div>
+  </div>
+  <div class="form-title">Entre com suas credenciais</div>
+  <div class="field">
+    <label>Usuário</label>
+    <input id="l-user" type="text" placeholder="seu usuário" autocapitalize="none" autocomplete="username">
+  </div>
+  <div class="field">
+    <label>Senha</label>
+    <input id="l-senha" type="password" placeholder="••••••••" autocomplete="current-password">
+  </div>
+  <button class="btn-login" id="btn-login" onclick="fazerLogin()">Entrar no Sistema</button>
+  <div id="login-msg"></div>
+  <div class="footer-area">
+    <p>SD Vidros · (85) 99611-9824 · Itaitinga - CE</p>
+    <p class="hint">Primeiro acesso: usuário <strong>admin</strong> / senha <strong>admin123</strong></p>
+  </div>
+</div>
+<script>
+  const pContainer = document.getElementById('particles');
+  for (let i = 0; i < 10; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = 20 + Math.random() * 100;
+    p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;animation-duration:${9+Math.random()*14}s;animation-delay:${Math.random()*12}s;`;
+    pContainer.appendChild(p);
+  }
+  function getUsers() {
+    try {
+      const u = localStorage.getItem('sdv_users');
+      if (!u) {
+        const def = [{ id: 1, username: 'admin', nome: 'Administrador', senha: 'admin123', ativo: true, role: 'admin' }];
+        localStorage.setItem('sdv_users', JSON.stringify(def));
+        return def;
+      }
+      return JSON.parse(u);
+    } catch { return []; }
+  }
+  document.getElementById('l-user').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('l-senha').focus(); });
+  document.getElementById('l-senha').addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(); });
+  function fazerLogin() {
+    const username = document.getElementById('l-user').value.trim().toLowerCase();
+    const senha = document.getElementById('l-senha').value;
+    const btn = document.getElementById('btn-login');
+    btn.disabled = true; btn.textContent = 'Verificando...';
+    setTimeout(() => {
+      const users = getUsers();
+      const user = users.find(u => u.username === username && u.senha === senha && u.ativo);
+      if (user) {
+        sessionStorage.setItem('sdv_token', btoa(username + ':' + Date.now()));
+        sessionStorage.setItem('sdv_user', JSON.stringify({ id: user.id, username: user.username, nome: user.nome, role: user.role || 'user' }));
+        window.location.href = 'index.html';
+      } else {
+        const msg = document.getElementById('login-msg');
+        msg.className = 'msg err';
+        msg.textContent = '❌ Usuário ou senha incorretos.';
+        btn.disabled = false; btn.textContent = 'Entrar no Sistema';
+        setTimeout(() => { msg.className = ''; msg.textContent = ''; }, 3500);
+      }
+    }, 450);
+  }
+  if (sessionStorage.getItem('sdv_token')) window.location.href = 'index.html';
+</script>
+</body>
+</html>
