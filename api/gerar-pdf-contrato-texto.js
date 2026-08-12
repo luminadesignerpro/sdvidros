@@ -7,6 +7,14 @@ const FONT_SIZE = 9;
 const LINE_H = 13;
 const DARK = rgb(0.08, 0.08, 0.08);
 
+function sanitizeForPdf(str) {
+  return String(str)
+    .replace(/═/g, '=')
+    .replace(/─/g, '-')
+    .replace(/[–—]/g, '-')
+    .replace(/[^\x00-\xFF\n]/g, '?');
+}
+
 function wrapMonoLine(line, font, size, maxWidth) {
   // Preserva linhas em branco
   if (line === '') return [''];
@@ -44,7 +52,7 @@ module.exports = async (req, res) => {
       y = PAGE_H - MARGIN;
     }
 
-    const rawLines = String(texto).split('\n');
+    const rawLines = sanitizeForPdf(texto).split('\n');
     for (const rawLine of rawLines) {
       const wrapped = wrapMonoLine(rawLine, font, FONT_SIZE, contentWidth);
       for (const line of wrapped) {
