@@ -247,57 +247,61 @@
     nomeInput.addEventListener('input', atualizarBotao);
 
     btnConfirmar.addEventListener('click', () => {
-      formErro.classList.add('hidden');
-      btnConfirmar.disabled = true;
-      btnConfirmar.textContent = 'Enviando...';
+      try {
+        formErro.classList.add('hidden');
+        btnConfirmar.disabled = true;
+        btnConfirmar.textContent = 'Enviando...';
 
-      // Reduzir o tamanho da imagem gerada para evitar erros de limite de payload (4.5MB Vercel)
-      const tmpCanvas = document.createElement('canvas');
-      tmpCanvas.width = canvas.clientWidth || 500;
-      tmpCanvas.height = canvas.clientHeight || 200;
-      const tmpCtx = tmpCanvas.getContext('2d');
-      tmpCtx.fillStyle = '#ffffff';
-      tmpCtx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
-      tmpCtx.drawImage(canvas, 0, 0, tmpCanvas.width, tmpCanvas.height);
-      
-      const assinaturaBase64 = tmpCanvas.toDataURL('image/jpeg', 0.6); // Usando JPEG com 60% de qualidade reduz o tamanho drasticamente
+        // Pegar imagem diretamente do canvas principal (com fundo branco já pintado)
+        let assinaturaBase64 = '';
+        try {
+          assinaturaBase64 = canvas.toDataURL('image/jpeg', 0.6);
+        } catch (e) {
+          assinaturaBase64 = canvas.toDataURL('image/png');
+        }
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
 
-      fetch('/api/assinar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: contratoId,
-          assinante_nome: nomeInput.value.trim(),
-          assinatura_base64: assinaturaBase64
-        }),
-        signal: controller.signal
-      })
-        .then(r => r.json().catch(() => { throw new Error('Erro ao processar resposta do servidor. (Status: ' + r.status + ')'); }).then(data => ({ ok: r.ok, data })))
-        .then(({ ok, data }) => {
-          clearTimeout(timeoutId);
-          if (!ok) throw new Error(data.error || 'Erro ao enviar assinatura.');
-          telaForm.classList.add('hidden');
-          telaSucesso.classList.remove('hidden');
-          // Montar link de notificação para SD Vidros (opcional - cliente toca se quiser)
-          const nomeAssinante = nomeInput.value.trim();
-          const msg = '✅ *Contrato assinado!*\n\n'
-            + '👤 Cliente: ' + (nomeAssinante || clienteNome || 'Não informado') + '\n'
-            + (numeroOs ? '📋 OS: ' + numeroOs + '\n' : '')
-            + '\nO cliente acabou de assinar o contrato digitalmente em sdvidros.vercel.app';
-          const btnNotif = document.getElementById('btn-notificar-sdv');
-          btnNotif.href = 'https://wa.me/5585996119824?text=' + encodeURIComponent(msg);
-          btnNotif.style.display = 'inline-block';
+        fetch('/api/assinar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: contratoId,
+            assinante_nome: nomeInput.value.trim(),
+            assinatura_base64: assinaturaBase64
+          }),
+          signal: controller.signal
         })
-        .catch(err => {
-          clearTimeout(timeoutId);
-          formErro.textContent = (err.name === 'AbortError') ? 'Tempo limite esgotado. Tente novamente.' : (err.message || 'Erro ao enviar assinatura.');
-          formErro.classList.remove('hidden');
-          btnConfirmar.disabled = false;
-          btnConfirmar.textContent = 'Confirmar Assinatura';
-        });
+          .then(r => r.json().catch(() => { throw new Error('Erro ao processar resposta do servidor. (Status: ' + r.status + ')'); }).then(data => ({ ok: r.ok, data })))
+          .then(({ ok, data }) => {
+            clearTimeout(timeoutId);
+            if (!ok) throw new Error(data.error || 'Erro ao enviar assinatura.');
+            telaForm.classList.add('hidden');
+            telaSucesso.classList.remove('hidden');
+            // Montar link de notificação para SD Vidros (opcional - cliente toca se quiser)
+            const nomeAssinante = nomeInput.value.trim();
+            const msg = '✅ *Contrato assinado!*\n\n'
+              + '👤 Cliente: ' + (nomeAssinante || clienteNome || 'Não informado') + '\n'
+              + (numeroOs ? '📋 OS: ' + numeroOs + '\n' : '')
+              + '\nO cliente acabou de assinar o contrato digitalmente em sdvidros.vercel.app';
+            const btnNotif = document.getElementById('btn-notificar-sdv');
+            btnNotif.href = 'https://wa.me/5585996119824?text=' + encodeURIComponent(msg);
+            btnNotif.style.display = 'inline-block';
+          })
+          .catch(err => {
+            clearTimeout(timeoutId);
+            formErro.textContent = (err.name === 'AbortError') ? 'Tempo limite esgotado. Tente novamente.' : (err.message || 'Erro ao enviar assinatura.');
+            formErro.classList.remove('hidden');
+            btnConfirmar.disabled = false;
+            btnConfirmar.textContent = 'Confirmar Assinatura';
+          });
+      } catch (err) {
+        formErro.textContent = err.message || 'Erro ao preparar assinatura.';
+        formErro.classList.remove('hidden');
+        btnConfirmar.disabled = false;
+        btnConfirmar.textContent = 'Confirmar Assinatura';
+      }
     });
   }
 })();
