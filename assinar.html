@@ -156,16 +156,21 @@
           'Este contrato já foi assinado por ' + (data.assinante_nome || '') + '.';
         return;
       }
+      // Guardar info do contrato para notificação pós-assinatura
+      let _numeroOs = data.numero_os || '';
+      let _clienteNome = data.cliente_nome || '';
+
       document.getElementById('contrato-texto').textContent = data.texto;
       document.getElementById('subtitulo').textContent =
         (data.cliente_nome ? data.cliente_nome + ' — ' : '') + (data.numero_os || '');
       telaLoading.classList.add('hidden');
       telaForm.classList.remove('hidden');
-      iniciarCanvas();
+      // Usar requestAnimationFrame para garantir que o canvas tenha dimensões corretas
+      requestAnimationFrame(() => iniciarCanvas(_numeroOs, _clienteNome));
     })
     .catch(err => mostrarErro(err.message || 'Erro ao carregar contrato.'));
 
-  function iniciarCanvas() {
+  function iniciarCanvas(numeroOs, clienteNome) {
     const canvas = document.getElementById('signature-pad');
     const ctx = canvas.getContext('2d');
     const nomeInput = document.getElementById('nome-input');
@@ -272,6 +277,17 @@
           if (!ok) throw new Error(data.error || 'Erro ao enviar assinatura.');
           telaForm.classList.add('hidden');
           telaSucesso.classList.remove('hidden');
+          // Notificar SD Vidros via WhatsApp
+          const nomeAssinante = nomeInput.value.trim();
+          const msg = encodeURIComponent(
+            '✅ *Contrato assinado!*\n\n'
+            + '👤 Cliente: ' + (nomeAssinante || clienteNome || 'Não informado') + '\n'
+            + (numeroOs ? '📋 OS: ' + numeroOs + '\n' : '')
+            + '\nO cliente acabou de assinar o contrato digitalmente em sdvidros.vercel.app'
+          );
+          setTimeout(() => {
+            window.open('https://wa.me/5585996119824?text=' + msg, '_blank');
+          }, 1500);
         })
         .catch(err => {
           clearTimeout(timeoutId);
