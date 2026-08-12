@@ -235,7 +235,19 @@
       btnConfirmar.disabled = true;
       btnConfirmar.textContent = 'Enviando...';
 
-      const assinaturaBase64 = canvas.toDataURL('image/png');
+      // Reduzir o tamanho da imagem gerada para evitar erros de limite de payload (4.5MB Vercel)
+      const tmpCanvas = document.createElement('canvas');
+      tmpCanvas.width = canvas.clientWidth || 500;
+      tmpCanvas.height = canvas.clientHeight || 200;
+      const tmpCtx = tmpCanvas.getContext('2d');
+      tmpCtx.fillStyle = '#ffffff';
+      tmpCtx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
+      tmpCtx.drawImage(canvas, 0, 0, tmpCanvas.width, tmpCanvas.height);
+      
+      const assinaturaBase64 = tmpCanvas.toDataURL('image/jpeg', 0.6); // Usando JPEG com 60% de qualidade reduz o tamanho drasticamente
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
 
       fetch('/api/assinar', {
         method: 'POST',
@@ -244,16 +256,19 @@
           id: contratoId,
           assinante_nome: nomeInput.value.trim(),
           assinatura_base64: assinaturaBase64
-        })
+        }),
+        signal: controller.signal
       })
-        .then(r => r.json().then(data => ({ ok: r.ok, data })))
+        .then(r => r.json().catch(() => { throw new Error('Erro ao processar resposta do servidor. (Status: ' + r.status + ')'); }).then(data => ({ ok: r.ok, data })))
         .then(({ ok, data }) => {
+          clearTimeout(timeoutId);
           if (!ok) throw new Error(data.error || 'Erro ao enviar assinatura.');
           telaForm.classList.add('hidden');
           telaSucesso.classList.remove('hidden');
         })
         .catch(err => {
-          formErro.textContent = err.message || 'Erro ao enviar assinatura.';
+          clearTimeout(timeoutId);
+          formErro.textContent = (err.name === 'AbortError') ? 'Tempo limite esgotado. Tente novamente.' : (err.message || 'Erro ao enviar assinatura.');
           formErro.classList.remove('hidden');
           btnConfirmar.disabled = false;
           btnConfirmar.textContent = 'Confirmar Assinatura';

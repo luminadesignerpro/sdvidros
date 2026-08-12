@@ -473,6 +473,10 @@
     <div class="card">
       <div class="card-title">📤 Enviar / Salvar</div>
       <button class="btn btn-whats btn-full" onclick="enviarWhatsApp()">📱 Enviar Orçamento pelo WhatsApp</button>
+      <button class="btn btn-gold btn-full" onclick="baixarPdfOrcamento()" style="margin-top:10px" id="btn-pdf-orc">
+        <span id="pdf-orc-spinner" class="spinner" style="display:none"></span>
+        <span id="pdf-orc-btn-text">📄 Enviar Orçamento em PDF</span>
+      </button>
       <button class="btn btn-primary btn-full" id="btn-salvar-os" onclick="salvarOrdem()" style="margin-top:10px">✅ Salvar Ordem de Serviço</button>
       <button class="btn btn-sec btn-full" id="btn-cancelar-os" onclick="cancelarEdicaoOs()" style="margin-top:8px;display:none">✕ Cancelar Edição</button>
     </div>
@@ -1484,14 +1488,95 @@ function baixarPdfContrato() {
       return r.blob();
     })
     .then(blob => {
+      const fileName = `Contrato-${(os.numero || '0001').replace('#', '')}.pdf`;
+      if (navigator.share && navigator.canShare) {
+        const file = new File([blob], fileName, { type: 'application/pdf' });
+        if (navigator.canShare({ files: [file] })) {
+          navigator.share({
+            title: `Contrato ${os.numero}`,
+            text: `Contrato de prestação de serviços - OS ${os.numero}`,
+            files: [file]
+          }).catch(e => console.log('Share canceled', e));
+          return;
+        }
+      }
       const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
     })
     .catch(err => alert(err.message || 'Erro ao gerar PDF.'))
     .finally(() => {
       btn.disabled = false;
       spinner.style.display = 'none';
       btnTxt.textContent = '📄 Baixar PDF';
+    });
+}
+
+function baixarPdfOrcamento() {
+  const o = getOrc();
+  if (!o.nome && !o.itens.length) { alert('Preencha pelo menos o nome do cliente ou um item antes de gerar o PDF.'); return; }
+
+  const btn = document.getElementById('btn-pdf-orc');
+  const spinner = document.getElementById('pdf-orc-spinner');
+  const btnTxt = document.getElementById('pdf-orc-btn-text');
+  btn.disabled = true;
+  spinner.style.display = 'inline-block';
+  btnTxt.textContent = ' Gerando...';
+
+  const endCliente = [o.end, o.num, o.apto, o.bairro].filter(Boolean).join(', ');
+
+  fetch('/api/gerar-pdf-orcamento', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      numero: o.numero,
+      dataStr: o.data,
+      nome: o.nome || '',
+      cnpj: o.cnpj || '',
+      tel: o.tel || '',
+      endereco: endCliente,
+      resp: o.resp || '',
+      itens: o.itens || [],
+      total: o.total || '',
+      forma: o.forma || '',
+      obs: o.obs || '',
+      prazo: o.prazo || '',
+      garantia: o.garantia || ''
+    })
+  })
+    .then(async r => {
+      if (!r.ok) {
+        const data = await r.json().catch(() => ({}));
+        throw new Error(data.error || 'Erro ao gerar PDF do orçamento.');
+      }
+      return r.blob();
+    })
+    .then(blob => {
+      const fileName = `Orcamento-${(o.numero || '0001').replace('#', '')}.pdf`;
+      if (navigator.share && navigator.canShare) {
+        const file = new File([blob], fileName, { type: 'application/pdf' });
+        if (navigator.canShare({ files: [file] })) {
+          navigator.share({
+            title: `Orçamento ${o.numero}`,
+            text: `Orçamento / Ordem de Serviço - ${o.numero}`,
+            files: [file]
+          }).catch(e => console.log('Share canceled', e));
+          return;
+        }
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+    })
+    .catch(err => alert(err.message || 'Erro ao gerar PDF do orçamento.'))
+    .finally(() => {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      btnTxt.textContent = '📄 Enviar Orçamento em PDF';
     });
 }
 
