@@ -581,6 +581,17 @@
         </div>
       </div>
     </div>
+
+    <!-- CARDS DE CONTRATOS CRIADOS E ASSINADOS -->
+    <div class="card" style="margin-top:14px;">
+      <div class="card-title">
+        📋 Contratos e Assinaturas Digitais <span class="num-badge" id="contratos-count">0</span>
+        <button class="btn btn-sec btn-sm" onclick="carregarListaContratos()" style="margin-left:auto;font-size:11px;">🔄 Atualizar</button>
+      </div>
+      <div id="contratos-lista">
+        <div class="empty"><span class="spinner"></span> Carregando contratos...</div>
+      </div>
+    </div>
   </div>
 
   <!-- ══════════════════════════════════════════ -->
@@ -620,6 +631,17 @@
       <button class="modal-close" onclick="fecharModal()">✕</button>
     </div>
     <div id="modal-cli-lista"></div>
+  </div>
+</div>
+
+<!-- ══ SIGNATURE VIEW MODAL ══ -->
+<div id="modal-assinatura" class="modal-overlay" style="display:none" onclick="fecharModalAssinatura(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">
+      ✍️ Detalhes da Assinatura Digital
+      <button class="modal-close" onclick="fecharModalAssinatura()">✕</button>
+    </div>
+    <div id="modal-assinatura-conteudo"></div>
   </div>
 </div>
 
@@ -694,7 +716,7 @@ function goTab(t) {
   if (t==='historico') renderHist();
   if (t==='produtos')  renderProdutos();
   if (t==='clientes')  renderCli();
-  if (t==='contratos') { renderHist(); renderSelectContratos(); }
+  if (t==='contratos') { renderHist(); renderSelectContratos(); carregarListaContratos(); }
   if (t==='usuarios')  renderUsuarios();
 }
 
@@ -1436,6 +1458,7 @@ function enviarParaAssinatura() {
         + link + '\n\n'
         + 'É rápido: toca no link, lê o contrato e assina com o dedo na tela.';
       abrirWhats(os.dados.tel, msg);
+      carregarListaContratos();
     })
     .catch(err => alert(err.message || 'Erro ao enviar para assinatura.'))
     .finally(() => {
@@ -1444,6 +1467,114 @@ function enviarParaAssinatura() {
       btnTxt.textContent = '✍️ Enviar para Assinatura Digital';
     });
 }
+
+let listaContratosCache = [];
+
+function carregarListaContratos() {
+  const container = document.getElementById('contratos-lista');
+  const badge = document.getElementById('contratos-count');
+  if (!container) return;
+  
+  fetch('/api/listar-contratos')
+    .then(r => {
+      if (!r.ok) throw new Error('Erro ao carregar contratos.');
+      return r.json();
+    })
+    .then(data => {
+      listaContratosCache = data || [];
+      if (badge) badge.textContent = listaContratosCache.length;
+      renderListaContratos();
+    })
+    .catch(err => {
+      container.innerHTML = '<div class="empty" style="color:var(--err-fg)">❌ ' + (err.message || 'Erro ao carregar contratos.') + '</div>';
+    });
+}
+
+function renderListaContratos() {
+  const container = document.getElementById('contratos-lista');
+  if (!container) return;
+  if (!listaContratosCache.length) {
+    container.innerHTML = '<div class="empty">Nenhum contrato gerado para assinatura ainda.</div>';
+    return;
+  }
+
+  container.innerHTML = listaContratosCache.map(c => {
+    const dataFormatada = c.created_at ? new Date(c.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+    const assinadoEmStr = c.assinado_em ? new Date(c.assinado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+    const linkAssinatura = window.location.origin + '/assinar.html?id=' + c.id;
+
+    return `
+      <div class="hist-card">
+        <div class="hist-top">
+          <span class="hist-num">${esc(c.numero_os || '#0000')}</span>
+          <span class="hist-date">${esc(dataFormatada)}</span>
+        </div>
+        <div class="hist-client">${esc(c.cliente_nome || 'Cliente não identificado')}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">${esc(c.cliente_tel || '')}</div>
+        
+        <div style="margin-top:8px;">
+          ${c.assinado
+            ? `<span style="background:rgba(37,211,102,0.15);color:#4ade80;border:1px solid rgba(37,211,102,0.3);padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:700;">✅ ASSINADO por ${esc(c.assinante_nome || c.cliente_nome || 'Cliente')} ${assinadoEmStr ? 'em ' + assinadoEmStr : ''}</span>`
+            : `<span style="background:rgba(201,168,76,0.15);color:var(--gold-light);border:1px solid rgba(201,168,76,0.3);padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:700;">⏳ AGUARDANDO ASSINATURA</span>`
+          }
+        </div>
+
+        <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+          ${c.assinado && c.assinatura_base64
+            ? `<button class="btn btn-gold btn-sm" onclick="verAssinatura('${c.id}')">✍️ Ver Rubrica/Assinatura</button>`
+            : `<button class="btn btn-whats btn-sm" onclick="reenviarLinkAssinatura('${c.id}')">📱 Reenviar Link WhatsApp</button>
+               <button class="btn btn-sec btn-sm" onclick="copiarLinkAssinatura('${linkAssinatura}')">🔗 Copiar Link</button>`
+          }
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function verAssinatura(id) {
+  const c = listaContratosCache.find(x => String(x.id) === String(id));
+  if (!c) return;
+  const modal = document.getElementById('modal-assinatura');
+  const conteudo = document.getElementById('modal-assinatura-conteudo');
+  
+  const assinadoEmStr = c.assinado_em ? new Date(c.assinado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+
+  conteudo.innerHTML = `
+    <div style="margin-bottom:14px;font-size:13px;line-height:1.6;">
+      <p><strong>Ordem de Serviço:</strong> ${esc(c.numero_os || '')}</p>
+      <p><strong>Cliente:</strong> ${esc(c.cliente_nome || '')}</p>
+      <p><strong>Assinado por:</strong> ${esc(c.assinante_nome || c.cliente_nome || '')}</p>
+      <p><strong>Data/Hora da Assinatura:</strong> ${esc(assinadoEmStr)}</p>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Rubrica / Assinatura Digital do Cliente:</div>
+    <div style="background:#fff;border-radius:10px;padding:12px;text-align:center;border:1px solid var(--border);">
+      <img src="${c.assinatura_base64}" alt="Assinatura Digital" style="max-width:100%;max-height:220px;display:inline-block;" />
+    </div>
+  `;
+  modal.style.display = 'flex';
+}
+
+function fecharModalAssinatura(e) {
+  if (!e || e.target === document.getElementById('modal-assinatura')) {
+    document.getElementById('modal-assinatura').style.display = 'none';
+  }
+}
+
+function copiarLinkAssinatura(link) {
+  navigator.clipboard.writeText(link).then(() => alert('🔗 Link de assinatura copiado!'));
+}
+
+function reenviarLinkAssinatura(id) {
+  const c = listaContratosCache.find(x => String(x.id) === String(id));
+  if (!c || !c.cliente_tel) { alert('WhatsApp do cliente não cadastrado.'); return; }
+  const link = window.location.origin + '/assinar.html?id=' + c.id;
+  const msg = '*SD VIDROS — ASSINATURA DIGITAL* ✍️\n\n'
+    + 'Olá' + (c.cliente_nome ? ', ' + c.cliente_nome : '') + '! Segue o link para revisar e assinar seu contrato ' + (c.numero_os || '') + ':\n\n'
+    + link + '\n\n'
+    + 'É rápido: toca no link, lê o contrato e assina com o dedo na tela.';
+  abrirWhats(c.cliente_tel, msg);
+}
+
 
 function baixarPdfContrato() {
   const id = document.getElementById('sel-orcamento-contrato').value;
