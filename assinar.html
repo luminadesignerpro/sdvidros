@@ -100,7 +100,11 @@
 
 <div id="tela-sucesso" class="sucesso-tela hidden">
   <h1>✅ Assinado com sucesso!</h1>
-  <p class="subtitle">Obrigado, sua assinatura foi registrada.</p>
+  <p class="subtitle" id="msg-sucesso">Obrigado, sua assinatura foi registrada.</p>
+  <a id="btn-notificar-sdv" href="#" target="_blank"
+    style="display:none;margin-top:20px;padding:14px 24px;border-radius:10px;background:#25D366;color:#fff;font-size:15px;font-weight:700;text-decoration:none;">
+    📱 Enviar confirmação para SD Vidros
+  </a>
 </div>
 
 <div id="tela-form" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
@@ -277,17 +281,15 @@
           if (!ok) throw new Error(data.error || 'Erro ao enviar assinatura.');
           telaForm.classList.add('hidden');
           telaSucesso.classList.remove('hidden');
-          // Notificar SD Vidros via WhatsApp
+          // Montar link de notificação para SD Vidros (opcional - cliente toca se quiser)
           const nomeAssinante = nomeInput.value.trim();
-          const msg = encodeURIComponent(
-            '✅ *Contrato assinado!*\n\n'
+          const msg = '✅ *Contrato assinado!*\n\n'
             + '👤 Cliente: ' + (nomeAssinante || clienteNome || 'Não informado') + '\n'
             + (numeroOs ? '📋 OS: ' + numeroOs + '\n' : '')
-            + '\nO cliente acabou de assinar o contrato digitalmente em sdvidros.vercel.app'
-          );
-          setTimeout(() => {
-            window.open('https://wa.me/5585996119824?text=' + msg, '_blank');
-          }, 1500);
+            + '\nO cliente acabou de assinar o contrato digitalmente em sdvidros.vercel.app';
+          const btnNotif = document.getElementById('btn-notificar-sdv');
+          btnNotif.href = 'https://wa.me/5585996119824?text=' + encodeURIComponent(msg);
+          btnNotif.style.display = 'inline-block';
         })
         .catch(err => {
           clearTimeout(timeoutId);
