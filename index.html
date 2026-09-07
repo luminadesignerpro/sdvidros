@@ -500,10 +500,7 @@
       <div class="card-title">📤 Enviar / Salvar Orçamento</div>
       <button class="btn btn-gold btn-full" onclick="enviarOuBaixarPdfOrcamento()" style="font-size:15px;padding:15px;" id="btn-pdf-orc">
         <span id="pdf-orc-spinner" class="spinner" style="display:none"></span>
-        <span id="pdf-orc-btn-text">📄 Enviar Orçamento em PDF</span>
-      </button>
-      <button class="btn btn-whats btn-full" onclick="enviarWhatsComAprovacao()" style="margin-top:10px;">
-        📱 Enviar no WhatsApp com Opções de Aprovação
+        <span id="pdf-orc-btn-text">📄 Enviar PDF do Orçamento</span>
       </button>
       <button class="btn btn-primary btn-full" id="btn-salvar-os" onclick="salvarOrdem()" style="margin-top:10px">✅ Salvar Ordem de Serviço</button>
       <button class="btn btn-sec btn-full" id="btn-cancelar-os" onclick="cancelarEdicaoOs()" style="margin-top:8px;display:none">✕ Cancelar Edição</button>
@@ -2419,11 +2416,9 @@ async function enviarOuBaixarPdfOrcamento(orcObj = null) {
     if (navigator.share && navigator.canShare) {
       const file = new File([blob], fileName, { type: 'application/pdf' });
       if (navigator.canShare({ files: [file] })) {
-        const msgAprovacao = gerarMensagemWhatsAppAprovacao(o);
         await navigator.share({
-          title: `Orçamento ${o.numero} - SD Vidros`,
-          text: msgAprovacao,
-          files: [file]
+          files: [file],
+          title: fileName
         }).catch(e => {
           if (e.name !== 'AbortError') console.log('Compartilhamento cancelado', e);
         });
@@ -2431,27 +2426,19 @@ async function enviarOuBaixarPdfOrcamento(orcObj = null) {
       }
     }
 
-    // No computador: baixa o PDF
+    // No computador: baixa o PDF diretamente
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = fileName;
     a.click();
-
-    // Notificação com opção de abrir WhatsApp com mensagem de aprovação
-    if (o.tel) {
-      setTimeout(() => {
-        if (confirm('📄 PDF baixado com sucesso!\n\nDeseja abrir o WhatsApp agora para enviar a mensagem de aprovação para o cliente?')) {
-          enviarWhatsComAprovacao(o);
-        }
-      }, 400);
-    }
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
   } catch (err) {
     alert(err.message || 'Erro ao gerar PDF do orçamento.');
   } finally {
     if (btn) btn.disabled = false;
     if (spinner) spinner.style.display = 'none';
-    if (btnTxt) btnTxt.textContent = '📄 Enviar Orçamento em PDF';
+    if (btnTxt) btnTxt.textContent = '📄 Enviar PDF do Orçamento';
   }
 }
 
