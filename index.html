@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0f0f0f">
   <title>SD Vidros – Sistema de Gestão & Orçamentos</title>
   <meta name="description" content="SD Vidros – Gestão de orçamentos por m², clientes e contratos. Itaitinga - CE.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -608,6 +610,10 @@
             <span id="pdf-spinner" class="spinner" style="display:none"></span>
             <span id="pdf-btn-text">📄 Enviar Contrato em PDF</span>
           </button>
+          <button class="btn btn-gold btn-sm" onclick="baixarPdfContratoTexto()" id="btn-pdf-contrato-texto">
+            <span id="pdf-texto-spinner" class="spinner" style="display:none"></span>
+            <span id="pdf-texto-btn-text">🖨️ PDF em Texto (Máquina de Escrever)</span>
+          </button>
           <button class="btn btn-sec btn-sm" onclick="document.getElementById('contrato-resultado-area').style.display='none'">✕ Ocultar</button>
         </div>
       </div>
@@ -1055,7 +1061,8 @@ const SD_ZAP_NUM = '5585996119824';
 function abrirWhats(tel, msg) {
   const num = tel.replace(/\D/g,'');
   if (!num || num.length < 10) { alert('Número de WhatsApp inválido: "'+tel+'". Verifique o campo WhatsApp/Tel do cliente.'); return; }
-  window.open('https://wa.me/55'+num+'?text='+encodeURIComponent(msg),'_blank');
+  const url = 'https://api.whatsapp.com/send?phone=55'+num+'&text='+encodeURIComponent(msg);
+  window.location.href = url;
 }
 
 function gerarLinkAprovacaoWhats(numero, total, aprovado) {
@@ -1739,6 +1746,7 @@ function renderListaContratos() {
             : `<button class="btn btn-whats btn-sm" onclick="reenviarLinkAssinatura('${c.id}')">📱 Reenviar Link WhatsApp</button>
                <button class="btn btn-sec btn-sm" onclick="copiarLinkAssinatura('${linkAssinatura}')">🔗 Copiar Link</button>`
           }
+          <button class="btn btn-danger btn-sm" onclick="excluirContrato('${c.id}')">🗑️ Excluir</button>
         </div>
       </div>
     `;
@@ -1787,6 +1795,20 @@ function reenviarLinkAssinatura(id) {
     + link + '\n\n'
     + 'É rápido: toca no link, lê o contrato e assina com o dedo na tela.';
   abrirWhats(c.cliente_tel, msg);
+}
+
+function excluirContrato(id) {
+  if (!confirm('Tem certeza que deseja excluir este contrato? Essa ação não pode ser desfeita e o link de assinatura deixará de funcionar.')) return;
+  fetch('/api/deletar-contrato?id=' + encodeURIComponent(id), { method: 'DELETE' })
+    .then(r => r.json().then(data => ({ ok: r.ok, data })))
+    .then(({ ok, data }) => {
+      if (!ok) throw new Error(data.error || 'Erro ao excluir contrato.');
+      listaContratosCache = listaContratosCache.filter(x => String(x.id) !== String(id));
+      const badge = document.getElementById('contratos-count');
+      if (badge) badge.textContent = listaContratosCache.length;
+      renderListaContratos();
+    })
+    .catch(err => alert(err.message || 'Erro ao excluir contrato.'));
 }
 
 
