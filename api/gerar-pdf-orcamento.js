@@ -19,8 +19,15 @@ const PAGE_H = 841.89;
 const MARGIN_X = 32;
 const CONTENT_W = PAGE_W - (MARGIN_X * 2); // 531.28 pt
 
+function sanitizePdf(text) {
+  if (text == null) return '';
+  return String(text)
+    .replace(/[^\x00-\x7F\xA0-\xFF\u2022]/g, '')
+    .trim();
+}
+
 function wrapText(text, font, size, maxWidth) {
-  const words = String(text == null ? '' : text).split(/\s+/).filter(Boolean);
+  const words = sanitizePdf(text).split(/\s+/).filter(Boolean);
   const lines = [];
   let line = '';
   for (const word of words) {
@@ -455,8 +462,8 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
     color: GRAY
   });
 
-  page.drawText('📲 Confirmação rápida pelo WhatsApp: (85) 99611-9824', {
-    x: MARGIN_X + CONTENT_W - 215,
+  page.drawText('Confirmação rápida WhatsApp: (85) 99611-9824', {
+    x: MARGIN_X + CONTENT_W - 205,
     y: rodapeCardY + 12,
     size: 6.8,
     font: fontBold,
