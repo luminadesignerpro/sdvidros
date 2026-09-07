@@ -1,10 +1,23 @@
 const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
 
-const DARK = rgb(0, 0, 0);
-const GRAY = rgb(0.35, 0.35, 0.35);
+// Paleta de Cores Premium SD VIDROS
+const DARK = rgb(0.09, 0.12, 0.18);      // Slate Navy elegante
+const GOLD = rgb(0.79, 0.63, 0.22);      // Dourado nobre
+const GOLD_LIGHT = rgb(0.96, 0.93, 0.84);// Dourado suave para fundos
+const GRAY = rgb(0.42, 0.46, 0.54);      // Cinza neutro texto secundário
+const LIGHT_GRAY = rgb(0.65, 0.69, 0.76);// Cinza claro
+const BORDER = rgb(0.86, 0.89, 0.93);    // Borda suave
+const BOX_BG = rgb(0.98, 0.98, 0.99);    // Fundo de cards
+const HEADER_BG = rgb(0.93, 0.95, 0.98); // Fundo sutil de cabeçalhos
+const ROW_ALT = rgb(0.97, 0.98, 0.99);   // Fundo alternado de linhas
+const WHITE = rgb(1, 1, 1);
+const GREEN_BG = rgb(0.93, 0.97, 0.94);  // Fundo PIX
+const GREEN_TXT = rgb(0.12, 0.48, 0.24); // Texto PIX
 
 const PAGE_W = 595.28; // A4 pt
 const PAGE_H = 841.89;
+const MARGIN_X = 32;
+const CONTENT_W = PAGE_W - (MARGIN_X * 2); // 531.28 pt
 
 function wrapText(text, font, size, maxWidth) {
   const words = String(text == null ? '' : text).split(/\s+/).filter(Boolean);
@@ -25,7 +38,7 @@ function wrapText(text, font, size, maxWidth) {
 
 async function gerarPdfOrcamento(dados, fetchLogo) {
   const {
-    numero, dataStr, nome, cnpj, tel, endereco, resp,
+    numero, dataStr, nome, cnpj, tel, endereco, bairro, cidade, apto, resp,
     itens, total, forma, obs, prazo, garantia
   } = dados;
 
@@ -41,234 +54,413 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
 
   const page = pdfDoc.addPage([PAGE_W, PAGE_H]);
 
-  // Moldura retangular externa idêntica ao modelo da imagem 1
-  const BORDER_X = 26;
-  const BORDER_Y = 26;
-  const BORDER_W = PAGE_W - 52;
-  const BORDER_H = PAGE_H - 52;
+  // 1. Faixa decorativa superior dourada
   page.drawRectangle({
-    x: BORDER_X,
-    y: BORDER_Y,
-    width: BORDER_W,
-    height: BORDER_H,
-    borderColor: DARK,
-    borderWidth: 0.8
+    x: MARGIN_X,
+    y: PAGE_H - 24,
+    width: CONTENT_W,
+    height: 3.5,
+    color: GOLD
   });
 
-  const LINE_START_X = BORDER_X;
-  const LINE_END_X = BORDER_X + BORDER_W;
+  // ---------------- 2. CABEÇALHO ELEGANTE ----------------
+  const headerY = PAGE_H - 34;
 
-  function desenharLinha(yPos) {
-    page.drawLine({
-      start: { x: LINE_START_X, y: yPos },
-      end: { x: LINE_END_X, y: yPos },
-      thickness: 0.6,
-      color: DARK
-    });
-  }
-
-  let y = BORDER_Y + BORDER_H - 10;
-
-  // ---------------- 1. CABEÇALHO (LOGO + DADOS DA EMPRESA) ----------------
-  const logoTop = y;
+  // Logo com borda suave
   if (logoImage) {
-    const logoSize = 42;
-    page.drawImage(logoImage, {
-      x: 36,
-      y: logoTop - logoSize - 2,
+    const logoSize = 48;
+    page.drawRectangle({
+      x: MARGIN_X,
+      y: headerY - logoSize,
       width: logoSize,
-      height: logoSize
+      height: logoSize,
+      borderColor: BORDER,
+      borderWidth: 0.8,
+      color: WHITE
+    });
+    page.drawImage(logoImage, {
+      x: MARGIN_X + 2,
+      y: headerY - logoSize + 2,
+      width: logoSize - 4,
+      height: logoSize - 4
     });
   }
 
-  const textX = logoImage ? 86 : 36;
-  page.drawText('SD VIDROS', { x: textX, y: logoTop - 10, size: 12, font: fontBold, color: DARK });
-  page.drawText('RUA JORGE FIGUEIREDO 740 - BARROCAO - ITAITINGA-CE - 61887-000', { x: textX, y: logoTop - 22, size: 6.8, font: fontRegular, color: DARK });
-  page.drawText('SDVIDROS2025@GMAIL.COM   CNPJ: 49.226.611/0001-33', { x: textX, y: logoTop - 32, size: 6.8, font: fontRegular, color: DARK });
+  const textX = logoImage ? MARGIN_X + 56 : MARGIN_X;
+  page.drawText('SD VIDROS', { x: textX, y: headerY - 14, size: 17, font: fontBold, color: DARK });
+  page.drawText('SOLUÇÕES EM VIDROS TEMPERADOS E ESQUADRIAS DE ALUMÍNIO', { x: textX, y: headerY - 26, size: 7.2, font: fontBold, color: GOLD });
+  page.drawText('Rua Jorge Figueiredo 740, Barrocão - Itaitinga-CE • CNPJ: 49.226.611/0001-33', { x: textX, y: headerY - 37, size: 7, font: fontRegular, color: GRAY });
+  page.drawText('WhatsApp: (85) 99611-9824 • 99760-2237 • 98574-9606 | sdvidros2025@gmail.com', { x: textX, y: headerY - 48, size: 7, font: fontRegular, color: GRAY });
 
-  // Telefones no canto direito
-  page.drawText('(85) 99611-9824', { x: 470, y: logoTop - 12, size: 8, font: fontBold, color: DARK });
-  page.drawText('(85) 99760-2237', { x: 470, y: logoTop - 23, size: 8, font: fontBold, color: DARK });
-  page.drawText('(85) 98574-9606', { x: 470, y: logoTop - 34, size: 8, font: fontBold, color: DARK });
+  // Badge do Orçamento no canto direito superior
+  const badgeW = 138;
+  const badgeH = 50;
+  const badgeX = MARGIN_X + CONTENT_W - badgeW;
+  const badgeY = headerY - badgeH;
 
-  y = logoTop - 50;
-  desenharLinha(y);
+  page.drawRectangle({
+    x: badgeX,
+    y: badgeY,
+    width: badgeW,
+    height: badgeH,
+    color: DARK
+  });
 
-  // ---------------- 2. NÚMERO DO ORÇAMENTO, HORA E DATA ----------------
-  y -= 13;
+  // Linha dourada na lateral do badge
+  page.drawRectangle({
+    x: badgeX,
+    y: badgeY,
+    width: 3.5,
+    height: badgeH,
+    color: GOLD
+  });
+
   const numLimpo = String(numero || '000001').replace('#', '').padStart(6, '0');
-  page.drawText(`ORCAMENTO ${numLimpo}`, { x: 36, y, size: 9.5, font: fontBold, color: DARK });
+  page.drawText('PROPOSTA COMERCIAL', { x: badgeX + 10, y: badgeY + 35, size: 7, font: fontBold, color: GOLD });
+  page.drawText(`Nº ${numLimpo}`, { x: badgeX + 10, y: badgeY + 20, size: 12, font: fontBold, color: WHITE });
 
   const agora = new Date();
   const horaStr = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   const dataFormatada = dataStr || agora.toLocaleDateString('pt-BR');
-  const dataHoraTxt = `Hora: ${horaStr}    Data: ${dataFormatada}`;
-  const dataHoraW = fontRegular.widthOfTextAtSize(dataHoraTxt, 8);
-  page.drawText(dataHoraTxt, { x: LINE_END_X - 10 - dataHoraW, y, size: 8, font: fontRegular, color: DARK });
+  page.drawText(`Emissão: ${dataFormatada} às ${horaStr}`, { x: badgeX + 10, y: badgeY + 8, size: 6.8, font: fontRegular, color: rgb(0.85, 0.88, 0.93) });
 
-  y -= 7;
-  desenharLinha(y);
+  // ---------------- 3. CARD: DADOS DO CLIENTE & LOCAL ----------------
+  const clientCardY = badgeY - 14;
+  const clientCardH = 58;
+  const clientCardBoxY = clientCardY - clientCardH;
 
-  // ---------------- 3. DADOS DO CLIENTE ----------------
-  y -= 13;
-  page.drawText(`Cliente  : ${String(nome || '').toUpperCase()}`, { x: 36, y, size: 8, font: fontBold, color: DARK });
-  if (tel) {
-    const telW = fontRegular.widthOfTextAtSize(tel, 8);
-    page.drawText(tel, { x: LINE_END_X - 10 - telW, y, size: 8, font: fontRegular, color: DARK });
+  page.drawRectangle({
+    x: MARGIN_X,
+    y: clientCardBoxY,
+    width: CONTENT_W,
+    height: clientCardH,
+    color: BOX_BG,
+    borderColor: BORDER,
+    borderWidth: 0.8
+  });
+
+  // Topo interno do card
+  page.drawRectangle({
+    x: MARGIN_X,
+    y: clientCardY - 15,
+    width: CONTENT_W,
+    height: 15,
+    color: HEADER_BG
+  });
+  page.drawText('IDENTIFICAÇÃO DO CLIENTE & LOCAL DA INSTALAÇÃO', { x: MARGIN_X + 10, y: clientCardY - 11, size: 7, font: fontBold, color: DARK });
+
+  const nomeCliente = String(nome || 'CLIENTE NÃO INFORMADO').toUpperCase();
+  const telCliente = String(tel || '').trim();
+  const endLimpo = String(endereco || '').toUpperCase();
+  const bairroNome = String(bairro || '').toUpperCase();
+  const cidadeNome = String(cidade || '').toUpperCase();
+  const bairroCidade = [bairroNome, cidadeNome ? cidadeNome + ' - CE' : 'CE'].filter(Boolean).join(', ');
+
+  // Linha 1: Cliente e Telefone
+  page.drawText('CLIENTE:', { x: MARGIN_X + 10, y: clientCardY - 27, size: 6.8, font: fontBold, color: GRAY });
+  page.drawText(nomeCliente.substring(0, 48), { x: MARGIN_X + 56, y: clientCardY - 27, size: 8, font: fontBold, color: DARK });
+
+  page.drawText('WHATSAPP / TEL:', { x: MARGIN_X + 340, y: clientCardY - 27, size: 6.8, font: fontBold, color: GRAY });
+  page.drawText(telCliente || '-', { x: MARGIN_X + 420, y: clientCardY - 27, size: 8, font: fontBold, color: DARK });
+
+  // Linha 2: Endereço e Bairro/Cidade
+  page.drawText('ENDEREÇO:', { x: MARGIN_X + 10, y: clientCardY - 41, size: 6.8, font: fontBold, color: GRAY });
+  page.drawText((endLimpo || 'Não informado').substring(0, 52), { x: MARGIN_X + 68, y: clientCardY - 41, size: 7.5, font: fontRegular, color: DARK });
+
+  page.drawText('BAIRRO / CID:', { x: MARGIN_X + 340, y: clientCardY - 41, size: 6.8, font: fontBold, color: GRAY });
+  page.drawText(bairroCidade || 'Itaitinga - CE', { x: MARGIN_X + 406, y: clientCardY - 41, size: 7.5, font: fontRegular, color: DARK });
+
+  // Linha 3: CPF/CNPJ e Complemento
+  page.drawText('CPF / CNPJ:', { x: MARGIN_X + 10, y: clientCardY - 54, size: 6.8, font: fontBold, color: GRAY });
+  page.drawText(cnpj || 'Não informado', { x: MARGIN_X + 68, y: clientCardY - 54, size: 7.5, font: fontRegular, color: DARK });
+
+  if (apto) {
+    page.drawText('COMPL / APTO:', { x: MARGIN_X + 220, y: clientCardY - 54, size: 6.8, font: fontBold, color: GRAY });
+    page.drawText(String(apto).toUpperCase(), { x: MARGIN_X + 284, y: clientCardY - 54, size: 7.5, font: fontRegular, color: DARK });
   }
 
-  y -= 12;
-  const endLimpo = String(endereco || '').trim().toUpperCase();
-  page.drawText(endLimpo ? `Endereço: ${endLimpo.substring(0, 48)}` : 'Endereço:', { x: 36, y, size: 7.5, font: fontRegular, color: DARK });
-  const bairroNome = String(dados.bairro || '').trim().toUpperCase();
-  page.drawText(bairroNome ? `Bairro: ${bairroNome}` : 'Bairro:', { x: 370, y, size: 7.5, font: fontRegular, color: DARK });
+  // ---------------- 4. TABELA DE ITENS & SERVIÇOS ----------------
+  const tableHeaderY = clientCardBoxY - 14;
+  const tableHeaderH = 19;
 
-  y -= 12;
-  page.drawText(`CPF/Cnpj: ${cnpj || ''}`, { x: 36, y, size: 7.5, font: fontRegular, color: DARK });
-  page.drawText(`Cpl: ${dados.apto || ''}`, { x: 230, y, size: 7.5, font: fontRegular, color: DARK });
-  const cidadeNome = String(dados.cidade || '').trim().toUpperCase();
-  page.drawText(cidadeNome ? `Cidade: ${cidadeNome}` : 'Cidade:', { x: 330, y, size: 7.5, font: fontRegular, color: DARK });
-  page.drawText('UF: CE', { x: 470, y, size: 7.5, font: fontRegular, color: DARK });
-  page.drawText('CEP:', { x: 515, y, size: 7.5, font: fontRegular, color: DARK });
+  // Barra de cabeçalho da tabela escura e elegante
+  page.drawRectangle({
+    x: MARGIN_X,
+    y: tableHeaderY - tableHeaderH,
+    width: CONTENT_W,
+    height: tableHeaderH,
+    color: DARK
+  });
 
-  y -= 7;
-  desenharLinha(y);
+  page.drawText('DESCRIÇÃO DO PRODUTO / SERVIÇO', { x: MARGIN_X + 8, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
+  page.drawText('MEDIDAS (L x A)', { x: MARGIN_X + 250, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
+  page.drawText('ÁREA (M²)', { x: MARGIN_X + 338, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
+  page.drawText('QTD', { x: MARGIN_X + 395, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
+  page.drawText('VL. UNIT (R$)', { x: MARGIN_X + 434, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
+  page.drawText('TOTAL (R$)', { x: MARGIN_X + 486, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
 
-  // ---------------- 4. CABEÇALHO DA TABELA DE ITENS ----------------
-  y -= 12;
-  page.drawText('Descrição do Item', { x: 36, y, size: 7.2, font: fontBold, color: DARK });
-  page.drawText('Uni', { x: 240, y, size: 7.2, font: fontBold, color: DARK });
-  page.drawText('Quant', { x: 265, y, size: 7.2, font: fontBold, color: DARK });
-  page.drawText('LAR  x  ALT  -  MT2', { x: 300, y, size: 7.2, font: fontBold, color: DARK });
-  page.drawText('VL Metro', { x: 400, y, size: 7.2, font: fontBold, color: DARK });
-  page.drawText('VL Unita', { x: 455, y, size: 7.2, font: fontBold, color: DARK });
-  page.drawText('VL Total', { x: 515, y, size: 7.2, font: fontBold, color: DARK });
-
-  y -= 6;
-  desenharLinha(y);
-
-  // ---------------- 5. LINHAS DE ITENS ----------------
+  let curY = tableHeaderY - tableHeaderH;
   const itensList = Array.isArray(itens) && itens.length ? itens : [];
-  y -= 13;
 
   if (!itensList.length) {
-    page.drawText('SERVIÇOS DE VIDRAÇARIA E ESQUADRIAS DE ALUMÍNIO', { x: 36, y, size: 7.5, font: fontRegular, color: DARK });
-    page.drawText('UND', { x: 240, y, size: 7.5, font: fontRegular, color: DARK });
-    page.drawText('1', { x: 272, y, size: 7.5, font: fontRegular, color: DARK });
-    const totW = fontRegular.widthOfTextAtSize(total || '0,00', 7.5);
-    page.drawText(total || '0,00', { x: 550 - totW, y, size: 7.5, font: fontRegular, color: DARK });
-    y -= 16;
+    // Linha única padrão se não houver itens discriminados
+    const rowH = 24;
+    curY -= rowH;
+    page.drawRectangle({
+      x: MARGIN_X,
+      y: curY,
+      width: CONTENT_W,
+      height: rowH,
+      color: WHITE,
+      borderColor: BORDER,
+      borderWidth: 0.6
+    });
+    page.drawText('SERVIÇOS DE VIDRAÇARIA E ESQUADRIAS DE ALUMÍNIO', { x: MARGIN_X + 8, y: curY + 8, size: 7.5, font: fontBold, color: DARK });
+    page.drawText('Sob Medida', { x: MARGIN_X + 250, y: curY + 8, size: 7.5, font: fontRegular, color: GRAY });
+    page.drawText('-', { x: MARGIN_X + 350, y: curY + 8, size: 7.5, font: fontRegular, color: GRAY });
+    page.drawText('1 UND', { x: MARGIN_X + 395, y: curY + 8, size: 7.5, font: fontRegular, color: DARK });
+
+    const valTot = String(total || '0,00').replace('R$', '').trim();
+    page.drawText(valTot, { x: MARGIN_X + 438, y: curY + 8, size: 7.5, font: fontRegular, color: DARK });
+    page.drawText(valTot, { x: MARGIN_X + 490, y: curY + 8, size: 8, font: fontBold, color: DARK });
   } else {
-    itensList.forEach((it) => {
+    itensList.forEach((it, idx) => {
       let descTxt = String(it.desc || '').toUpperCase();
-      if (it.cor) descTxt += ` ${String(it.cor).toUpperCase()}`;
+      if (it.cor) descTxt += ` (${String(it.cor).toUpperCase()})`;
 
-      // Quebrar descrição se for longa
-      const descLines = wrapText(descTxt, fontRegular, 7.2, 195);
-      page.drawText(descLines[0], { x: 36, y, size: 7.2, font: fontRegular, color: DARK });
+      const descLines = wrapText(descTxt, fontRegular, 7.5, 230);
+      const rowH = Math.max(22, descLines.length * 11 + 9);
+      curY -= rowH;
 
-      page.drawText('UND', { x: 240, y, size: 7.2, font: fontRegular, color: DARK });
-      page.drawText(String(it.qtd || 1), { x: 272, y, size: 7.2, font: fontRegular, color: DARK });
+      // Fundo alternado
+      page.drawRectangle({
+        x: MARGIN_X,
+        y: curY,
+        width: CONTENT_W,
+        height: rowH,
+        color: idx % 2 === 0 ? WHITE : ROW_ALT,
+        borderColor: BORDER,
+        borderWidth: 0.5
+      });
 
-      let medTxt = '';
-      if (it.alt && it.larg) {
-        medTxt = `${it.larg} x ${it.alt} - ${it.m2 || ''}`;
-      } else if (it.m2) {
-        medTxt = it.m2;
+      // Descrição do item
+      descLines.forEach((l, lIdx) => {
+        page.drawText(l, { x: MARGIN_X + 8, y: curY + rowH - 12 - (lIdx * 10), size: 7.5, font: lIdx === 0 ? fontBold : fontRegular, color: DARK });
+      });
+
+      // Medidas
+      let medTxt = '-';
+      if (it.larg && it.alt) {
+        medTxt = `${it.larg} x ${it.alt} m`;
       }
-      if (medTxt) {
-        page.drawText(medTxt, { x: 300, y, size: 7.2, font: fontRegular, color: DARK });
-      }
+      page.drawText(medTxt, { x: MARGIN_X + 250, y: curY + rowH - 13, size: 7.5, font: fontRegular, color: DARK });
 
-      if (it.v_m2) {
-        page.drawText(String(it.v_m2), { x: 400, y, size: 7.2, font: fontRegular, color: DARK });
-      }
-      if (it.v_unit) {
-        page.drawText(String(it.v_unit), { x: 455, y, size: 7.2, font: fontRegular, color: DARK });
-      }
+      // Área m²
+      const m2Txt = it.m2 ? String(it.m2).replace('m²', '').trim() + ' m²' : '-';
+      page.drawText(m2Txt, { x: MARGIN_X + 338, y: curY + rowH - 13, size: 7.5, font: fontRegular, color: DARK });
 
-      const valTotItem = String(it.total || '').replace('R$', '').trim();
-      const totItemW = fontRegular.widthOfTextAtSize(valTotItem, 7.2);
-      page.drawText(valTotItem, { x: 555 - totItemW, y, size: 7.2, font: fontRegular, color: DARK });
+      // Quantidade
+      page.drawText(`${it.qtd || 1} UND`, { x: MARGIN_X + 395, y: curY + rowH - 13, size: 7.5, font: fontRegular, color: DARK });
 
-      y -= 12;
-      // Se a descrição teve continuação na segunda linha
-      for (let d = 1; d < descLines.length; d++) {
-        page.drawText(descLines[d], { x: 36, y, size: 7.2, font: fontRegular, color: DARK });
-        y -= 11;
-      }
+      // Valor unitário
+      const vUnitTxt = it.v_unit ? String(it.v_unit).replace('R$', '').trim() : '-';
+      page.drawText(vUnitTxt, { x: MARGIN_X + 438, y: curY + rowH - 13, size: 7.5, font: fontRegular, color: DARK });
+
+      // Valor total do item
+      const vTotTxt = String(it.total || '0,00').replace('R$', '').trim();
+      page.drawText(vTotTxt, { x: MARGIN_X + 488, y: curY + rowH - 13, size: 7.8, font: fontBold, color: DARK });
     });
   }
 
-  // ---------------- 6. OBSERVAÇÕES GERAIS E FORMAS DE PAGAMENTO ----------------
-  // Posicionar bloco de observações com espaço adequado
-  if (y > 330) y = 330;
-  desenharLinha(y);
-  y -= 13;
-
-  page.drawText('Observações Gerais:', { x: 36, y, size: 8, font: fontBold, color: DARK });
-  y -= 11;
-  page.drawText('FORMAS DE PAGAMENTO', { x: 36, y, size: 7.2, font: fontBold, color: DARK });
-  y -= 10;
-
-  if (forma) {
-    page.drawText(`* ${String(forma).toUpperCase()}`, { x: 36, y, size: 7, font: fontRegular, color: DARK });
-    y -= 9;
-  }
-  page.drawText('* 50 % NA ENTRADA E 50% NO FINAL DO SERVIÇO (VALOR TOTAL)', { x: 36, y, size: 7, font: fontRegular, color: DARK });
-  y -= 9;
-  page.drawText('* 10 X S/JUROS NO CARTAO (VALOR TOTAL)', { x: 36, y, size: 7, font: fontRegular, color: DARK });
-  y -= 9;
-  page.drawText('* AV 10% DESCONTO', { x: 36, y, size: 7, font: fontRegular, color: DARK });
-  y -= 13;
-
-  page.drawText('CHAVES PIX PARA PAGAMENTO:', { x: 36, y, size: 7.2, font: fontBold, color: DARK });
-  y -= 10;
-  page.drawText('* InfinityPay (CNPJ): 49.226.611/0001-33', { x: 36, y, size: 7, font: fontRegular, color: DARK });
-  y -= 9;
-  page.drawText('* Itaú (Celular): 85 99760-2237', { x: 36, y, size: 7, font: fontRegular, color: DARK });
-  y -= 11;
-
-  if (prazo || garantia || obs) {
-    if (prazo) { page.drawText(`* Prazo de Entrega: ${prazo}`, { x: 36, y, size: 7, font: fontRegular, color: DARK }); y -= 9; }
-    if (garantia) { page.drawText(`* Garantia: ${garantia}`, { x: 36, y, size: 7, font: fontRegular, color: DARK }); y -= 9; }
-    if (obs) { page.drawText(`* Obs: ${obs}`, { x: 36, y, size: 7, font: fontRegular, color: DARK }); y -= 9; }
+  // Se a tabela terminou muito alta, ajustamos o espaço para manter o layout nobre e balanceado
+  const minBottomSectionTop = 330;
+  let bottomY = curY - 14;
+  if (bottomY > minBottomSectionTop) {
+    bottomY = minBottomSectionTop;
   }
 
-  // ---------------- 7. VALORES / TOTAIS E RESPONSÁVEL ----------------
-  const totaisTopY = 160;
-  desenharLinha(totaisTopY + 12);
+  // ---------------- 5. CARDS INFERIORES (CONDIÇÕES COMERCIAIS & TOTAIS) ----------------
+  const cardBottomH = 150;
+  const cardBottomY = bottomY - cardBottomH;
 
-  // Esquerda: Responsável e Situação
-  page.drawText(`Responsavel: ${String(resp || 'SAMUEL DAVID').toUpperCase()}`, { x: 36, y: totaisTopY - 2, size: 7.5, font: fontBold, color: DARK });
-  page.drawText('Situação Atual: Aguardando Aprovação', { x: 36, y: totaisTopY - 14, size: 7.5, font: fontRegular, color: DARK });
-  page.drawText('Data Aprovação:   /   /         Data Entrega:   /   /', { x: 36, y: totaisTopY - 26, size: 7.5, font: fontRegular, color: DARK });
+  // CARD ESQUERDO: CONDIÇÕES & PAGAMENTO (Largura: 320 pt)
+  const leftCardW = 320;
+  page.drawRectangle({
+    x: MARGIN_X,
+    y: cardBottomY,
+    width: leftCardW,
+    height: cardBottomH,
+    color: BOX_BG,
+    borderColor: BORDER,
+    borderWidth: 0.8
+  });
 
-  // Direita: Totais tabulados idênticos à imagem 1
+  // Cabeçalho do Card Esquerdo
+  page.drawRectangle({
+    x: MARGIN_X,
+    y: bottomY - 16,
+    width: leftCardW,
+    height: 16,
+    color: HEADER_BG
+  });
+  page.drawText('CONDIÇÕES COMERCIAIS & FORMAS DE PAGAMENTO', { x: MARGIN_X + 8, y: bottomY - 12, size: 7, font: fontBold, color: DARK });
+
+  let condY = bottomY - 28;
+  const formaTxt = forma ? String(forma).toUpperCase() : 'À VISTA';
+  page.drawText(`• Forma Escolhida: ${formaTxt}`, { x: MARGIN_X + 8, y: condY, size: 7.2, font: fontBold, color: DARK });
+  condY -= 11;
+  page.drawText('• Opções: 50% na entrada + 50% na entrega | Até 10x s/ juros no cartão', { x: MARGIN_X + 8, y: condY, size: 6.8, font: fontRegular, color: GRAY });
+  condY -= 11;
+  page.drawText(`• Prazo de Execução: ${prazo || '15 dias úteis após confirmação'}`, { x: MARGIN_X + 8, y: condY, size: 6.8, font: fontRegular, color: DARK });
+  condY -= 11;
+  page.drawText(`• Garantia: ${garantia || '1 Ano de garantia legal e de instalação'}`, { x: MARGIN_X + 8, y: condY, size: 6.8, font: fontRegular, color: DARK });
+
+  if (obs) {
+    condY -= 11;
+    page.drawText(`• Observações: ${String(obs).substring(0, 50)}`, { x: MARGIN_X + 8, y: condY, size: 6.8, font: fontRegular, color: GRAY });
+  }
+
+  // Box PIX no rodapé do Card Esquerdo
+  const pixBoxH = 46;
+  const pixBoxY = cardBottomY + 7;
+  page.drawRectangle({
+    x: MARGIN_X + 8,
+    y: pixBoxY,
+    width: leftCardW - 16,
+    height: pixBoxH,
+    color: GREEN_BG,
+    borderColor: rgb(0.72, 0.85, 0.76),
+    borderWidth: 0.8
+  });
+  page.drawText('DADOS PARA PAGAMENTO VIA PIX:', { x: MARGIN_X + 16, y: pixBoxY + 32, size: 6.8, font: fontBold, color: GREEN_TXT });
+  page.drawText('Chave CNPJ: 49.226.611/0001-33 (InfinityPay - SD Vidros)', { x: MARGIN_X + 16, y: pixBoxY + 20, size: 6.8, font: fontRegular, color: DARK });
+  page.drawText('Chave Celular: (85) 99760-2237 (Itaú - Samuel David)', { x: MARGIN_X + 16, y: pixBoxY + 9, size: 6.8, font: fontRegular, color: DARK });
+
+  // CARD DIREITO: RESUMO FINANCEIRO E TOTAL (Largura: 198 pt)
+  const rightCardW = CONTENT_W - leftCardW - 12; // ~199 pt
+  const rightCardX = MARGIN_X + leftCardW + 12;
+
+  page.drawRectangle({
+    x: rightCardX,
+    y: cardBottomY,
+    width: rightCardW,
+    height: cardBottomH,
+    color: BOX_BG,
+    borderColor: BORDER,
+    borderWidth: 0.8
+  });
+
+  // Cabeçalho do Card Direito
+  page.drawRectangle({
+    x: rightCardX,
+    y: bottomY - 16,
+    width: rightCardW,
+    height: 16,
+    color: HEADER_BG
+  });
+  page.drawText('RESUMO FINANCEIRO', { x: rightCardX + 8, y: bottomY - 12, size: 7, font: fontBold, color: DARK });
+
+  let totY = bottomY - 32;
   const valorTotalLimpo = String(total || '0,00').replace('R$', '').trim();
-  page.drawText('VALOR MATERIAL R$', { x: 375, y: totaisTopY - 2, size: 7.2, font: fontBold, color: DARK });
-  page.drawText(valorTotalLimpo, { x: 505, y: totaisTopY - 2, size: 7.2, font: fontRegular, color: DARK });
 
-  page.drawText('VALOR SERVIÇO  R$', { x: 375, y: totaisTopY - 12, size: 7.2, font: fontBold, color: DARK });
-  page.drawText('FRETE          R$', { x: 375, y: totaisTopY - 22, size: 7.2, font: fontBold, color: DARK });
-  page.drawText('DESCONTO       R$', { x: 375, y: totaisTopY - 32, size: 7.2, font: fontBold, color: DARK });
+  page.drawText('Valor dos Materiais:', { x: rightCardX + 10, y: totY, size: 7, font: fontRegular, color: GRAY });
+  page.drawText(`R$ ${valorTotalLimpo}`, { x: rightCardX + rightCardW - 10 - fontBold.widthOfTextAtSize(`R$ ${valorTotalLimpo}`, 7.5), y: totY, size: 7.5, font: fontBold, color: DARK });
 
-  page.drawText('VALOR TOTAL    R$', { x: 375, y: totaisTopY - 44, size: 8, font: fontBold, color: DARK });
-  page.drawText(valorTotalLimpo, { x: 505, y: totaisTopY - 44, size: 8, font: fontBold, color: DARK });
+  totY -= 14;
+  page.drawText('Mão de Obra e Instalação:', { x: rightCardX + 10, y: totY, size: 7, font: fontRegular, color: GRAY });
+  page.drawText('Inclusa', { x: rightCardX + rightCardW - 10 - fontRegular.widthOfTextAtSize('Inclusa', 7), y: totY, size: 7, font: fontRegular, color: DARK });
 
-  // ---------------- 8. RODAPÉ E CAMPO DE APROVAÇÃO ----------------
-  const rodapeY = 88;
-  desenharLinha(rodapeY + 12);
+  totY -= 14;
+  page.drawText('Frete e Deslocamento:', { x: rightCardX + 10, y: totY, size: 7, font: fontRegular, color: GRAY });
+  page.drawText('Incluso', { x: rightCardX + rightCardW - 10 - fontRegular.widthOfTextAtSize('Incluso', 7), y: totY, size: 7, font: fontRegular, color: DARK });
 
-  page.drawText('Impressão em 1 via - 1ª VIA (X) - ** Obrigado pela Preferência **', { x: 36, y: rodapeY - 2, size: 6.8, font: fontRegular, color: GRAY });
-  page.drawText('Autorizo a execução do(s) serviço(s) nas condições acima discriminado', { x: 36, y: rodapeY - 14, size: 7.2, font: fontRegular, color: DARK });
+  // Bloco de destaque do VALOR TOTAL
+  const totalBoxH = 50;
+  const totalBoxY = cardBottomY + 7;
+  page.drawRectangle({
+    x: rightCardX + 8,
+    y: totalBoxY,
+    width: rightCardW - 16,
+    height: totalBoxH,
+    color: DARK
+  });
+  // Borda dourada no total
+  page.drawRectangle({
+    x: rightCardX + 8,
+    y: totalBoxY,
+    width: rightCardW - 16,
+    height: totalBoxH,
+    borderColor: GOLD,
+    borderWidth: 1.2
+  });
 
-  page.drawText('( ) Aprovado   ( ) Reprovado   Assinatura: ___________________________________   Data: ____/____/________', {
-    x: 36,
-    y: rodapeY - 28,
-    size: 7.2,
+  page.drawText('TOTAL DO ORÇAMENTO', { x: rightCardX + 18, y: totalBoxY + 34, size: 7, font: fontBold, color: GOLD });
+  page.drawText(`R$ ${valorTotalLimpo}`, { x: rightCardX + 18, y: totalBoxY + 14, size: 14, font: fontBold, color: WHITE });
+
+  // ---------------- 6. RODAPÉ DE APROVAÇÃO & ASSINATURA ----------------
+  const rodapeCardH = 68;
+  const rodapeCardY = 32;
+
+  page.drawRectangle({
+    x: MARGIN_X,
+    y: rodapeCardY,
+    width: CONTENT_W,
+    height: rodapeCardH,
+    color: WHITE,
+    borderColor: BORDER,
+    borderWidth: 0.8
+  });
+
+  // Linha 1: Autorização e Opções de Aprovação
+  page.drawText('Autorizo a execução dos serviços conforme as especificações e valores discriminados nesta proposta.', {
+    x: MARGIN_X + 10,
+    y: rodapeCardY + rodapeCardH - 14,
+    size: 6.8,
+    font: fontRegular,
+    color: DARK
+  });
+
+  // Checkboxes no canto superior direito do rodapé
+  page.drawText('[  ] APROVADO     [  ] AJUSTAR DETALHES', {
+    x: MARGIN_X + CONTENT_W - 200,
+    y: rodapeCardY + rodapeCardH - 14,
+    size: 7.5,
     font: fontBold,
     color: DARK
+  });
+
+  // Linha 2: Campo de Assinatura
+  page.drawText('Assinatura do Cliente: __________________________________________________', {
+    x: MARGIN_X + 10,
+    y: rodapeCardY + 30,
+    size: 7.5,
+    font: fontBold,
+    color: DARK
+  });
+  page.drawText('Data: _____ / _____ / ________', {
+    x: MARGIN_X + CONTENT_W - 145,
+    y: rodapeCardY + 30,
+    size: 7.5,
+    font: fontBold,
+    color: DARK
+  });
+
+  // Linha 3: Responsável técnico e Confirmação via WhatsApp
+  const respNome = String(resp || 'SAMUEL DAVID').toUpperCase();
+  page.drawText(`Responsável: ${respNome} • Situação: Aguardando Aprovação`, {
+    x: MARGIN_X + 10,
+    y: rodapeCardY + 12,
+    size: 6.8,
+    font: fontRegular,
+    color: GRAY
+  });
+
+  page.drawText('📲 Confirmação rápida pelo WhatsApp: (85) 99611-9824', {
+    x: MARGIN_X + CONTENT_W - 215,
+    y: rodapeCardY + 12,
+    size: 6.8,
+    font: fontBold,
+    color: GOLD
   });
 
   return pdfDoc.save();
