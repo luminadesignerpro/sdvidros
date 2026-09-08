@@ -306,19 +306,21 @@
 
     /* ── MODAL ── */
     .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.72);
-      backdrop-filter: blur(5px); z-index: 200;
-      display: flex; align-items: flex-end; justify-content: center;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(6px); z-index: 2000;
+      display: none; align-items: center; justify-content: center;
+      padding: 16px;
       animation: fadeIn 0.2s ease;
     }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal-overlay.active { display: flex; }
     .modal-box {
       background: var(--card); border: 1px solid var(--border);
-      border-radius: 22px 22px 0 0; padding: 26px 20px 32px;
-      width: 100%; max-width: 800px; max-height: 75vh; overflow-y: auto;
-      animation: slideModal 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 18px; padding: 24px 20px;
+      width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.85), 0 0 24px rgba(201,168,76,0.15);
+      animation: slideModal 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    @keyframes slideModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes slideModal { from { transform: scale(0.95) translateY(15px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
     .modal-title { font-size: 16px; font-weight: 800; color: var(--gold-light); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
     .modal-close { background: rgba(255,255,255,0.07); border: none; color: var(--muted); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
     .modal-close:hover { background: rgba(224,68,68,0.18); color: #ff8080; }
@@ -1802,43 +1804,42 @@ async function enviarOrcamentoParaAssinaturaDigital() {
     renderHist();
     renderSelectContratos();
 
-    // 2. Gerar texto do contrato
+    // 2. Gerar texto do contrato e links
     const textoContrato = montarTextoContrato(d);
 
-    const gerarLinkDireto = () => {
-      const payload = {
-        n: d.numero,
-        c: d.nome || '',
-        t: d.tel || '',
-        v: d.total || '',
-        f: d.forma || '',
-        p: d.prazo || '',
-        g: d.garantia || '',
-        d: d.data || '',
-        e: d.end || '',
-        b: d.bairro || '',
-        num: d.num || '',
-        apto: d.apto || '',
-        cnpj: d.cnpj || '',
-        resp: d.resp || '',
-        obs: d.obs || '',
-        itens: (d.itens || []).map(it => ({
-          desc: it.desc,
-          larg: it.larg,
-          alt: it.alt,
-          m2: it.m2,
-          qtd: it.qtd,
-          v_unit: it.v_unit,
-          total: it.total,
-          cor: it.cor,
-          bizt: it.bizt
-        }))
-      };
-      const jsonStr = unescape(encodeURIComponent(JSON.stringify(payload)));
-      return window.location.origin + '/assinar.html?d=' + encodeURIComponent(btoa(jsonStr));
+    const payloadCompacto = {
+      n: d.numero,
+      c: d.nome || '',
+      t: d.tel || '',
+      v: d.total || '',
+      f: d.forma || '',
+      p: d.prazo || '',
+      g: d.garantia || '',
+      d: d.data || '',
+      e: d.end || '',
+      b: d.bairro || '',
+      num: d.num || '',
+      apto: d.apto || '',
+      cnpj: d.cnpj || '',
+      resp: d.resp || '',
+      obs: d.obs || '',
+      itens: (d.itens || []).map(it => ({
+        desc: it.desc,
+        larg: it.larg,
+        alt: it.alt,
+        m2: it.m2,
+        qtd: it.qtd,
+        v_unit: it.v_unit,
+        total: it.total,
+        cor: it.cor,
+        bizt: it.bizt
+      }))
     };
+    const jsonStr = unescape(encodeURIComponent(JSON.stringify(payloadCompacto)));
+    const dParam = encodeURIComponent(btoa(jsonStr));
 
-    let linkAssinatura = '';
+    let linkAssinatura = window.location.origin + '/assinar.html?d=' + dParam;
+    let linkPdf = window.location.origin + '/api/gerar-pdf-orcamento?d=' + dParam;
 
     // 3. Tentar criar registro no Supabase
     try {
@@ -1855,13 +1856,10 @@ async function enviarOrcamentoParaAssinaturaDigital() {
       const resData = await res.json().catch(() => ({}));
       if (res.ok && resData.id) {
         linkAssinatura = window.location.origin + '/assinar.html?id=' + resData.id;
+        linkPdf = window.location.origin + '/api/gerar-pdf-orcamento?id=' + resData.id;
       }
     } catch (e) {
       console.warn('Supabase offline ou inacessível, gerando link autônomo:', e);
-    }
-
-    if (!linkAssinatura) {
-      linkAssinatura = gerarLinkDireto();
     }
 
     // 4. Gerar o arquivo PDF oficial do Orçamento para enviar JUNTO
@@ -1905,43 +1903,26 @@ async function enviarOrcamentoParaAssinaturaDigital() {
     const fileName = `Orcamento-${(d.numero || '0001').replace('#', '')}.pdf`;
     const file = new File([blob], fileName, { type: 'application/pdf' });
 
-    // 5. Montar mensagem com o link de assinatura
+    // 5. Montar mensagem contendo link do PDF oficial E link de assinatura online
     const msg = '*SD VIDROS — PROPOSTA & ASSINATURA DIGITAL* ✍️\n\n'
-      + 'Olá' + (d.nome ? ', ' + d.nome : '') + '! Segue em anexo o PDF com seu orçamento *' + d.numero + '* no valor de *' + d.total + '*:\n\n'
-      + linkAssinatura + '\n\n'
-      + '📄 O PDF detalhado com especificações e valores está em anexo.\n'
-      + '✅ Se estiver tudo aprovado, toque no link acima para assinar com o dedo na tela e autorizar o início dos serviços!';
+      + 'Olá' + (d.nome ? ', ' + d.nome : '') + '! Segue o link com seu orçamento *' + d.numero + '* no valor de *' + d.total + '*:\n\n'
+      + '📄 *Baixar PDF Oficial:*\n' + linkPdf + '\n\n'
+      + '✍️ *Assinar Orçamento Online:*\n' + linkAssinatura + '\n\n'
+      + '📄 O PDF detalhado com especificações e valores está disponível no link acima.\n'
+      + '✅ Se estiver tudo aprovado, toque no link de assinatura para assinar com o dedo na tela e autorizar o início dos serviços!';
 
-    // 6. Enviar o arquivo PDF JUNTO via compartilhamento nativo (WhatsApp no celular)
-    let compartilhou = false;
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({
-          files: [file],
-          title: `Orçamento ${d.numero} - SD Vidros`,
-          text: msg
-        });
-        compartilhou = true;
-      } catch (e) {
-        if (e.name !== 'AbortError') {
-          console.warn('Compartilhamento nativo com arquivo falhou:', e);
-        } else {
-          compartilhou = true;
-        }
-      }
-    }
-
-    // Se estiver no computador ou o navegador não suportar anexar arquivo no share:
-    if (!compartilhou) {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 2000);
-
-      abrirWhats(d.tel, msg);
-    }
+    // 6. Abrir modal com opções de envio e disparar compartilhamento nativo do PDF
+    abrirModalEnvio({
+      numero: d.numero,
+      cliente: d.nome,
+      tel: d.tel,
+      total: d.total,
+      msg: msg,
+      file: file,
+      blob: blob,
+      fileName: fileName,
+      autoShare: true
+    });
 
     carregarListaContratos();
     sincronizarStatusContratos();
@@ -1951,6 +1932,89 @@ async function enviarOrcamentoParaAssinaturaDigital() {
     if (btn) btn.disabled = false;
     if (spinner) spinner.style.display = 'none';
     if (btnTxt) btnTxt.textContent = '✍️ Enviar para Assinatura Digital';
+  }
+}
+
+let _envioAtual = null;
+
+function fecharModalEnvio() {
+  const m = document.getElementById('modal-envio-orcamento');
+  if (m) m.classList.remove('active');
+}
+
+function abrirModalEnvio(dados) {
+  _envioAtual = dados;
+  const numEl = document.getElementById('modal-envio-num');
+  const cliEl = document.getElementById('modal-envio-cliente');
+  const totEl = document.getElementById('modal-envio-total');
+  if (numEl) numEl.textContent = dados.numero || '';
+  if (cliEl) cliEl.textContent = dados.cliente || 'Cliente';
+  if (totEl) totEl.textContent = dados.total || '';
+
+  const btnWhats = document.getElementById('btn-modal-whats-msg');
+  if (btnWhats) {
+    btnWhats.onclick = () => {
+      abrirWhats(dados.tel, dados.msg);
+    };
+  }
+
+  const btnShare = document.getElementById('btn-modal-share-file');
+  if (btnShare) {
+    btnShare.onclick = async () => {
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [dados.file] })) {
+        try {
+          await navigator.share({
+            files: [dados.file],
+            title: `Orçamento ${dados.numero} - SD Vidros`,
+            text: dados.msg
+          });
+        } catch (e) {
+          if (e.name !== 'AbortError') console.warn('Compartilhamento falhou:', e);
+        }
+      } else {
+        const url = URL.createObjectURL(dados.blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = dados.fileName;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+        alert('O PDF foi baixado no seu aparelho! Agora você pode anexá-lo na conversa do WhatsApp.');
+      }
+    };
+  }
+
+  const btnBaixar = document.getElementById('btn-modal-baixar-pdf');
+  if (btnBaixar) {
+    btnBaixar.onclick = () => {
+      const url = URL.createObjectURL(dados.blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = dados.fileName;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    };
+  }
+
+  const m = document.getElementById('modal-envio-orcamento');
+  if (m) m.classList.add('active');
+
+  // No celular: dispara o compartilhador nativo direto com o arquivo PDF!
+  if (dados.autoShare && navigator.share && navigator.canShare && navigator.canShare({ files: [dados.file] })) {
+    navigator.share({
+      files: [dados.file],
+      title: `Orçamento ${dados.numero} - SD Vidros`,
+      text: dados.msg
+    }).catch(e => {
+      if (e.name !== 'AbortError') console.warn(e);
+    });
+  } else if (!navigator.share || !navigator.canShare || !navigator.canShare({ files: [dados.file] })) {
+    // No PC ou se não suportar anexo direto: baixa o PDF automaticamente
+    const url = URL.createObjectURL(dados.blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = dados.fileName;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
 }
 
@@ -2740,43 +2804,28 @@ async function enviarOuBaixarPdfOrcamento(orcObj = null) {
       }))
     };
     const jsonStr = unescape(encodeURIComponent(JSON.stringify(payload)));
-    const linkAssinatura = window.location.origin + '/assinar.html?d=' + encodeURIComponent(btoa(jsonStr));
+    const dParam = encodeURIComponent(btoa(jsonStr));
+    const linkAssinatura = window.location.origin + '/assinar.html?d=' + dParam;
+    const linkPdf = window.location.origin + '/api/gerar-pdf-orcamento?d=' + dParam;
 
     const msg = '*SD VIDROS — ORÇAMENTO & PROPOSTA COMERCIAL* 📄\n\n'
-      + 'Olá' + (o.nome ? ', ' + o.nome : '') + '! Segue em anexo o PDF com seu orçamento *' + o.numero + '* no valor de *' + o.total + '*:\n\n'
-      + linkAssinatura + '\n\n'
-      + '📄 O arquivo PDF detalhado com especificações e valores está em anexo.\n'
-      + '✍️ Toque no link acima para conferir os detalhes e assinar com o dedo na tela se estiver aprovado!';
+      + 'Olá' + (o.nome ? ', ' + o.nome : '') + '! Segue o link com seu orçamento *' + o.numero + '* no valor de *' + o.total + '*:\n\n'
+      + '📄 *Baixar PDF Oficial:*\n' + linkPdf + '\n\n'
+      + '✍️ *Assinar Orçamento Online:*\n' + linkAssinatura + '\n\n'
+      + '📄 O arquivo PDF completo com especificações e valores também está disponível no link acima.\n'
+      + '✅ Para autorizar o início do serviço, toque no link acima para assinar digitalmente com o dedo na tela!';
 
-    // No celular ou navegador com suporte nativo a compartilhamento de arquivo
-    let compartilhou = false;
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({
-          files: [file],
-          title: `Orçamento ${o.numero} - SD Vidros`,
-          text: msg
-        });
-        compartilhou = true;
-      } catch (e) {
-        if (e.name !== 'AbortError') console.log('Compartilhamento cancelado', e);
-        else compartilhou = true;
-      }
-    }
-
-    if (!compartilhou) {
-      // No computador: baixa o PDF diretamente
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 2000);
-
-      if (o.tel) {
-        abrirWhats(o.tel, msg);
-      }
-    }
+    abrirModalEnvio({
+      numero: o.numero,
+      cliente: o.nome,
+      tel: o.tel,
+      total: o.total,
+      msg: msg,
+      file: file,
+      blob: blob,
+      fileName: fileName,
+      autoShare: true
+    });
   } catch (err) {
     alert(err.message || 'Erro ao gerar PDF do orçamento.');
   } finally {
@@ -2901,5 +2950,53 @@ window.addEventListener('DOMContentLoaded', function() {
   if (el) el.textContent = '👤 ' + (user.nome || user.username || 'Usuário');
 });
 </script>
+<!-- Modal de Envio e Compartilhamento de Orçamento -->
+<div id="modal-envio-orcamento" class="modal-overlay" onclick="if(event.target===this) fecharModalEnvio()">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span style="display:flex;align-items:center;gap:8px;">
+        📤 Enviar Orçamento e Assinatura
+      </span>
+      <button class="modal-close" onclick="fecharModalEnvio()">✕</button>
+    </div>
+
+    <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.22);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;line-height:1.6;">
+      <div style="display:flex;justify-content:space-between;">
+        <span style="color:var(--muted)">Orçamento:</span>
+        <strong id="modal-envio-num" style="color:var(--gold-light)">#0001</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <span style="color:var(--muted)">Cliente:</span>
+        <strong id="modal-envio-cliente" style="color:#fff">-</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <span style="color:var(--muted)">Valor Total:</span>
+        <strong id="modal-envio-total" style="color:#4ade80">-</strong>
+      </div>
+    </div>
+
+    <p style="font-size:12.5px;color:#cbd5e1;margin-bottom:12px;line-height:1.4;">
+      Escolha como deseja enviar ao cliente no WhatsApp:
+    </p>
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button class="btn btn-green btn-full" id="btn-modal-whats-msg" style="font-size:14px;padding:13px 14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        💬 1. Enviar Mensagem no WhatsApp (com Links de Assinatura & PDF)
+      </button>
+
+      <button class="btn btn-gold btn-full" id="btn-modal-share-file" style="font-size:14px;padding:13px 14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        📄 2. Compartilhar Arquivo PDF no WhatsApp
+      </button>
+
+      <button class="btn btn-sec btn-full" id="btn-modal-baixar-pdf" style="font-size:12.5px;padding:10px;display:flex;align-items:center;justify-content:center;gap:6px;">
+        📥 Baixar Cópia do Arquivo PDF
+      </button>
+    </div>
+
+    <div style="text-align:center;margin-top:14px;">
+      <button class="btn btn-sec btn-sm" onclick="fecharModalEnvio()" style="min-width:90px;font-size:12px;">Concluído</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

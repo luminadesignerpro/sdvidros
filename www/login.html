@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SD Vidros – Acesso ao Sistema</title>
+  <meta name="description" content="Sistema de Gestão SD Vidros – Orçamentos, Clientes e Contratos. Itaitinga - CE.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #C9A84C;
+      --gold-light: #E8D27A;
+      --gold-dim: #a07828;
+      --bg: #07070b;
+      --card: #101018;
+      --border: rgba(201,168,76,0.22);
+      --text: #f0ece4;
+      --muted: #6a6275;
+      --font: 'Outfit', -apple-system, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: hidden;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 25% 15%, rgba(201,168,76,0.09) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 75% 85%, rgba(201,168,76,0.06) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .particles { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,168,76,0.5), transparent 70%);
+      animation: rise linear infinite;
+    }
+    @keyframes rise {
+      0% { transform: translateY(110vh) scale(0); opacity: 0; }
+      8% { opacity: 1; }
+      88% { opacity: 0.4; }
+      100% { transform: translateY(-10vh) scale(1.4); opacity: 0; }
+    }
+    .login-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 38px 30px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.75), 0 0 0 1px rgba(201,168,76,0.08), inset 0 1px 0 rgba(255,255,255,0.04);
+      position: relative;
+      animation: appear 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .login-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 10%; right: 10%;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, var(--gold-light), var(--gold), transparent);
+      border-radius: 999px;
+    }
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(36px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .logo-area { text-align: center; margin-bottom: 22px; }
+    .logo-img-wrap {
+      width: 118px; height: 118px;
+      border-radius: 24px;
+      margin: 0 auto 14px;
+      border: 2.5px solid var(--gold);
+      box-shadow: 0 0 35px rgba(201,168,76,0.35), inset 0 0 15px rgba(0,0,0,0.5);
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      background: #000;
+      animation: glowing 3.5s ease-in-out infinite;
+    }
+    @keyframes glowing {
+      0%, 100% { box-shadow: 0 0 35px rgba(201,168,76,0.35); }
+      50% { box-shadow: 0 0 60px rgba(201,168,76,0.55); }
+    }
+    .logo-img-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .brand-name {
+      font-size: 27px; font-weight: 900;
+      background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 55%, var(--gold-dim) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      letter-spacing: 0.1em;
+    }
+    .brand-sub { font-size: 10.5px; color: var(--muted); font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; margin-top: 4px; }
+    .gold-divider {
+      width: 44px; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 10px auto 14px;
+    }
+    .form-title { font-size: 13.5px; font-weight: 500; color: rgba(240,236,228,0.7); text-align: center; margin-bottom: 22px; }
+
+    /* CAMPOS COM ÍCONES */
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 10.5px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 7px; }
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      width: 18px;
+      height: 18px;
+      stroke: var(--muted);
+      pointer-events: none;
+      transition: stroke 0.2s;
+    }
+    .input-wrap input {
+      width: 100%; padding: 14px 16px 14px 44px;
+      background: #0a0a13; border: 1.5px solid rgba(201,168,76,0.16);
+      border-radius: 13px; font-size: 14.5px; font-family: var(--font); color: var(--text); transition: all 0.2s;
+    }
+    .input-wrap input::placeholder { color: #3c384e; }
+    .input-wrap input:focus {
+      outline: none; border-color: var(--gold);
+      background: #0d0d18; box-shadow: 0 0 0 3.5px rgba(201,168,76,0.11);
+    }
+    .input-wrap input:focus ~ .input-icon,
+    .input-wrap input:focus + .input-icon {
+      stroke: var(--gold);
+    }
+
+    /* ESQUECI SENHA */
+    .forgot-link-area {
+      display: flex;
+      justify-content: flex-end;
+      margin: -4px 0 20px;
+    }
+    .forgot-link {
+      font-size: 12px;
+      color: var(--gold-light);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0.85;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .forgot-link:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    /* BOTÃO PRINCIPAL ENTRAR NO SISTEMA */
+    .btn-login {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 60%, var(--gold-dim) 100%);
+      color: #1a0e00; font-size: 15px; font-weight: 800; font-family: var(--font);
+      border: none; border-radius: 14px; cursor: pointer; transition: all 0.2s;
+      letter-spacing: 0.03em; position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-login::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%);
+      border-radius: 14px 14px 0 0;
+    }
+    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(201,168,76,0.42); }
+    .btn-login:active { transform: scale(0.98); }
+    .btn-login:disabled { opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* BOTÃO DE BIOMETRIA POSICIONADO ABAIXO (EXATAMENTE COMO NA SEGUNDA IMAGEM) */
+    .btn-bio {
+      width: 100%;
+      padding: 13px 16px;
+      margin-top: 14px;
+      background: rgba(14, 15, 23, 0.9);
+      border: 1.2px dashed rgba(201, 168, 76, 0.5);
+      border-radius: 14px;
+      color: #f1f5f9;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: var(--font);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    .btn-bio:hover {
+      background: rgba(20, 22, 34, 0.95);
+      border-color: var(--gold);
+      border-style: solid;
+      box-shadow: 0 0 25px rgba(201, 168, 76, 0.25);
+      transform: translateY(-2px);
+    }
+    .btn-bio:active { transform: scale(0.98); }
+    .btn-bio:disabled { opacity: 0.65; cursor: wait; transform: none; }
+    .bio-icon-wrap {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(201, 168, 76, 0.12);
+    }
+    .bio-svg {
+      stroke: var(--gold-light);
+      width: 17px;
+      height: 17px;
+    }
+
+    .msg { border-radius: 11px; padding: 11px 16px; font-size: 13px; font-weight: 700; margin-top: 14px; text-align: center; }
+    .msg.err { background: rgba(224,64,64,0.12); border: 1px solid rgba(224,64,64,0.22); color: #ff7878; }
+    .msg.info { background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.25); color: var(--gold-light); }
+    .msg.suc { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; }
+
+    .footer-area { text-align: center; margin-top: 26px; }
+    .footer-area p { font-size: 11.5px; color: rgba(148, 163, 184, 0.6); letter-spacing: 0.04em; }
+    .hint { font-size: 10.5px; color: rgba(106,98,117,0.45); margin-top: 6px; }
+    @media(max-width: 480px) { .login-box { padding: 30px 20px; border-radius: 22px; } .brand-name { font-size: 25px; } }
+  </style>
+</head>
+<body>
+<div class="particles" id="particles"></div>
+<div class="login-box">
+  <div class="logo-area">
+    <div class="logo-img-wrap">
+      <img src="logo.jpg" alt="SD Vidros Logo">
+    </div>
+    <div class="brand-name">SD VIDROS</div>
+    <div class="brand-sub">SISTEMA DE GESTÃO & ORÇAMENTOS</div>
+    <div class="gold-divider"></div>
+  </div>
+
+  <div class="form-title">Entre com suas credenciais</div>
+
+  <!-- USUÁRIO -->
+  <div class="field">
+    <label>USUÁRIO</label>
+    <div class="input-wrap">
+      <input id="l-user" type="text" placeholder="seu usuário (ex: admin)" autocapitalize="none" autocomplete="username">
+      <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </svg>
+    </div>
+  </div>
+
+  <!-- SENHA -->
+  <div class="field">
+    <label>SENHA</label>
+    <div class="input-wrap">
+      <input id="l-senha" type="password" placeholder="••••••••" autocomplete="current-password">
+      <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ESQUECI MINHA SENHA -->
+  <div class="forgot-link-area">
+    <span class="forgot-link" onclick="esqueciSenha()">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m21 2-2 2m-1.5 1.5L14 9"></path>
+        <path d="M15.5 7.5 18 10"></path>
+        <path d="m9 15-4.5 4.5a2.12 2.12 0 1 1-3-3L6 12"></path>
+        <circle cx="15.5" cy="8.5" r="5.5"></circle>
+      </svg>
+      Esqueci meu usuário ou senha
+    </span>
+  </div>
+
+  <!-- BOTÃO 1: ENTRAR NO SISTEMA COM SETA -->
+  <button class="btn-login" id="btn-login" onclick="fazerLogin()">
+    <span>Entrar no Sistema</span>
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+      <polyline points="12 5 19 12 12 19"></polyline>
+    </svg>
+  </button>
+
+  <!-- BOTÃO 2: ACESSAR COM BIOMETRIA / DIGITAL (ABAIXO DO ENTRAR) -->
+  <button class="btn-bio" id="btn-biometria" type="button" onclick="loginComBiometria()">
+    <div class="bio-icon-wrap">
+      <svg class="bio-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"></path>
+        <path d="M14 13.12c0 2.38 0 6.38-1 8.88"></path>
+        <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"></path>
+        <path d="M2 12a10 10 0 0 1 18-6"></path>
+        <path d="M2 16h.01"></path>
+        <path d="M21.8 16c.2-2 .131-5.354 0-6"></path>
+        <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"></path>
+        <path d="M8.65 22c.21-.66.45-1.32.57-2"></path>
+        <path d="M9 6.8a6 6 0 0 1 9 5.2v2"></path>
+      </svg>
+    </div>
+    <span id="txt-btn-bio">Acessar com Biometria / Digital</span>
+  </button>
+
+  <div id="login-msg"></div>
+
+  <div class="footer-area">
+    <p>SD Vidros • Sistema Seguro</p>
+    <p class="hint">Primeiro acesso: usuário <strong>admin</strong> / senha <strong>admin123</strong></p>
+  </div>
+</div>
+
+<script>
+  // Se já tiver sessão persistida em localStorage ou sessionStorage, entra direto
+  (function() {
+    const savedToken = sessionStorage.getItem('sdv_token') || localStorage.getItem('sdv_token');
+    if (savedToken) {
+      if (!sessionStorage.getItem('sdv_token')) {
+        sessionStorage.setItem('sdv_token', savedToken);
+        const u = localStorage.getItem('sdv_user');
+        if (u) sessionStorage.setItem('sdv_user', u);
+      }
+      window.location.replace('index.html');
+    }
+  })();
+
+  const pContainer = document.getElementById('particles');
+  for (let i = 0; i < 10; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = 20 + Math.random() * 100;
+    p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;animation-duration:${9+Math.random()*14}s;animation-delay:${Math.random()*12}s;`;
+    pContainer.appendChild(p);
+  }
+
+  function getUsers() {
+    try {
+      const u = localStorage.getItem('sdv_users');
+      if (!u) {
+        const def = [{ id: 1, username: 'admin', nome: 'Administrador', senha: 'admin123', ativo: true, role: 'admin' }];
+        localStorage.setItem('sdv_users', JSON.stringify(def));
+        return def;
+      }
+      return JSON.parse(u);
+    } catch { return []; }
+  }
+
+  document.getElementById('l-user').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('l-senha').focus(); });
+  document.getElementById('l-senha').addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(); });
+
+  function mostrarMsg(texto, tipo = 'err') {
+    const msg = document.getElementById('login-msg');
+    if (!msg) return;
+    msg.className = 'msg ' + tipo;
+    msg.textContent = texto;
+    if (tipo !== 'info') {
+      setTimeout(() => { msg.className = ''; msg.textContent = ''; }, 4500);
+    }
+  }
+
+  function esqueciSenha() {
+    alert('🔑 RECUPERAÇÃO DE ACESSO — SD VIDROS\n\nCredenciais padrão:\n• Usuário: admin\n• Senha: admin123\n\nOu entre em contato via WhatsApp com o suporte:\n(85) 99611-9824');
+  }
+
+  function concluirLogin(user, viaBiometria = false) {
+    const token = btoa(user.username + ':' + Date.now());
+    sessionStorage.setItem('sdv_token', token);
+    sessionStorage.setItem('sdv_user', JSON.stringify({ id: user.id, username: user.username, nome: user.nome, role: user.role || 'user' }));
+
+    // Sempre persiste localmente para permitir biometria e não deslogar
+    localStorage.setItem('sdv_token', token);
+    localStorage.setItem('sdv_user', JSON.stringify({ id: user.id, username: user.username, nome: user.nome, role: user.role || 'user' }));
+
+    window.location.replace('index.html');
+  }
+
+  async function ativarBiometriaParaUsuario(user) {
+    try {
+      localStorage.setItem('sdv_bio_user', JSON.stringify({ id: user.id, username: user.username, nome: user.nome }));
+      localStorage.setItem('sdv_bio_enabled', 'true');
+
+      if (window.PublicKeyCredential && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
+        const disponivel = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+        if (disponivel) {
+          const challenge = new Uint8Array(32);
+          window.crypto.getRandomValues(challenge);
+          const userId = new Uint8Array(16);
+          window.crypto.getRandomValues(userId);
+
+          const createOptions = {
+            publicKey: {
+              challenge: challenge,
+              rp: { name: 'SD Vidros', id: window.location.hostname },
+              user: {
+                id: userId,
+                name: user.username,
+                displayName: user.nome || user.username
+              },
+              pubKeyCredParams: [
+                { alg: -7, type: 'public-key' },
+                { alg: -257, type: 'public-key' }
+              ],
+              authenticatorSelection: {
+                authenticatorAttachment: 'platform',
+                userVerification: 'required',
+                requireResidentKey: false
+              },
+              timeout: 60000,
+              attestation: 'none'
+            }
+          };
+          const cred = await navigator.credentials.create(createOptions);
+          if (cred && cred.rawId) {
+            const rawB64 = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
+            localStorage.setItem('sdv_bio_cred_id', rawB64);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Registro de biometria WebAuthn:', e);
+    }
+  }
+
+  async function loginComBiometria() {
+    const btnBio = document.getElementById('btn-biometria');
+    const txtBio = document.getElementById('txt-btn-bio');
+
+    if (btnBio) btnBio.disabled = true;
+    if (txtBio) txtBio.textContent = 'Toque no sensor biométrico...';
+
+    const users = getUsers();
+    const bioUserRaw = localStorage.getItem('sdv_bio_user');
+
+    // 1. Tenta WebAuthn nativo do aparelho (Android Fingerprint / Face ID / Windows Hello)
+    if (window.PublicKeyCredential) {
+      try {
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+
+        const credIdRaw = localStorage.getItem('sdv_bio_cred_id');
+        const allowList = credIdRaw ? [{
+          id: Uint8Array.from(atob(credIdRaw), c => c.charCodeAt(0)),
+          type: 'public-key'
+        }] : [];
+
+        const getOptions = {
+          publicKey: {
+            challenge: challenge,
+            timeout: 60000,
+            userVerification: 'required',
+            rpId: window.location.hostname
+          }
+        };
+        if (allowList.length) getOptions.publicKey.allowCredentials = allowList;
+
+        const assertion = await navigator.credentials.get(getOptions);
+        if (assertion) {
+          let user = null;
+          if (bioUserRaw) {
+            try {
+              const uObj = JSON.parse(bioUserRaw);
+              user = users.find(u => u.username === uObj.username && u.ativo);
+            } catch (_) {}
+          }
+          if (!user) {
+            user = users.find(u => u.username === 'admin' && u.ativo) || users[0];
+          }
+          if (user) {
+            mostrarMsg('✅ Biometria confirmada! Entrando...', 'suc');
+            setTimeout(() => concluirLogin(user, true), 300);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Interação WebAuthn:', err);
+        if (btnBio) btnBio.disabled = false;
+        if (txtBio) txtBio.textContent = 'Acessar com Biometria / Digital';
+
+        if (err.name === 'NotAllowedError') {
+          mostrarMsg('Biometria cancelada. Tente novamente ou use a senha.', 'err');
+          return;
+        }
+      }
+    }
+
+    // 2. Se a biometria já foi ativada neste dispositivo para um usuário
+    if (bioUserRaw) {
+      try {
+        const uObj = JSON.parse(bioUserRaw);
+        const user = users.find(u => u.username === uObj.username && u.ativo);
+        if (user) {
+          mostrarMsg('✅ Acesso biométrico autorizado! Entrando...', 'suc');
+          setTimeout(() => concluirLogin(user, true), 300);
+          return;
+        }
+      } catch (_) {}
+    }
+
+    // 3. Primeira vez ativando biometria
+    if (btnBio) btnBio.disabled = false;
+    if (txtBio) txtBio.textContent = 'Acessar com Biometria / Digital';
+    mostrarMsg('Entre com usuário e senha uma vez para ativar a Biometria neste aparelho.', 'info');
+    const uInp = document.getElementById('l-user');
+    if (uInp && !uInp.value) uInp.focus();
+  }
+
+  function fazerLogin() {
+    const username = document.getElementById('l-user').value.trim().toLowerCase();
+    const senha = document.getElementById('l-senha').value;
+    const btn = document.getElementById('btn-login');
+    btn.disabled = true; btn.textContent = 'Verificando...';
+    setTimeout(async () => {
+      const users = getUsers();
+      const user = users.find(u => u.username === username && u.senha === senha && u.ativo);
+      if (user) {
+        await ativarBiometriaParaUsuario(user);
+        concluirLogin(user, false);
+      } else {
+        mostrarMsg('❌ Usuário ou senha incorretos.', 'err');
+        btn.disabled = false; btn.textContent = 'Entrar no Sistema';
+      }
+    }, 350);
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('sdv_bio_enabled') === 'true' || localStorage.getItem('sdv_bio_user')) {
+      const btnBio = document.getElementById('btn-biometria');
+      if (btnBio) {
+        btnBio.style.borderColor = 'rgba(201, 168, 76, 0.8)';
+        btnBio.style.boxShadow = '0 0 20px rgba(201, 168, 76, 0.2)';
+      }
+    }
+  });
+</script>
+</body>
+</html>

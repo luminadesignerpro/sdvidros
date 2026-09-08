@@ -474,9 +474,80 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
 }
 
 module.exports = async (req, res) => {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
+  if (req.method !== 'POST' && req.method !== 'GET') {
+    return res.status(405).json({ error: 'Método não permitido' });
+  }
   try {
-    const dados = req.body || {};
+    let dados = req.body || {};
+
+    if (req.method === 'GET') {
+      if (req.query && req.query.d) {
+        try {
+          const raw = decodeURIComponent(req.query.d);
+          const jsonStr = Buffer.from(raw, 'base64').toString('utf-8');
+          const p = JSON.parse(jsonStr);
+
+          let bNome = (p.b || p.bairro || '').trim();
+          let cNome = (p.cidade || '').trim();
+          if (bNome.includes(',')) {
+            const parts = bNome.split(',').map(s => s.trim());
+            bNome = parts[0] || '';
+            cNome = parts[1] || '';
+          } else if (bNome.includes('-')) {
+            const parts = bNome.split('-').map(s => s.trim());
+            bNome = parts[0] || '';
+            cNome = parts[1] || '';
+          }
+
+          let endCompleto = (p.e || p.endereco || '').trim();
+          if (p.num && !endCompleto.includes(p.num)) {
+            endCompleto = endCompleto ? `${endCompleto}, Nº ${p.num}` : `Nº ${p.num}`;
+          }
+
+          dados = {
+            numero: p.n || p.numero || '0001',
+            dataStr: p.d || p.data || new Date().toLocaleDateString('pt-BR'),
+            nome: p.c || p.nome || '',
+            cnpj: p.cnpj || '',
+            tel: p.t || p.tel || '',
+            endereco: endCompleto,
+            bairro: bNome,
+            cidade: cNome,
+            apto: p.apto || '',
+            resp: p.resp || '',
+            itens: p.itens || [],
+            total: p.v || p.total || '',
+            forma: p.f || p.forma || '',
+            obs: p.obs || '',
+            prazo: p.p || p.prazo || '',
+            garantia: p.g || p.garantia || ''
+          };
+        } catch (e) {
+          return res.status(400).json({ error: 'Parâmetro de orçamento inválido' });
+        }
+      } else if (req.query && req.query.id) {
+        try {
+          const { getSupabaseClient } = require('./_supabase');
+          const supabase = getSupabaseClient();
+          if (supabase) {
+            const { data, error } = await supabase.from('contratos').select('*').eq('id', req.query.id).single();
+            if (!error && data) {
+              if (data.dados) {
+                dados = data.dados;
+              } else {
+                dados = {
+                  numero: data.numero_os || '0001',
+                  nome: data.cliente_nome || '',
+                  tel: data.cliente_tel || '',
+                  total: data.valor_total || '',
+                  obs: data.texto || ''
+                };
+              }
+            }
+          }
+        } catch (e) {}
+      }
+    }
 
     const fetchLogo = async () => {
       try {

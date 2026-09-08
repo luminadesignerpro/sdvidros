@@ -573,6 +573,16 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
       mostrarErro(msg);
     });
 
+  function baixarPdfAtual() {
+    if (dParam) {
+      window.open('/api/gerar-pdf-orcamento?d=' + encodeURIComponent(dParam), '_blank');
+    } else if (contratoId) {
+      window.open('/api/gerar-pdf-orcamento?id=' + encodeURIComponent(contratoId), '_blank');
+    } else {
+      alert('Informações do orçamento não encontradas.');
+    }
+  }
+
   function iniciarCanvas(numeroOs, clienteNome) {
     const canvas = document.getElementById('signature-pad');
     const ctx = canvas.getContext('2d');
