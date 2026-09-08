@@ -356,9 +356,31 @@
 
 <script>
 (function () {
-  const params = new URLSearchParams(window.location.search);
-  const contratoId = params.get('id');
-  const dParam = params.get('d') || params.get('data');
+  function extractParam(key) {
+    try {
+      const s = new URLSearchParams(window.location.search).get(key);
+      if (s) return s;
+    } catch (_) {}
+    try {
+      if (window.location.hash) {
+        const h = window.location.hash.replace(/^#\/?/, '');
+        const qIdx = h.indexOf('?');
+        const qs = qIdx !== -1 ? h.slice(qIdx + 1) : (h.includes('=') ? h : '');
+        if (qs) {
+          const val = new URLSearchParams(qs).get(key);
+          if (val) return val;
+        }
+      }
+    } catch (_) {}
+    try {
+      const match = window.location.href.match(new RegExp('[?&#]' + key + '=([^&#]*)'));
+      if (match && match[1]) return decodeURIComponent(match[1]);
+    } catch (_) {}
+    return null;
+  }
+
+  const contratoId = extractParam('id');
+  const dParam = extractParam('d') || extractParam('data');
 
   const telaLoading = document.getElementById('tela-loading');
   const telaErro = document.getElementById('tela-erro');
@@ -369,10 +391,10 @@
   let contratoCache = null;
 
   function mostrarErro(msg) {
-    telaLoading.classList.add('hidden');
-    telaForm.classList.add('hidden');
-    erroTexto.textContent = msg;
-    telaErro.classList.remove('hidden');
+    if (telaLoading) telaLoading.classList.add('hidden');
+    if (telaForm) telaForm.classList.add('hidden');
+    if (erroTexto) erroTexto.textContent = msg;
+    if (telaErro) telaErro.classList.remove('hidden');
   }
 
   window.irParaAssinatura = function() {
@@ -385,52 +407,63 @@
   };
 
   window.baixarPdfAtual = function() {
-    if (!contratoCache || !contratoCache.texto) {
-      alert('Contrato não carregado.');
-      return;
+    if (dParam) {
+      window.open('/api/gerar-pdf-orcamento?d=' + encodeURIComponent(dParam), '_blank');
+    } else if (contratoId) {
+      window.open('/api/gerar-pdf-orcamento?id=' + encodeURIComponent(contratoId), '_blank');
+    } else if (contratoCache && contratoCache.texto) {
+      fetch('/api/gerar-pdf-contrato-texto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          texto: contratoCache.texto,
+          numero: contratoCache.numero_os || '0001'
+        })
+      })
+        .then(r => { if (!r.ok) throw new Error(); return r.blob(); })
+        .then(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'Contrato-' + (contratoCache.numero_os || '0001').replace('#', '') + '.pdf';
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 2000);
+        })
+        .catch(() => alert('Erro ao gerar PDF do contrato.'));
+    } else {
+      alert('Informações do orçamento não encontradas.');
     }
-    fetch('/api/gerar-pdf-contrato-texto', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        texto: contratoCache.texto,
-        numero: contratoCache.numero_os || '0001'
-      })
-    })
-      .then(r => {
-        if (!r.ok) throw new Error('Erro ao baixar PDF.');
-        return r.blob();
-      })
-      .then(blob => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'Contrato-' + (contratoCache.numero_os || '0001').replace('#', '') + '.pdf';
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 2000);
-      })
-      .catch(err => alert(err.message || 'Erro ao gerar PDF.'));
   };
 
   function renderizarProposta(data) {
     contratoCache = data;
 
     if (data.assinado) {
-      telaLoading.classList.add('hidden');
-      telaSucesso.classList.remove('hidden');
-      telaSucesso.querySelector('#msg-sucesso').innerHTML =
-        'Esta proposta/contrato já foi <strong>aprovada e assinada</strong> por <strong>' + (data.assinante_nome || '') + '</strong>' +
-        (data.assinado_em ? ' em ' + new Date(data.assinado_em).toLocaleDateString('pt-BR') : '') + '.';
+      if (telaLoading) telaLoading.classList.add('hidden');
+      if (telaSucesso) {
+        telaSucesso.classList.remove('hidden');
+        const msgSuc = telaSucesso.querySelector('#msg-sucesso');
+        if (msgSuc) {
+          msgSuc.innerHTML =
+            'Esta proposta/contrato já foi <strong>aprovada e assinada</strong> por <strong>' + (data.assinante_nome || '') + '</strong>' +
+            (data.assinado_em ? ' em ' + new Date(data.assinado_em).toLocaleDateString('pt-BR') : '') + '.';
+        }
+      }
       return;
     }
 
     const numOs = data.numero_os || 'Proposta';
     const cliNome = data.cliente_nome || 'Cliente';
 
-    document.getElementById('display-numero').textContent = 'Orçamento ' + numOs;
-    document.getElementById('display-cliente').textContent = cliNome;
-    document.getElementById('subtitulo').textContent = 'Ordem de Serviço ' + numOs;
-    document.getElementById('contrato-texto').textContent = data.texto;
+    const setTxt = (id, txt) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = txt;
+    };
+
+    setTxt('display-numero', 'Orçamento ' + numOs);
+    setTxt('display-cliente', cliNome);
+    setTxt('subtitulo', 'Ordem de Serviço ' + numOs);
+    setTxt('contrato-texto', data.texto || '');
 
     // Link de ajuste via WhatsApp pré-configurado
     const btnAjustar = document.getElementById('btn-ajustar-zap');
@@ -439,22 +472,47 @@
       btnAjustar.href = 'https://wa.me/5585996119824?text=' + encodeURIComponent(zapMsg);
     }
 
-    telaLoading.classList.add('hidden');
-    telaForm.classList.remove('hidden');
+    if (telaLoading) telaLoading.classList.add('hidden');
+    if (telaForm) telaForm.classList.remove('hidden');
 
     requestAnimationFrame(() => iniciarCanvas(numOs, cliNome));
   }
 
   function montarTextoContrato(d) {
+    d = d || {};
     const hoje = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
     const endCliente = [d.end || d.e, d.num, d.apto, d.bairro || d.b].filter(Boolean).join(', ');
-    const itensStr = (d.itens || []).map((it, i) => {
-      let detalhe = '';
-      if (it.alt && it.larg) detalhe += ` [Dimensões: ${it.alt}m x ${it.larg}m = ${it.m2 || ''}]`;
-      if (it.cor) detalhe += ` [Cor: ${it.cor}]`;
-      if (it.bizt) detalhe += ` [Lapidação/Bizotê: ${it.bizt}]`;
-      return `  ${i + 1}. ${it.desc || ''}${detalhe} - Qtd: ${it.qtd || 1} - Total: ${it.total || ''}`;
-    }).join('\n') || '  (itens não especificados)';
+
+    let itensRaw = Array.isArray(d.itens) ? d.itens : (Array.isArray(d.i) ? d.i : []);
+    const itensStr = itensRaw.map((it, i) => {
+      if (Array.isArray(it)) {
+        // Formato compacto [desc, qtd, larg, alt, m2, v_unit, total, cor, bizt]
+        const desc = it[0] || '';
+        const qtd = it[1] || 1;
+        const larg = it[2] || '';
+        const alt = it[3] || '';
+        const m2 = it[4] || '';
+        const tot = it[6] || it[it.length - 1] || '';
+        let detalhe = '';
+        if (alt && larg) detalhe += ` [Dimensões: ${alt}m x ${larg}m${m2 ? ' = ' + m2 : ''}]`;
+        return `  ${i + 1}. ${desc}${detalhe} - Qtd: ${qtd} - Total: ${tot}`;
+      } else if (it && typeof it === 'object') {
+        const desc = it.d || it.desc || '';
+        const qtd = it.q || it.qtd || 1;
+        const larg = it.l || it.larg || '';
+        const alt = it.a || it.alt || '';
+        const m2 = it.m || it.m2 || '';
+        const tot = it.t || it.total || '';
+        const cor = it.c || it.cor || '';
+        const bizt = it.z || it.bizt || '';
+        let detalhe = '';
+        if (alt && larg) detalhe += ` [Dimensões: ${alt}m x ${larg}m${m2 ? ' = ' + m2 : ''}]`;
+        if (cor) detalhe += ` [Cor: ${cor}]`;
+        if (bizt) detalhe += ` [Lapidação/Bizotê: ${bizt}]`;
+        return `  ${i + 1}. ${desc}${detalhe} - Qtd: ${qtd} - Total: ${tot}`;
+      }
+      return `  ${i + 1}. ${String(it)}`;
+    }).join('\n') || '  (itens conforme orçamento aprovado)';
 
     return `CONTRATO DE PRESTAÇÃO DE SERVIÇOS
 N° ${d.numero || d.n || '0001'}
@@ -540,16 +598,53 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
     }
     s = s.replace(/ /g, '+').replace(/-/g, '+').replace(/_/g, '/');
     while (s.length % 4 !== 0) s += '=';
+
+    let jsonParsed = null;
+
+    // Tentativa 1: UTF-8 moderno via TextDecoder
     try {
-      const raw = atob(s);
-      return JSON.parse(decodeURIComponent(escape(raw)));
-    } catch (e1) {
-      try {
-        return JSON.parse(atob(s));
-      } catch (e2) {
-        return null;
+      const binary = atob(s);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
       }
+      jsonParsed = JSON.parse(new TextDecoder().decode(bytes));
+    } catch (_) {}
+
+    // Tentativa 2: decodeURIComponent(escape(atob(s)))
+    if (!jsonParsed) {
+      try {
+        jsonParsed = JSON.parse(decodeURIComponent(escape(atob(s))));
+      } catch (_) {}
     }
+
+    // Tentativa 3: atob direto
+    if (!jsonParsed) {
+      try {
+        jsonParsed = JSON.parse(atob(s));
+      } catch (_) {}
+    }
+
+    // Tentativa 4: Recuperação de payload parcial caso o link tenha sido truncado no WhatsApp
+    if (!jsonParsed) {
+      try {
+        const raw = atob(s);
+        const res = {};
+        const nM = raw.match(/"n"\s*:\s*"([^"]+)"/);
+        if (nM) res.n = nM[1];
+        const cM = raw.match(/"c"\s*:\s*"([^"]+)"/);
+        if (cM) res.c = cM[1];
+        const tM = raw.match(/"t"\s*:\s*"([^"]+)"/);
+        if (tM) res.t = tM[1];
+        const vM = raw.match(/"v"\s*:\s*"([^"]+)"/);
+        if (vM) res.v = vM[1];
+        const fM = raw.match(/"f"\s*:\s*"([^"]+)"/);
+        if (fM) res.f = fM[1];
+        if (res.n || res.c || res.v) jsonParsed = res;
+      } catch (_) {}
+    }
+
+    return jsonParsed;
   }
 
   if (dParam) {
@@ -593,16 +688,6 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
       }
       mostrarErro(msg);
     });
-
-  function baixarPdfAtual() {
-    if (dParam) {
-      window.open('/api/gerar-pdf-orcamento?d=' + encodeURIComponent(dParam), '_blank');
-    } else if (contratoId) {
-      window.open('/api/gerar-pdf-orcamento?id=' + encodeURIComponent(contratoId), '_blank');
-    } else {
-      alert('Informações do orçamento não encontradas.');
-    }
-  }
 
   function iniciarCanvas(numeroOs, clienteNome) {
     const canvas = document.getElementById('signature-pad');

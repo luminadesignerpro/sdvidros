@@ -508,6 +508,40 @@ module.exports = async (req, res) => {
             endCompleto = endCompleto ? `${endCompleto}, Nº ${p.num}` : `Nº ${p.num}`;
           }
 
+          let listaItens = [];
+          if (Array.isArray(p.itens) && p.itens.length) {
+            listaItens = p.itens;
+          } else if (Array.isArray(p.i) && p.i.length) {
+            listaItens = p.i.map(it => {
+              if (Array.isArray(it)) {
+                return {
+                  desc: it[0] || '',
+                  qtd: it[1] || 1,
+                  larg: it[2] || '',
+                  alt: it[3] || '',
+                  m2: it[4] || '',
+                  v_unit: it[5] || '',
+                  total: it[6] || '',
+                  cor: it[7] || '',
+                  bizt: it[8] || ''
+                };
+              } else if (it && typeof it === 'object') {
+                return {
+                  desc: it.d || it.desc || '',
+                  qtd: it.q || it.qtd || 1,
+                  larg: it.l || it.larg || '',
+                  alt: it.a || it.alt || '',
+                  m2: it.m || it.m2 || '',
+                  v_unit: it.u || it.v_unit || '',
+                  total: it.t || it.total || '',
+                  cor: it.c || it.cor || '',
+                  bizt: it.z || it.bizt || ''
+                };
+              }
+              return { desc: String(it || '') };
+            });
+          }
+
           dados = {
             numero: p.n || p.numero || '0001',
             dataStr: p.d || p.data || new Date().toLocaleDateString('pt-BR'),
@@ -519,7 +553,7 @@ module.exports = async (req, res) => {
             cidade: cNome,
             apto: p.apto || '',
             resp: p.resp || '',
-            itens: p.itens || [],
+            itens: listaItens,
             total: p.v || p.total || '',
             forma: p.f || p.forma || '',
             obs: p.obs || '',
@@ -531,8 +565,8 @@ module.exports = async (req, res) => {
         }
       } else if (req.query && req.query.id) {
         try {
-          const { getSupabaseClient } = require('./_supabase');
-          const supabase = getSupabaseClient();
+          const { getClient } = require('./_supabase');
+          const supabase = getClient();
           if (supabase) {
             const { data, error } = await supabase.from('contratos').select('*').eq('id', req.query.id).single();
             if (!error && data) {
