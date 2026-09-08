@@ -445,15 +445,106 @@
     requestAnimationFrame(() => iniciarCanvas(numOs, cliNome));
   }
 
+  function montarTextoContrato(d) {
+    const hoje = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+    const endCliente = [d.end || d.e, d.num, d.apto, d.bairro || d.b].filter(Boolean).join(', ');
+    const itensStr = (d.itens || []).map((it, i) => {
+      let detalhe = '';
+      if (it.alt && it.larg) detalhe += ` [Dimensões: ${it.alt}m x ${it.larg}m = ${it.m2 || ''}]`;
+      if (it.cor) detalhe += ` [Cor: ${it.cor}]`;
+      if (it.bizt) detalhe += ` [Lapidação/Bizotê: ${it.bizt}]`;
+      return `  ${i + 1}. ${it.desc || ''}${detalhe} - Qtd: ${it.qtd || 1} - Total: ${it.total || ''}`;
+    }).join('\n') || '  (itens não especificados)';
+
+    return `CONTRATO DE PRESTAÇÃO DE SERVIÇOS
+N° ${d.numero || d.n || '0001'}
+Itaitinga - CE, ${hoje}
+
+══════════════════════════════════════════════════════════════
+
+CONTRATADA:
+Razão Social.....: SD Vidros
+WhatsApp.........: (85) 99611-9824
+Instagram........: @sdvidros
+Cidade...........: Itaitinga - CE
+
+CONTRATANTE (CLIENTE):
+Nome.............: ${d.nome || d.c || 'Não informado'}
+${(d.cnpj) ? 'CPF/CNPJ.........: ' + d.cnpj + '\n' : ''}WhatsApp/Tel.....: ${d.tel || d.t || 'Não informado'}
+Endereço.........: ${endCliente || 'Não informado'}
+${(d.resp) ? 'Responsável......: ' + d.resp : ''}
+
+══════════════════════════════════════════════════════════════
+
+CLÁUSULA 1ª – DO OBJETO
+
+A CONTRATADA obriga-se a fornecer e instalar ao CONTRATANTE os seguintes
+serviços de vidraçaria e esquadrias:
+
+${itensStr}
+
+══════════════════════════════════════════════════════════════
+
+CLÁUSULA 2ª – DO VALOR E FORMA DE PAGAMENTO
+
+Valor Total: ${d.total || d.v || 'R$ 0,00'}
+Forma de Pagamento: ${d.forma || d.f || 'À vista'}
+${(d.obs || d.o) ? '\nObservações: ' + (d.obs || d.o) : ''}
+
+A CONTRATANTE efetuará o pagamento conforme a forma descrita acima.
+Chave Pix para pagamento: (85) 99760-2237
+
+══════════════════════════════════════════════════════════════
+
+CLÁUSULA 3ª – DO PRAZO DE ENTREGA E EXECUÇÃO
+
+O prazo para execução e entrega dos serviços é de ${d.prazo || d.p || '15 dias úteis'},
+contados a partir da confirmação do pagamento/sinal e da aprovação de
+todos os detalhes técnicos do projeto.
+
+══════════════════════════════════════════════════════════════
+
+CLÁUSULA 4ª – DA GARANTIA
+
+A CONTRATADA oferece garantia de ${d.garantia || d.g || '1 (um) ano'} contra defeitos de
+fabricação e instalação, excluindo danos causados por mau uso, vandalismo,
+acidentes ou fenômenos naturais.
+
+══════════════════════════════════════════════════════════════
+
+CLÁUSULA 5ª – DAS OBRIGAÇÕES DAS PARTES
+
+5.1 – A CONTRATADA executará os serviços com materiais de alta qualidade e mão de obra especializada;
+5.2 – A CONTRATANTE garantirá o acesso ao local nos dias combinados e efetuará o pagamento acordado.
+
+══════════════════════════════════════════════════════════════
+
+Itaitinga - CE, ${hoje}
+
+
+_________________________________________________
+CONTRATADA: SD Vidros
+WhatsApp: (85) 99611-9824
+
+
+_________________________________________________
+CONTRATANTE: ${d.nome || d.c || '_______________________________'}
+WhatsApp: ${d.tel || d.t || '_________________________________'}`;
+  }
+
   if (dParam) {
     try {
       const jsonStr = decodeURIComponent(escape(atob(dParam)));
       const parsed = JSON.parse(jsonStr);
+      let textoFinal = parsed.x || parsed.texto;
+      if (!textoFinal) {
+        textoFinal = montarTextoContrato(parsed);
+      }
       const data = {
         numero_os: parsed.n || parsed.numero_os || 'Proposta',
         cliente_nome: parsed.c || parsed.cliente_nome || 'Cliente',
         cliente_tel: parsed.t || parsed.cliente_tel || '',
-        texto: parsed.x || parsed.texto || '',
+        texto: textoFinal,
         assinado: false
       };
       renderizarProposta(data);

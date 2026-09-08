@@ -1810,7 +1810,29 @@ async function enviarOrcamentoParaAssinaturaDigital() {
         n: d.numero,
         c: d.nome || '',
         t: d.tel || '',
-        x: textoContrato
+        v: d.total || '',
+        f: d.forma || '',
+        p: d.prazo || '',
+        g: d.garantia || '',
+        d: d.data || '',
+        e: d.end || '',
+        b: d.bairro || '',
+        num: d.num || '',
+        apto: d.apto || '',
+        cnpj: d.cnpj || '',
+        resp: d.resp || '',
+        obs: d.obs || '',
+        itens: (d.itens || []).map(it => ({
+          desc: it.desc,
+          larg: it.larg,
+          alt: it.alt,
+          m2: it.m2,
+          qtd: it.qtd,
+          v_unit: it.v_unit,
+          total: it.total,
+          cor: it.cor,
+          bizt: it.bizt
+        }))
       };
       const jsonStr = unescape(encodeURIComponent(JSON.stringify(payload)));
       return window.location.origin + '/assinar.html?d=' + encodeURIComponent(btoa(jsonStr));
@@ -1842,14 +1864,85 @@ async function enviarOrcamentoParaAssinaturaDigital() {
       linkAssinatura = gerarLinkDireto();
     }
 
-    // 4. Montar link e enviar no WhatsApp com opções de aprovação e assinatura
-    const msg = '*SD VIDROS — PROPOSTA & ASSINATURA DIGITAL* ✍️\n\n'
-      + 'Olá' + (d.nome ? ', ' + d.nome : '') + '! Segue o link com seu orçamento *' + d.numero + '* no valor de *' + d.total + '*:\n\n'
-      + linkAssinatura + '\n\n'
-      + '📄 Toque no link acima para conferir os itens e baixar o PDF.\n'
-      + '✅ Se estiver tudo aprovado, basta assinar com o dedo na tela para autorizar o início dos serviços!';
+    // 4. Gerar o arquivo PDF oficial do Orçamento para enviar JUNTO
+    let bNome = (d.bairro || '').trim();
+    let cNome = '';
+    if (bNome.includes(',')) {
+      const parts = bNome.split(',').map(s => s.trim());
+      bNome = parts[0] || '';
+      cNome = parts[1] || '';
+    } else if (bNome.includes('-')) {
+      const parts = bNome.split('-').map(s => s.trim());
+      bNome = parts[0] || '';
+      cNome = parts[1] || '';
+    }
 
-    abrirWhats(d.tel, msg);
+    let endCompleto = (d.end || '').trim();
+    if (d.num && !endCompleto.includes(d.num)) {
+      endCompleto = endCompleto ? `${endCompleto}, Nº ${d.num}` : `Nº ${d.num}`;
+    }
+
+    const dadosPdf = {
+      numero: d.numero,
+      dataStr: d.data || new Date().toLocaleDateString('pt-BR'),
+      nome: d.nome || '',
+      cnpj: d.cnpj || '',
+      tel: d.tel || '',
+      endereco: endCompleto,
+      bairro: bNome,
+      cidade: cNome,
+      apto: d.apto || '',
+      resp: d.resp || '',
+      itens: d.itens || [],
+      total: d.total || '',
+      forma: d.forma || '',
+      obs: d.obs || '',
+      prazo: d.prazo || '',
+      garantia: d.garantia || ''
+    };
+
+    const blob = await obterPdfOrcamentoBlob(dadosPdf);
+    const fileName = `Orcamento-${(d.numero || '0001').replace('#', '')}.pdf`;
+    const file = new File([blob], fileName, { type: 'application/pdf' });
+
+    // 5. Montar mensagem com o link de assinatura
+    const msg = '*SD VIDROS — PROPOSTA & ASSINATURA DIGITAL* ✍️\n\n'
+      + 'Olá' + (d.nome ? ', ' + d.nome : '') + '! Segue em anexo o PDF com seu orçamento *' + d.numero + '* no valor de *' + d.total + '*:\n\n'
+      + linkAssinatura + '\n\n'
+      + '📄 O PDF detalhado com especificações e valores está em anexo.\n'
+      + '✅ Se estiver tudo aprovado, toque no link acima para assinar com o dedo na tela e autorizar o início dos serviços!';
+
+    // 6. Enviar o arquivo PDF JUNTO via compartilhamento nativo (WhatsApp no celular)
+    let compartilhou = false;
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: `Orçamento ${d.numero} - SD Vidros`,
+          text: msg
+        });
+        compartilhou = true;
+      } catch (e) {
+        if (e.name !== 'AbortError') {
+          console.warn('Compartilhamento nativo com arquivo falhou:', e);
+        } else {
+          compartilhou = true;
+        }
+      }
+    }
+
+    // Se estiver no computador ou o navegador não suportar anexar arquivo no share:
+    if (!compartilhou) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+      abrirWhats(d.tel, msg);
+    }
+
     carregarListaContratos();
     sincronizarStatusContratos();
   } catch (err) {
@@ -2615,28 +2708,75 @@ async function enviarOuBaixarPdfOrcamento(orcObj = null) {
 
     const blob = await obterPdfOrcamentoBlob(dadosPdf);
     const fileName = `Orcamento-${(o.numero || '0001').replace('#', '')}.pdf`;
+    const file = new File([blob], fileName, { type: 'application/pdf' });
+
+    // Link de assinatura digital para acompanhar o PDF
+    const payload = {
+      n: o.numero,
+      c: o.nome || '',
+      t: o.tel || '',
+      v: o.total || '',
+      f: o.forma || '',
+      p: o.prazo || '',
+      g: o.garantia || '',
+      d: o.data || '',
+      e: o.end || '',
+      b: o.bairro || '',
+      num: o.num || '',
+      apto: o.apto || '',
+      cnpj: o.cnpj || '',
+      resp: o.resp || '',
+      obs: o.obs || '',
+      itens: (o.itens || []).map(it => ({
+        desc: it.desc,
+        larg: it.larg,
+        alt: it.alt,
+        m2: it.m2,
+        qtd: it.qtd,
+        v_unit: it.v_unit,
+        total: it.total,
+        cor: it.cor,
+        bizt: it.bizt
+      }))
+    };
+    const jsonStr = unescape(encodeURIComponent(JSON.stringify(payload)));
+    const linkAssinatura = window.location.origin + '/assinar.html?d=' + encodeURIComponent(btoa(jsonStr));
+
+    const msg = '*SD VIDROS — ORÇAMENTO & PROPOSTA COMERCIAL* 📄\n\n'
+      + 'Olá' + (o.nome ? ', ' + o.nome : '') + '! Segue em anexo o PDF com seu orçamento *' + o.numero + '* no valor de *' + o.total + '*:\n\n'
+      + linkAssinatura + '\n\n'
+      + '📄 O arquivo PDF detalhado com especificações e valores está em anexo.\n'
+      + '✍️ Toque no link acima para conferir os detalhes e assinar com o dedo na tela se estiver aprovado!';
 
     // No celular ou navegador com suporte nativo a compartilhamento de arquivo
-    if (navigator.share && navigator.canShare) {
-      const file = new File([blob], fileName, { type: 'application/pdf' });
-      if (navigator.canShare({ files: [file] })) {
+    let compartilhou = false;
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
         await navigator.share({
           files: [file],
-          title: fileName
-        }).catch(e => {
-          if (e.name !== 'AbortError') console.log('Compartilhamento cancelado', e);
+          title: `Orçamento ${o.numero} - SD Vidros`,
+          text: msg
         });
-        return;
+        compartilhou = true;
+      } catch (e) {
+        if (e.name !== 'AbortError') console.log('Compartilhamento cancelado', e);
+        else compartilhou = true;
       }
     }
 
-    // No computador: baixa o PDF diretamente
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    if (!compartilhou) {
+      // No computador: baixa o PDF diretamente
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+      if (o.tel) {
+        abrirWhats(o.tel, msg);
+      }
+    }
   } catch (err) {
     alert(err.message || 'Erro ao gerar PDF do orçamento.');
   } finally {
