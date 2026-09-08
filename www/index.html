@@ -359,7 +359,16 @@
 <!-- AUTH GUARD -->
 <script>
   (function() {
-    if (!sessionStorage.getItem('sdv_token')) { window.location.replace('login.html'); throw new Error('redirect'); }
+    const token = sessionStorage.getItem('sdv_token') || localStorage.getItem('sdv_token');
+    if (!token) {
+      window.location.replace('login.html');
+      throw new Error('redirect');
+    }
+    if (!sessionStorage.getItem('sdv_token') && localStorage.getItem('sdv_token')) {
+      sessionStorage.setItem('sdv_token', localStorage.getItem('sdv_token'));
+      const u = localStorage.getItem('sdv_user');
+      if (u) sessionStorage.setItem('sdv_user', u);
+    }
   })();
 </script>
 
@@ -769,9 +778,15 @@ const PRODUTOS_PADRAO = [
 function sair() {
   sessionStorage.removeItem('sdv_token');
   sessionStorage.removeItem('sdv_user');
+  localStorage.removeItem('sdv_token');
+  localStorage.removeItem('sdv_user');
   window.location.replace('login.html');
 }
-function getUser() { try { return JSON.parse(sessionStorage.getItem('sdv_user') || '{}'); } catch { return {}; } }
+function getUser() {
+  try {
+    return JSON.parse(sessionStorage.getItem('sdv_user') || localStorage.getItem('sdv_user') || '{}');
+  } catch { return {}; }
+}
 
 // ══════════════════════════════════════════════
 //  TABS

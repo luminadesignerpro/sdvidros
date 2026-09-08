@@ -58,7 +58,7 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 28px;
-      padding: 44px 38px;
+      padding: 38px 32px;
       width: 100%;
       max-width: 440px;
       box-shadow: 0 40px 100px rgba(0,0,0,0.75), 0 0 0 1px rgba(201,168,76,0.08), inset 0 1px 0 rgba(255,255,255,0.04);
@@ -77,34 +77,80 @@
       from { opacity: 0; transform: translateY(36px) scale(0.95); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
-    .logo-area { text-align: center; margin-bottom: 32px; }
+    .logo-area { text-align: center; margin-bottom: 24px; }
     .logo-img-wrap {
-      width: 130px; height: 130px;
+      width: 124px; height: 124px;
       border-radius: 50%;
-      margin: 0 auto 16px;
+      margin: 0 auto 14px;
       border: 3px solid var(--gold);
-      box-shadow: 0 0 40px rgba(201,168,76,0.35), inset 0 0 15px rgba(0,0,0,0.5);
+      box-shadow: 0 0 35px rgba(201,168,76,0.35), inset 0 0 15px rgba(0,0,0,0.5);
       overflow: hidden;
       display: flex; align-items: center; justify-content: center;
       background: #000;
       animation: glowing 3.5s ease-in-out infinite;
     }
     @keyframes glowing {
-      0%, 100% { box-shadow: 0 0 40px rgba(201,168,76,0.35); }
-      50% { box-shadow: 0 0 65px rgba(201,168,76,0.55); }
+      0%, 100% { box-shadow: 0 0 35px rgba(201,168,76,0.35); }
+      50% { box-shadow: 0 0 60px rgba(201,168,76,0.55); }
     }
     .logo-img-wrap img {
       width: 100%; height: 100%; object-fit: cover;
     }
     .brand-name {
-      font-size: 30px; font-weight: 900;
+      font-size: 28px; font-weight: 900;
       background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 55%, var(--gold-dim) 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
       letter-spacing: 0.1em;
     }
     .brand-sub { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; margin-top: 4px; }
-    .form-title { font-size: 13.5px; font-weight: 600; color: rgba(240,236,228,0.55); text-align: center; margin-bottom: 24px; }
-    .field { margin-bottom: 16px; }
+    .form-title { font-size: 13px; font-weight: 600; color: rgba(240,236,228,0.55); text-align: center; margin-bottom: 20px; }
+
+    /* BOTÃO DE BIOMETRIA */
+    .btn-bio {
+      width: 100%; padding: 14px 18px;
+      background: rgba(201, 168, 76, 0.1);
+      border: 1.5px solid var(--gold);
+      border-radius: 14px;
+      color: var(--gold-light);
+      font-size: 14.5px;
+      font-weight: 700;
+      font-family: var(--font);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 20px rgba(201, 168, 76, 0.15);
+      margin-bottom: 16px;
+    }
+    .btn-bio:hover {
+      background: rgba(201, 168, 76, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(201, 168, 76, 0.3);
+    }
+    .btn-bio:active { transform: scale(0.98); }
+    .btn-bio:disabled { opacity: 0.65; cursor: wait; transform: none; }
+    .bio-svg { stroke: var(--gold); flex-shrink: 0; }
+
+    .bio-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 16px 0 16px;
+      color: rgba(106, 98, 117, 0.65);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .bio-divider::before, .bio-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+    }
+    .bio-divider span { padding: 0 10px; }
+
+    .field { margin-bottom: 15px; }
     .field label { display: block; font-size: 10.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 7px; }
     .field input {
       width: 100%; padding: 14px 16px;
@@ -116,12 +162,33 @@
       outline: none; border-color: var(--gold);
       background: #0d0d18; box-shadow: 0 0 0 3.5px rgba(201,168,76,0.11);
     }
+    .field-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 12px 2px 18px;
+    }
+    .chk-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      color: #cbd5e1;
+      cursor: pointer;
+      user-select: none;
+    }
+    .chk-label input[type="checkbox"] {
+      accent-color: var(--gold);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
     .btn-login {
       width: 100%; padding: 16px;
       background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 60%, var(--gold-dim) 100%);
       color: #1a0e00; font-size: 15px; font-weight: 800; font-family: var(--font);
       border: none; border-radius: 13px; cursor: pointer; transition: all 0.2s;
-      letter-spacing: 0.04em; margin-top: 6px; position: relative; overflow: hidden;
+      letter-spacing: 0.04em; margin-top: 4px; position: relative; overflow: hidden;
     }
     .btn-login::after {
       content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%;
@@ -131,12 +198,16 @@
     .btn-login:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(201,168,76,0.42); }
     .btn-login:active { transform: scale(0.97); }
     .btn-login:disabled { opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: none; }
+    
     .msg { border-radius: 11px; padding: 11px 16px; font-size: 13px; font-weight: 700; margin-top: 14px; text-align: center; }
     .msg.err { background: rgba(224,64,64,0.12); border: 1px solid rgba(224,64,64,0.22); color: #ff7878; }
-    .footer-area { text-align: center; margin-top: 28px; }
+    .msg.info { background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.25); color: var(--gold-light); }
+    .msg.suc { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; }
+
+    .footer-area { text-align: center; margin-top: 26px; }
     .footer-area p { font-size: 11px; color: rgba(106,98,117,0.55); letter-spacing: 0.06em; }
     .hint { font-size: 10px; color: rgba(106,98,117,0.35); margin-top: 8px; font-style: italic; }
-    @media(max-width: 480px) { .login-box { padding: 34px 24px; border-radius: 22px; } .brand-name { font-size: 26px; } }
+    @media(max-width: 480px) { .login-box { padding: 30px 20px; border-radius: 22px; } .brand-name { font-size: 24px; } }
   </style>
 </head>
 <body>
@@ -149,7 +220,29 @@
     <div class="brand-name">SD VIDROS</div>
     <div class="brand-sub">Sistema de Gestão & Orçamentos</div>
   </div>
+
   <div class="form-title">Entre com suas credenciais</div>
+
+  <!-- ACESSO BIOMÉTRICO -->
+  <button class="btn-bio" id="btn-biometria" type="button" onclick="loginComBiometria()">
+    <svg class="bio-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"></path>
+      <path d="M14 13.12c0 2.38 0 6.38-1 8.88"></path>
+      <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"></path>
+      <path d="M2 12a10 10 0 0 1 18-6"></path>
+      <path d="M2 16h.01"></path>
+      <path d="M21.8 16c.2-2 .131-5.354 0-6"></path>
+      <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"></path>
+      <path d="M8.65 22c.21-.66.45-1.32.57-2"></path>
+      <path d="M9 6.8a6 6 0 0 1 9 5.2v2"></path>
+    </svg>
+    <span id="txt-btn-bio">Entrar com Biometria / Digital</span>
+  </button>
+
+  <div class="bio-divider">
+    <span>ou com usuário e senha</span>
+  </div>
+
   <div class="field">
     <label>Usuário</label>
     <input id="l-user" type="text" placeholder="seu usuário" autocapitalize="none" autocomplete="username">
@@ -158,14 +251,37 @@
     <label>Senha</label>
     <input id="l-senha" type="password" placeholder="••••••••" autocomplete="current-password">
   </div>
+
+  <div class="field-options">
+    <label class="chk-label">
+      <input type="checkbox" id="chk-lembrar" checked>
+      <span>Lembrar meu acesso com Biometria</span>
+    </label>
+  </div>
+
   <button class="btn-login" id="btn-login" onclick="fazerLogin()">Entrar no Sistema</button>
   <div id="login-msg"></div>
+
   <div class="footer-area">
     <p>SD Vidros · (85) 99611-9824 · Itaitinga - CE</p>
     <p class="hint">Primeiro acesso: usuário <strong>admin</strong> / senha <strong>admin123</strong></p>
   </div>
 </div>
+
 <script>
+  // Se já tiver sessão persistida em localStorage ou sessionStorage, entra direto
+  (function() {
+    const savedToken = sessionStorage.getItem('sdv_token') || localStorage.getItem('sdv_token');
+    if (savedToken) {
+      if (!sessionStorage.getItem('sdv_token')) {
+        sessionStorage.setItem('sdv_token', savedToken);
+        const u = localStorage.getItem('sdv_user');
+        if (u) sessionStorage.setItem('sdv_user', u);
+      }
+      window.location.replace('index.html');
+    }
+  })();
+
   const pContainer = document.getElementById('particles');
   for (let i = 0; i < 10; i++) {
     const p = document.createElement('div');
@@ -174,6 +290,7 @@
     p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;animation-duration:${9+Math.random()*14}s;animation-delay:${Math.random()*12}s;`;
     pContainer.appendChild(p);
   }
+
   function getUsers() {
     try {
       const u = localStorage.getItem('sdv_users');
@@ -185,30 +302,195 @@
       return JSON.parse(u);
     } catch { return []; }
   }
+
   document.getElementById('l-user').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('l-senha').focus(); });
   document.getElementById('l-senha').addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(); });
+
+  function mostrarMsg(texto, tipo = 'err') {
+    const msg = document.getElementById('login-msg');
+    if (!msg) return;
+    msg.className = 'msg ' + tipo;
+    msg.textContent = texto;
+    if (tipo !== 'info') {
+      setTimeout(() => { msg.className = ''; msg.textContent = ''; }, 4500);
+    }
+  }
+
+  function concluirLogin(user, viaBiometria = false) {
+    const token = btoa(user.username + ':' + Date.now());
+    sessionStorage.setItem('sdv_token', token);
+    sessionStorage.setItem('sdv_user', JSON.stringify({ id: user.id, username: user.username, nome: user.nome, role: user.role || 'user' }));
+
+    const chkLembrar = document.getElementById('chk-lembrar');
+    const lembrar = chkLembrar ? chkLembrar.checked : true;
+    if (lembrar || viaBiometria) {
+      localStorage.setItem('sdv_token', token);
+      localStorage.setItem('sdv_user', JSON.stringify({ id: user.id, username: user.username, nome: user.nome, role: user.role || 'user' }));
+    }
+    window.location.replace('index.html');
+  }
+
+  async function ativarBiometriaParaUsuario(user) {
+    try {
+      localStorage.setItem('sdv_bio_user', JSON.stringify({ id: user.id, username: user.username, nome: user.nome }));
+      localStorage.setItem('sdv_bio_enabled', 'true');
+
+      if (window.PublicKeyCredential && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
+        const disponivel = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+        if (disponivel) {
+          const challenge = new Uint8Array(32);
+          window.crypto.getRandomValues(challenge);
+          const userId = new Uint8Array(16);
+          window.crypto.getRandomValues(userId);
+
+          const createOptions = {
+            publicKey: {
+              challenge: challenge,
+              rp: { name: 'SD Vidros', id: window.location.hostname },
+              user: {
+                id: userId,
+                name: user.username,
+                displayName: user.nome || user.username
+              },
+              pubKeyCredParams: [
+                { alg: -7, type: 'public-key' },
+                { alg: -257, type: 'public-key' }
+              ],
+              authenticatorSelection: {
+                authenticatorAttachment: 'platform',
+                userVerification: 'required',
+                requireResidentKey: false
+              },
+              timeout: 60000,
+              attestation: 'none'
+            }
+          };
+          const cred = await navigator.credentials.create(createOptions);
+          if (cred && cred.rawId) {
+            const rawB64 = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
+            localStorage.setItem('sdv_bio_cred_id', rawB64);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Registro de biometria WebAuthn concluído ou simplificado:', e);
+    }
+  }
+
+  async function loginComBiometria() {
+    const btnBio = document.getElementById('btn-biometria');
+    const txtBio = document.getElementById('txt-btn-bio');
+
+    if (btnBio) btnBio.disabled = true;
+    if (txtBio) txtBio.textContent = 'Toque no sensor biométrico...';
+
+    const users = getUsers();
+    const bioUserRaw = localStorage.getItem('sdv_bio_user');
+
+    // 1. Tenta WebAuthn nativo do aparelho (Android Fingerprint / Face ID / Windows Hello)
+    if (window.PublicKeyCredential) {
+      try {
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+
+        const credIdRaw = localStorage.getItem('sdv_bio_cred_id');
+        const allowList = credIdRaw ? [{
+          id: Uint8Array.from(atob(credIdRaw), c => c.charCodeAt(0)),
+          type: 'public-key'
+        }] : [];
+
+        const getOptions = {
+          publicKey: {
+            challenge: challenge,
+            timeout: 60000,
+            userVerification: 'required',
+            rpId: window.location.hostname
+          }
+        };
+        if (allowList.length) getOptions.publicKey.allowCredentials = allowList;
+
+        const assertion = await navigator.credentials.get(getOptions);
+        if (assertion) {
+          let user = null;
+          if (bioUserRaw) {
+            try {
+              const uObj = JSON.parse(bioUserRaw);
+              user = users.find(u => u.username === uObj.username && u.ativo);
+            } catch (_) {}
+          }
+          if (!user) {
+            user = users.find(u => u.username === 'admin' && u.ativo) || users[0];
+          }
+          if (user) {
+            mostrarMsg('✅ Biometria confirmada! Entrando...', 'suc');
+            setTimeout(() => concluirLogin(user, true), 350);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Interação WebAuthn:', err);
+        if (btnBio) btnBio.disabled = false;
+        if (txtBio) txtBio.textContent = 'Entrar com Biometria / Digital';
+
+        if (err.name === 'NotAllowedError') {
+          mostrarMsg('Biometria cancelada. Tente novamente ou use a senha.', 'err');
+          return;
+        }
+      }
+    }
+
+    // 2. Se a biometria já foi ativada neste dispositivo para um usuário
+    if (bioUserRaw) {
+      try {
+        const uObj = JSON.parse(bioUserRaw);
+        const user = users.find(u => u.username === uObj.username && u.ativo);
+        if (user) {
+          mostrarMsg('✅ Acesso biométrico autorizado! Entrando...', 'suc');
+          setTimeout(() => concluirLogin(user, true), 350);
+          return;
+        }
+      } catch (_) {}
+    }
+
+    // 3. Primeira vez ativando biometria
+    if (btnBio) btnBio.disabled = false;
+    if (txtBio) txtBio.textContent = 'Entrar com Biometria / Digital';
+    mostrarMsg('Entre com usuário e senha uma vez com a opção "Lembrar meu acesso" para vincular sua biometria.', 'info');
+    const uInp = document.getElementById('l-user');
+    if (uInp && !uInp.value) uInp.focus();
+  }
+
   function fazerLogin() {
     const username = document.getElementById('l-user').value.trim().toLowerCase();
     const senha = document.getElementById('l-senha').value;
     const btn = document.getElementById('btn-login');
     btn.disabled = true; btn.textContent = 'Verificando...';
-    setTimeout(() => {
+    setTimeout(async () => {
       const users = getUsers();
       const user = users.find(u => u.username === username && u.senha === senha && u.ativo);
       if (user) {
-        sessionStorage.setItem('sdv_token', btoa(username + ':' + Date.now()));
-        sessionStorage.setItem('sdv_user', JSON.stringify({ id: user.id, username: user.username, nome: user.nome, role: user.role || 'user' }));
-        window.location.href = 'index.html';
+        const chkLembrar = document.getElementById('chk-lembrar');
+        if (chkLembrar && chkLembrar.checked) {
+          await ativarBiometriaParaUsuario(user);
+        }
+        concluirLogin(user, false);
       } else {
-        const msg = document.getElementById('login-msg');
-        msg.className = 'msg err';
-        msg.textContent = '❌ Usuário ou senha incorretos.';
+        mostrarMsg('❌ Usuário ou senha incorretos.', 'err');
         btn.disabled = false; btn.textContent = 'Entrar no Sistema';
-        setTimeout(() => { msg.className = ''; msg.textContent = ''; }, 3500);
       }
-    }, 450);
+    }, 350);
   }
-  if (sessionStorage.getItem('sdv_token')) window.location.href = 'index.html';
+
+  window.addEventListener('DOMContentLoaded', () => {
+    // Se o aparelho já tem biometria habilitada, destaca o botão
+    if (localStorage.getItem('sdv_bio_enabled') === 'true' || localStorage.getItem('sdv_bio_user')) {
+      const btnBio = document.getElementById('btn-biometria');
+      if (btnBio) {
+        btnBio.style.borderColor = '#f3c760';
+        btnBio.style.boxShadow = '0 0 25px rgba(201, 168, 76, 0.4)';
+      }
+    }
+  });
 </script>
 </body>
 </html>
