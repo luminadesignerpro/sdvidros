@@ -43,6 +43,26 @@ function wrapText(text, font, size, maxWidth) {
   return lines.length ? lines : [''];
 }
 
+function formatMoney(val) {
+  if (val == null) return '0,00';
+  let str = String(val).replace('R$', '').trim();
+  if (!str) return '0,00';
+  if (str.includes(',') && str.includes('.')) return str;
+  if (str.includes(',')) {
+    const p = str.split(',');
+    const intP = Number(p[0].replace(/\D/g, '') || 0).toLocaleString('pt-BR');
+    const decP = (p[1] || '00').padEnd(2, '0').slice(0, 2);
+    return intP + ',' + decP;
+  }
+  if (str.includes('.')) {
+    const num = parseFloat(str);
+    if (!isNaN(num)) return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  const num = parseInt(str.replace(/\D/g, ''), 10);
+  if (!isNaN(num)) return num.toLocaleString('pt-BR') + ',00';
+  return str;
+}
+
 async function gerarPdfOrcamento(dados, fetchLogo) {
   const {
     numero, dataStr, nome, cnpj, tel, endereco, bairro, cidade, apto, resp,
@@ -100,7 +120,7 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
   page.drawText('WhatsApp: (85) 99611-9824 • 99760-2237 • 98574-9606 | sdvidros2025@gmail.com', { x: textX, y: headerY - 48, size: 7, font: fontRegular, color: GRAY });
 
   // Badge do Orçamento no canto direito superior
-  const badgeW = 138;
+  const badgeW = 142;
   const badgeH = 50;
   const badgeX = MARGIN_X + CONTENT_W - badgeW;
   const badgeY = headerY - badgeH;
@@ -199,19 +219,19 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
     color: DARK
   });
 
-  page.drawText('DESCRIÇÃO DO PRODUTO / SERVIÇO', { x: MARGIN_X + 8, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
-  page.drawText('MEDIDAS (L x A)', { x: MARGIN_X + 250, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
-  page.drawText('ÁREA (M²)', { x: MARGIN_X + 338, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
-  page.drawText('QTD', { x: MARGIN_X + 395, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
-  page.drawText('VL. UNIT (R$)', { x: MARGIN_X + 434, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
-  page.drawText('TOTAL (R$)', { x: MARGIN_X + 486, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
+  page.drawText('ITEM', { x: MARGIN_X + 6, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
+  page.drawText('DESCRIÇÃO DO PRODUTO / SERVIÇO', { x: MARGIN_X + 30, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
+  page.drawText('MEDIDAS (L x A)', { x: MARGIN_X + 248, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
+  page.drawText('ÁREA (M²)', { x: MARGIN_X + 322, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
+  page.drawText('QTD', { x: MARGIN_X + 374, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
+  page.drawText('VL. UNIT (R$)', { x: MARGIN_X + 418, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
+  page.drawText('TOTAL (R$)', { x: MARGIN_X + 478, y: tableHeaderY - 13, size: 7, font: fontBold, color: WHITE });
 
   let curY = tableHeaderY - tableHeaderH;
   const itensList = Array.isArray(itens) && itens.length ? itens : [];
 
   if (!itensList.length) {
-    // Linha única padrão se não houver itens discriminados
-    const rowH = 24;
+    const rowH = 26;
     curY -= rowH;
     page.drawRectangle({
       x: MARGIN_X,
@@ -222,21 +242,22 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
       borderColor: BORDER,
       borderWidth: 0.6
     });
-    page.drawText('SERVIÇOS DE VIDRAÇARIA E ESQUADRIAS DE ALUMÍNIO', { x: MARGIN_X + 8, y: curY + 8, size: 7.5, font: fontBold, color: DARK });
-    page.drawText('Sob Medida', { x: MARGIN_X + 250, y: curY + 8, size: 7.5, font: fontRegular, color: GRAY });
-    page.drawText('-', { x: MARGIN_X + 350, y: curY + 8, size: 7.5, font: fontRegular, color: GRAY });
-    page.drawText('1 UND', { x: MARGIN_X + 395, y: curY + 8, size: 7.5, font: fontRegular, color: DARK });
+    page.drawText('01', { x: MARGIN_X + 8, y: curY + 9, size: 7.5, font: fontBold, color: GRAY });
+    page.drawText('SERVIÇOS DE VIDRAÇARIA E ESQUADRIAS DE ALUMÍNIO', { x: MARGIN_X + 30, y: curY + 9, size: 7.5, font: fontBold, color: DARK });
+    page.drawText('Sob Medida', { x: MARGIN_X + 248, y: curY + 9, size: 7.5, font: fontRegular, color: GRAY });
+    page.drawText('-', { x: MARGIN_X + 332, y: curY + 9, size: 7.5, font: fontRegular, color: GRAY });
+    page.drawText('1 UND', { x: MARGIN_X + 374, y: curY + 9, size: 7.5, font: fontRegular, color: DARK });
 
-    const valTot = String(total || '0,00').replace('R$', '').trim();
-    page.drawText(valTot, { x: MARGIN_X + 438, y: curY + 8, size: 7.5, font: fontRegular, color: DARK });
-    page.drawText(valTot, { x: MARGIN_X + 490, y: curY + 8, size: 8, font: fontBold, color: DARK });
+    const valTot = formatMoney(total);
+    page.drawText(valTot, { x: MARGIN_X + 418, y: curY + 9, size: 7.5, font: fontRegular, color: DARK });
+    page.drawText(valTot, { x: MARGIN_X + 478, y: curY + 9, size: 8, font: fontBold, color: DARK });
   } else {
     itensList.forEach((it, idx) => {
       let descTxt = String(it.desc || '').toUpperCase();
       if (it.cor) descTxt += ` (${String(it.cor).toUpperCase()})`;
 
-      const descLines = wrapText(descTxt, fontRegular, 7.5, 230);
-      const rowH = Math.max(22, descLines.length * 11 + 9);
+      const descLines = wrapText(descTxt, fontRegular, 7.5, 210);
+      const rowH = Math.max(24, descLines.length * 11 + 10);
       curY -= rowH;
 
       // Fundo alternado
@@ -250,9 +271,13 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
         borderWidth: 0.5
       });
 
+      // Item #
+      const numItemStr = String(idx + 1).padStart(2, '0');
+      page.drawText(numItemStr, { x: MARGIN_X + 8, y: curY + rowH - 13, size: 7.5, font: fontBold, color: GRAY });
+
       // Descrição do item
       descLines.forEach((l, lIdx) => {
-        page.drawText(l, { x: MARGIN_X + 8, y: curY + rowH - 12 - (lIdx * 10), size: 7.5, font: lIdx === 0 ? fontBold : fontRegular, color: DARK });
+        page.drawText(l, { x: MARGIN_X + 30, y: curY + rowH - 13 - (lIdx * 10), size: 7.5, font: lIdx === 0 ? fontBold : fontRegular, color: DARK });
       });
 
       // Medidas
@@ -260,35 +285,49 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
       if (it.larg && it.alt) {
         medTxt = `${it.larg} x ${it.alt} m`;
       }
-      page.drawText(medTxt, { x: MARGIN_X + 250, y: curY + rowH - 13, size: 7.5, font: fontRegular, color: DARK });
+      page.drawText(medTxt, { x: MARGIN_X + 248, y: curY + rowH - 13, size: 7.5, font: fontRegular, color: DARK });
 
       // Área m²
-      const m2Txt = it.m2 ? String(it.m2).replace('m²', '').trim() + ' m²' : '-';
-      page.drawText(m2Txt, { x: MARGIN_X + 338, y: curY + rowH - 13, size: 7.5, font: fontRegular, color: DARK });
+      let m2Txt = '-';
+      if (it.m2) {
+        const numM2 = parseFloat(String(it.m2).replace(',', '.'));
+        if (!isNaN(numM2) && numM2 > 0) {
+          m2Txt = String(it.m2).replace('m²', '').trim() + ' m²';
+        }
+      }
+      page.drawText(m2Txt, { x: MARGIN_X + 322, y: curY + rowH - 13, size: 7.5, font: fontRegular, color: DARK });
 
       // Quantidade
-      page.drawText(`${it.qtd || 1} UND`, { x: MARGIN_X + 395, y: curY + rowH - 13, size: 7.5, font: fontRegular, color: DARK });
+      page.drawText(`${it.qtd || 1} UND`, { x: MARGIN_X + 374, y: curY + rowH - 13, size: 7.5, font: fontRegular, color: DARK });
 
       // Valor unitário
-      const vUnitTxt = it.v_unit ? String(it.v_unit).replace('R$', '').trim() : '-';
-      page.drawText(vUnitTxt, { x: MARGIN_X + 438, y: curY + rowH - 13, size: 7.5, font: fontRegular, color: DARK });
+      const vUnitTxt = formatMoney(it.v_unit);
+      page.drawText(vUnitTxt, { x: MARGIN_X + 418, y: curY + rowH - 13, size: 7.5, font: fontRegular, color: DARK });
 
       // Valor total do item
-      const vTotTxt = String(it.total || '0,00').replace('R$', '').trim();
-      page.drawText(vTotTxt, { x: MARGIN_X + 488, y: curY + rowH - 13, size: 7.8, font: fontBold, color: DARK });
+      const vTotTxt = formatMoney(it.total);
+      page.drawText(vTotTxt, { x: MARGIN_X + 478, y: curY + rowH - 13, size: 7.8, font: fontBold, color: DARK });
     });
   }
 
-  // Se a tabela terminou muito alta, ajustamos o espaço para manter o layout nobre e balanceado
-  const minBottomSectionTop = 330;
-  let bottomY = curY - 14;
-  if (bottomY > minBottomSectionTop) {
-    bottomY = minBottomSectionTop;
-  }
+  // ---------------- 5. CARDS INFERIORES (CONDIÇÕES & TOTAIS) ----------------
+  const rodapeCardH = 70;
+  const rodapeCardY = 26;
+  const rodapeTop = rodapeCardY + rodapeCardH;
 
-  // ---------------- 5. CARDS INFERIORES (CONDIÇÕES COMERCIAIS & TOTAIS) ----------------
-  const cardBottomH = 150;
-  const cardBottomY = bottomY - cardBottomH;
+  // Altura dos cards comerciais
+  const cardBottomH = 146;
+  let bottomY = curY - 12;
+
+  let cardBottomY = bottomY - cardBottomH;
+  let spaceBelowCards = cardBottomY - rodapeTop;
+
+  // Se apertar o rodapé por excesso de itens, ajusta bottomY
+  if (spaceBelowCards < 12) {
+    bottomY = rodapeTop + 12 + cardBottomH;
+    cardBottomY = bottomY - cardBottomH;
+    spaceBelowCards = cardBottomY - rodapeTop;
+  }
 
   // CARD ESQUERDO: CONDIÇÕES & PAGAMENTO (Largura: 320 pt)
   const leftCardW = 320;
@@ -368,10 +407,10 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
   page.drawText('RESUMO FINANCEIRO', { x: rightCardX + 8, y: bottomY - 12, size: 7, font: fontBold, color: DARK });
 
   let totY = bottomY - 32;
-  const valorTotalLimpo = String(total || '0,00').replace('R$', '').trim();
+  const valorTotalFormatado = formatMoney(total);
 
   page.drawText('Valor dos Materiais:', { x: rightCardX + 10, y: totY, size: 7, font: fontRegular, color: GRAY });
-  page.drawText(`R$ ${valorTotalLimpo}`, { x: rightCardX + rightCardW - 10 - fontBold.widthOfTextAtSize(`R$ ${valorTotalLimpo}`, 7.5), y: totY, size: 7.5, font: fontBold, color: DARK });
+  page.drawText(`R$ ${valorTotalFormatado}`, { x: rightCardX + rightCardW - 10 - fontBold.widthOfTextAtSize(`R$ ${valorTotalFormatado}`, 7.5), y: totY, size: 7.5, font: fontBold, color: DARK });
 
   totY -= 14;
   page.drawText('Mão de Obra e Instalação:', { x: rightCardX + 10, y: totY, size: 7, font: fontRegular, color: GRAY });
@@ -391,7 +430,6 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
     height: totalBoxH,
     color: DARK
   });
-  // Borda dourada no total
   page.drawRectangle({
     x: rightCardX + 8,
     y: totalBoxY,
@@ -402,12 +440,156 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
   });
 
   page.drawText('TOTAL DO ORÇAMENTO', { x: rightCardX + 18, y: totalBoxY + 34, size: 7, font: fontBold, color: GOLD });
-  page.drawText(`R$ ${valorTotalLimpo}`, { x: rightCardX + 18, y: totalBoxY + 14, size: 14, font: fontBold, color: WHITE });
+  page.drawText(`R$ ${valorTotalFormatado}`, { x: rightCardX + 18, y: totalBoxY + 14, size: 14, font: fontBold, color: WHITE });
 
-  // ---------------- 6. RODAPÉ DE APROVAÇÃO & ASSINATURA ----------------
-  const rodapeCardH = 68;
-  const rodapeCardY = 32;
+  // ---------------- 6. BARRA DE DIFERENCIAIS & CARD DE ESPECIFICAÇÕES TÉCNICAS (ABNT) ----------------
+  // Preenche harmonicamente o espaço intermediário sem deixar vazio branco
+  if (spaceBelowCards >= 140) {
+    // 6.1 Barra com 4 Pilares de Confiança SD Vidros
+    const badgesY = cardBottomY - 12;
+    const badgesH = 24;
+    const badgeColW = (CONTENT_W - 18) / 4;
 
+    const selos = [
+      { t1: '100% VIDRO', t2: 'TEMPERADO' },
+      { t1: 'PADRÃO NORMAS', t2: 'ABNT NBR 14698' },
+      { t1: 'PONTUALIDADE', t2: 'NA ENTREGA' },
+      { t1: '1 ANO DE', t2: 'GARANTIA REAL' }
+    ];
+
+    selos.forEach((s, sIdx) => {
+      const bX = MARGIN_X + (sIdx * (badgeColW + 6));
+      page.drawRectangle({
+        x: bX,
+        y: badgesY - badgesH,
+        width: badgeColW,
+        height: badgesH,
+        color: BOX_BG,
+        borderColor: BORDER,
+        borderWidth: 0.6
+      });
+      // Borda decorativa dourada no topo de cada selo
+      page.drawRectangle({
+        x: bX,
+        y: badgesY - 2.5,
+        width: badgeColW,
+        height: 2.5,
+        color: GOLD
+      });
+
+      const txtFull = `${s.t1} ${s.t2}`;
+      const txtW = fontBold.widthOfTextAtSize(txtFull, 6.2);
+      page.drawText(txtFull, {
+        x: bX + Math.max(4, (badgeColW - txtW) / 2),
+        y: badgesY - 15,
+        size: 6.2,
+        font: fontBold,
+        color: DARK
+      });
+    });
+
+    // 6.2 Card Executivo de Padrão Técnico e Segurança
+    const qualTopY = badgesY - badgesH - 10;
+    const qualBottomY = rodapeTop + 10;
+    const qualCardH = qualTopY - qualBottomY;
+
+    if (qualCardH >= 70) {
+      page.drawRectangle({
+        x: MARGIN_X,
+        y: qualBottomY,
+        width: CONTENT_W,
+        height: qualCardH,
+        color: BOX_BG,
+        borderColor: BORDER,
+        borderWidth: 0.8
+      });
+
+      // Cabeçalho do Card Técnico
+      const qualHeaderH = 15;
+      page.drawRectangle({
+        x: MARGIN_X,
+        y: qualTopY - qualHeaderH,
+        width: CONTENT_W,
+        height: qualHeaderH,
+        color: HEADER_BG
+      });
+      page.drawText('PADRÃO TÉCNICO DE ENGENHARIA, NORMAS DE SEGURANÇA & PROCEDIMENTOS', {
+        x: MARGIN_X + 10,
+        y: qualTopY - 11,
+        size: 6.8,
+        font: fontBold,
+        color: DARK
+      });
+
+      const colW = (CONTENT_W - 24) / 2;
+      const col1X = MARGIN_X + 10;
+      const col2X = MARGIN_X + colW + 18;
+      let textLineY = qualTopY - qualHeaderH - 13;
+
+      // Coluna 1: Materiais & Segurança
+      page.drawText('• Vidros Temperados Certificados:', { x: col1X, y: textLineY, size: 6.8, font: fontBold, color: DARK });
+      page.drawText('Conforme normas ABNT NBR 14698/14697, resistência térmica e a impacto até 5x maior que o vidro comum.', { x: col1X + 8, y: textLineY - 10, size: 6.3, font: fontRegular, color: GRAY });
+
+      page.drawText('• Perfis Estruturais em Alumínio Nobre:', { x: col1X, y: textLineY - 23, size: 6.8, font: fontBold, color: DARK });
+      page.drawText('Tratamento anticorrosivo especial (anodização ou pintura eletrostática), imunes a oxidação e ferrugem.', { x: col1X + 8, y: textLineY - 33, size: 6.3, font: fontRegular, color: GRAY });
+
+      page.drawText('• Vedação Acústica e Hidráulica:', { x: col1X, y: textLineY - 46, size: 6.8, font: fontBold, color: DARK });
+      page.drawText('Aplicação com silicone neutro fungicida de alta vedação, evitando vazamentos, infiltrações e mofo.', { x: col1X + 8, y: textLineY - 56, size: 6.3, font: fontRegular, color: GRAY });
+
+      // Coluna 2: Instalação & Atendimento
+      page.drawText('• Medição Técnica e Precisão a Laser:', { x: col2X, y: textLineY, size: 6.8, font: fontBold, color: DARK });
+      page.drawText('Conferência de vãos, prumos e esquadros antes da fabricação sob medida para encaixe milimétrico.', { x: col2X + 8, y: textLineY - 10, size: 6.3, font: fontRegular, color: GRAY });
+
+      page.drawText('• Ferragens e Roldanas de Alta Performance:', { x: col2X, y: textLineY - 23, size: 6.8, font: fontBold, color: DARK });
+      page.drawText('Roldanas blindadas de rolamento suave com regulagem, e componentes em aço inox e latão cromado.', { x: col2X + 8, y: textLineY - 33, size: 6.3, font: fontRegular, color: GRAY });
+
+      page.drawText('• Equipe Especializada e Garantia de 1 Ano:', { x: col2X, y: textLineY - 46, size: 6.8, font: fontBold, color: DARK });
+      page.drawText('Montadores próprios capacitados com EPIs, limpeza pós-obra e cobertura total de fabricação.', { x: col2X + 8, y: textLineY - 56, size: 6.3, font: fontRegular, color: GRAY });
+    }
+  } else if (spaceBelowCards >= 50) {
+    // Versão compacta da barra de selos se houver mais itens
+    const badgesY = cardBottomY - 10;
+    const badgesH = 24;
+    const badgeColW = (CONTENT_W - 18) / 4;
+
+    const selos = [
+      { t1: '100% VIDRO', t2: 'TEMPERADO' },
+      { t1: 'PADRÃO NORMAS', t2: 'ABNT NBR' },
+      { t1: 'PONTUALIDADE', t2: 'NA ENTREGA' },
+      { t1: '1 ANO DE', t2: 'GARANTIA' }
+    ];
+
+    selos.forEach((s, sIdx) => {
+      const bX = MARGIN_X + (sIdx * (badgeColW + 6));
+      page.drawRectangle({
+        x: bX,
+        y: badgesY - badgesH,
+        width: badgeColW,
+        height: badgesH,
+        color: BOX_BG,
+        borderColor: BORDER,
+        borderWidth: 0.6
+      });
+      page.drawRectangle({
+        x: bX,
+        y: badgesY - 2.5,
+        width: badgeColW,
+        height: 2.5,
+        color: GOLD
+      });
+      const txtFull = `${s.t1} ${s.t2}`;
+      const txtW = fontBold.widthOfTextAtSize(txtFull, 6.2);
+      page.drawText(txtFull, {
+        x: bX + Math.max(4, (badgeColW - txtW) / 2),
+        y: badgesY - 15,
+        size: 6.2,
+        font: fontBold,
+        color: DARK
+      });
+    });
+  }
+
+  // ---------------- 7. RODAPÉ DE APROVAÇÃO & ASSINATURA ----------------
   page.drawRectangle({
     x: MARGIN_X,
     y: rodapeCardY,
@@ -419,7 +601,7 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
   });
 
   // Linha 1: Autorização e Opções de Aprovação
-  page.drawText('Autorizo a execução dos serviços conforme as especificações e valores discriminados nesta proposta.', {
+  page.drawText('Autorizo a execução dos serviços conforme as especificações e valores discriminados nesta proposta comercial.', {
     x: MARGIN_X + 10,
     y: rodapeCardY + rodapeCardH - 14,
     size: 6.8,
@@ -427,7 +609,6 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
     color: DARK
   });
 
-  // Checkboxes no canto superior direito do rodapé
   page.drawText('[  ] APROVADO     [  ] AJUSTAR DETALHES', {
     x: MARGIN_X + CONTENT_W - 200,
     y: rodapeCardY + rodapeCardH - 14,
@@ -454,7 +635,7 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
 
   // Linha 3: Responsável técnico e Confirmação via WhatsApp
   const respNome = String(resp || 'SAMUEL DAVID').toUpperCase();
-  page.drawText(`Responsável: ${respNome} • Situação: Aguardando Aprovação`, {
+  page.drawText(`Responsável Técnico: ${respNome} • Situação: Proposta Comercial Aguardando Aprovação`, {
     x: MARGIN_X + 10,
     y: rodapeCardY + 12,
     size: 6.8,
