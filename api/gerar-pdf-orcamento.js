@@ -483,9 +483,13 @@ module.exports = async (req, res) => {
     if (req.method === 'GET') {
       if (req.query && req.query.d) {
         try {
-          const raw = decodeURIComponent(req.query.d);
-          const jsonStr = Buffer.from(raw, 'base64').toString('utf-8');
-          const p = JSON.parse(jsonStr);
+          let s = String(req.query.d).trim();
+          while (s.includes('%')) {
+            try { s = decodeURIComponent(s); } catch(_) { break; }
+          }
+          s = s.replace(/ /g, '+').replace(/-/g, '+').replace(/_/g, '/');
+          while (s.length % 4 !== 0) s += '=';
+          const p = JSON.parse(Buffer.from(s, 'base64').toString('utf-8'));
 
           let bNome = (p.b || p.bairro || '').trim();
           let cNome = (p.cidade || '').trim();

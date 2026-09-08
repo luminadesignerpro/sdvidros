@@ -532,23 +532,44 @@ CONTRATANTE: ${d.nome || d.c || '_______________________________'}
 WhatsApp: ${d.tel || d.t || '_________________________________'}`;
   }
 
+  function safeDecodeB64(str) {
+    if (!str) return null;
+    let s = String(str).trim();
+    while (s.includes('%')) {
+      try { s = decodeURIComponent(s); } catch(_) { break; }
+    }
+    s = s.replace(/ /g, '+').replace(/-/g, '+').replace(/_/g, '/');
+    while (s.length % 4 !== 0) s += '=';
+    try {
+      const raw = atob(s);
+      return JSON.parse(decodeURIComponent(escape(raw)));
+    } catch (e1) {
+      try {
+        return JSON.parse(atob(s));
+      } catch (e2) {
+        return null;
+      }
+    }
+  }
+
   if (dParam) {
     try {
-      const jsonStr = decodeURIComponent(escape(atob(dParam)));
-      const parsed = JSON.parse(jsonStr);
-      let textoFinal = parsed.x || parsed.texto;
-      if (!textoFinal) {
-        textoFinal = montarTextoContrato(parsed);
+      const parsed = safeDecodeB64(dParam);
+      if (parsed) {
+        let textoFinal = parsed.x || parsed.texto;
+        if (!textoFinal) {
+          textoFinal = montarTextoContrato(parsed);
+        }
+        const data = {
+          numero_os: parsed.n || parsed.numero_os || 'Proposta',
+          cliente_nome: parsed.c || parsed.cliente_nome || 'Cliente',
+          cliente_tel: parsed.t || parsed.cliente_tel || '',
+          texto: textoFinal,
+          assinado: false
+        };
+        renderizarProposta(data);
+        return;
       }
-      const data = {
-        numero_os: parsed.n || parsed.numero_os || 'Proposta',
-        cliente_nome: parsed.c || parsed.cliente_nome || 'Cliente',
-        cliente_tel: parsed.t || parsed.cliente_tel || '',
-        texto: textoFinal,
-        assinado: false
-      };
-      renderizarProposta(data);
-      return;
     } catch (e) {
       console.warn('Falha ao decodificar link direto:', e);
     }
