@@ -456,7 +456,7 @@
           <thead>
             <tr>
               <th style="width:48px;text-align:center">QTD</th>
-              <th style="min-width:180px">DESCRIÇÃO (PRODUTO / SERVIÇO)</th>
+              <th style="min-width:240px">DESCRIÇÃO (PRODUTO / SERVIÇO)</th>
               <th style="width:90px">COR</th>
               <th style="width:65px">ALT.(m)</th>
               <th style="width:65px">LARG.(m)</th>
@@ -472,7 +472,10 @@
         </table>
       </div>
 
-      <button class="btn btn-sec btn-sm" onclick="addItem()" style="margin-top:8px">+ Adicionar linha</button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;">
+        <button class="btn btn-sec btn-sm" onclick="addItem()">+ Adicionar linha</button>
+        <button class="btn btn-gold btn-sm" onclick="irParaAbaProdutosParaNovoItem()" title="Ir para a aba Produtos & Serviços e escolher produto cadastrado">📦 Ir para Produtos & Serviços</button>
+      </div>
 
       <div class="total-bar">
         <div>
@@ -541,6 +544,18 @@
   <!-- PANEL: PRODUTOS E SERVIÇOS (CATÁLOGO DA SEGUNDA IMAGEM) -->
   <!-- ══════════════════════════════════════════ -->
   <div id="panel-produtos" class="panel">
+    <!-- Banner de modo de seleção para o orçamento -->
+    <div id="aviso-selecao-produto" style="display:none;background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(201,168,76,0.08));border:1.5px solid var(--gold);border-radius:var(--r-sm);padding:14px 18px;margin-bottom:14px;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:24px;">📦</span>
+        <div>
+          <div style="font-weight:800;color:var(--gold-light);font-size:14px;" id="aviso-selecao-produto-txt">Modo de Seleção Ativo: Escolha um produto abaixo para preencher no Orçamento</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px;">Clique no botão <strong>✅ Usar este</strong> do produto desejado ou cadastre um novo produto acima.</div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-sec btn-sm" onclick="cancelarSelecaoProduto()" style="font-size:12px;">✕ Cancelar e Voltar</button>
+    </div>
+
     <div class="card">
       <div class="card-title">➕ Cadastrar / Editar Produto ou Serviço</div>
       <div class="field-row">
@@ -558,7 +573,10 @@
       <div id="prod-msg"></div>
     </div>
     <div class="card">
-      <div class="card-title">📦 Produtos e Serviços Cadastrados <span class="num-badge" id="prod-count">0</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+        <div class="card-title" style="margin-bottom:0;">📦 Produtos e Serviços Cadastrados <span class="num-badge" id="prod-count">0</span></div>
+        <input id="busca-prod-filtro" placeholder="🔍 Filtrar produtos..." oninput="renderProdutos(this.value)" style="max-width:240px;padding:6px 12px;font-size:12px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:#08080f;color:var(--text);">
+      </div>
       <div id="prod-lista"><div class="empty">Nenhum produto cadastrado.</div></div>
     </div>
   </div>
@@ -801,7 +819,7 @@ function goTab(t) {
     if (tab) tab.classList.toggle('active', p===t);
   });
   if (t==='historico') { renderHist(); sincronizarStatusContratos(); }
-  if (t==='produtos')  renderProdutos();
+  if (t==='produtos')  { atualizarBannerSelecaoProduto(); renderProdutos(); }
   if (t==='clientes')  renderCli();
   if (t==='contratos') { renderHist(); renderSelectContratos(); carregarListaContratos(); sincronizarStatusContratos(); }
   if (t==='usuarios')  renderUsuarios();
@@ -847,6 +865,94 @@ function updateDatalistProdutos() {
       </button>
     `).join('');
   }
+}
+
+let itemEmEdicaoId = null;
+
+function irParaAbaProdutosParaItem(id) {
+  itemEmEdicaoId = id;
+  goTab('produtos');
+  atualizarBannerSelecaoProduto();
+  const aviso = document.getElementById('aviso-selecao-produto');
+  if (aviso) aviso.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function irParaAbaProdutosParaNovoItem() {
+  itemEmEdicaoId = 'novo';
+  goTab('produtos');
+  atualizarBannerSelecaoProduto();
+  const aviso = document.getElementById('aviso-selecao-produto');
+  if (aviso) aviso.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function cancelarSelecaoProduto() {
+  itemEmEdicaoId = null;
+  atualizarBannerSelecaoProduto();
+  goTab('orcamento');
+}
+
+function atualizarBannerSelecaoProduto() {
+  const aviso = document.getElementById('aviso-selecao-produto');
+  const txt = document.getElementById('aviso-selecao-produto-txt');
+  if (!aviso) return;
+  if (itemEmEdicaoId) {
+    aviso.style.display = 'flex';
+    if (itemEmEdicaoId === 'novo') {
+      if (txt) txt.innerHTML = '<strong>📦 Modo de Seleção Ativo:</strong> Escolha um produto abaixo para adicionar como novo item no Orçamento, ou cadastre um novo produto acima.';
+    } else {
+      if (txt) txt.innerHTML = '<strong>📦 Modo de Seleção Ativo:</strong> Escolha um produto abaixo para preencher a linha do Orçamento, ou cadastre um novo produto acima.';
+    }
+  } else {
+    aviso.style.display = 'none';
+  }
+}
+
+function usarProdutoDoCatalogo(pId) {
+  const p = produtos.find(x => x.id === pId);
+  if (!p) return;
+
+  if (itemEmEdicaoId && itemEmEdicaoId !== 'novo') {
+    const targetId = itemEmEdicaoId;
+    const tr = document.getElementById('item-' + targetId);
+    if (tr) {
+      const ins = tr.querySelectorAll('input');
+      if (ins && ins.length >= 8) {
+        ins[1].value = p.nome || '';
+        if (p.vm2)   ins[6].value = String(p.vm2);
+        if (p.vunit) ins[7].value = String(p.vunit);
+        calcItem(targetId);
+
+        // Feedback visual na linha
+        tr.style.transition = 'all 0.4s ease';
+        tr.style.outline = '2px solid var(--gold)';
+        tr.style.backgroundColor = 'rgba(201,168,76,0.18)';
+        setTimeout(() => {
+          tr.style.outline = '';
+          tr.style.backgroundColor = '';
+        }, 1800);
+      }
+      itemEmEdicaoId = null;
+      atualizarBannerSelecaoProduto();
+      goTab('orcamento');
+      setTimeout(() => {
+        const trTarget = document.getElementById('item-' + targetId);
+        if (trTarget) trTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+      return;
+    }
+  }
+
+  // Novo item
+  addItem(p.nome, '1', '', '', '', p.vm2 ? String(p.vm2) : '', p.vunit ? String(p.vunit) : '');
+  itemEmEdicaoId = null;
+  atualizarBannerSelecaoProduto();
+  goTab('orcamento');
+  setTimeout(() => {
+    const list = document.getElementById('itens-lista');
+    if (list && list.lastElementChild) {
+      list.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 100);
 }
 
 function addProdutoDoCatalogo(id) {
@@ -909,8 +1015,13 @@ function addItem(desc='', qtd='1', cor='', alt='', larg='', v_m2='', v_unit='', 
     <td style="text-align:center">
       <input type="text" inputmode="numeric" value="${esc(qtd)}" oninput="calcItem(${id})" style="text-align:center">
     </td>
-    <td>
-      <input list="lista-produtos-sugeridos" placeholder="Digite ou selecione o produto/serviço..." value="${esc(desc)}" oninput="aoMudarDescricaoItem(${id})" change="aoMudarDescricaoItem(${id})">
+    <td style="min-width:240px">
+      <div style="display:flex;gap:5px;align-items:center;">
+        <input list="lista-produtos-sugeridos" placeholder="Digite ou selecione..." value="${esc(desc)}" oninput="aoMudarDescricaoItem(${id})" change="aoMudarDescricaoItem(${id})" style="flex:1;min-width:130px;">
+        <button type="button" class="btn btn-gold btn-xs" onclick="irParaAbaProdutosParaItem(${id})" title="Ir para a aba Produtos & Serviços e escolher o produto cadastrado" style="padding:5px 8px;font-size:11px;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;flex-shrink:0;">
+          📦 Catálogo
+        </button>
+      </div>
     </td>
     <td>
       <input placeholder="Ex: Incolor" value="${esc(cor)}">
@@ -1396,6 +1507,13 @@ function salvarProduto() {
   updateDatalistProdutos();
   renderProdutos();
   limparProd();
+
+  if (itemEmEdicaoId) {
+    const usarAgora = confirm(`✅ Produto "${novo.nome}" cadastrado com sucesso no catálogo!\nDeseja usá-lo agora no Orçamento?`);
+    if (usarAgora) {
+      usarProdutoDoCatalogo(novo.id || editandoProdId);
+    }
+  }
 }
 
 function limparProd() {
@@ -1424,21 +1542,37 @@ function deletarProd(id) {
   renderProdutos();
 }
 
-function renderProdutos() {
+function renderProdutos(filtro = '') {
   const el = document.getElementById('prod-lista');
   const badge = document.getElementById('prod-count');
   if (badge) badge.textContent = produtos.length;
   if (!produtos.length) { el.innerHTML = '<div class="empty">Nenhum produto cadastrado no catálogo.</div>'; return; }
-  el.innerHTML = produtos.slice().reverse().map(p => `
-    <div class="prod-card">
+
+  let lista = produtos.slice().reverse();
+  const inputFiltro = document.getElementById('busca-prod-filtro');
+  const termo = (typeof filtro === 'string' && filtro.trim()) ? filtro.trim().toLowerCase() : (inputFiltro && inputFiltro.value.trim().toLowerCase());
+
+  if (termo) {
+    lista = lista.filter(p => (p.nome && p.nome.toLowerCase().includes(termo)) || (p.cat && p.cat.toLowerCase().includes(termo)));
+    if (!lista.length) {
+      el.innerHTML = `<div class="empty">Nenhum produto encontrado para "${esc(termo)}".</div>`;
+      return;
+    }
+  }
+
+  const btnLabel = itemEmEdicaoId ? '✅ Usar este' : '📋 Usar';
+  const btnClass = itemEmEdicaoId ? 'btn btn-primary btn-sm' : 'btn btn-gold btn-sm';
+
+  el.innerHTML = lista.map(p => `
+    <div class="prod-card" style="${itemEmEdicaoId ? 'border-color:rgba(201,168,76,0.35);' : ''}">
       <div>
-        <div class="prod-name">${p.nome}</div>
-        <div class="prod-det">Categoria: <strong>${p.cat||'Geral'}</strong> · ${p.vm2 ? 'R$ '+p.vm2+' /m²' : ''} ${p.vunit ? 'R$ '+p.vunit+' unit' : ''}</div>
+        <div class="prod-name">${esc(p.nome)}</div>
+        <div class="prod-det">Categoria: <strong>${esc(p.cat||'Geral')}</strong> · ${p.vm2 ? 'R$ '+p.vm2+' /m²' : ''} ${p.vunit ? 'R$ '+p.vunit+' unit' : ''}</div>
       </div>
       <div class="prod-btns">
-        <button class="btn btn-gold btn-sm" onclick="addItem('${esc(p.nome)}', '1', '', '', '', '${p.vm2||''}', '${p.vunit||''}'); goTab('orcamento');">📋 Usar</button>
-        <button class="btn btn-sec btn-sm" onclick="editarProd(${p.id})">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="deletarProd(${p.id})">✕</button>
+        <button class="${btnClass}" onclick="usarProdutoDoCatalogo(${p.id})" title="Usar este produto no orçamento">${btnLabel}</button>
+        <button class="btn btn-sec btn-sm" onclick="editarProd(${p.id})" title="Editar cadastro">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deletarProd(${p.id})" title="Excluir">✕</button>
       </div>
     </div>`).join('');
 }
