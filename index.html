@@ -502,6 +502,10 @@
         <span id="pdf-orc-spinner" class="spinner" style="display:none"></span>
         <span id="pdf-orc-btn-text">📄 Enviar PDF do Orçamento</span>
       </button>
+      <button class="btn btn-ia btn-full" onclick="enviarOrcamentoParaAssinaturaDigital()" style="font-size:15px;padding:15px;margin-top:10px;" id="btn-orc-assinatura">
+        <span id="orc-assinatura-spinner" class="spinner" style="display:none"></span>
+        <span id="orc-assinatura-btn-text">✍️ Enviar para Assinatura Digital</span>
+      </button>
       <button class="btn btn-primary btn-full" id="btn-salvar-os" onclick="salvarOrdem()" style="margin-top:10px">✅ Salvar Ordem de Serviço</button>
       <button class="btn btn-sec btn-full" id="btn-cancelar-os" onclick="cancelarEdicaoOs()" style="margin-top:8px;display:none">✕ Cancelar Edição</button>
     </div>
@@ -779,10 +783,10 @@ function goTab(t) {
     const tab = document.getElementById('tab-'+p);
     if (tab) tab.classList.toggle('active', p===t);
   });
-  if (t==='historico') renderHist();
+  if (t==='historico') { renderHist(); sincronizarStatusContratos(); }
   if (t==='produtos')  renderProdutos();
   if (t==='clientes')  renderCli();
-  if (t==='contratos') { renderHist(); renderSelectContratos(); carregarListaContratos(); }
+  if (t==='contratos') { renderHist(); renderSelectContratos(); carregarListaContratos(); sincronizarStatusContratos(); }
   if (t==='usuarios')  renderUsuarios();
 }
 
@@ -1226,6 +1230,9 @@ function renderHist() {
 
   el.innerHTML = historico.slice().reverse().map(o => {
     const st = o.status || 'pendente';
+    const assinadoBadge = (st === 'aprovado' && o.assinado_por)
+      ? `<div style="font-size:11.5px;color:#4ade80;margin-top:4px;font-weight:600;">✍️ Autorizado por: ${esc(o.assinado_por)}</div>`
+      : '';
     return `
     <div class="hist-card">
       <div class="hist-top">
@@ -1237,6 +1244,7 @@ function renderHist() {
       </div>
       <div class="hist-client">${esc(o.nome || 'Cliente não identificado')}</div>
       <div style="font-size:12px;color:var(--muted);margin-top:2px;">${esc((o.dados && o.dados.tel) || '')}</div>
+      ${assinadoBadge}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px">
         <div class="hist-total">${esc(o.total || 'R$ 0,00')}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -1528,28 +1536,18 @@ function renderSelectContratos() {
     historico.slice().reverse().map(o=>`<option value="${o.id}">${o.numero} – ${o.nome||'Cliente sem nome'} (${o.total})</option>`).join('');
 }
 
-function gerarContrato() {
-  const id = document.getElementById('sel-orcamento-contrato').value;
-  if (!id) { alert('Selecione uma Ordem de Serviço para gerar o contrato.'); return; }
-  const os = historico.find(x=>String(x.id)===String(id));
-  if (!os||!os.dados) { alert('Dados da OS não encontrados.'); return; }
-  const btn = document.getElementById('btn-gerar-contrato');
-  const spinner = document.getElementById('contrato-spinner');
-  const btnTxt = document.getElementById('contrato-btn-text');
-  btn.disabled = true; spinner.style.display = 'inline-block'; btnTxt.textContent = ' Gerando...';
-  setTimeout(() => {
-    const d = os.dados;
-    const hoje = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
-    const endCliente = [d.end,d.num,d.apto,d.bairro].filter(Boolean).join(', ');
-    const itensStr = (d.itens||[]).map((it,i)=>{
-      let detalhe = '';
-      if (it.alt && it.larg) detalhe += ` [Dimensões: ${it.alt}m x ${it.larg}m = ${it.m2}]`;
-      if (it.cor) detalhe += ` [Cor: ${it.cor}]`;
-      if (it.bizt) detalhe += ` [Lapidação/Bizotê: ${it.bizt}]`;
-      return `  ${i+1}. ${it.desc}${detalhe} - Qtd: ${it.qtd} - Total: ${it.total}`;
-    }).join('\n') || '  (itens não especificados)';
+function montarTextoContrato(d) {
+  const hoje = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+  const endCliente = [d.end, d.num, d.apto, d.bairro].filter(Boolean).join(', ');
+  const itensStr = (d.itens || []).map((it, i) => {
+    let detalhe = '';
+    if (it.alt && it.larg) detalhe += ` [Dimensões: ${it.alt}m x ${it.larg}m = ${it.m2}]`;
+    if (it.cor) detalhe += ` [Cor: ${it.cor}]`;
+    if (it.bizt) detalhe += ` [Lapidação/Bizotê: ${it.bizt}]`;
+    return `  ${i + 1}. ${it.desc}${detalhe} - Qtd: ${it.qtd} - Total: ${it.total}`;
+  }).join('\n') || '  (itens não especificados)';
 
-    const contrato = `CONTRATO DE PRESTAÇÃO DE SERVIÇOS
+  return `CONTRATO DE PRESTAÇÃO DE SERVIÇOS
 N° ${d.numero}
 Itaitinga - CE, ${hoje}
 
@@ -1562,10 +1560,10 @@ Instagram........: @sdvidros
 Cidade...........: Itaitinga - CE
 
 CONTRATANTE (CLIENTE):
-Nome.............: ${d.nome||'Não informado'}
-${d.cnpj?'CPF/CNPJ.........: '+d.cnpj+'\n':''}WhatsApp/Tel.....: ${d.tel||'Não informado'}
-Endereço.........: ${endCliente||'Não informado'}
-${d.resp?'Responsável......: '+d.resp:''}
+Nome.............: ${d.nome || 'Não informado'}
+${d.cnpj ? 'CPF/CNPJ.........: ' + d.cnpj + '\n' : ''}WhatsApp/Tel.....: ${d.tel || 'Não informado'}
+Endereço.........: ${endCliente || 'Não informado'}
+${d.resp ? 'Responsável......: ' + d.resp : ''}
 
 ══════════════════════════════════════════════════════════════
 
@@ -1580,9 +1578,9 @@ ${itensStr}
 
 CLÁUSULA 2ª – DO VALOR E FORMA DE PAGAMENTO
 
-Valor Total: ${d.total||'R$ 0,00'}
-Forma de Pagamento: ${d.forma||'À vista'}
-${d.obs?'\nObservações: '+d.obs:''}
+Valor Total: ${d.total || 'R$ 0,00'}
+Forma de Pagamento: ${d.forma || 'À vista'}
+${d.obs ? '\nObservações: ' + d.obs : ''}
 
 A CONTRATANTE efetuará o pagamento conforme a forma descrita acima.
 Chave Pix para pagamento: (85) 99760-2237
@@ -1591,7 +1589,7 @@ Chave Pix para pagamento: (85) 99760-2237
 
 CLÁUSULA 3ª – DO PRAZO DE ENTREGA E EXECUÇÃO
 
-O prazo para execução e entrega dos serviços é de ${d.prazo||'a combinar'},
+O prazo para execução e entrega dos serviços é de ${d.prazo || 'a combinar'},
 contados a partir da confirmação do pagamento/sinal e da aprovação de
 todos os detalhes técnicos do projeto.
 
@@ -1599,7 +1597,7 @@ todos os detalhes técnicos do projeto.
 
 CLÁUSULA 4ª – DA GARANTIA
 
-A CONTRATADA oferece garantia de ${d.garantia||'1 (um) ano'} contra defeitos de
+A CONTRATADA oferece garantia de ${d.garantia || '1 (um) ano'} contra defeitos de
 fabricação e instalação, excluindo danos causados por mau uso, vandalismo,
 acidentes ou fenômenos naturais.
 
@@ -1621,26 +1619,38 @@ WhatsApp: (85) 99611-9824
 
 
 _________________________________________________
-CONTRATANTE: ${d.nome||'_______________________________'}
-WhatsApp: ${d.tel||'_________________________________'}`;
+CONTRATANTE: ${d.nome || '_______________________________'}
+WhatsApp: ${d.tel || '_________________________________'}`;
+}
 
+function gerarContrato() {
+  const id = document.getElementById('sel-orcamento-contrato').value;
+  if (!id) { alert('Selecione uma Ordem de Serviço para gerar o contrato.'); return; }
+  const os = historico.find(x => String(x.id) === String(id));
+  if (!os || !os.dados) { alert('Dados da OS não encontrados.'); return; }
+  const btn = document.getElementById('btn-gerar-contrato');
+  const spinner = document.getElementById('contrato-spinner');
+  const btnTxt = document.getElementById('contrato-btn-text');
+  btn.disabled = true; spinner.style.display = 'inline-block'; btnTxt.textContent = ' Gerando...';
+  setTimeout(() => {
+    const contrato = montarTextoContrato(os.dados);
     document.getElementById('contrato-texto').textContent = contrato;
     document.getElementById('contrato-resultado-area').style.display = 'block';
     btn.disabled = false; spinner.style.display = 'none'; btnTxt.textContent = '✨ Gerar Contrato';
-  }, 600);
+  }, 300);
 }
 
 function copiarContrato() {
   const txt = document.getElementById('contrato-texto').textContent;
-  navigator.clipboard.writeText(txt).then(()=>alert('📋 Contrato copiado para a área de transferência!'));
+  navigator.clipboard.writeText(txt).then(() => alert('📋 Contrato copiado para a área de transferência!'));
 }
 
 function enviarContratoWhats() {
   const id = document.getElementById('sel-orcamento-contrato').value;
-  const os = historico.find(x=>String(x.id)===String(id));
-  if (!os||!os.dados||!os.dados.tel) { alert('WhatsApp do cliente não localizado.'); return; }
+  const os = historico.find(x => String(x.id) === String(id));
+  if (!os || !os.dados || !os.dados.tel) { alert('WhatsApp do cliente não localizado.'); return; }
   const txt = document.getElementById('contrato-texto').textContent;
-  const resumo = '*CONTRATO DE PRESTAÇÃO DE SERVIÇOS – SD VIDROS* 📄\n\nSegue a minuta do contrato referente à OS '+os.numero+':\n\n'+txt.substring(0,2800)+(txt.length>2800?'...':'');
+  const resumo = '*CONTRATO DE PRESTAÇÃO DE SERVIÇOS – SD VIDROS* 📄\n\nSegue a minuta do contrato referente à OS ' + os.numero + ':\n\n' + txt.substring(0, 2800) + (txt.length > 2800 ? '...' : '');
   abrirWhats(os.dados.tel, resumo);
 }
 
@@ -1680,6 +1690,7 @@ function enviarParaAssinatura() {
         + 'É rápido: toca no link, lê o contrato e assina com o dedo na tela.';
       abrirWhats(os.dados.tel, msg);
       carregarListaContratos();
+      sincronizarStatusContratos();
     })
     .catch(err => alert(err.message || 'Erro ao enviar para assinatura.'))
     .finally(() => {
@@ -1687,6 +1698,135 @@ function enviarParaAssinatura() {
       spinner.style.display = 'none';
       btnTxt.textContent = '✍️ Enviar para Assinatura Digital';
     });
+}
+
+async function enviarOrcamentoParaAssinaturaDigital() {
+  const d = getOrc();
+  if (!d.itens || !d.itens.length) {
+    alert('Adicione pelo menos um item ao orçamento antes de enviar para assinatura.');
+    return;
+  }
+  if (!d.tel) {
+    alert('Informe o WhatsApp do cliente para enviar o link de assinatura.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-orc-assinatura');
+  const spinner = document.getElementById('orc-assinatura-spinner');
+  const btnTxt = document.getElementById('orc-assinatura-btn-text');
+
+  if (btn) btn.disabled = true;
+  if (spinner) spinner.style.display = 'inline-block';
+  if (btnTxt) btnTxt.textContent = ' Preparando assinatura...';
+
+  try {
+    // 1. Automaticamente salva/atualiza a Ordem de Serviço em historico (status pendente)
+    (d.itens || []).forEach(it => {
+      if (it.desc && !produtos.some(p => p.nome.toLowerCase() === it.desc.toLowerCase())) {
+        produtos.push({
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          nome: it.desc,
+          cat: 'Geral',
+          vm2: parseNum(it.v_m2),
+          vunit: parseNum(it.v_unit)
+        });
+      }
+    });
+    save(K.products, produtos);
+    updateDatalistProdutos();
+    renderProdutos();
+
+    if (editandoOsId) {
+      const idx = historico.findIndex(x => x.id === editandoOsId);
+      if (idx !== -1) {
+        historico[idx] = {
+          ...historico[idx],
+          nome: d.nome,
+          total: d.total,
+          data_orc: d.data,
+          dados: d,
+          status: historico[idx].status || 'pendente'
+        };
+      }
+    } else {
+      const ord = {
+        id: Date.now(),
+        numero: d.numero,
+        nome: d.nome,
+        total: d.total,
+        data_orc: d.data,
+        dados: d,
+        status: 'pendente'
+      };
+      historico.push(ord);
+      proxNumero++;
+      save(K.nextNum, proxNumero);
+      atualizarNumeroDisplay();
+    }
+    save(K.orders, historico);
+    renderHist();
+    renderSelectContratos();
+
+    // 2. Gerar texto do contrato
+    const textoContrato = montarTextoContrato(d);
+
+    // 3. Criar registro no Supabase
+    const res = await fetch('/api/criar-contrato', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        numero_os: d.numero,
+        cliente_nome: d.nome || '',
+        cliente_tel: d.tel || '',
+        texto: textoContrato
+      })
+    });
+    const resData = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(resData.error || 'Erro ao criar proposta para assinatura digital.');
+
+    // 4. Montar link e enviar no WhatsApp com opções de aprovação e assinatura
+    const linkAssinatura = window.location.origin + '/assinar.html?id=' + resData.id;
+    const msg = '*SD VIDROS — PROPOSTA & ASSINATURA DIGITAL* ✍️\n\n'
+      + 'Olá' + (d.nome ? ', ' + d.nome : '') + '! Segue o link com seu orçamento *' + d.numero + '* no valor de *' + d.total + '*:\n\n'
+      + linkAssinatura + '\n\n'
+      + '📄 Toque no link acima para conferir os itens e baixar o PDF.\n'
+      + '✅ Se estiver tudo aprovado, basta assinar com o dedo na tela para autorizar o início dos serviços!';
+
+    abrirWhats(d.tel, msg);
+    carregarListaContratos();
+    sincronizarStatusContratos();
+  } catch (err) {
+    alert(err.message || 'Erro ao enviar para assinatura digital.');
+  } finally {
+    if (btn) btn.disabled = false;
+    if (spinner) spinner.style.display = 'none';
+    if (btnTxt) btnTxt.textContent = '✍️ Enviar para Assinatura Digital';
+  }
+}
+
+function sincronizarStatusContratos() {
+  fetch('/api/listar-contratos')
+    .then(async r => {
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok || !Array.isArray(data)) return;
+      let alterou = false;
+      data.forEach(c => {
+        if (c.assinado && c.numero_os) {
+          const idx = historico.findIndex(o => o.numero === c.numero_os);
+          if (idx !== -1 && historico[idx].status !== 'aprovado') {
+            historico[idx].status = 'aprovado';
+            historico[idx].assinado_por = c.assinante_nome || '';
+            historico[idx].assinado_em = c.assinado_em || '';
+            alterou = true;
+          }
+        }
+      });
+      if (alterou) {
+        save(K.orders, historico);
+        renderHist();
+      }
+    })
+    .catch(() => {});
 }
 
 let listaContratosCache = [];
@@ -2555,6 +2695,9 @@ window.addEventListener('DOMContentLoaded', function() {
   renderCli();
   renderSelectContratos();
   renderUsuarios();
+
+  sincronizarStatusContratos();
+  setInterval(sincronizarStatusContratos, 25000);
 
   const user = getUser();
   const el = document.getElementById('usuario-logado');
