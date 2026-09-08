@@ -1670,25 +1670,45 @@ function enviarParaAssinatura() {
   spinner.style.display = 'inline-block';
   btnTxt.textContent = ' Enviando...';
 
+  const telCli = (os.dados && os.dados.tel) || '';
+  const nomeCli = (os.dados && os.dados.nome) || os.nome || '';
+  const numOs = os.numero || '0001';
+
+  const gerarLinkDireto = () => {
+    const payload = {
+      n: numOs,
+      c: nomeCli,
+      t: telCli,
+      x: texto
+    };
+    const jsonStr = unescape(encodeURIComponent(JSON.stringify(payload)));
+    return window.location.origin + '/assinar.html?d=' + encodeURIComponent(btoa(jsonStr));
+  };
+
   fetch('/api/criar-contrato', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      numero_os: os.numero,
-      cliente_nome: os.dados.nome || '',
-      cliente_tel: os.dados.tel || '',
+      numero_os: numOs,
+      cliente_nome: nomeCli,
+      cliente_tel: telCli,
       texto: texto
     })
   })
-    .then(r => r.json().then(data => ({ ok: r.ok, data })))
-    .then(({ ok, data }) => {
-      if (!ok) throw new Error(data.error || 'Erro ao criar contrato para assinatura.');
-      const link = window.location.origin + '/assinar.html?id=' + data.id;
+    .then(async r => {
+      const data = await r.json().catch(() => ({}));
+      if (r.ok && data.id) {
+        return window.location.origin + '/assinar.html?id=' + data.id;
+      }
+      return gerarLinkDireto();
+    })
+    .catch(() => gerarLinkDireto())
+    .then(link => {
       const msg = '*SD VIDROS — ASSINATURA DIGITAL* ✍️\n\n'
-        + 'Olá' + (os.dados.nome ? ', ' + os.dados.nome : '') + '! Segue o link para revisar e assinar seu contrato ' + os.numero + ':\n\n'
+        + 'Olá' + (nomeCli ? ', ' + nomeCli : '') + '! Segue o link para revisar e assinar seu contrato ' + numOs + ':\n\n'
         + link + '\n\n'
         + 'É rápido: toca no link, lê o contrato e assina com o dedo na tela.';
-      abrirWhats(os.dados.tel, msg);
+      abrirWhats(telCli, msg);
       carregarListaContratos();
       sincronizarStatusContratos();
     })
@@ -1770,22 +1790,44 @@ async function enviarOrcamentoParaAssinaturaDigital() {
     // 2. Gerar texto do contrato
     const textoContrato = montarTextoContrato(d);
 
-    // 3. Criar registro no Supabase
-    const res = await fetch('/api/criar-contrato', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        numero_os: d.numero,
-        cliente_nome: d.nome || '',
-        cliente_tel: d.tel || '',
-        texto: textoContrato
-      })
-    });
-    const resData = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(resData.error || 'Erro ao criar proposta para assinatura digital.');
+    const gerarLinkDireto = () => {
+      const payload = {
+        n: d.numero,
+        c: d.nome || '',
+        t: d.tel || '',
+        x: textoContrato
+      };
+      const jsonStr = unescape(encodeURIComponent(JSON.stringify(payload)));
+      return window.location.origin + '/assinar.html?d=' + encodeURIComponent(btoa(jsonStr));
+    };
+
+    let linkAssinatura = '';
+
+    // 3. Tentar criar registro no Supabase
+    try {
+      const res = await fetch('/api/criar-contrato', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          numero_os: d.numero,
+          cliente_nome: d.nome || '',
+          cliente_tel: d.tel || '',
+          texto: textoContrato
+        })
+      });
+      const resData = await res.json().catch(() => ({}));
+      if (res.ok && resData.id) {
+        linkAssinatura = window.location.origin + '/assinar.html?id=' + resData.id;
+      }
+    } catch (e) {
+      console.warn('Supabase offline ou inacessível, gerando link autônomo:', e);
+    }
+
+    if (!linkAssinatura) {
+      linkAssinatura = gerarLinkDireto();
+    }
 
     // 4. Montar link e enviar no WhatsApp com opções de aprovação e assinatura
-    const linkAssinatura = window.location.origin + '/assinar.html?id=' + resData.id;
     const msg = '*SD VIDROS — PROPOSTA & ASSINATURA DIGITAL* ✍️\n\n'
       + 'Olá' + (d.nome ? ', ' + d.nome : '') + '! Segue o link com seu orçamento *' + d.numero + '* no valor de *' + d.total + '*:\n\n'
       + linkAssinatura + '\n\n'

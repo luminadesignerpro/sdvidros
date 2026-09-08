@@ -8,14 +8,25 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Dados incompletos para assinatura.' });
     }
 
-    const supabase = getClient();
+    let supabase;
+    try {
+      supabase = getClient();
+    } catch (cfgErr) {
+      return res.status(503).json({ error: cfgErr.message });
+    }
 
     const { data: existente, error: errBusca } = await supabase
       .from('contratos')
       .select('assinado')
       .eq('id', id)
       .single();
-    if (errBusca) throw errBusca;
+    if (errBusca) {
+      const msg = errBusca.message || '';
+      if (msg.includes('fetch failed') || msg.includes('ENOTFOUND')) {
+        return res.status(503).json({ error: 'Banco de dados Supabase inacessível ou pausado.' });
+      }
+      throw errBusca;
+    }
     if (existente && existente.assinado) {
       return res.status(409).json({ error: 'Este contrato já foi assinado anteriormente.' });
     }
@@ -30,10 +41,20 @@ module.exports = async (req, res) => {
       })
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      const msg = error.message || '';
+      if (msg.includes('fetch failed') || msg.includes('ENOTFOUND')) {
+        return res.status(503).json({ error: 'Banco de dados Supabase inacessível ou pausado.' });
+      }
+      throw error;
+    }
     res.status(200).json({ ok: true });
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: e.message || 'Erro ao salvar assinatura.' });
+    console.error('Erro em assinar:', e);
+    let msg = e.message || 'Erro ao salvar assinatura.';
+    if (msg.includes('fetch failed')) {
+      msg = 'Banco de dados Supabase inacessível ou pausado.';
+    }
+    res.status(500).json({ error: msg });
   }
 };

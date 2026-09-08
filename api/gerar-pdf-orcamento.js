@@ -479,11 +479,24 @@ module.exports = async (req, res) => {
     const dados = req.body || {};
 
     const fetchLogo = async () => {
-      const host = req.headers.host;
-      const proto = host && host.includes('localhost') ? 'http' : 'https';
-      const resp = await fetch(`${proto}://${host}/logo.jpg`);
-      if (!resp.ok) return null;
-      return Buffer.from(await resp.arrayBuffer());
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const localPath = path.join(process.cwd(), 'logo.jpg');
+        if (fs.existsSync(localPath)) {
+          return fs.readFileSync(localPath);
+        }
+      } catch (_) {}
+      try {
+        const host = req.headers.host;
+        if (!host) return null;
+        const proto = host.includes('localhost') ? 'http' : 'https';
+        const resp = await fetch(`${proto}://${host}/logo.jpg`);
+        if (!resp.ok) return null;
+        return Buffer.from(await resp.arrayBuffer());
+      } catch (_) {
+        return null;
+      }
     };
 
     const pdfBytes = await gerarPdfOrcamento(dados, fetchLogo);

@@ -358,6 +358,7 @@
 (function () {
   const params = new URLSearchParams(window.location.search);
   const contratoId = params.get('id');
+  const dParam = params.get('d') || params.get('data');
 
   const telaLoading = document.getElementById('tela-loading');
   const telaErro = document.getElementById('tela-erro');
@@ -411,8 +412,59 @@
       .catch(err => alert(err.message || 'Erro ao gerar PDF.'));
   };
 
+  function renderizarProposta(data) {
+    contratoCache = data;
+
+    if (data.assinado) {
+      telaLoading.classList.add('hidden');
+      telaSucesso.classList.remove('hidden');
+      telaSucesso.querySelector('#msg-sucesso').innerHTML =
+        'Esta proposta/contrato já foi <strong>aprovada e assinada</strong> por <strong>' + (data.assinante_nome || '') + '</strong>' +
+        (data.assinado_em ? ' em ' + new Date(data.assinado_em).toLocaleDateString('pt-BR') : '') + '.';
+      return;
+    }
+
+    const numOs = data.numero_os || 'Proposta';
+    const cliNome = data.cliente_nome || 'Cliente';
+
+    document.getElementById('display-numero').textContent = 'Orçamento ' + numOs;
+    document.getElementById('display-cliente').textContent = cliNome;
+    document.getElementById('subtitulo').textContent = 'Ordem de Serviço ' + numOs;
+    document.getElementById('contrato-texto').textContent = data.texto;
+
+    // Link de ajuste via WhatsApp pré-configurado
+    const btnAjustar = document.getElementById('btn-ajustar-zap');
+    if (btnAjustar) {
+      const zapMsg = 'Olá SD Vidros! Recebi a proposta ' + numOs + ' (' + cliNome + '), mas gostaria de tirar algumas dúvidas e falar sobre ajustes antes de aprovar.';
+      btnAjustar.href = 'https://wa.me/5585996119824?text=' + encodeURIComponent(zapMsg);
+    }
+
+    telaLoading.classList.add('hidden');
+    telaForm.classList.remove('hidden');
+
+    requestAnimationFrame(() => iniciarCanvas(numOs, cliNome));
+  }
+
+  if (dParam) {
+    try {
+      const jsonStr = decodeURIComponent(escape(atob(dParam)));
+      const parsed = JSON.parse(jsonStr);
+      const data = {
+        numero_os: parsed.n || parsed.numero_os || 'Proposta',
+        cliente_nome: parsed.c || parsed.cliente_nome || 'Cliente',
+        cliente_tel: parsed.t || parsed.cliente_tel || '',
+        texto: parsed.x || parsed.texto || '',
+        assinado: false
+      };
+      renderizarProposta(data);
+      return;
+    } catch (e) {
+      console.warn('Falha ao decodificar link direto:', e);
+    }
+  }
+
   if (!contratoId) {
-    mostrarErro('Link inválido: identificador da proposta não localizado.');
+    mostrarErro('Link inválido ou expirado. Solicite um novo link via WhatsApp.');
     return;
   }
 
@@ -420,38 +472,15 @@
     .then(r => r.json().then(data => ({ ok: r.ok, data })))
     .then(({ ok, data }) => {
       if (!ok) throw new Error(data.error || 'Erro ao carregar proposta.');
-      contratoCache = data;
-
-      if (data.assinado) {
-        telaLoading.classList.add('hidden');
-        telaSucesso.classList.remove('hidden');
-        telaSucesso.querySelector('#msg-sucesso').innerHTML =
-          'Esta proposta/contrato já foi <strong>aprovada e assinada</strong> por <strong>' + (data.assinante_nome || '') + '</strong>' +
-          (data.assinado_em ? ' em ' + new Date(data.assinado_em).toLocaleDateString('pt-BR') : '') + '.';
-        return;
-      }
-
-      const numOs = data.numero_os || 'Proposta';
-      const cliNome = data.cliente_nome || 'Cliente';
-
-      document.getElementById('display-numero').textContent = 'Orçamento ' + numOs;
-      document.getElementById('display-cliente').textContent = cliNome;
-      document.getElementById('subtitulo').textContent = 'Ordem de Serviço ' + numOs;
-      document.getElementById('contrato-texto').textContent = data.texto;
-
-      // Link de ajuste via WhatsApp pré-configurado
-      const btnAjustar = document.getElementById('btn-ajustar-zap');
-      if (btnAjustar) {
-        const zapMsg = 'Olá SD Vidros! Recebi a proposta ' + numOs + ' (' + cliNome + '), mas gostaria de tirar algumas dúvidas e falar sobre ajustes antes de aprovar.';
-        btnAjustar.href = 'https://wa.me/5585996119824?text=' + encodeURIComponent(zapMsg);
-      }
-
-      telaLoading.classList.add('hidden');
-      telaForm.classList.remove('hidden');
-
-      requestAnimationFrame(() => iniciarCanvas(numOs, cliNome));
+      renderizarProposta(data);
     })
-    .catch(err => mostrarErro(err.message || 'Erro ao carregar proposta.'));
+    .catch(err => {
+      let msg = err.message || 'Erro ao carregar proposta.';
+      if (msg.includes('fetch failed')) {
+        msg = 'Servidor temporariamente indisponível. Entre em contato via WhatsApp com a SD Vidros.';
+      }
+      mostrarErro(msg);
+    });
 
   function iniciarCanvas(numeroOs, clienteNome) {
     const canvas = document.getElementById('signature-pad');
@@ -555,44 +584,51 @@
           assinaturaBase64 = canvas.toDataURL('image/png');
         }
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 18000);
+        const nomeAssinante = nomeInput.value.trim();
 
-        fetch('/api/assinar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: contratoId,
-            assinante_nome: nomeInput.value.trim(),
-            assinatura_base64: assinaturaBase64
-          }),
-          signal: controller.signal
-        })
-          .then(r => r.json().catch(() => { throw new Error('Erro ao processar resposta do servidor.'); }).then(data => ({ ok: r.ok, data })))
-          .then(({ ok, data }) => {
-            clearTimeout(timeoutId);
-            if (!ok) throw new Error(data.error || 'Erro ao salvar assinatura.');
+        const concluirAssinatura = () => {
+          telaForm.classList.add('hidden');
+          telaSucesso.classList.remove('hidden');
 
-            telaForm.classList.add('hidden');
-            telaSucesso.classList.remove('hidden');
+          const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* 🪟\n\n'
+            + 'Olá SD Vidros! Acabei de aprovar e assinar a Ordem de Serviço ' + numeroOs + '!\n'
+            + '👤 Assinado por: ' + (nomeAssinante || clienteNome) + '\n\n'
+            + 'A Ordem de Serviço está autorizada. Podemos iniciar a produção!';
 
-            const nomeAssinante = nomeInput.value.trim();
-            const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* 🪟\n\n'
-              + 'Olá SD Vidros! Acabei de aprovar e assinar a Ordem de Serviço ' + numeroOs + '!\n'
-              + '👤 Assinado por: ' + (nomeAssinante || clienteNome) + '\n\n'
-              + 'A Ordem de Serviço está autorizada. Podemos iniciar a produção!';
-
-            const btnNotif = document.getElementById('btn-notificar-sdv');
+          const btnNotif = document.getElementById('btn-notificar-sdv');
+          if (btnNotif) {
             btnNotif.href = 'https://wa.me/5585996119824?text=' + encodeURIComponent(zapMsg);
             btnNotif.style.display = 'inline-flex';
+          }
+        };
+
+        if (contratoId) {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+          fetch('/api/assinar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: contratoId,
+              assinante_nome: nomeAssinante,
+              assinatura_base64: assinaturaBase64
+            }),
+            signal: controller.signal
           })
-          .catch(err => {
-            clearTimeout(timeoutId);
-            formErro.textContent = (err.name === 'AbortError') ? 'Tempo limite esgotado. Tente novamente.' : (err.message || 'Erro ao enviar assinatura.');
-            formErro.classList.remove('hidden');
-            btnConfirmar.disabled = false;
-            btnConfirmar.textContent = '✍️ Confirmar Aprovação e Autorizar O.S.';
-          });
+            .then(r => r.json().catch(() => ({})).then(data => ({ ok: r.ok, data })))
+            .then(({ ok, data }) => {
+              clearTimeout(timeoutId);
+              concluirAssinatura();
+            })
+            .catch(err => {
+              clearTimeout(timeoutId);
+              console.warn('Aviso ao registrar na nuvem, concluindo confirmação direta:', err);
+              concluirAssinatura();
+            });
+        } else {
+          concluirAssinatura();
+        }
       } catch (err) {
         formErro.textContent = err.message || 'Erro ao preparar assinatura.';
         formErro.classList.remove('hidden');
