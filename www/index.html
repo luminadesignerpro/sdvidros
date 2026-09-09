@@ -343,6 +343,173 @@
     .status-pill.pendente { background: rgba(201,168,76,0.14); color: var(--gold-light); border-color: rgba(201,168,76,0.3); }
     .status-pill.aprovado { background: rgba(37,211,102,0.15); color: #4ade80; border-color: rgba(37,211,102,0.35); }
     .status-pill.recusado { background: rgba(224,68,68,0.15); color: #ff8585; border-color: rgba(224,68,68,0.35); }
+
+    /* ── MÓDULO: FUNCIONÁRIOS & PONTO ── */
+    .ponto-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .ponto-title-box h2 {
+      font-size: 22px; font-weight: 900; color: #fff; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px;
+    }
+    .ponto-title-box p {
+      font-size: 12.5px; color: var(--muted); margin-top: 3px;
+    }
+    .ponto-top-actions {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .ponto-period-chips {
+      display: inline-flex; background: rgba(255,255,255,0.04); padding: 3px;
+      border-radius: 999px; border: 1px solid rgba(255,255,255,0.08);
+    }
+    .ponto-period-btn {
+      background: transparent; border: none; color: var(--muted); padding: 5px 12px;
+      border-radius: 999px; font-size: 11.5px; font-weight: 700; cursor: pointer; transition: all 0.15s;
+    }
+    .ponto-period-btn.active {
+      background: #0284c7; color: #fff; box-shadow: 0 2px 10px rgba(2,132,199,0.4);
+    }
+
+    /* Relógio Digital Card */
+    .ponto-clock-card {
+      background: radial-gradient(ellipse 70% 50% at 50% 20%, rgba(14,165,233,0.12) 0%, rgba(16,16,24,0.95) 75%);
+      border: 1.5px solid rgba(14,165,233,0.25); border-radius: var(--r-md);
+      padding: 24px 20px; text-align: center; margin-bottom: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .ponto-date-display {
+      font-size: 13px; font-weight: 800; color: #38bdf8; text-transform: uppercase;
+      letter-spacing: 0.12em; margin-bottom: 6px;
+    }
+    .ponto-clock-display {
+      font-size: clamp(38px, 8vw, 56px); font-weight: 900; color: #ffffff;
+      letter-spacing: 0.04em; text-shadow: 0 0 24px rgba(56,189,248,0.45);
+      line-height: 1.1; margin-bottom: 16px; font-variant-numeric: tabular-nums;
+    }
+    .ponto-employee-sel {
+      width: 100%; max-width: 440px; margin: 0 auto 20px; display: block;
+      background: #08080f; border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 10px; color: #fff; padding: 10px 14px; font-size: 14px;
+      font-weight: 600; outline: none; transition: border-color 0.2s;
+    }
+    .ponto-employee-sel:focus {
+      border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56,189,248,0.15);
+    }
+
+    .ponto-grid-actions {
+      display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
+    }
+    @media(max-width: 800px) {
+      .ponto-grid-actions { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media(max-width: 480px) {
+      .ponto-grid-actions { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .ponto-btn-action {
+      background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 12px; padding: 14px 8px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .ponto-btn-action:hover {
+      transform: translateY(-2px);
+    }
+    .ponto-btn-action:active { transform: scale(0.96); }
+    .ponto-btn-action .ponto-act-icon { font-size: 20px; line-height: 1; }
+    .ponto-btn-action .ponto-act-label { font-size: 12.5px; font-weight: 800; white-space: nowrap; }
+
+    .ponto-act-entrada {
+      background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.35); color: #34d399;
+    }
+    .ponto-act-entrada:hover {
+      background: rgba(16,185,129,0.2); border-color: #10b981; box-shadow: 0 6px 20px rgba(16,185,129,0.25);
+    }
+    .ponto-act-almoco {
+      background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.35); color: #fbbf24;
+    }
+    .ponto-act-almoco:hover {
+      background: rgba(245,158,11,0.2); border-color: #f59e0b; box-shadow: 0 6px 20px rgba(245,158,11,0.25);
+    }
+    .ponto-act-volta {
+      background: rgba(20,184,166,0.1); border-color: rgba(20,184,166,0.35); color: #2dd4bf;
+    }
+    .ponto-act-volta:hover {
+      background: rgba(20,184,166,0.2); border-color: #14b8a6; box-shadow: 0 6px 20px rgba(20,184,166,0.25);
+    }
+    .ponto-act-saida {
+      background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.35); color: #f87171;
+    }
+    .ponto-act-saida:hover {
+      background: rgba(239,68,68,0.2); border-color: #ef4444; box-shadow: 0 6px 20px rgba(239,68,68,0.25);
+    }
+    .ponto-act-falta {
+      background: rgba(220,38,38,0.12); border-color: rgba(220,38,38,0.35); color: #fca5a5;
+    }
+    .ponto-act-falta:hover {
+      background: rgba(220,38,38,0.22); border-color: #dc2626; box-shadow: 0 6px 20px rgba(220,38,38,0.25);
+    }
+    .ponto-act-doente {
+      background: rgba(168,85,247,0.12); border-color: rgba(168,85,247,0.35); color: #c084fc;
+    }
+    .ponto-act-doente:hover {
+      background: rgba(168,85,247,0.22); border-color: #a855f7; box-shadow: 0 6px 20px rgba(168,85,247,0.25);
+    }
+
+    /* Tabelas do Módulo de Ponto */
+    .ponto-table-wrap {
+      overflow-x: auto; width: 100%; border-radius: var(--r-sm);
+      border: 1px solid rgba(255,255,255,0.07); margin-top: 12px;
+    }
+    .ponto-table {
+      width: 100%; border-collapse: collapse; min-width: 820px; font-size: 13px;
+    }
+    .ponto-table th {
+      background: #0a0a14; color: var(--muted); font-size: 11px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.06em; padding: 12px 14px; text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .ponto-table td {
+      padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); background: var(--surface);
+      vertical-align: middle;
+    }
+    .ponto-table tr:hover td {
+      background: rgba(255,255,255,0.02);
+    }
+    .ponto-colab-name { font-weight: 800; color: #fff; font-size: 13.5px; }
+    .ponto-colab-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .ponto-cargo-badge { font-weight: 700; color: #38bdf8; font-size: 12.5px; }
+    .ponto-sal-val { font-weight: 800; color: #fff; font-size: 13px; }
+    .ponto-sal-h { font-size: 11.5px; font-weight: 700; color: #4ade80; margin-top: 1px; }
+
+    .ponto-status-select {
+      background: #08080f; border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 999px; padding: 5px 10px; font-size: 11.5px; font-weight: 700;
+      color: #fff; outline: none; cursor: pointer;
+    }
+    .ponto-status-select.presente { border-color: rgba(74,222,128,0.4); color: #4ade80; }
+    .ponto-status-select.almoco { border-color: rgba(251,191,36,0.4); color: #fbbf24; }
+    .ponto-status-select.folga { border-color: rgba(56,189,248,0.4); color: #38bdf8; }
+    .ponto-status-select.ausente { border-color: rgba(248,113,113,0.4); color: #f87171; }
+
+    .ponto-badge-tempo {
+      background: rgba(14,165,233,0.12); border: 1px solid rgba(14,165,233,0.3);
+      color: #38bdf8; font-weight: 800; font-size: 11.5px; padding: 4px 10px;
+      border-radius: 999px; display: inline-block; white-space: nowrap;
+    }
+    .ponto-hora-ent { color: #4ade80; font-weight: 700; }
+    .ponto-hora-alm { color: #fbbf24; font-weight: 700; }
+    .ponto-hora-vol { color: #2dd4bf; font-weight: 700; }
+    .ponto-hora-sai { color: #f87171; font-weight: 700; }
+    .ponto-hora-null { color: var(--muted); }
+
+    .btn-cyan {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7); color: #fff; border: none;
+    }
+    .btn-cyan:hover {
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      box-shadow: 0 4px 18px rgba(14,165,233,0.4);
+    }
   </style>
   <script src="pdf-lib.min.js"></script>
   <script>
@@ -393,6 +560,7 @@
     <button id="tab-historico" class="tab" data-tab="historico" onclick="goTab('historico')">🗂️ Histórico</button>
     <button id="tab-produtos" class="tab" data-tab="produtos" onclick="goTab('produtos')">📦 Produtos & Serviços</button>
     <button id="tab-clientes" class="tab" data-tab="clientes" onclick="goTab('clientes')">👤 Clientes</button>
+    <button id="tab-ponto" class="tab" data-tab="ponto" onclick="goTab('ponto')">👷 Funcionários & Ponto <span style="background:rgba(14,165,233,0.22);color:#38bdf8;font-size:10px;padding:2px 6px;border-radius:999px;margin-left:3px;border:1px solid rgba(14,165,233,0.35);font-weight:800;">Ponto</span></button>
     <button id="tab-contratos" class="tab" data-tab="contratos" onclick="goTab('contratos')">📄 Contratos</button>
     <button id="tab-usuarios" class="tab" data-tab="usuarios" onclick="goTab('usuarios')">👥 Usuários</button>
   </div>
@@ -608,6 +776,128 @@
   </div>
 
   <!-- ══════════════════════════════════════════ -->
+  <!-- PANEL: FUNCIONÁRIOS & PONTO -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="panel-ponto" class="panel">
+    <!-- Cabeçalho da Seção -->
+    <div class="ponto-header">
+      <div class="ponto-title-box">
+        <h2>👷 Funcionários & Ponto</h2>
+        <p>Controle de jornada de trabalho e registro de ponto eletrônico</p>
+      </div>
+      <div class="ponto-top-actions">
+        <div class="ponto-period-chips">
+          <button type="button" class="ponto-period-btn" onclick="selPontoPeriodo(this, 'dia')">Dia</button>
+          <button type="button" class="ponto-period-btn" onclick="selPontoPeriodo(this, 'semana')">Semana</button>
+          <button type="button" class="ponto-period-btn active" onclick="selPontoPeriodo(this, 'mes')">Mês</button>
+          <button type="button" class="ponto-period-btn" onclick="selPontoPeriodo(this, 'ano')">Ano</button>
+        </div>
+        <button type="button" class="btn btn-sec btn-sm" onclick="rolarParaRelogioPonto()">📋 Ponto</button>
+        <button type="button" class="btn btn-cyan btn-sm" onclick="abrirModalLancamentoPonto()">+ Lançamento</button>
+      </div>
+    </div>
+
+    <!-- Card: Relógio Digital e Batedor de Ponto -->
+    <div class="ponto-clock-card" id="relogio-card-container">
+      <div class="ponto-date-display" id="ponto-data-atual">TERÇA-FEIRA, 8 DE SETEMBRO DE 2026</div>
+      <div class="ponto-clock-display" id="ponto-hora-atual">00:00:00</div>
+
+      <select class="ponto-employee-sel" id="ponto-sel-colaborador" onchange="atualizarStatusBatidaColaborador()">
+        <option value="">Selecione o Funcionário...</option>
+      </select>
+
+      <div class="ponto-grid-actions">
+        <button type="button" class="ponto-btn-action ponto-act-entrada" onclick="registrarBatidaPonto('entrada1')">
+          <span class="ponto-act-icon">➔]</span>
+          <span class="ponto-act-label">1ª Entrada</span>
+        </button>
+        <button type="button" class="ponto-btn-action ponto-act-almoco" onclick="registrarBatidaPonto('saidaAlmoco')">
+          <span class="ponto-act-icon">☕</span>
+          <span class="ponto-act-label">Saída Almoço</span>
+        </button>
+        <button type="button" class="ponto-btn-action ponto-act-volta" onclick="registrarBatidaPonto('voltaAlmoco')">
+          <span class="ponto-act-icon">▶️</span>
+          <span class="ponto-act-label">Volta Almoço</span>
+        </button>
+        <button type="button" class="ponto-btn-action ponto-act-saida" onclick="registrarBatidaPonto('saidaFinal')">
+          <span class="ponto-act-icon">[➔</span>
+          <span class="ponto-act-label">Saída Final</span>
+        </button>
+        <button type="button" class="ponto-btn-action ponto-act-falta" onclick="registrarBatidaPonto('falta')">
+          <span class="ponto-act-icon">👤✕</span>
+          <span class="ponto-act-label">Falta</span>
+        </button>
+        <button type="button" class="ponto-btn-action ponto-act-doente" onclick="registrarBatidaPonto('faltaDoente')">
+          <span class="ponto-act-icon">⚡</span>
+          <span class="ponto-act-label">Falta Doente</span>
+        </button>
+      </div>
+      <div id="ponto-feedback-msg" style="margin-top:14px;font-size:13.5px;font-weight:700;"></div>
+    </div>
+
+    <!-- Card: Quadro de Funcionários Ativos -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+        <div class="card-title" style="margin-bottom:0;">
+          👥 Quadro de Funcionários Ativos <span class="num-badge" id="funcionarios-count">0</span>
+        </div>
+        <button type="button" class="btn btn-cyan btn-sm" onclick="abrirModalFuncionario()">+ Novo Funcionário</button>
+      </div>
+
+      <div class="ponto-table-wrap">
+        <table class="ponto-table">
+          <thead>
+            <tr>
+              <th style="min-width:180px">COLABORADOR</th>
+              <th style="min-width:150px">CARGO</th>
+              <th style="min-width:110px">DEPARTAMENTO</th>
+              <th style="min-width:80px">JORNADA</th>
+              <th style="min-width:110px">SALÁRIO</th>
+              <th style="min-width:130px">STATUS PRESENÇA</th>
+              <th style="width:110px;text-align:center">AÇÕES</th>
+            </tr>
+          </thead>
+          <tbody id="funcionarios-lista-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Card: Espelho de Ponto Eletrônico -->
+    <div class="card" style="margin-top:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+        <div class="card-title" style="margin-bottom:0;">
+          📑 Espelho de Ponto Eletrônico
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <select id="filtro-ponto-colaborador" onchange="renderEspelhoPonto()" style="background:#08080f;border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#fff;padding:6px 12px;font-size:12px;">
+            <option value="">Todos os Funcionários</option>
+          </select>
+          <button type="button" class="btn btn-sec btn-sm" onclick="imprimirFolhaPonto()">🖨️ Imprimir Folha</button>
+        </div>
+      </div>
+
+      <div class="ponto-table-wrap">
+        <table class="ponto-table">
+          <thead>
+            <tr>
+              <th style="min-width:150px">COLABORADOR</th>
+              <th style="width:95px">DATA</th>
+              <th style="width:85px">ENTRADA 1</th>
+              <th style="width:95px">SAÍDA ALMOÇO</th>
+              <th style="width:95px">VOLTA ALMOÇO</th>
+              <th style="width:90px">SAÍDA FINAL</th>
+              <th style="min-width:110px">TEMPO TRABALHADO</th>
+              <th style="min-width:130px">VALOR DO SALÁRIO</th>
+              <th style="width:110px;text-align:center">AÇÕES</th>
+            </tr>
+          </thead>
+          <tbody id="espelho-ponto-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
   <!-- PANEL: CONTRATOS -->
   <!-- ══════════════════════════════════════════ -->
   <div id="panel-contratos" class="panel">
@@ -744,6 +1034,122 @@
   </div>
 </div>
 
+<!-- ══ MODAL FUNCIONARIO ══ -->
+<div id="modal-funcionario" class="modal-overlay" style="display:none" onclick="fecharModalFuncionario(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">
+      <span id="modal-func-titulo">👤 Cadastrar Novo Funcionário</span>
+      <button class="modal-close" onclick="fecharModalFuncionario()">✕</button>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Nome Completo *</label>
+        <input id="f-nome" placeholder="Ex: Lucas Ferreira" />
+      </div>
+      <div class="field">
+        <label>WhatsApp / Telefone *</label>
+        <input id="f-tel" placeholder="(85) 99999-9999" />
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Email Corporativo</label>
+        <input id="f-email" type="email" placeholder="lucas@sdvidros.com.br" />
+      </div>
+      <div class="field">
+        <label>Cargo / Função *</label>
+        <input id="f-cargo" placeholder="Ex: Vidraceiro Líder / Instalador" />
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Departamento</label>
+        <input id="f-depto" placeholder="Ex: Produção / Operações" />
+      </div>
+      <div class="field">
+        <label>Jornada Semanal</label>
+        <input id="f-jornada" placeholder="Ex: 44h/sem" value="44h/sem" />
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Salário Mensal (R$)</label>
+        <input id="f-salario" type="text" inputmode="decimal" placeholder="3.500,00" oninput="calcularValorHoraFuncionario()" />
+      </div>
+      <div class="field">
+        <label>Valor / Hora (R$/h)</label>
+        <input id="f-vhora" type="text" inputmode="decimal" placeholder="17,67" />
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Status Inicial</label>
+      <select id="f-status" style="width:100%;padding:9px;background:#08080f;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;">
+        <option value="Presente">Presente</option>
+        <option value="Em Almoço">Em Almoço</option>
+        <option value="Folga">Folga</option>
+        <option value="Ausente">Ausente</option>
+      </select>
+    </div>
+    <div class="actions" style="margin-top:16px;">
+      <button class="btn btn-cyan btn-full" id="btn-salvar-func" onclick="salvarFuncionarioModal()">💾 Salvar Funcionário</button>
+    </div>
+    <div id="func-modal-msg" style="margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL LANÇAMENTO DE PONTO MANUAL ══ -->
+<div id="modal-lancamento-ponto" class="modal-overlay" style="display:none" onclick="fecharModalLancamentoPonto(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">
+      <span id="modal-ponto-titulo">⏰ Lançamento / Edição de Ponto</span>
+      <button class="modal-close" onclick="fecharModalLancamentoPonto()">✕</button>
+    </div>
+    <div class="field">
+      <label>Colaborador *</label>
+      <select id="lp-colaborador" style="width:100%;padding:9px;background:#08080f;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;">
+      </select>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Data *</label>
+      <input id="lp-data" type="text" placeholder="DD/MM/AAAA" />
+    </div>
+    <div class="field-row" style="margin-top:10px;">
+      <div class="field">
+        <label>1ª Entrada</label>
+        <input id="lp-ent1" placeholder="08:00" />
+      </div>
+      <div class="field">
+        <label>Saída Almoço</label>
+        <input id="lp-almsai" placeholder="12:00" />
+      </div>
+    </div>
+    <div class="field-row" style="margin-top:10px;">
+      <div class="field">
+        <label>Volta Almoço</label>
+        <input id="lp-almvol" placeholder="13:00" />
+      </div>
+      <div class="field">
+        <label>Saída Final</label>
+        <input id="lp-sai2" placeholder="17:00" />
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Status do Registro</label>
+      <select id="lp-status" style="width:100%;padding:9px;background:#08080f;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;">
+        <option value="Presente">Presente / Concluído</option>
+        <option value="Em Almoço">Em Almoço</option>
+        <option value="Folga">Folga</option>
+        <option value="Ausente">Falta / Ausente</option>
+        <option value="Atestado">Atestado / Falta Doente</option>
+      </select>
+    </div>
+    <div class="actions" style="margin-top:16px;">
+      <button class="btn btn-cyan btn-full" onclick="salvarLancamentoPontoModal()">💾 Salvar Batidas de Ponto</button>
+    </div>
+    <div id="ponto-modal-msg" style="margin-top:10px;"></div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════
 //  STORAGE & KEYS
@@ -753,7 +1159,9 @@ const K = {
   clients: 'sdv_clientes',
   orders: 'sdv_ordens',
   nextNum: 'sdv_next_num',
-  products: 'sdv_produtos'
+  products: 'sdv_produtos',
+  employees: 'sdv_funcionarios',
+  timesheet: 'sdv_pontos'
 };
 function load(k, d=[]) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }
 function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
@@ -763,6 +1171,11 @@ function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
 // ══════════════════════════════════════════════
 let clientes = [];
 let produtos = [];
+let funcionariosLista = [];
+let pontosLista = [];
+let pontoPeriodoAtual = 'mes';
+let editandoFuncionarioId = null;
+let editandoPontoId = null;
 let historico = [];
 let proxNumero = 1;
 let formaAtual = 'À vista';
@@ -812,7 +1225,7 @@ function getUser() {
 //  TABS
 // ══════════════════════════════════════════════
 function goTab(t) {
-  ['orcamento','historico','produtos','clientes','contratos','usuarios'].forEach(p => {
+  ['orcamento','historico','produtos','clientes','ponto','contratos','usuarios'].forEach(p => {
     const pan = document.getElementById('panel-'+p);
     if (pan) pan.classList.toggle('active', p===t);
     const tab = document.getElementById('tab-'+p);
@@ -821,6 +1234,7 @@ function goTab(t) {
   if (t==='historico') { renderHist(); sincronizarStatusContratos(); }
   if (t==='produtos')  { atualizarBannerSelecaoProduto(); renderProdutos(); }
   if (t==='clientes')  renderCli();
+  if (t==='ponto')     { renderPontoView(); }
   if (t==='contratos') { renderHist(); renderSelectContratos(); carregarListaContratos(); sincronizarStatusContratos(); }
   if (t==='usuarios')  renderUsuarios();
 }
@@ -1400,11 +1814,13 @@ function fecharModalSync(e) {
 
 function gerarBackupObjeto() {
   return {
-    version: '1.0',
+    version: '1.2',
     data: new Date().toISOString(),
     orders: load(K.orders, []),
     clients: load(K.clients, []),
     products: load(K.products, []),
+    employees: load(K.employees, []),
+    timesheet: load(K.timesheet, []),
     nextNum: load(K.nextNum, 1),
     users: load(K.users, [])
   };
@@ -1470,6 +1886,8 @@ function aplicarBackup(b) {
   if (Array.isArray(b.orders)) { historico = b.orders; save(K.orders, historico); }
   if (Array.isArray(b.clients)) { clientes = b.clients; save(K.clients, clientes); }
   if (Array.isArray(b.products)) { produtos = b.products; save(K.products, produtos); }
+  if (Array.isArray(b.employees)) { funcionariosLista = b.employees; save(K.employees, funcionariosLista); renderFuncionarios(); atualizarSelectColaboradoresPonto(); }
+  if (Array.isArray(b.timesheet)) { pontosLista = b.timesheet; save(K.timesheet, pontosLista); renderEspelhoPonto(); }
   if (b.nextNum) { proxNumero = b.nextNum; save(K.nextNum, proxNumero); }
   if (Array.isArray(b.users) && b.users.length) { save(K.users, b.users); }
 
@@ -1478,7 +1896,7 @@ function aplicarBackup(b) {
   renderProdutos();
   renderCli();
   renderSelectContratos();
-  showMsg('sync-msg', `✅ Sucesso! Restauradas ${historico.length} O.S. e ${clientes.length} clientes.`, true);
+  showMsg('sync-msg', `✅ Sucesso! Restauradas ${historico.length} O.S., ${clientes.length} clientes e dados de Ponto.`, true);
   setTimeout(() => fecharModalSync(), 1800);
 }
 
@@ -1675,6 +2093,771 @@ function showMsg(id, txt, ok) {
   el.className = ok ? 'msg-ok' : 'msg-err';
   el.textContent = txt;
   setTimeout(() => { if(el) { el.className=''; el.textContent=''; } }, 3500);
+}
+
+// ══════════════════════════════════════════════
+//  FUNCIONÁRIOS & PONTO ELETRÔNICO
+// ══════════════════════════════════════════════
+const FUNCIONARIOS_PADRAO = [
+  {
+    id: 101,
+    nome: 'Lucas Ferreira',
+    email: 'lucas@sdsolucoes.com.br',
+    whatsapp: '(11) 98765-4321',
+    cargo: 'Desenvolvedor Full Stack',
+    departamento: 'Tecnologia',
+    jornada: '40h/sem',
+    salario: 6500,
+    valorHora: 32.50,
+    status: 'Presente'
+  },
+  {
+    id: 102,
+    nome: 'Rafael Alencar',
+    email: 'rafael@sdsolucoes.com.br',
+    whatsapp: '(11) 96543-2109',
+    cargo: 'Engenheiro de Infra & Cloud',
+    departamento: 'Operações',
+    jornada: '44h/sem',
+    salario: 7000,
+    valorHora: 31.82,
+    status: 'Em Almoço'
+  },
+  {
+    id: 103,
+    nome: 'Camila Rocha',
+    email: 'camila@sdsolucoes.com.br',
+    whatsapp: '(11) 95432-1098',
+    cargo: 'Analista de Suporte Técnico',
+    departamento: 'Atendimento',
+    jornada: '36h/sem',
+    salario: 3800,
+    valorHora: 21.11,
+    status: 'Folga'
+  },
+  {
+    id: 104,
+    nome: 'Juliana Costa',
+    email: 'juliana@sdsolucoes.com.br',
+    whatsapp: '(85) 99123-4567',
+    cargo: 'Especialista de Atendimento',
+    departamento: 'Vendas',
+    jornada: '44h/sem',
+    salario: 4500,
+    valorHora: 26.00,
+    status: 'Presente'
+  }
+];
+
+function getHojeFormatado() {
+  const d = new Date();
+  const dia = String(d.getDate()).padStart(2, '0');
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const ano = d.getFullYear();
+  return `${dia}/${mes}/${ano}`;
+}
+
+const PONTOS_PADRAO = [
+  {
+    id: 1001,
+    colaboradorId: 101,
+    colaboradorNome: 'Lucas Ferreira',
+    data: getHojeFormatado(),
+    entrada1: '08:00',
+    saidaAlmoco: '12:00',
+    voltaAlmoco: '13:00',
+    saidaFinal: '17:00',
+    tempoTrabalhado: '08h 00m',
+    valorSalario: 'R$ 260,00',
+    valorHoraInfo: '(R$ 32,50/h)',
+    status: 'Presente'
+  },
+  {
+    id: 1002,
+    colaboradorId: 104,
+    colaboradorNome: 'Juliana Costa',
+    data: getHojeFormatado(),
+    entrada1: '09:00',
+    saidaAlmoco: '12:30',
+    voltaAlmoco: '13:30',
+    saidaFinal: '',
+    tempoTrabalhado: '03h 30m',
+    valorSalario: 'R$ 91,00',
+    valorHoraInfo: '(R$ 26,00/h)',
+    status: 'Presente'
+  },
+  {
+    id: 1003,
+    colaboradorId: 102,
+    colaboradorNome: 'Rafael Alencar',
+    data: getHojeFormatado(),
+    entrada1: '08:30',
+    saidaAlmoco: '12:15',
+    voltaAlmoco: '',
+    saidaFinal: '',
+    tempoTrabalhado: '03h 45m',
+    valorSalario: 'R$ 119,32',
+    valorHoraInfo: '(R$ 31,82/h)',
+    status: 'Em Almoço'
+  }
+];
+
+function iniciarRelogioPonto() {
+  atualizarRelogioDisplay();
+  if (!window._relogioPontoTimer) {
+    window._relogioPontoTimer = setInterval(atualizarRelogioDisplay, 1000);
+  }
+}
+
+function atualizarRelogioDisplay() {
+  const agora = new Date();
+  const diasSemana = ['DOMINGO', 'SEGUNDA-FEIRA', 'TERÇA-FEIRA', 'QUARTA-FEIRA', 'QUINTA-FEIRA', 'SEXTA-FEIRA', 'SÁBADO'];
+  const meses = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+  
+  const strData = `${diasSemana[agora.getDay()]}, ${agora.getDate()} DE ${meses[agora.getMonth()]} DE ${agora.getFullYear()}`;
+  const strHora = `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}:${String(agora.getSeconds()).padStart(2, '0')}`;
+
+  const elData = document.getElementById('ponto-data-atual');
+  const elHora = document.getElementById('ponto-hora-atual');
+  if (elData) elData.textContent = strData;
+  if (elHora) elHora.textContent = strHora;
+}
+
+function renderPontoView() {
+  iniciarRelogioPonto();
+  atualizarSelectColaboradoresPonto();
+  renderFuncionarios();
+  renderEspelhoPonto();
+}
+
+function atualizarSelectColaboradoresPonto() {
+  const selRelogio = document.getElementById('ponto-sel-colaborador');
+  const selFiltro = document.getElementById('filtro-ponto-colaborador');
+  const selModal = document.getElementById('lp-colaborador');
+
+  const valAtual = selRelogio ? selRelogio.value : '';
+  const filtroAtual = selFiltro ? selFiltro.value : '';
+
+  const opts = funcionariosLista.map(f => `<option value="${f.id}">${esc(f.nome)} — ${esc(f.cargo||'Colaborador')}</option>`).join('');
+
+  if (selRelogio) {
+    selRelogio.innerHTML = '<option value="">Selecione o Funcionário...</option>' + opts;
+    if (valAtual) selRelogio.value = valAtual;
+  }
+  if (selFiltro) {
+    selFiltro.innerHTML = '<option value="">Todos os Funcionários</option>' + opts;
+    if (filtroAtual) selFiltro.value = filtroAtual;
+  }
+  if (selModal) {
+    selModal.innerHTML = '<option value="">-- Selecione o Colaborador --</option>' + opts;
+  }
+  const badge = document.getElementById('funcionarios-count');
+  if (badge) badge.textContent = funcionariosLista.length;
+}
+
+function renderFuncionarios() {
+  const tbody = document.getElementById('funcionarios-lista-tbody');
+  if (!tbody) return;
+  const badge = document.getElementById('funcionarios-count');
+  if (badge) badge.textContent = funcionariosLista.length;
+
+  if (!funcionariosLista.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">Nenhum funcionário cadastrado. Clique em "+ Novo Funcionário" para adicionar.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = funcionariosLista.map(f => {
+    const st = f.status || 'Presente';
+    let stCls = 'presente';
+    if (st === 'Em Almoço') stCls = 'almoco';
+    else if (st === 'Folga') stCls = 'folga';
+    else if (st === 'Ausente' || st === 'Atestado') stCls = 'ausente';
+
+    const salFormatado = 'R$ ' + (Number(f.salario)||0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const vhFormatado = 'R$ ' + (Number(f.valorHora)||0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '/h';
+
+    return `
+      <tr>
+        <td>
+          <div class="ponto-colab-name">${esc(f.nome)}</div>
+          <div class="ponto-colab-sub">${esc(f.email || '')}${f.whatsapp ? ' · ' + esc(f.whatsapp) : ''}</div>
+        </td>
+        <td>
+          <div class="ponto-cargo-badge">${esc(f.cargo || 'Geral')}</div>
+        </td>
+        <td style="color:var(--text2);font-weight:600;">
+          ${esc(f.departamento || 'Operações')}
+        </td>
+        <td style="color:var(--text2);font-weight:700;">
+          ${esc(f.jornada || '44h/sem')}
+        </td>
+        <td>
+          <div class="ponto-sal-val">${salFormatado}</div>
+          <div class="ponto-sal-h">${vhFormatado}</div>
+        </td>
+        <td>
+          <select class="ponto-status-select ${stCls}" onchange="mudarStatusFuncionarioDireto(${f.id}, this.value)">
+            <option value="Presente" ${st==='Presente'?'selected':''}>• Presente</option>
+            <option value="Em Almoço" ${st==='Em Almoço'?'selected':''}>• Em Almoço</option>
+            <option value="Folga" ${st==='Folga'?'selected':''}>• Folga</option>
+            <option value="Ausente" ${st==='Ausente'?'selected':''}>• Ausente</option>
+          </select>
+        </td>
+        <td style="text-align:center;white-space:nowrap;">
+          <div style="display:flex;gap:4px;justify-content:center;">
+            <button type="button" class="btn btn-sec btn-sm" onclick="abrirModalFuncionario(${f.id})" title="Editar Funcionário" style="padding:4px 8px;font-size:12px;">✏️</button>
+            <button type="button" class="btn btn-sec btn-sm" onclick="resetarStatusFuncionario(${f.id})" title="Resetar Status" style="padding:4px 8px;font-size:12px;">🔄</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="excluirFuncionario(${f.id})" title="Excluir Funcionário" style="padding:4px 8px;font-size:12px;">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderEspelhoPonto() {
+  const tbody = document.getElementById('espelho-ponto-tbody');
+  if (!tbody) return;
+
+  const selFiltro = document.getElementById('filtro-ponto-colaborador');
+  const filtroId = selFiltro && selFiltro.value ? parseInt(selFiltro.value) : null;
+
+  let lista = pontosLista.slice();
+  if (filtroId) {
+    lista = lista.filter(p => p.colaboradorId === filtroId);
+  }
+
+  if (!lista.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">Nenhum registro de ponto encontrado para o período.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = lista.map(p => {
+    const f = funcionariosLista.find(x => x.id === p.colaboradorId);
+    const nomeColab = f ? f.nome : (p.colaboradorNome || 'Colaborador');
+    const vhInfo = p.valorHoraInfo || (f && f.valorHora ? `(R$ ${f.valorHora.toFixed(2).replace('.',',')}/h)` : '');
+
+    return `
+      <tr>
+        <td>
+          <div class="ponto-colab-name">${esc(nomeColab)}</div>
+        </td>
+        <td style="font-weight:700;color:var(--text);">${esc(p.data || '')}</td>
+        <td><span class="${p.entrada1 ? 'ponto-hora-ent' : 'ponto-hora-null'}">${p.entrada1 || '--:--'}</span></td>
+        <td><span class="${p.saidaAlmoco ? 'ponto-hora-alm' : 'ponto-hora-null'}">${p.saidaAlmoco || '--:--'}</span></td>
+        <td><span class="${p.voltaAlmoco ? 'ponto-hora-vol' : 'ponto-hora-null'}">${p.voltaAlmoco || '--:--'}</span></td>
+        <td><span class="${p.saidaFinal ? 'ponto-hora-sai' : 'ponto-hora-null'}">${p.saidaFinal || '--:--'}</span></td>
+        <td>
+          <span class="ponto-badge-tempo">${p.tempoTrabalhado || '00h 00m'}</span>
+        </td>
+        <td>
+          <div style="font-weight:800;color:#4ade80;font-size:13px;">${p.valorSalario || 'R$ 0,00'}</div>
+          ${vhInfo ? `<div style="font-size:11px;color:var(--muted);">${esc(vhInfo)}</div>` : ''}
+        </td>
+        <td style="text-align:center;white-space:nowrap;">
+          <div style="display:flex;gap:4px;justify-content:center;">
+            <button type="button" class="btn btn-whats btn-sm" onclick="enviarPontoWhatsApp(${p.id})" title="Enviar Comprovante via WhatsApp" style="padding:4px 8px;font-size:12px;">📱</button>
+            <button type="button" class="btn btn-sec btn-sm" onclick="abrirModalLancamentoPonto(${p.id})" title="Editar Batidas" style="padding:4px 8px;font-size:12px;">✏️</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="excluirPonto(${p.id})" title="Excluir Registro" style="padding:4px 8px;font-size:12px;">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function selPontoPeriodo(btn, periodo) {
+  document.querySelectorAll('.ponto-period-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  pontoPeriodoAtual = periodo;
+  renderEspelhoPonto();
+}
+
+function rolarParaRelogioPonto() {
+  const el = document.getElementById('relogio-card-container');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function atualizarStatusBatidaColaborador() {
+  const sel = document.getElementById('ponto-sel-colaborador');
+  const id = sel ? parseInt(sel.value) : 0;
+  const msgEl = document.getElementById('ponto-feedback-msg');
+  if (!id) {
+    if (msgEl) msgEl.innerHTML = '';
+    return;
+  }
+  const colab = funcionariosLista.find(f => f.id === id);
+  if (!colab) return;
+  const hoje = getHojeFormatado();
+  const p = pontosLista.find(x => x.colaboradorId === id && x.data === hoje);
+  if (msgEl) {
+    if (p) {
+      msgEl.innerHTML = `<span style="color:var(--gold-light);">Status hoje (${hoje}): Ent: ${p.entrada1||'--'} · Almoço: ${p.saidaAlmoco||'--'} / ${p.voltaAlmoco||'--'} · Saída: ${p.saidaFinal||'--'} (${p.tempoTrabalhado||'00h 00m'})</span>`;
+    } else {
+      msgEl.innerHTML = `<span style="color:var(--text2);">Nenhuma batida registrada hoje para ${colab.nome}.</span>`;
+    }
+  }
+}
+
+function mostrarMsgPonto(txt, ok) {
+  const el = document.getElementById('ponto-feedback-msg');
+  if (!el) return;
+  el.style.color = ok ? '#4ade80' : '#f87171';
+  el.textContent = txt;
+  setTimeout(() => {
+    if (el) { el.textContent = ''; atualizarStatusBatidaColaborador(); }
+  }, 4500);
+}
+
+function mudarStatusFuncionarioDireto(id, novoStatus) {
+  const f = funcionariosLista.find(x => x.id === id);
+  if (!f) return;
+  f.status = novoStatus;
+  save(K.employees, funcionariosLista);
+  renderFuncionarios();
+}
+
+function resetarStatusFuncionario(id) {
+  const f = funcionariosLista.find(x => x.id === id);
+  if (!f) return;
+  f.status = 'Presente';
+  save(K.employees, funcionariosLista);
+  renderFuncionarios();
+  mostrarMsgPonto(`Status de ${f.nome} resetado para "Presente".`, true);
+}
+
+function registrarBatidaPonto(tipo) {
+  const sel = document.getElementById('ponto-sel-colaborador');
+  const colabId = parseInt(sel ? sel.value : 0);
+  if (!colabId) {
+    mostrarMsgPonto('⚠️ Selecione um funcionário no menu acima antes de bater o ponto!', false);
+    if (sel) sel.focus();
+    return;
+  }
+  const colab = funcionariosLista.find(f => f.id === colabId);
+  if (!colab) return;
+
+  const agora = new Date();
+  const hh = String(agora.getHours()).padStart(2, '0');
+  const mm = String(agora.getMinutes()).padStart(2, '0');
+  const horaStr = `${hh}:${mm}`;
+  const dataHoje = getHojeFormatado();
+
+  let p = pontosLista.find(x => x.colaboradorId === colabId && x.data === dataHoje);
+  if (!p) {
+    p = {
+      id: Date.now(),
+      colaboradorId: colabId,
+      colaboradorNome: colab.nome,
+      data: dataHoje,
+      entrada1: '',
+      saidaAlmoco: '',
+      voltaAlmoco: '',
+      saidaFinal: '',
+      tempoTrabalhado: '00h 00m',
+      valorSalario: 'R$ 0,00',
+      valorHoraInfo: `(R$ ${(colab.valorHora||0).toFixed(2).replace('.', ',')}/h)`,
+      status: 'Presente'
+    };
+    pontosLista.unshift(p);
+  }
+
+  let labelTipo = '';
+  if (tipo === 'entrada1') {
+    p.entrada1 = horaStr;
+    colab.status = 'Presente';
+    p.status = 'Presente';
+    labelTipo = '1ª Entrada';
+  } else if (tipo === 'saidaAlmoco') {
+    p.saidaAlmoco = horaStr;
+    colab.status = 'Em Almoço';
+    p.status = 'Em Almoço';
+    labelTipo = 'Saída Almoço';
+  } else if (tipo === 'voltaAlmoco') {
+    p.voltaAlmoco = horaStr;
+    colab.status = 'Presente';
+    p.status = 'Presente';
+    labelTipo = 'Volta Almoço';
+  } else if (tipo === 'saidaFinal') {
+    p.saidaFinal = horaStr;
+    colab.status = 'Folga';
+    p.status = 'Folga';
+    labelTipo = 'Saída Final';
+  } else if (tipo === 'falta') {
+    p.status = 'Ausente';
+    colab.status = 'Ausente';
+    labelTipo = 'Falta Registrada';
+  } else if (tipo === 'faltaDoente') {
+    p.status = 'Atestado/Médico';
+    colab.status = 'Atestado';
+    labelTipo = 'Falta Médica Registrada';
+  }
+
+  recalcularHorasPonto(p, colab);
+
+  save(K.employees, funcionariosLista);
+  save(K.timesheet, pontosLista);
+
+  renderFuncionarios();
+  renderEspelhoPonto();
+
+  mostrarMsgPonto(`✅ ${labelTipo} registrada com sucesso para ${colab.nome} às ${horaStr}!`, true);
+}
+
+function recalcularHorasPonto(p, colab) {
+  const parseMin = (str) => {
+    if (!str || !str.includes(':')) return null;
+    const parts = str.split(':').map(Number);
+    if (isNaN(parts[0]) || isNaN(parts[1])) return null;
+    return parts[0] * 60 + parts[1];
+  };
+
+  let totalMin = 0;
+  const mEntrada = parseMin(p.entrada1);
+  const mAlmocoSai = parseMin(p.saidaAlmoco);
+  const mAlmocoVolta = parseMin(p.voltaAlmoco);
+  const mSaida = parseMin(p.saidaFinal);
+
+  // Turno da manhã
+  if (mEntrada !== null && mAlmocoSai !== null && mAlmocoSai > mEntrada) {
+    totalMin += (mAlmocoSai - mEntrada);
+  } else if (mEntrada !== null && mSaida !== null && mAlmocoSai === null && mSaida > mEntrada) {
+    totalMin += (mSaida - mEntrada);
+  }
+
+  // Turno da tarde
+  if (mAlmocoVolta !== null && mSaida !== null && mSaida > mAlmocoVolta) {
+    totalMin += (mSaida - mAlmocoVolta);
+  } else if (mAlmocoVolta !== null && mSaida === null) {
+    const agora = new Date();
+    const minAgora = agora.getHours() * 60 + agora.getMinutes();
+    if (minAgora > mAlmocoVolta && p.data === getHojeFormatado()) {
+      totalMin += (minAgora - mAlmocoVolta);
+    }
+  }
+
+  if (mEntrada !== null && mAlmocoSai === null && mSaida === null && p.data === getHojeFormatado()) {
+    const agora = new Date();
+    const minAgora = agora.getHours() * 60 + agora.getMinutes();
+    if (minAgora > mEntrada) {
+      totalMin = (minAgora - mEntrada);
+    }
+  }
+
+  const hTot = Math.floor(totalMin / 60);
+  const mTot = totalMin % 60;
+  p.tempoTrabalhado = `${String(hTot).padStart(2, '0')}h ${String(mTot).padStart(2, '0')}m`;
+
+  const vHora = colab && colab.valorHora ? colab.valorHora : 0;
+  const valorDia = (totalMin / 60) * vHora;
+  p.valorSalario = 'R$ ' + valorDia.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (vHora > 0) {
+    p.valorHoraInfo = `(R$ ${vHora.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/h)`;
+  }
+}
+
+function calcularValorHoraFuncionario() {
+  const salario = parseNum(document.getElementById('f-salario').value);
+  const jornadaStr = document.getElementById('f-jornada').value || '44';
+  const horasSem = parseInt(jornadaStr.replace(/\D/g, '')) || 44;
+  const horasMes = horasSem * 4.545;
+  if (salario > 0 && horasMes > 0) {
+    const vh = salario / horasMes;
+    document.getElementById('f-vhora').value = vh.toFixed(2).replace('.', ',');
+  }
+}
+
+function abrirModalFuncionario(id = null) {
+  editandoFuncionarioId = id;
+  const titulo = document.getElementById('modal-func-titulo');
+  const btnSalvar = document.getElementById('btn-salvar-func');
+  if (id) {
+    const f = funcionariosLista.find(x => x.id === id);
+    if (!f) return;
+    if (titulo) titulo.textContent = '✏️ Editar Funcionário';
+    if (btnSalvar) btnSalvar.textContent = '💾 Atualizar Funcionário';
+    document.getElementById('f-nome').value = f.nome || '';
+    document.getElementById('f-tel').value = f.whatsapp || '';
+    document.getElementById('f-email').value = f.email || '';
+    document.getElementById('f-cargo').value = f.cargo || '';
+    document.getElementById('f-depto').value = f.departamento || '';
+    document.getElementById('f-jornada').value = f.jornada || '44h/sem';
+    document.getElementById('f-salario').value = f.salario ? String(f.salario) : '';
+    document.getElementById('f-vhora').value = f.valorHora ? f.valorHora.toFixed(2).replace('.', ',') : '';
+    document.getElementById('f-status').value = f.status || 'Presente';
+  } else {
+    if (titulo) titulo.textContent = '👤 Cadastrar Novo Funcionário';
+    if (btnSalvar) btnSalvar.textContent = '💾 Salvar Funcionário';
+    ['f-nome','f-tel','f-email','f-cargo','f-depto','f-salario','f-vhora'].forEach(i => {
+      const el = document.getElementById(i); if (el) el.value = '';
+    });
+    document.getElementById('f-jornada').value = '44h/sem';
+    document.getElementById('f-status').value = 'Presente';
+  }
+  document.getElementById('modal-funcionario').style.display = 'flex';
+}
+
+function fecharModalFuncionario(e) {
+  if (!e || e.target === document.getElementById('modal-funcionario')) {
+    document.getElementById('modal-funcionario').style.display = 'none';
+  }
+}
+
+function salvarFuncionarioModal() {
+  const nome = document.getElementById('f-nome').value.trim();
+  const whatsapp = document.getElementById('f-tel').value.trim();
+  const cargo = document.getElementById('f-cargo').value.trim();
+  if (!nome) { showMsg('func-modal-msg', 'Informe o nome completo do funcionário.', false); return; }
+
+  const salario = parseNum(document.getElementById('f-salario').value);
+  let vhora = parseNum(document.getElementById('f-vhora').value);
+  if (!vhora && salario > 0) {
+    const jornadaStr = document.getElementById('f-jornada').value || '44';
+    const horasSem = parseInt(jornadaStr.replace(/\D/g, '')) || 44;
+    vhora = salario / (horasSem * 4.545);
+  }
+
+  const novo = {
+    nome,
+    whatsapp,
+    email: document.getElementById('f-email').value.trim(),
+    cargo: cargo || 'Colaborador',
+    departamento: document.getElementById('f-depto').value.trim() || 'Operações',
+    jornada: document.getElementById('f-jornada').value.trim() || '44h/sem',
+    salario,
+    valorHora: vhora,
+    status: document.getElementById('f-status').value || 'Presente'
+  };
+
+  if (editandoFuncionarioId) {
+    const idx = funcionariosLista.findIndex(x => x.id === editandoFuncionarioId);
+    if (idx !== -1) funcionariosLista[idx] = { ...funcionariosLista[idx], ...novo };
+  } else {
+    novo.id = Date.now();
+    funcionariosLista.push(novo);
+  }
+
+  save(K.employees, funcionariosLista);
+  atualizarSelectColaboradoresPonto();
+  renderFuncionarios();
+  document.getElementById('modal-funcionario').style.display = 'none';
+  mostrarMsgPonto(`✅ Funcionário "${nome}" salvo com sucesso!`, true);
+}
+
+function excluirFuncionario(id) {
+  const f = funcionariosLista.find(x => x.id === id);
+  if (!f) return;
+  if (!confirm(`Deseja realmente remover o colaborador "${f.nome}"?`)) return;
+  funcionariosLista = funcionariosLista.filter(x => x.id !== id);
+  save(K.employees, funcionariosLista);
+  atualizarSelectColaboradoresPonto();
+  renderFuncionarios();
+  mostrarMsgPonto('Colaborador removido.', true);
+}
+
+function abrirModalLancamentoPonto(pId = null) {
+  editandoPontoId = pId;
+  const titulo = document.getElementById('modal-ponto-titulo');
+  atualizarSelectColaboradoresPonto();
+
+  if (pId) {
+    const p = pontosLista.find(x => x.id === pId);
+    if (!p) return;
+    if (titulo) titulo.textContent = '✏️ Editar Registro de Ponto';
+    document.getElementById('lp-colaborador').value = p.colaboradorId || '';
+    document.getElementById('lp-data').value = p.data || '';
+    document.getElementById('lp-ent1').value = p.entrada1 || '';
+    document.getElementById('lp-almsai').value = p.saidaAlmoco || '';
+    document.getElementById('lp-almvol').value = p.voltaAlmoco || '';
+    document.getElementById('lp-sai2').value = p.saidaFinal || '';
+    document.getElementById('lp-status').value = p.status || 'Presente';
+  } else {
+    if (titulo) titulo.textContent = '⏰ Lançamento Manual de Ponto';
+    const selRelogio = document.getElementById('ponto-sel-colaborador');
+    document.getElementById('lp-colaborador').value = selRelogio ? selRelogio.value : '';
+    document.getElementById('lp-data').value = getHojeFormatado();
+    document.getElementById('lp-ent1').value = '08:00';
+    document.getElementById('lp-almsai').value = '12:00';
+    document.getElementById('lp-almvol').value = '13:00';
+    document.getElementById('lp-sai2').value = '17:00';
+    document.getElementById('lp-status').value = 'Presente';
+  }
+  document.getElementById('modal-lancamento-ponto').style.display = 'flex';
+}
+
+function fecharModalLancamentoPonto(e) {
+  if (!e || e.target === document.getElementById('modal-lancamento-ponto')) {
+    document.getElementById('modal-lancamento-ponto').style.display = 'none';
+  }
+}
+
+function salvarLancamentoPontoModal() {
+  const colabId = parseInt(document.getElementById('lp-colaborador').value);
+  const data = document.getElementById('lp-data').value.trim();
+  if (!colabId) { showMsg('ponto-modal-msg', 'Selecione o colaborador.', false); return; }
+  if (!data) { showMsg('ponto-modal-msg', 'Informe a data do registro.', false); return; }
+
+  const colab = funcionariosLista.find(x => x.id === colabId);
+  const ent1 = document.getElementById('lp-ent1').value.trim();
+  const almsai = document.getElementById('lp-almsai').value.trim();
+  const almvol = document.getElementById('lp-almvol').value.trim();
+  const sai2 = document.getElementById('lp-sai2').value.trim();
+  const status = document.getElementById('lp-status').value || 'Presente';
+
+  let p = null;
+  if (editandoPontoId) {
+    p = pontosLista.find(x => x.id === editandoPontoId);
+  }
+  if (!p) {
+    p = { id: Date.now() };
+    pontosLista.unshift(p);
+  }
+
+  p.colaboradorId = colabId;
+  p.colaboradorNome = colab ? colab.nome : 'Colaborador';
+  p.data = data;
+  p.entrada1 = ent1;
+  p.saidaAlmoco = almsai;
+  p.voltaAlmoco = almvol;
+  p.saidaFinal = sai2;
+  p.status = status;
+
+  recalcularHorasPonto(p, colab);
+
+  save(K.timesheet, pontosLista);
+  renderEspelhoPonto();
+  document.getElementById('modal-lancamento-ponto').style.display = 'none';
+  mostrarMsgPonto(`✅ Registro de ponto para ${p.colaboradorNome} salvo com sucesso!`, true);
+}
+
+function excluirPonto(id) {
+  if (!confirm('Deseja excluir este registro de ponto?')) return;
+  pontosLista = pontosLista.filter(x => x.id !== id);
+  save(K.timesheet, pontosLista);
+  renderEspelhoPonto();
+  mostrarMsgPonto('Registro de ponto excluído.', true);
+}
+
+function enviarPontoWhatsApp(pId) {
+  const p = pontosLista.find(x => x.id === pId);
+  if (!p) return;
+  const f = funcionariosLista.find(x => x.id === p.colaboradorId);
+  const tel = f && f.whatsapp ? f.whatsapp.replace(/\D/g, '') : '';
+  const msg = `*SD Vidros — Espelho de Ponto Eletrônico*
+Colaborador: *${f ? f.nome : p.colaboradorNome}*
+Data: *${p.data}*
+
+⏰ *Batidas de Ponto:*
+• 1ª Entrada: *${p.entrada1 || '--:--'}*
+• Saída Almoço: *${p.saidaAlmoco || '--:--'}*
+• Volta Almoço: *${p.voltaAlmoco || '--:--'}*
+• Saída Final: *${p.saidaFinal || '--:--'}*
+
+⏱️ Tempo Trabalhado: *${p.tempoTrabalhado || '00h 00m'}*
+💰 Valor do Salário: *${p.valorSalario || 'R$ 0,00'}*
+Status: *${p.status || 'Validado'}*
+
+_Comprovante de ponto eletrônico gerado pelo sistema SD Vidros._`;
+
+  const url = tel ? `https://api.whatsapp.com/send?phone=55${tel}&text=${encodeURIComponent(msg)}` : `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+
+function imprimirFolhaPonto() {
+  const selFiltro = document.getElementById('filtro-ponto-colaborador');
+  const fId = selFiltro && selFiltro.value ? parseInt(selFiltro.value) : null;
+  const f = fId ? funcionariosLista.find(x => x.id === fId) : null;
+
+  let registros = pontosLista.slice();
+  if (fId) registros = registros.filter(x => x.colaboradorId === fId);
+
+  const hoje = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Folha de Ponto Eletrônico — SD Vidros</title>
+      <style>
+        body { font-family: Arial, sans-serif; color: #111; padding: 24px; max-width: 800px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #C9A84C; padding-bottom: 14px; margin-bottom: 20px; }
+        .title { font-size: 20px; font-weight: bold; color: #111; }
+        .sub { font-size: 12px; color: #555; margin-top: 3px; }
+        .info-box { background: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 12px; }
+        th { background: #f0f0f0; border: 1px solid #ccc; padding: 8px; text-align: center; }
+        td { border: 1px solid #ddd; padding: 7px 8px; text-align: center; }
+        .signatures { display: flex; justify-content: space-between; margin-top: 60px; padding-top: 20px; }
+        .sig-line { width: 45%; text-align: center; border-top: 1px solid #333; padding-top: 6px; font-size: 12px; }
+        @media print { button { display: none; } }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div>
+          <div class="title">SD VIDROS — ESPELHO DE PONTO ELETRÔNICO</div>
+          <div class="sub">Sistema de Gestão de Ponto e Jornada de Trabalho · Itaitinga - CE</div>
+        </div>
+        <button onclick="window.print()" style="padding:8px 16px;background:#C9A84C;color:#000;font-weight:bold;border:none;border-radius:6px;cursor:pointer;">🖨️ Imprimir</button>
+      </div>
+
+      <div class="info-box">
+        <strong>Colaborador:</strong> ${f ? f.nome : 'Todos os Funcionários'}<br>
+        ${f ? `<strong>Cargo:</strong> ${f.cargo||'Geral'} | <strong>Departamento:</strong> ${f.departamento||'Operações'} | <strong>Jornada:</strong> ${f.jornada||'44h/sem'}<br>` : ''}
+        <strong>Data de Emissão:</strong> ${hoje}
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Colaborador</th>
+            <th>Data</th>
+            <th>1ª Entrada</th>
+            <th>Saída Almoço</th>
+            <th>Volta Almoço</th>
+            <th>Saída Final</th>
+            <th>Horas Trab.</th>
+            <th>Valor Salário</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${registros.map(r => `
+            <tr>
+              <td style="text-align:left;"><strong>${r.colaboradorNome || ''}</strong></td>
+              <td>${r.data || ''}</td>
+              <td>${r.entrada1 || '--:--'}</td>
+              <td>${r.saidaAlmoco || '--:--'}</td>
+              <td>${r.voltaAlmoco || '--:--'}</td>
+              <td>${r.saidaFinal || '--:--'}</td>
+              <td><strong>${r.tempoTrabalhado || '00h 00m'}</strong></td>
+              <td>${r.valorSalario || 'R$ 0,00'}</td>
+              <td>${r.status || 'Normal'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+
+      <div class="signatures">
+        <div class="sig-line">
+          <strong>${f ? f.nome : 'Assinatura do Colaborador'}</strong><br>
+          Colaborador
+        </div>
+        <div class="sig-line">
+          <strong>SD Vidros</strong><br>
+          Diretoria / RH
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const w = window.open('', '_blank');
+  if (w) {
+    w.document.write(html);
+    w.document.close();
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -2940,6 +4123,24 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('itens-lista').innerHTML = '';
   itemId = 0; addItem();
   atualizarNumeroDisplay();
+
+  // Load funcionarios e pontos
+  funcionariosLista = load(K.employees);
+  if (!funcionariosLista || !funcionariosLista.length) {
+    funcionariosLista = FUNCIONARIOS_PADRAO;
+    save(K.employees, funcionariosLista);
+  }
+
+  pontosLista = load(K.timesheet);
+  if (!pontosLista || !pontosLista.length) {
+    pontosLista = PONTOS_PADRAO;
+    save(K.timesheet, pontosLista);
+  }
+
+  iniciarRelogioPonto();
+  atualizarSelectColaboradoresPonto();
+  renderFuncionarios();
+  renderEspelhoPonto();
 
   renderHist();
   renderProdutos();
