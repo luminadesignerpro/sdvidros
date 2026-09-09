@@ -702,7 +702,10 @@
         <div class="card-title" style="margin-bottom:0;">
           🗂️ Orçamentos e Ordens de Serviço <span class="num-badge" id="hist-count">0</span>
         </div>
-        <button class="btn btn-gold btn-sm" onclick="abrirModalSync()">🔄 Backup / Sincronizar</button>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-whats btn-sm" onclick="abrirModalConfirmacaoZap()" title="Confirmar aprovação recebida pelo WhatsApp">⚡ Confirmar WhatsApp</button>
+          <button class="btn btn-gold btn-sm" onclick="abrirModalSync()">🔄 Backup / Sincronizar</button>
+        </div>
       </div>
       <div id="hist-lista"><div class="empty">Nenhum orçamento salvo ainda.</div></div>
     </div>
@@ -999,6 +1002,38 @@
       <button class="modal-close" onclick="fecharModalAssinatura()">✕</button>
     </div>
     <div id="modal-assinatura-conteudo"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL CONFIRMAÇÃO WHATSAPP AUTOMÁTICA ══ -->
+<div id="modal-confirmacao-zap" class="modal-overlay" style="display:none" onclick="fecharModalConfirmacaoZap(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">
+      ⚡ Confirmar Aprovação via WhatsApp
+      <button class="modal-close" onclick="fecharModalConfirmacaoZap()">✕</button>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5;">
+      Cole abaixo a mensagem enviada pelo cliente no WhatsApp para atualizar automaticamente o orçamento no Histórico para <strong style="color:#4ade80">🟢 Aprovado</strong>:
+    </div>
+
+    <div style="background:rgba(37,211,102,0.08);border:1.5px solid rgba(37,211,102,0.3);border-radius:14px;padding:14px;margin-bottom:14px;">
+      <div style="font-size:11.5px;color:#4ade80;font-weight:700;margin-bottom:6px;">Exemplo de mensagem recebida:</div>
+      <div style="font-size:12px;color:var(--text);font-style:italic;background:rgba(0,0,0,0.35);padding:8px 12px;border-radius:8px;">
+        "Olá! Aprovo o orçamento #0006 no valor de R$ 800,00 da SD Vidros! Pode iniciar a produção"
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:14px;">
+      <label>Cole a mensagem ou digite o Nº da O.S. (ex: #0006)</label>
+      <textarea id="zap-msg-input" style="width:100%;height:85px;background:#08080f;border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;color:var(--text);padding:10px;font-family:var(--font);font-size:13px;" placeholder="Cole a mensagem do WhatsApp aqui..."></textarea>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-whats btn-full" onclick="processarConfirmacaoZapColada()">
+        ✅ Confirmar e Atualizar Status
+      </button>
+    </div>
+    <div id="zap-confirm-feedback" style="margin-top:10px;"></div>
   </div>
 </div>
 
@@ -1616,16 +1651,22 @@ function gerarLinkAprovacaoWhats(numero, total, aprovado) {
 }
 
 function gerarMensagemWhatsAppAprovacao(o) {
+  const numOs = o.numero || '';
+  const totalVal = o.total || '';
+  const nomeCli = o.nome || '';
+  const baseUrl = (window.location.origin && window.location.origin.startsWith('http'))
+    ? window.location.origin
+    : 'https://sdvidros.vercel.app';
+  const linkAprovacaoOnline = `${baseUrl}/api/aprovar-orcamento?os=${encodeURIComponent(numOs)}&total=${encodeURIComponent(totalVal)}&cliente=${encodeURIComponent(nomeCli)}`;
+
   let m = `*SD VIDROS* 🪟\n`;
-  m += `Orçamento *${o.numero || ''}* em anexo (PDF).\n\n`;
-  if (o.nome) m += `👤 Cliente: *${o.nome}*\n`;
-  if (o.total) m += `💰 Valor Total: *${o.total}*\n\n`;
-  m += `Por favor, nos responda com:\n`;
-  m += `✅ *Aprovado*\n`;
-  m += `❌ *Não Aprovado / Ajustar detalhes*\n\n`;
-  m += `Ou confirme com 1 toque:\n`;
-  m += `👉 *Aprovar Orçamento:*\nhttps://wa.me/${SD_ZAP_NUM}?text=${encodeURIComponent(`Olá! Aprovo o orçamento ${o.numero || ''} no valor de ${o.total || ''} da SD Vidros! Pode iniciar a produção.`)}\n\n`;
-  m += `👉 *Solicitar Ajustes:*\nhttps://wa.me/${SD_ZAP_NUM}?text=${encodeURIComponent(`Olá! Recebi o orçamento ${o.numero || ''}, mas gostaria de falar sobre ajustes e condições.`)}`;
+  m += `Orçamento *${numOs}* em anexo (PDF).\n\n`;
+  if (nomeCli) m += `👤 Cliente: *${nomeCli}*\n`;
+  if (totalVal) m += `💰 Valor Total: *${totalVal}*\n\n`;
+  m += `Para aprovar seu orçamento e autorizar a produção com *confirmação automática*, toque no link abaixo:\n\n`;
+  m += `👉 *CLIQUE AQUI PARA APROVAR O ORÇAMENTO:*\n${linkAprovacaoOnline}\n\n`;
+  m += `_(Ao tocar no link, a aprovação é registrada instantaneamente no sistema e o WhatsApp abre com a confirmação pronta)_\n\n`;
+  m += `👉 *Solicitar Ajustes:*\nhttps://wa.me/${SD_ZAP_NUM}?text=${encodeURIComponent(`Olá! Recebi o orçamento ${numOs}, mas gostaria de falar sobre ajustes e condições.`)}`;
   return m;
 }
 
@@ -1739,8 +1780,94 @@ function alternarStatusOs(id) {
   const atual = historico[idx].status || 'pendente';
   const prox = ordem[(ordem.indexOf(atual) + 1) % ordem.length];
   historico[idx].status = prox;
+  if (prox === 'aprovado') {
+    historico[idx].assinado_por = historico[idx].assinado_por || 'Aprovado Manualmente';
+    historico[idx].assinado_em = new Date().toISOString();
+    // Sincroniza em segundo plano com a API
+    fetch('/api/aprovar-orcamento', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        os: historico[idx].numero,
+        cliente: historico[idx].nome,
+        total: historico[idx].total
+      })
+    }).catch(() => {});
+  }
   save(K.orders, historico);
   renderHist();
+}
+
+function abrirModalConfirmacaoZap() {
+  document.getElementById('modal-confirmacao-zap').style.display = 'flex';
+  const textarea = document.getElementById('zap-msg-input');
+  if (textarea) {
+    textarea.value = '';
+    textarea.focus();
+  }
+  const feedback = document.getElementById('zap-confirm-feedback');
+  if (feedback) { feedback.className = ''; feedback.textContent = ''; }
+}
+
+function fecharModalConfirmacaoZap(e) {
+  if (!e || e.target === document.getElementById('modal-confirmacao-zap')) {
+    document.getElementById('modal-confirmacao-zap').style.display = 'none';
+  }
+}
+
+function processarConfirmacaoZapColada() {
+  const texto = (document.getElementById('zap-msg-input').value || '').trim();
+  if (!texto) {
+    showMsg('zap-confirm-feedback', 'Cole a mensagem recebida no WhatsApp.', false);
+    return;
+  }
+
+  // Detecta número da OS (ex: #0006 ou 0006 ou orçamento #0006)
+  let matchOs = texto.match(/#(\d{1,5})/i) || texto.match(/orçamento\s*(?:nº|n°|n\.|#)?\s*(\d{1,5})/i);
+  let numOs = '';
+  if (matchOs) {
+    numOs = '#' + matchOs[1].padStart(4, '0');
+  } else {
+    const digitos = texto.replace(/\D/g, '');
+    if (digitos.length >= 1 && digitos.length <= 5) {
+      numOs = '#' + digitos.padStart(4, '0');
+    }
+  }
+
+  if (!numOs) {
+    showMsg('zap-confirm-feedback', 'Não foi possível identificar o número da O.S. (ex: #0006) no texto.', false);
+    return;
+  }
+
+  const norm = s => '#' + String(s || '').replace(/\D/g, '').padStart(4, '0');
+  const idx = historico.findIndex(o => norm(o.numero) === numOs);
+
+  if (idx !== -1) {
+    historico[idx].status = 'aprovado';
+    historico[idx].assinado_por = 'Confirmado via WhatsApp';
+    historico[idx].assinado_em = new Date().toISOString();
+    save(K.orders, historico);
+    renderHist();
+  } else {
+    showMsg('zap-confirm-feedback', `Aviso: Ordem ${numOs} não estava salva localmente, mas será registrada na nuvem.`, false);
+  }
+
+  // Notifica também a API do Supabase
+  fetch('/api/aprovar-orcamento', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      os: numOs,
+      cliente: (idx !== -1 && historico[idx].nome) ? historico[idx].nome : 'Cliente',
+      total: (idx !== -1 && historico[idx].total) ? historico[idx].total : ''
+    })
+  }).catch(() => {});
+
+  showMsg('zap-confirm-feedback', `🎉 Orçamento ${numOs} atualizado para APROVADO com sucesso!`, true);
+  setTimeout(() => {
+    fecharModalConfirmacaoZap();
+    goTab('historico');
+  }, 1200);
 }
 
 function baixarPdfOs(id) {
@@ -3213,13 +3340,15 @@ function sincronizarStatusContratos() {
       const data = await r.json().catch(() => ({}));
       if (!r.ok || !Array.isArray(data)) return;
       let alterou = false;
+      const norm = s => '#' + String(s || '').replace(/\D/g, '').padStart(4, '0');
       data.forEach(c => {
         if (c.assinado && c.numero_os) {
-          const idx = historico.findIndex(o => o.numero === c.numero_os);
+          const normC = norm(c.numero_os);
+          const idx = historico.findIndex(o => norm(o.numero) === normC);
           if (idx !== -1 && historico[idx].status !== 'aprovado') {
             historico[idx].status = 'aprovado';
-            historico[idx].assinado_por = c.assinante_nome || '';
-            historico[idx].assinado_em = c.assinado_em || '';
+            historico[idx].assinado_por = c.assinante_nome || 'Confirmado via WhatsApp';
+            historico[idx].assinado_em = c.assinado_em || new Date().toISOString();
             alterou = true;
           }
         }
@@ -4149,7 +4278,11 @@ window.addEventListener('DOMContentLoaded', function() {
   renderUsuarios();
 
   sincronizarStatusContratos();
-  setInterval(sincronizarStatusContratos, 25000);
+  setInterval(sincronizarStatusContratos, 10000);
+  window.addEventListener('focus', sincronizarStatusContratos);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) sincronizarStatusContratos();
+  });
 
   const user = getUser();
   const el = document.getElementById('usuario-logado');
