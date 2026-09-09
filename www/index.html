@@ -702,7 +702,10 @@
         <div class="card-title" style="margin-bottom:0;">
           🗂️ Orçamentos e Ordens de Serviço <span class="num-badge" id="hist-count">0</span>
         </div>
-        <button class="btn btn-gold btn-sm" onclick="abrirModalSync()">🔄 Backup / Sincronizar</button>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-whats btn-sm" onclick="abrirModalConfirmacaoZap()" title="Confirmar aprovação recebida pelo WhatsApp">⚡ Confirmar WhatsApp</button>
+          <button class="btn btn-gold btn-sm" onclick="abrirModalSync()">🔄 Backup / Sincronizar</button>
+        </div>
       </div>
       <div id="hist-lista"><div class="empty">Nenhum orçamento salvo ainda.</div></div>
     </div>
@@ -999,6 +1002,38 @@
       <button class="modal-close" onclick="fecharModalAssinatura()">✕</button>
     </div>
     <div id="modal-assinatura-conteudo"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL CONFIRMAÇÃO WHATSAPP AUTOMÁTICA ══ -->
+<div id="modal-confirmacao-zap" class="modal-overlay" style="display:none" onclick="fecharModalConfirmacaoZap(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">
+      ⚡ Confirmar Aprovação via WhatsApp
+      <button class="modal-close" onclick="fecharModalConfirmacaoZap()">✕</button>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5;">
+      Cole abaixo a mensagem enviada pelo cliente no WhatsApp para atualizar automaticamente o orçamento no Histórico para <strong style="color:#4ade80">🟢 Aprovado</strong>:
+    </div>
+
+    <div style="background:rgba(37,211,102,0.08);border:1.5px solid rgba(37,211,102,0.3);border-radius:14px;padding:14px;margin-bottom:14px;">
+      <div style="font-size:11.5px;color:#4ade80;font-weight:700;margin-bottom:6px;">Exemplo de mensagem recebida:</div>
+      <div style="font-size:12px;color:var(--text);font-style:italic;background:rgba(0,0,0,0.35);padding:8px 12px;border-radius:8px;">
+        "Olá! Aprovo o orçamento #0006 no valor de R$ 800,00 da SD Vidros! Pode iniciar a produção"
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:14px;">
+      <label>Cole a mensagem ou digite o Nº da O.S. (ex: #0006)</label>
+      <textarea id="zap-msg-input" style="width:100%;height:85px;background:#08080f;border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;color:var(--text);padding:10px;font-family:var(--font);font-size:13px;" placeholder="Cole a mensagem do WhatsApp aqui..."></textarea>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-whats btn-full" onclick="processarConfirmacaoZapColada()">
+        ✅ Confirmar e Atualizar Status
+      </button>
+    </div>
+    <div id="zap-confirm-feedback" style="margin-top:10px;"></div>
   </div>
 </div>
 
@@ -1616,16 +1651,22 @@ function gerarLinkAprovacaoWhats(numero, total, aprovado) {
 }
 
 function gerarMensagemWhatsAppAprovacao(o) {
+  const numOs = o.numero || '';
+  const totalVal = o.total || '';
+  const nomeCli = o.nome || '';
+  const baseUrl = (window.location.origin && window.location.origin.startsWith('http'))
+    ? window.location.origin
+    : 'https://sdvidros.vercel.app';
+  const linkAprovacaoOnline = `${baseUrl}/api/aprovar-orcamento?os=${encodeURIComponent(numOs)}&total=${encodeURIComponent(totalVal)}&cliente=${encodeURIComponent(nomeCli)}`;
+
   let m = `*SD VIDROS* 🪟\n`;
-  m += `Orçamento *${o.numero || ''}* em anexo (PDF).\n\n`;
-  if (o.nome) m += `👤 Cliente: *${o.nome}*\n`;
-  if (o.total) m += `💰 Valor Total: *${o.total}*\n\n`;
-  m += `Por favor, nos responda com:\n`;
-  m += `✅ *Aprovado*\n`;
-  m += `❌ *Não Aprovado / Ajustar detalhes*\n\n`;
-  m += `Ou confirme com 1 toque:\n`;
-  m += `👉 *Aprovar Orçamento:*\nhttps://wa.me/${SD_ZAP_NUM}?text=${encodeURIComponent(`Olá! Aprovo o orçamento ${o.numero || ''} no valor de ${o.total || ''} da SD Vidros! Pode iniciar a produção.`)}\n\n`;
-  m += `👉 *Solicitar Ajustes:*\nhttps://wa.me/${SD_ZAP_NUM}?text=${encodeURIComponent(`Olá! Recebi o orçamento ${o.numero || ''}, mas gostaria de falar sobre ajustes e condições.`)}`;
+  m += `Orçamento *${numOs}* em anexo (PDF).\n\n`;
+  if (nomeCli) m += `👤 Cliente: *${nomeCli}*\n`;
+  if (totalVal) m += `💰 Valor Total: *${totalVal}*\n\n`;
+  m += `Para aprovar seu orçamento e autorizar a produção com *confirmação automática*, toque no link abaixo:\n\n`;
+  m += `👉 *CLIQUE AQUI PARA APROVAR O ORÇAMENTO:*\n${linkAprovacaoOnline}\n\n`;
+  m += `_(Ao tocar no link, a aprovação é registrada instantaneamente no sistema e o WhatsApp abre com a confirmação pronta)_\n\n`;
+  m += `👉 *Solicitar Ajustes:*\nhttps://wa.me/${SD_ZAP_NUM}?text=${encodeURIComponent(`Olá! Recebi o orçamento ${numOs}, mas gostaria de falar sobre ajustes e condições.`)}`;
   return m;
 }
 
@@ -1739,8 +1780,94 @@ function alternarStatusOs(id) {
   const atual = historico[idx].status || 'pendente';
   const prox = ordem[(ordem.indexOf(atual) + 1) % ordem.length];
   historico[idx].status = prox;
+  if (prox === 'aprovado') {
+    historico[idx].assinado_por = historico[idx].assinado_por || 'Aprovado Manualmente';
+    historico[idx].assinado_em = new Date().toISOString();
+    // Sincroniza em segundo plano com a API
+    fetch('/api/aprovar-orcamento', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        os: historico[idx].numero,
+        cliente: historico[idx].nome,
+        total: historico[idx].total
+      })
+    }).catch(() => {});
+  }
   save(K.orders, historico);
   renderHist();
+}
+
+function abrirModalConfirmacaoZap() {
+  document.getElementById('modal-confirmacao-zap').style.display = 'flex';
+  const textarea = document.getElementById('zap-msg-input');
+  if (textarea) {
+    textarea.value = '';
+    textarea.focus();
+  }
+  const feedback = document.getElementById('zap-confirm-feedback');
+  if (feedback) { feedback.className = ''; feedback.textContent = ''; }
+}
+
+function fecharModalConfirmacaoZap(e) {
+  if (!e || e.target === document.getElementById('modal-confirmacao-zap')) {
+    document.getElementById('modal-confirmacao-zap').style.display = 'none';
+  }
+}
+
+function processarConfirmacaoZapColada() {
+  const texto = (document.getElementById('zap-msg-input').value || '').trim();
+  if (!texto) {
+    showMsg('zap-confirm-feedback', 'Cole a mensagem recebida no WhatsApp.', false);
+    return;
+  }
+
+  // Detecta número da OS (ex: #0006 ou 0006 ou orçamento #0006)
+  let matchOs = texto.match(/#(\d{1,5})/i) || texto.match(/orçamento\s*(?:nº|n°|n\.|#)?\s*(\d{1,5})/i);
+  let numOs = '';
+  if (matchOs) {
+    numOs = '#' + matchOs[1].padStart(4, '0');
+  } else {
+    const digitos = texto.replace(/\D/g, '');
+    if (digitos.length >= 1 && digitos.length <= 5) {
+      numOs = '#' + digitos.padStart(4, '0');
+    }
+  }
+
+  if (!numOs) {
+    showMsg('zap-confirm-feedback', 'Não foi possível identificar o número da O.S. (ex: #0006) no texto.', false);
+    return;
+  }
+
+  const norm = s => '#' + String(s || '').replace(/\D/g, '').padStart(4, '0');
+  const idx = historico.findIndex(o => norm(o.numero) === numOs);
+
+  if (idx !== -1) {
+    historico[idx].status = 'aprovado';
+    historico[idx].assinado_por = 'Confirmado via WhatsApp';
+    historico[idx].assinado_em = new Date().toISOString();
+    save(K.orders, historico);
+    renderHist();
+  } else {
+    showMsg('zap-confirm-feedback', `Aviso: Ordem ${numOs} não estava salva localmente, mas será registrada na nuvem.`, false);
+  }
+
+  // Notifica também a API do Supabase
+  fetch('/api/aprovar-orcamento', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      os: numOs,
+      cliente: (idx !== -1 && historico[idx].nome) ? historico[idx].nome : 'Cliente',
+      total: (idx !== -1 && historico[idx].total) ? historico[idx].total : ''
+    })
+  }).catch(() => {});
+
+  showMsg('zap-confirm-feedback', `🎉 Orçamento ${numOs} atualizado para APROVADO com sucesso!`, true);
+  setTimeout(() => {
+    fecharModalConfirmacaoZap();
+    goTab('historico');
+  }, 1200);
 }
 
 function baixarPdfOs(id) {
@@ -1790,6 +1917,7 @@ function renderHist() {
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px">
         <div class="hist-total">${esc(o.total || 'R$ 0,00')}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${st !== 'aprovado' ? `<button class="btn btn-sm" onclick="aprovarOsDireto(${o.id})" style="background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.6);color:#25D366;font-weight:700;" title="Aprovar com 1 toque">✅ Aprovar</button>` : ''}
           <button class="btn btn-gold btn-sm" onclick="baixarPdfOs(${o.id})" title="Baixar / Compartilhar PDF">📄 PDF</button>
           <button class="btn btn-whats btn-sm" onclick="enviarWhatsOs(${o.id})" title="Enviar WhatsApp com links de aprovação">📱 WhatsApp</button>
           <button class="btn btn-sec btn-sm" onclick="editarOs(${o.id})">✏️ Editar</button>
@@ -1798,6 +1926,26 @@ function renderHist() {
       </div>
     </div>`;
   }).join('');
+}
+
+function aprovarOsDireto(id) {
+  const idx = historico.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  historico[idx].status = 'aprovado';
+  historico[idx].assinado_por = 'Confirmado via WhatsApp';
+  historico[idx].assinado_em = new Date().toISOString();
+  save(K.orders, historico);
+  renderHist();
+  mostrarToastAprovacao(`✅ Orçamento ${historico[idx].numero} marcado como Aprovado!`);
+  fetch('/api/aprovar-orcamento', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      os: historico[idx].numero,
+      cliente: historico[idx].nome,
+      total: historico[idx].total
+    })
+  }).catch(() => {});
 }
 
 // ══════════════════════════════════════════════
@@ -3207,27 +3355,141 @@ async function enviarOrcamentoParaAssinaturaDigital() {
   }
 }
 
-function sincronizarStatusContratos() {
-  fetch('/api/listar-contratos')
-    .then(async r => {
-      const data = await r.json().catch(() => ({}));
-      if (!r.ok || !Array.isArray(data)) return;
-      let alterou = false;
-      data.forEach(c => {
-        if (c.assinado && c.numero_os) {
-          const idx = historico.findIndex(o => o.numero === c.numero_os);
-          if (idx !== -1 && historico[idx].status !== 'aprovado') {
-            historico[idx].status = 'aprovado';
-            historico[idx].assinado_por = c.assinante_nome || '';
-            historico[idx].assinado_em = c.assinado_em || '';
-            alterou = true;
+const NTFY_TOPIC = 'sdvidros_aprovacoes_85996119824';
+
+let sseConn = null;
+function conectarRealtimeAprovacoes() {
+  if (typeof EventSource === 'undefined') return;
+  try {
+    if (sseConn) { try { sseConn.close(); } catch(_) {} }
+    // since=24h garante que qualquer aprovacao feita nas ultimas 24h seja sincronizada de imediato
+    sseConn = new EventSource(`https://ntfy.sh/${NTFY_TOPIC}/sse?since=24h`);
+    sseConn.onmessage = function(e) {
+      try {
+        const item = JSON.parse(e.data);
+        if (item.event === 'message' && item.message) {
+          const dados = JSON.parse(item.message);
+          if (dados.numero_os) {
+            aplicarAprovacaoOs(dados.numero_os, dados.cliente || dados.assinante_nome || 'Confirmado via WhatsApp');
           }
         }
-      });
-      if (alterou) {
-        save(K.orders, historico);
-        renderHist();
+      } catch (_) {}
+    };
+    sseConn.onerror = function() {
+      if (sseConn) { try { sseConn.close(); } catch(_) {} }
+      setTimeout(conectarRealtimeAprovacoes, 5000);
+    };
+  } catch (err) {
+    console.warn('Realtime SSE:', err);
+  }
+}
+
+function aplicarAprovacaoOs(numeroOs, assinante = 'Confirmado via WhatsApp') {
+  const norm = s => '#' + String(s || '').replace(/\D/g, '').padStart(4, '0');
+  const target = norm(numeroOs);
+  const idx = historico.findIndex(o => norm(o.numero) === target);
+  if (idx !== -1 && historico[idx].status !== 'aprovado') {
+    historico[idx].status = 'aprovado';
+    historico[idx].assinado_por = assinante;
+    historico[idx].assinado_em = new Date().toISOString();
+    save(K.orders, historico);
+    renderHist();
+    mostrarToastAprovacao(`🎉 Orçamento ${target} aprovado automaticamente!`);
+  }
+}
+
+function mostrarToastAprovacao(txt) {
+  let toast = document.getElementById('toast-aprovacao-realtime');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast-aprovacao-realtime';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:800;font-size:14px;padding:12px 24px;border-radius:999px;box-shadow:0 10px 30px rgba(16,185,129,0.5);z-index:9999;transition:all 0.3s cubic-bezier(0.16,1,0.3,1);display:flex;align-items:center;gap:8px;';
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = txt;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => {
+    if (toast) {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-50%) translateY(20px)';
+    }
+  }, 4500);
+}
+
+let ultimoTextoClipboard = '';
+async function verificarClipboardWhatsApp() {
+  if (!navigator.clipboard || !navigator.clipboard.readText) return;
+  try {
+    const texto = (await navigator.clipboard.readText() || '').trim();
+    if (texto && texto !== ultimoTextoClipboard) {
+      ultimoTextoClipboard = texto;
+      const textoLower = texto.toLowerCase();
+      const temPalavraAprov = textoLower.includes('aprovo') || textoLower.includes('aprovado') || textoLower.includes('produção') || textoLower.includes('iniciar') || textoLower.includes('confirmado');
+      const match = texto.match(/#(\d{1,5})/);
+      if (match && (temPalavraAprov || textoLower.includes('sd vidros') || textoLower.includes('orçamento'))) {
+        const numOs = '#' + match[1].padStart(4, '0');
+        aplicarAprovacaoOs(numOs, 'Confirmado via WhatsApp');
+        fetch('/api/aprovar-orcamento', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ os: numOs })
+        }).catch(() => {});
       }
+    }
+  } catch (_) {}
+}
+
+function sincronizarStatusContratos() {
+  const norm = s => '#' + String(s || '').replace(/\D/g, '').padStart(4, '0');
+
+  const processarListaAprovacoes = (itens) => {
+    if (!Array.isArray(itens)) return;
+    let alterou = false;
+    itens.forEach(c => {
+      if ((c.assinado || c.status === 'aprovado') && c.numero_os) {
+        const normC = norm(c.numero_os);
+        const idx = historico.findIndex(o => norm(o.numero) === normC);
+        if (idx !== -1 && historico[idx].status !== 'aprovado') {
+          historico[idx].status = 'aprovado';
+          historico[idx].assinado_por = c.assinante_nome || c.cliente || 'Confirmado via WhatsApp';
+          historico[idx].assinado_em = c.assinado_em || new Date().toISOString();
+          alterou = true;
+        }
+      }
+    });
+    if (alterou) {
+      save(K.orders, historico);
+      renderHist();
+      mostrarToastAprovacao('🎉 Orçamento atualizado para APROVADO!');
+    }
+  };
+
+  // 1. API própria com anti-cache
+  fetch('/api/listar-contratos?t=' + Date.now(), { cache: 'no-store' })
+    .then(async r => {
+      const data = await r.json().catch(() => ({}));
+      if (Array.isArray(data)) processarListaAprovacoes(data);
+    })
+    .catch(() => {});
+
+  // 2. Barramento direto ntfy em paralelo (ultra rápido, sem cache)
+  fetch(`https://ntfy.sh/${NTFY_TOPIC}/json?poll=1&since=24h`, { cache: 'no-store' })
+    .then(r => r.text())
+    .then(txt => {
+      if (!txt) return;
+      const lines = txt.split('\n').filter(Boolean);
+      const listaNtfy = [];
+      lines.forEach(l => {
+        try {
+          const item = JSON.parse(l);
+          if (item.event === 'message' && item.message) {
+            const dados = JSON.parse(item.message);
+            if (dados.numero_os) listaNtfy.push(dados);
+          }
+        } catch (_) {}
+      });
+      if (listaNtfy.length) processarListaAprovacoes(listaNtfy);
     })
     .catch(() => {});
 }
@@ -4149,7 +4411,24 @@ window.addEventListener('DOMContentLoaded', function() {
   renderUsuarios();
 
   sincronizarStatusContratos();
-  setInterval(sincronizarStatusContratos, 25000);
+  conectarRealtimeAprovacoes();
+  setInterval(sincronizarStatusContratos, 4000);
+  window.addEventListener('focus', () => {
+    sincronizarStatusContratos();
+    verificarClipboardWhatsApp();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      sincronizarStatusContratos();
+      verificarClipboardWhatsApp();
+    }
+  });
+  document.addEventListener('click', () => {
+    verificarClipboardWhatsApp();
+  });
+  document.addEventListener('touchstart', () => {
+    verificarClipboardWhatsApp();
+  }, { passive: true });
 
   const user = getUser();
   const el = document.getElementById('usuario-logado');

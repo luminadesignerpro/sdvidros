@@ -4,6 +4,9 @@ const SD_ZAP_NUM = '5585996119824';
 const NTFY_TOPIC = 'sdvidros_aprovacoes_85996119824';
 
 module.exports = async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
   const isPost = req.method === 'POST';
   const query = req.query || {};
   const body = req.body || {};

@@ -5,6 +5,11 @@ const NTFY_TOPIC = 'sdvidros_aprovacoes_85996119824';
 module.exports = async (req, res) => {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Método não permitido' });
 
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
   const contratosMap = new Map();
 
   // 1. Busca aprovações do barramento em tempo real (ntfy.sh - 100% de disponibilidade)
