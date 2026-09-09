@@ -1,9 +1,9 @@
 const { getClient } = require('./_supabase');
 
 const SD_ZAP_NUM = '5585996119824';
+const NTFY_TOPIC = 'sdvidros_aprovacoes_85996119824';
 
 module.exports = async (req, res) => {
-  // Permite GET e POST
   const isPost = req.method === 'POST';
   const query = req.query || {};
   const body = req.body || {};
@@ -27,21 +27,39 @@ module.exports = async (req, res) => {
     numOs = !isNaN(numInt) ? '#' + String(numInt).padStart(4, '0') : '#' + numOs;
   }
 
+  const dataHora = new Date().toISOString();
+  const eventoAprovacao = {
+    numero_os: numOs,
+    cliente: cliente || 'Cliente',
+    total: total || '',
+    status: 'aprovado',
+    assinado: true,
+    assinante_nome: cliente || 'Confirmado via WhatsApp',
+    assinado_em: dataHora,
+    origem: 'link_whatsapp'
+  };
+
+  // 1. Grava no barramento de tempo real ntfy (sempre online, zero downtime)
+  try {
+    await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+      method: 'POST',
+      headers: { 'Title': `Orçamento ${numOs} Aprovado`, 'Tags': 'white_check_mark' },
+      body: JSON.stringify(eventoAprovacao)
+    });
+  } catch (ntfyErr) {
+    console.warn('Aviso ntfy pub:', ntfyErr.message);
+  }
+
+  // 2. Tenta gravar no Supabase como persistência secundária
   let dbOk = false;
   let dbMsg = '';
-
-  // Grava aprovação no Supabase
   try {
     const supabase = getClient();
-    
-    // 1. Procura se já existe contrato com esse numero_os
     const { data: existente, error: errBusca } = await supabase
       .from('contratos')
-      .select('id, assinado, cliente_nome, cliente_tel')
+      .select('id, assinado, cliente_nome')
       .eq('numero_os', numOs)
       .limit(1);
-
-    const dataHora = new Date().toISOString();
 
     if (!errBusca && existente && existente.length > 0) {
       const id = existente[0].id;
@@ -50,16 +68,11 @@ module.exports = async (req, res) => {
         .update({
           assinado: true,
           assinante_nome: cliente || existente[0].cliente_nome || 'Confirmado via WhatsApp',
-          assinado_em: dataHora,
-          texto: existente[0].texto || `Orçamento ${numOs} aprovado pelo cliente via WhatsApp.`
+          assinado_em: dataHora
         })
         .eq('id', id);
-
-      if (errUpdate) throw errUpdate;
-      dbOk = true;
-      dbMsg = 'Contrato existente atualizado com sucesso.';
+      if (!errUpdate) dbOk = true;
     } else {
-      // Cria novo registro aprovado
       const { error: errInsert } = await supabase
         .from('contratos')
         .insert({
@@ -71,33 +84,29 @@ module.exports = async (req, res) => {
           assinante_nome: cliente || 'Confirmado via WhatsApp',
           assinado_em: dataHora
         });
-
-      if (errInsert) throw errInsert;
-      dbOk = true;
-      dbMsg = 'Novo registro de aprovação criado.';
+      if (!errInsert) dbOk = true;
     }
   } catch (err) {
-    console.warn('Aviso Supabase ao aprovar orçamento:', err.message || err);
-    dbMsg = err.message || 'Supabase offline/não configurado';
+    dbMsg = err.message || '';
   }
 
-  // Mensagem do WhatsApp exata (conforme imagem 2)
+  // Mensagem exata do WhatsApp (Imagem 2)
   const textoZap = `Olá! Aprovo o orçamento ${numOs}${total ? ' no valor de ' + total : ''} da SD Vidros! Pode iniciar a produção`;
   const zapUrl = `https://wa.me/${SD_ZAP_NUM}?text=${encodeURIComponent(textoZap)}`;
 
-  // Se a requisição for POST ou pedir JSON, responde JSON
   if (isPost || format === 'json') {
     return res.status(200).json({
       ok: true,
       numero_os: numOs,
       status: 'aprovado',
+      realtime_notified: true,
       db_salvo: dbOk,
       db_info: dbMsg,
       whatsapp_url: zapUrl
     });
   }
 
-  // Se o cliente clicou no link (GET pelo navegador), renderiza página de transição e redireciona para WhatsApp
+  // Cliente clicou no link: resposta HTML com abertura imediata do WhatsApp
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   return res.status(200).send(`
 <!DOCTYPE html>

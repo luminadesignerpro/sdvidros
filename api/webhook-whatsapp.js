@@ -46,7 +46,27 @@ module.exports = async (req, res) => {
     const numDigitos = matchOs[1];
     const numOs = '#' + numDigitos.padStart(4, '0');
 
-    // Atualiza no Supabase
+    const NTFY_TOPIC = 'sdvidros_aprovacoes_85996119824';
+    const dataHora = new Date().toISOString();
+
+    // 1. Notifica o barramento de tempo real instantâneo
+    try {
+      await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+        method: 'POST',
+        headers: { 'Title': `Orçamento ${numOs} Aprovado via Webhook`, 'Tags': 'white_check_mark' },
+        body: JSON.stringify({
+          numero_os: numOs,
+          cliente: 'Cliente',
+          status: 'aprovado',
+          assinado: true,
+          assinante_nome: 'Confirmado via WhatsApp',
+          assinado_em: dataHora,
+          origem: 'webhook_whatsapp'
+        })
+      });
+    } catch (_) {}
+
+    // 2. Tenta atualizar no Supabase (se disponível)
     let dbOk = false;
     let dbMsg = '';
     try {
@@ -56,8 +76,6 @@ module.exports = async (req, res) => {
         .select('id, cliente_nome')
         .eq('numero_os', numOs)
         .limit(1);
-
-      const dataHora = new Date().toISOString();
 
       if (existente && existente.length > 0) {
         await supabase

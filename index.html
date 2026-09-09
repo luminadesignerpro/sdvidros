@@ -3334,6 +3334,85 @@ async function enviarOrcamentoParaAssinaturaDigital() {
   }
 }
 
+const NTFY_TOPIC = 'sdvidros_aprovacoes_85996119824';
+
+function conectarRealtimeAprovacoes() {
+  if (typeof EventSource === 'undefined') return;
+  try {
+    const es = new EventSource(`https://ntfy.sh/${NTFY_TOPIC}/sse`);
+    es.onmessage = function(e) {
+      try {
+        const item = JSON.parse(e.data);
+        if (item.event === 'message' && item.message) {
+          const dados = JSON.parse(item.message);
+          if (dados.numero_os) {
+            aplicarAprovacaoOs(dados.numero_os, dados.cliente || 'Confirmado via WhatsApp');
+          }
+        }
+      } catch (_) {}
+    };
+  } catch (err) {
+    console.warn('Realtime SSE indisponível:', err);
+  }
+}
+
+function aplicarAprovacaoOs(numeroOs, assinante = 'Confirmado via WhatsApp') {
+  const norm = s => '#' + String(s || '').replace(/\D/g, '').padStart(4, '0');
+  const target = norm(numeroOs);
+  const idx = historico.findIndex(o => norm(o.numero) === target);
+  if (idx !== -1 && historico[idx].status !== 'aprovado') {
+    historico[idx].status = 'aprovado';
+    historico[idx].assinado_por = assinante;
+    historico[idx].assinado_em = new Date().toISOString();
+    save(K.orders, historico);
+    renderHist();
+    mostrarToastAprovacao(`🎉 Orçamento ${target} aprovado automaticamente!`);
+  }
+}
+
+function mostrarToastAprovacao(txt) {
+  let toast = document.getElementById('toast-aprovacao-realtime');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast-aprovacao-realtime';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:800;font-size:14px;padding:12px 24px;border-radius:999px;box-shadow:0 10px 30px rgba(16,185,129,0.5);z-index:9999;transition:all 0.3s cubic-bezier(0.16,1,0.3,1);display:flex;align-items:center;gap:8px;';
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = txt;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => {
+    if (toast) {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-50%) translateY(20px)';
+    }
+  }, 4500);
+}
+
+let ultimoTextoClipboard = '';
+async function verificarClipboardWhatsApp() {
+  if (!navigator.clipboard || !navigator.clipboard.readText) return;
+  try {
+    const texto = (await navigator.clipboard.readText() || '').trim();
+    if (texto && texto !== ultimoTextoClipboard) {
+      ultimoTextoClipboard = texto;
+      const textoLower = texto.toLowerCase();
+      if ((textoLower.includes('aprovo o orçamento') || textoLower.includes('aprovado') || textoLower.includes('iniciar a produção')) && texto.includes('#')) {
+        const match = texto.match(/#(\d{1,5})/);
+        if (match) {
+          const numOs = '#' + match[1].padStart(4, '0');
+          aplicarAprovacaoOs(numOs, 'Confirmado via WhatsApp');
+          fetch('/api/aprovar-orcamento', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ os: numOs })
+          }).catch(() => {});
+        }
+      }
+    }
+  } catch (_) {}
+}
+
 function sincronizarStatusContratos() {
   fetch('/api/listar-contratos')
     .then(async r => {
@@ -3356,6 +3435,7 @@ function sincronizarStatusContratos() {
       if (alterou) {
         save(K.orders, historico);
         renderHist();
+        mostrarToastAprovacao('🎉 Orçamento atualizado para APROVADO!');
       }
     })
     .catch(() => {});
@@ -4278,10 +4358,20 @@ window.addEventListener('DOMContentLoaded', function() {
   renderUsuarios();
 
   sincronizarStatusContratos();
-  setInterval(sincronizarStatusContratos, 10000);
-  window.addEventListener('focus', sincronizarStatusContratos);
+  conectarRealtimeAprovacoes();
+  setInterval(sincronizarStatusContratos, 4000);
+  window.addEventListener('focus', () => {
+    sincronizarStatusContratos();
+    verificarClipboardWhatsApp();
+  });
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) sincronizarStatusContratos();
+    if (!document.hidden) {
+      sincronizarStatusContratos();
+      verificarClipboardWhatsApp();
+    }
+  });
+  document.addEventListener('click', () => {
+    verificarClipboardWhatsApp();
   });
 
   const user = getUser();
