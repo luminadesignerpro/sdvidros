@@ -642,7 +642,6 @@
 
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;">
         <button class="btn btn-sec btn-sm" onclick="addItem()">+ Adicionar linha</button>
-        <button class="btn btn-gold btn-sm" onclick="irParaAbaProdutosParaNovoItem()" title="Ir para a aba Produtos & Serviços e escolher produto cadastrado">📦 Ir para Produtos & Serviços</button>
       </div>
 
       <div class="total-bar">
@@ -715,18 +714,6 @@
   <!-- PANEL: PRODUTOS E SERVIÇOS (CATÁLOGO DA SEGUNDA IMAGEM) -->
   <!-- ══════════════════════════════════════════ -->
   <div id="panel-produtos" class="panel">
-    <!-- Banner de modo de seleção para o orçamento -->
-    <div id="aviso-selecao-produto" style="display:none;background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(201,168,76,0.08));border:1.5px solid var(--gold);border-radius:var(--r-sm);padding:14px 18px;margin-bottom:14px;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span style="font-size:24px;">📦</span>
-        <div>
-          <div style="font-weight:800;color:var(--gold-light);font-size:14px;" id="aviso-selecao-produto-txt">Modo de Seleção Ativo: Escolha um produto abaixo para preencher no Orçamento</div>
-          <div style="font-size:12px;color:var(--text2);margin-top:2px;">Clique no botão <strong>✅ Usar este</strong> do produto desejado ou cadastre um novo produto acima.</div>
-        </div>
-      </div>
-      <button type="button" class="btn btn-sec btn-sm" onclick="cancelarSelecaoProduto()" style="font-size:12px;">✕ Cancelar e Voltar</button>
-    </div>
-
     <div class="card">
       <div class="card-title">➕ Cadastrar / Editar Produto ou Serviço</div>
       <div class="field-row">
