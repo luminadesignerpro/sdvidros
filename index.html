@@ -547,12 +547,6 @@
   <div class="banner">
     <img src="banner.jpg" alt="SD Vidros – Alumínio e Vidraçaria | Box de vidro e acrílico, Corrimão, Portão automático, Janelas, Grades, Fechamento de área. Tel/WhatsApp: (85) 99611-9824 - Itaitinga - CE">
     <div class="banner-overlay-top">
-      <button type="button" id="btn-central-mensagens" onclick="abrirModalCentralMensagens()" style="font-size:11px;font-weight:800;color:var(--gold-light);background:rgba(14,14,24,0.85);border:1px solid var(--gold);padding:5px 12px;border-radius:999px;cursor:pointer;display:flex;align-items:center;gap:6px;backdrop-filter:blur(4px);box-shadow:0 0 15px rgba(201,168,76,0.25);">
-        💬 Mensagens Clientes <span id="badge-msg-clientes" style="display:none;background:#ef4444;color:#fff;font-size:10px;padding:1px 6px;border-radius:999px;font-weight:900;">0</span>
-      </button>
-      <a href="cliente.html" target="_blank" style="text-decoration:none;font-size:11px;font-weight:800;color:#000;background:linear-gradient(135deg,var(--gold-light),var(--gold));border:none;padding:5px 12px;border-radius:999px;display:flex;align-items:center;gap:4px;box-shadow:0 0 15px rgba(201,168,76,0.35);">
-        👤 Portal do Cliente ➔
-      </a>
       <div class="user-pill">
         <span id="usuario-logado">👤 Admin</span>
       </div>
@@ -569,6 +563,8 @@
     <button id="tab-ponto" class="tab" data-tab="ponto" onclick="goTab('ponto')">👷 Funcionários & Ponto</button>
     <button id="tab-contratos" class="tab" data-tab="contratos" onclick="goTab('contratos')">📄 Contratos</button>
     <button id="tab-usuarios" class="tab" data-tab="usuarios" onclick="goTab('usuarios')">👥 Usuários</button>
+    <button type="button" id="tab-portal-cliente" class="tab" onclick="window.open('cliente.html','_blank')" title="Acessar Portal do Cliente">🌐 Portal do Cliente</button>
+    <button type="button" id="btn-central-mensagens" class="tab" onclick="abrirModalCentralMensagens()" title="Central de Mensagens com Clientes">💬 Mensagens <span id="badge-msg-clientes" style="display:none;background:#ef4444;color:#fff;font-size:9.5px;padding:1px 6px;border-radius:999px;font-weight:900;margin-left:4px;">0</span></button>
   </div>
 
   <!-- ══════════════════════════════════════════ -->
