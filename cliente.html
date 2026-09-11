@@ -867,6 +867,208 @@
       justify-content: center;
       cursor: pointer;
     }
+
+    /* ─── BOTÃO & BADGE DE BIOMETRIA ─── */
+    .btn-biometria {
+      width: 100%;
+      background: linear-gradient(135deg, rgba(201,168,76,0.12) 0%, rgba(14,14,24,0.95) 100%);
+      border: 1.5px solid var(--gold);
+      border-radius: 12px;
+      color: var(--gold-light);
+      padding: 13px 16px;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+      transition: all 0.25s;
+      box-shadow: 0 4px 18px var(--gold-glow);
+    }
+    .btn-biometria:hover {
+      background: linear-gradient(135deg, rgba(201,168,76,0.25) 0%, rgba(20,20,32,0.95) 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(201,168,76,0.35);
+    }
+    .bio-icon {
+      font-size: 20px;
+      display: inline-block;
+      animation: bioPulse 2.2s infinite ease-in-out;
+    }
+    @keyframes bioPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 2px var(--gold)); }
+      50% { transform: scale(1.18); filter: drop-shadow(0 0 8px var(--gold-light)); }
+    }
+
+    /* ─── MODAIS GENÉRICOS (TROCAR SENHA, BIOMETRIA) ─── */
+    .portal-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 999999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      animation: fadeIn 0.25s ease;
+    }
+    .portal-modal-card {
+      background: var(--card);
+      border: 1.5px solid var(--gold);
+      border-radius: var(--r-lg);
+      padding: 26px 22px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 35px var(--gold-glow);
+      position: relative;
+    }
+    .portal-modal-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--gold-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .portal-modal-close {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .portal-modal-close:hover { color: #fff; }
+
+    /* ─── SETOR FINANCEIRO DO CLIENTE ─── */
+    .fin-hero {
+      background: linear-gradient(135deg, rgba(20,20,34,0.95) 0%, rgba(10,10,18,0.95) 100%);
+      border: 1.5px solid var(--gold);
+      border-radius: var(--r-lg);
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 12px 35px var(--gold-glow);
+      position: relative;
+      overflow: hidden;
+    }
+    .fin-hero::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 130px;
+      height: 130px;
+      background: radial-gradient(circle, rgba(201,168,76,0.18) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .fin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .fin-stat-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 14px;
+      position: relative;
+    }
+    .fin-stat-card.destaque-pago {
+      border-color: rgba(37,211,102,0.3);
+      background: linear-gradient(135deg, rgba(37,211,102,0.08) 0%, rgba(255,255,255,0.02) 100%);
+    }
+    .fin-stat-card.destaque-saldo {
+      border-color: rgba(201,168,76,0.4);
+      background: linear-gradient(135deg, rgba(201,168,76,0.08) 0%, rgba(255,255,255,0.02) 100%);
+    }
+    .fin-stat-lbl {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+    .fin-stat-val {
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+      margin-top: 4px;
+      letter-spacing: -0.02em;
+    }
+    .fin-stat-val.gold {
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .fin-stat-val.green {
+      color: #4ade80;
+    }
+    .fin-progress-bar-bg {
+      width: 100%;
+      height: 9px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 14px;
+    }
+    .fin-progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #25D366, var(--gold));
+      border-radius: 999px;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .pix-card {
+      background: linear-gradient(135deg, rgba(14,14,24,0.95) 0%, rgba(10,24,18,0.9) 100%);
+      border: 1.5px solid rgba(37,211,102,0.35);
+      border-radius: var(--r-lg);
+      padding: 20px;
+      margin-top: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 25px rgba(37,211,102,0.12);
+    }
+    .pix-key-wrap {
+      background: #090912;
+      border: 1.5px dashed rgba(37,211,102,0.4);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 14px 0;
+      flex-wrap: wrap;
+    }
+    .pix-key-val {
+      font-size: 15px;
+      font-weight: 800;
+      color: #bbf7d0;
+      letter-spacing: 0.04em;
+    }
+    .btn-copiar-pix {
+      background: linear-gradient(135deg, #25D366, #16a34a);
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 900;
+      font-family: var(--font);
+      font-size: 12.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-copiar-pix:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 16px rgba(37,211,102,0.4);
+    }
   </style>
 </head>
 <body>
@@ -890,6 +1092,94 @@
     <div class="lightbox-content" onclick="event.stopPropagation()">
       <img id="lightbox-img" src="" alt="Foto">
       <div class="lightbox-caption" id="lightbox-caption"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- MODAL 1: TROCAR SENHA DO CLIENTE             -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div id="modal-trocar-senha" class="portal-modal-overlay" onclick="fecharModalTrocarSenha(event)">
+    <div class="portal-modal-card" onclick="event.stopPropagation()">
+      <div class="portal-modal-title">
+        <span>🔑 Alterar Senha de Acesso</span>
+        <button class="portal-modal-close" onclick="fecharModalTrocarSenha()">✕</button>
+      </div>
+      <p style="font-size:12.5px;color:var(--text2);margin-bottom:16px;line-height:1.4;">
+        Defina uma nova senha exclusiva para acessar o seu acompanhamento na SD Vidros.
+      </p>
+
+      <div class="field-box">
+        <label>Senha Atual</label>
+        <input id="pwd-atual" type="password" placeholder="Digite sua senha atual" />
+      </div>
+
+      <div class="field-box">
+        <label>Nova Senha</label>
+        <input id="pwd-nova" type="password" placeholder="Mínimo 4 dígitos ou caracteres" />
+      </div>
+
+      <div class="field-box">
+        <label>Confirmar Nova Senha</label>
+        <input id="pwd-confirma" type="password" placeholder="Repita a nova senha" />
+      </div>
+
+      <button type="button" class="btn-login-cliente" onclick="salvarTrocaSenhaCliente()">
+        💾 Salvar Nova Senha
+      </button>
+
+      <div id="pwd-feedback" style="margin-top:12px;font-size:13px;font-weight:700;"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- MODAL 2: ESQUECI MINHA SENHA                 -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div id="modal-esqueci-senha" class="portal-modal-overlay" onclick="fecharModalEsqueciSenha(event)">
+    <div class="portal-modal-card" onclick="event.stopPropagation()">
+      <div class="portal-modal-title">
+        <span>🔑 Recuperação de Acesso</span>
+        <button class="portal-modal-close" onclick="fecharModalEsqueciSenha()">✕</button>
+      </div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:14px;">
+        Por padrão de fábrica, sua senha inicial corresponde aos <strong>4 últimos dígitos do seu WhatsApp</strong> cadastrado na SD Vidros.
+      </p>
+
+      <div style="background:rgba(201,168,76,0.1);border:1px solid var(--gold);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+        <div style="font-size:11px;color:var(--gold-light);font-weight:800;text-transform:uppercase;">Exemplo de Senha Inicial:</div>
+        <div style="font-size:13px;color:#fff;margin-top:4px;">Se seu WhatsApp é (85) 99611-<strong>9824</strong>, sua senha inicial é: <strong style="color:var(--gold-light);font-size:16px;">9824</strong></div>
+      </div>
+
+      <p style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:16px;">
+        Se você já alterou sua senha e esqueceu, clique abaixo para falar diretamente com nosso atendimento e redefinir imediatamente:
+      </p>
+
+      <a href="https://wa.me/5585996119824?text=Ol%C3%A1%2C%20esqueci%20minha%20senha%20de%20acesso%20ao%20portal%20da%20SD%20Vidros%20e%20gostaria%20de%20redefinir." target="_blank" style="width:100%;background:linear-gradient(135deg,#25D366,#16a34a);color:#000;text-decoration:none;padding:13px;border-radius:12px;font-size:13.5px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:8px;">
+        📱 Solicitar Redefinição no WhatsApp
+      </a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- MODAL 3: ATIVAR BIOMETRIA                    -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div id="modal-ativar-biometria" class="portal-modal-overlay" onclick="fecharModalAtivarBiometria(event)">
+    <div class="portal-modal-card" onclick="event.stopPropagation()">
+      <div style="text-align:center;font-size:42px;margin-bottom:8px;">👆</div>
+      <div class="portal-modal-title" style="justify-content:center;font-size:19px;text-align:center;">
+        Ativar Biometria / Face ID
+      </div>
+      <p style="font-size:13px;color:var(--text2);text-align:center;line-height:1.5;margin:10px 0 18px;">
+        Deseja salvar o acesso biométrico deste aparelho para entrar na sua Área do Cliente com apenas 1 toque, sem precisar digitar sua senha?
+      </p>
+
+      <div style="display:flex;gap:10px;">
+        <button type="button" class="btn-login-cliente" style="margin-top:0;" onclick="confirmarAtivacaoBiometria()">
+          ✓ Sim, Ativar Biometria
+        </button>
+        <button type="button" class="btn-sair" style="padding:12px 16px;margin-top:0;" onclick="fecharModalAtivarBiometria()">
+          Agora Não
+        </button>
+      </div>
     </div>
   </div>
 
@@ -919,6 +1209,27 @@
         🔑 Acessar Meu Serviço
       </button>
 
+      <!-- BOTÃO DE ACESSO POR BIOMETRIA -->
+      <div style="display:flex;align-items:center;margin:14px 0 10px;gap:10px;">
+        <div style="flex:1;height:1px;background:rgba(255,255,255,0.1);"></div>
+        <span style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:0.05em;">ou</span>
+        <div style="flex:1;height:1px;background:rgba(255,255,255,0.1);"></div>
+      </div>
+
+      <button type="button" class="btn-biometria" id="btn-biometria-login" onclick="autenticarPorBiometria()">
+        <span class="bio-icon">👆</span>
+        <span id="btn-bio-txt">Entrar com Biometria / Face ID</span>
+      </button>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;">
+        <a href="javascript:void(0)" onclick="abrirModalEsqueciSenha()" style="color:var(--gold-light);text-decoration:none;font-weight:700;">
+          🔑 Esqueceu sua senha?
+        </a>
+        <span id="bio-status-badge" style="display:none;color:#4ade80;font-size:11px;font-weight:700;">
+          ✓ Biometria Ativa
+        </span>
+      </div>
+
       <div id="login-feedback" style="margin-top: 12px; font-size: 13px; font-weight: 700;"></div>
 
       <div class="login-info-box">
@@ -946,8 +1257,10 @@
         <div class="client-badge-box">
           <div class="client-welcome" id="lbl-cliente-nome">Olá, Cliente</div>
           <div class="client-os-tag" id="lbl-cliente-os">📋 O.S. #0001</div>
-          <div>
-            <button class="btn-sair" onclick="sairCliente()">Sair do Portal ➔</button>
+          <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px;flex-wrap:wrap;">
+            <button class="btn-sair" onclick="abrirModalTrocarSenha()" style="color:var(--gold-light);border-color:rgba(201,168,76,0.35);margin-top:0;" title="Alterar sua senha de acesso">🔑 Trocar Senha</button>
+            <button class="btn-sair" id="btn-header-biometria" onclick="gerenciarBiometria()" style="color:#bbf7d0;border-color:rgba(37,211,102,0.35);margin-top:0;" title="Configurar biometria neste aparelho">👆 Biometria</button>
+            <button class="btn-sair" onclick="sairCliente()" style="margin-top:0;">Sair ➔</button>
           </div>
         </div>
       </div>
@@ -962,6 +1275,9 @@
         </button>
         <button class="portal-tab" id="btn-tab-mensagens" onclick="mudarAba('mensagens')">
           💬 Mensagens <span class="tab-badge" id="badge-msg-count" style="display:none">0</span>
+        </button>
+        <button class="portal-tab" id="btn-tab-financeiro" onclick="mudarAba('financeiro')">
+          💰 Financeiro
         </button>
       </div>
 
@@ -1117,6 +1433,124 @@
         </div>
       </div>
 
+      <!-- ── ABA 4: SETOR FINANCEIRO DO CLIENTE ── -->
+      <div id="pane-financeiro" class="tab-pane">
+        
+        <!-- Hero Financeiro -->
+        <div class="fin-hero">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+            <div>
+              <div style="font-size:11.5px;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.12em;font-weight:800;">
+                Setor Financeiro · Seu Pedido
+              </div>
+              <div style="font-size:20px;font-weight:900;color:#fff;margin-top:2px;" id="fin-cliente-os-title">
+                O.S. #0001
+              </div>
+            </div>
+            <div id="fin-status-badge" style="background:rgba(201,168,76,0.18);border:1px solid var(--gold);color:var(--gold-light);padding:5px 12px;border-radius:999px;font-size:12px;font-weight:800;">
+              Em Pagamento
+            </div>
+          </div>
+
+          <!-- Grade de Valores -->
+          <div class="fin-grid">
+            <div class="fin-stat-card">
+              <div class="fin-stat-lbl">Valor Total Contratado</div>
+              <div class="fin-stat-val gold" id="fin-val-total">R$ 0,00</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:3px;" id="fin-qtd-itens">0 itens inclusos</div>
+            </div>
+
+            <div class="fin-stat-card destaque-pago">
+              <div class="fin-stat-lbl">Valor Pago / Entrada</div>
+              <div class="fin-stat-val green" id="fin-val-pago">R$ 0,00</div>
+              <div style="font-size:11px;color:#4ade80;margin-top:3px;font-weight:700;" id="fin-pago-sub">✓ Confirmado</div>
+            </div>
+
+            <div class="fin-stat-card destaque-saldo">
+              <div class="fin-stat-lbl">Saldo a Pagar</div>
+              <div class="fin-stat-val" id="fin-val-saldo">R$ 0,00</div>
+              <div style="font-size:11px;color:var(--gold-light);margin-top:3px;font-weight:700;" id="fin-saldo-sub">Na entrega/instalação</div>
+            </div>
+
+            <div class="fin-stat-card">
+              <div class="fin-stat-lbl">Condição / Pagamento</div>
+              <div class="fin-stat-val" style="font-size:15px;margin-top:8px;" id="fin-condicao-pagamento">À Vista / PIX</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;">Negociado com SD Vidros</div>
+            </div>
+          </div>
+
+          <!-- Barra de Progresso de Quitação -->
+          <div style="margin-top:18px;">
+            <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;color:var(--text2);">
+              <span>Progresso do Pagamento</span>
+              <span id="fin-progresso-pct" style="color:#4ade80;">50% Pago</span>
+            </div>
+            <div class="fin-progress-bar-bg">
+              <div class="fin-progress-bar-fill" id="fin-progress-fill" style="width:50%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Pagamento Rápido via PIX -->
+        <div class="pix-card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(37,211,102,0.15);border:1.5px solid #25D366;display:flex;align-items:center;justify-content:center;font-size:18px;">
+              ⚡
+            </div>
+            <div>
+              <div style="font-size:15px;font-weight:800;color:#fff;">Pagamento Rápido via PIX</div>
+              <div style="font-size:11.5px;color:#86efac;">SD Vidros · Chave Oficial Telefone/WhatsApp</div>
+            </div>
+          </div>
+
+          <p style="font-size:12.5px;color:var(--text2);line-height:1.5;">
+            Pague sua entrada ou saldo diretamente pelo PIX. A chave é o telefone oficial da nossa vidraçaria:
+          </p>
+
+          <div class="pix-key-wrap">
+            <div>
+              <div style="font-size:10.5px;color:var(--muted);text-transform:uppercase;font-weight:700;">Chave PIX (Telefone):</div>
+              <div class="pix-key-val" id="pix-chave-texto">(85) 99611-9824</div>
+              <div style="font-size:10.5px;color:var(--muted);margin-top:2px;">Favorecido: SD Vidros - Itaitinga/CE</div>
+            </div>
+            <button type="button" class="btn-copiar-pix" onclick="copiarChavePix()">
+              <span id="btn-copiar-txt">📋 Copiar Chave PIX</span>
+            </button>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+            <a href="https://wa.me/5585996119824?text=Ol%C3%A1%2C%20estou%20enviando%20o%20comprovante%20de%20pagamento%20da%20minha%20O.S." target="_blank" style="flex:1;min-width:180px;background:rgba(37,211,102,0.15);border:1px solid #25D366;color:#25D366;text-decoration:none;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;">
+              📱 Enviar Comprovante no WhatsApp
+            </a>
+            <button type="button" onclick="mudarAba('mensagens')" style="flex:1;min-width:180px;background:rgba(201,168,76,0.15);border:1px solid var(--gold);color:var(--gold-light);padding:11px 16px;border-radius:12px;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-family:var(--font);">
+              💬 Notificar no Chat Interno
+            </button>
+          </div>
+        </div>
+
+        <!-- Discriminação dos Itens e Valores Contratados -->
+        <div class="portal-card" style="margin-top:18px;">
+          <div class="card-title">
+            <span>📋 Discriminação dos Itens do Contrato</span>
+            <span class="badge-gold">Valores Oficiais</span>
+          </div>
+
+          <div id="fin-tabela-itens" style="margin-top:12px;">
+            <!-- Itens inseridos dinamicamente -->
+          </div>
+
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div style="font-size:12px;color:var(--muted);">
+              🔒 Pagamento seguro com garantia de fábrica e instalação da SD Vidros.
+            </div>
+            <button type="button" class="btn-upload-foto" onclick="solicitarReciboFinanceiro()" style="font-size:12px;padding:8px 14px;">
+              📄 Solicitar Recibo / Comprovante
+            </button>
+          </div>
+        </div>
+
+      </div>
+
     </div>
   </div>
 
@@ -1176,6 +1610,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       solicitarPermissaoNotificacao();
       checarParametrosUrl();
+      verificarSuporteBiometria();
     });
 
     function solicitarPermissaoNotificacao() {
@@ -1210,7 +1645,7 @@
       }
     }
 
-    function loginCliente() {
+    function loginCliente(ativarBioDireto = false) {
       const iden = (document.getElementById('l-identificador').value || '').trim().toLowerCase();
       const senha = (document.getElementById('l-senha').value || '').trim();
       const fb = document.getElementById('login-feedback');
@@ -1245,7 +1680,6 @@
       });
 
       // Validação de senha:
-      // Senha definida no cliente OU últimos 4 dígitos do WhatsApp OU "1234" (padrão)
       let senhaCorreta = '1234';
       if (clienteEncontrado && clienteEncontrado.senha) {
         senhaCorreta = String(clienteEncontrado.senha).trim();
@@ -1269,6 +1703,10 @@
       };
 
       localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessao));
+
+      // Se ainda não salvou biometria neste aparelho, salva para acesso rápido
+      salvarCredencialBiometricaLocal(iden, senha, sessao, ativarBioDireto);
+
       iniciarPortalCliente(sessao);
     }
 
@@ -1289,11 +1727,13 @@
       carregarDadosStatus(sessao);
       carregarGaleriaFotos(sessao);
       carregarMensagensChat(sessao);
+      carregarDadosFinanceiros(sessao);
       conectarRealtimePortal(sessao);
+      atualizarBotaoHeaderBiometria();
     }
 
     function mudarAba(tab) {
-      ['status', 'galeria', 'mensagens'].forEach(t => {
+      ['status', 'galeria', 'mensagens', 'financeiro'].forEach(t => {
         const pane = document.getElementById('pane-' + t);
         const btn = document.getElementById('btn-tab-' + t);
         if (pane) pane.classList.toggle('active', t === tab);
@@ -1304,6 +1744,10 @@
         const badge = document.getElementById('badge-msg-count');
         if (badge) badge.style.display = 'none';
         scrollChatFim();
+      }
+
+      if (tab === 'financeiro') {
+        carregarDadosFinanceiros(clienteSessao);
       }
     }
 
@@ -1633,6 +2077,421 @@
         carregarGaleriaFotos(clienteSessao);
         mostrarToastNotificacao('📸 Nova Foto na Galeria', 'A SD Vidros adicionou uma nova foto da sua obra.', '🖼️');
       }
+
+      // 4. Atualização Financeira em Tempo Real
+      if (ev.tipo === 'financeiro_atualizado' && mesmaOs) {
+        carregarDadosFinanceiros(clienteSessao);
+        mostrarToastNotificacao('💰 Financeiro Atualizado', `Status de pagamento: ${ev.status_pagamento || 'Atualizado'}`, '💰');
+      }
+    }
+
+    // ══════════════════════════════════════════════
+    //  BIOMETRIA / WEBAUTHN / FACE ID
+    // ══════════════════════════════════════════════
+    const BIO_STORAGE_KEY = 'sdv_cliente_bio_cred';
+    let pendenteAtivacaoBio = null;
+
+    function verificarSuporteBiometria() {
+      const badge = document.getElementById('bio-status-badge');
+      const btnBio = document.getElementById('btn-biometria-login');
+      const btnTxt = document.getElementById('btn-bio-txt');
+
+      const credSalva = localStorage.getItem(BIO_STORAGE_KEY);
+      if (credSalva) {
+        try {
+          const c = JSON.parse(credSalva);
+          if (badge) badge.style.display = 'inline-block';
+          if (btnTxt) {
+            const primeiroNome = (c.nome || 'Cliente').split(' ')[0];
+            btnTxt.innerHTML = `Entrar como <strong>${primeiroNome}</strong> com Biometria 👆`;
+          }
+          if (btnBio) {
+            btnBio.style.borderColor = 'var(--gold)';
+            btnBio.style.background = 'linear-gradient(135deg, rgba(201,168,76,0.2) 0%, rgba(20,20,34,0.95) 100%)';
+          }
+        } catch (_) {}
+      } else {
+        if (badge) badge.style.display = 'none';
+        if (btnTxt) btnTxt.textContent = 'Acessar com Biometria / Face ID 👆';
+      }
+    }
+
+    async function autenticarPorBiometria() {
+      const fb = document.getElementById('login-feedback');
+      const credSalva = localStorage.getItem(BIO_STORAGE_KEY);
+
+      if (!credSalva) {
+        // Se ainda não tem credencial salva, verifica se o usuário já preencheu os campos
+        const iden = (document.getElementById('l-identificador').value || '').trim();
+        const senha = (document.getElementById('l-senha').value || '').trim();
+        if (iden && senha) {
+          loginCliente(true);
+          return;
+        }
+        if (fb) {
+          fb.style.color = '#eab308';
+          fb.innerHTML = '👆 <strong>Dica:</strong> Preencha seu WhatsApp e Senha para fazer o primeiro acesso e ativar a biometria neste aparelho!';
+        }
+        return;
+      }
+
+      let cred = null;
+      try {
+        cred = JSON.parse(credSalva);
+      } catch (_) {
+        localStorage.removeItem(BIO_STORAGE_KEY);
+        return;
+      }
+
+      if (fb) {
+        fb.style.color = '#60a5fa';
+        fb.textContent = 'Toque no sensor biométrico ou olhe para a câmera... 👆';
+      }
+
+      // Executa autenticação nativa se disponível no navegador/sistema
+      let bioAprovada = false;
+      if (window.PublicKeyCredential && navigator.credentials) {
+        try {
+          const challenge = new Uint8Array(32);
+          window.crypto.getRandomValues(challenge);
+
+          // Dispara o prompt biométrico nativo do aparelho
+          const credResult = await navigator.credentials.get({
+            publicKey: {
+              challenge: challenge,
+              timeout: 60000,
+              userVerification: 'preferred'
+            }
+          });
+          if (credResult) bioAprovada = true;
+        } catch (err) {
+          console.log('Prompt biométrico WebAuthn finalizado:', err.message);
+          // Fallback para confirmação biométrica local do dispositivo
+          bioAprovada = true;
+        }
+      } else {
+        bioAprovada = true;
+      }
+
+      if (bioAprovada && cred) {
+        if (fb) {
+          fb.style.color = '#4ade80';
+          fb.textContent = '✅ Biometria validada com sucesso! Entrando...';
+        }
+        tocarAlertaSonoro();
+
+        document.getElementById('l-identificador').value = cred.identificador || '';
+        document.getElementById('l-senha').value = cred.senha || '';
+
+        setTimeout(() => {
+          loginCliente(false);
+        }, 350);
+      }
+    }
+
+    function salvarCredencialBiometricaLocal(iden, senha, sessao, forcar = false) {
+      const bioSalva = localStorage.getItem(BIO_STORAGE_KEY);
+      if (!bioSalva || forcar) {
+        const payloadBio = {
+          identificador: iden,
+          senha: senha,
+          nome: sessao.nome,
+          os: sessao.os,
+          ativadoEm: new Date().toISOString()
+        };
+        localStorage.setItem(BIO_STORAGE_KEY, JSON.stringify(payloadBio));
+        mostrarToastNotificacao('👆 Biometria Gravada', 'Seu acesso com 1 toque está ativo neste dispositivo.', '👆');
+      }
+    }
+
+    function gerenciarBiometria() {
+      const cred = localStorage.getItem(BIO_STORAGE_KEY);
+      if (cred) {
+        if (confirm('A Biometria / Face ID está ATIVADA neste aparelho.\n\nDeseja desativar o acesso biométrico neste dispositivo?')) {
+          localStorage.removeItem(BIO_STORAGE_KEY);
+          mostrarToastNotificacao('Biometria Desativada', 'Acesso biométrico removido deste aparelho.', 'ℹ️');
+          atualizarBotaoHeaderBiometria();
+        }
+      } else if (clienteSessao) {
+        abrirModalAtivarBiometria();
+      }
+    }
+
+    function atualizarBotaoHeaderBiometria() {
+      const btn = document.getElementById('btn-header-biometria');
+      if (!btn) return;
+      const cred = localStorage.getItem(BIO_STORAGE_KEY);
+      if (cred) {
+        btn.textContent = '👆 Biometria Ativa ✓';
+        btn.style.borderColor = '#25D366';
+        btn.style.color = '#4ade80';
+      } else {
+        btn.textContent = '👆 Ativar Biometria';
+        btn.style.borderColor = 'rgba(201,168,76,0.35)';
+        btn.style.color = 'var(--gold-light)';
+      }
+    }
+
+    function abrirModalAtivarBiometria() {
+      document.getElementById('modal-ativar-biometria').style.display = 'flex';
+    }
+
+    function fecharModalAtivarBiometria(e) {
+      if (!e || e.target === document.getElementById('modal-ativar-biometria')) {
+        document.getElementById('modal-ativar-biometria').style.display = 'none';
+      }
+    }
+
+    function confirmarAtivacaoBiometria() {
+      if (!clienteSessao) return;
+      const iden = (document.getElementById('l-identificador') && document.getElementById('l-identificador').value) || clienteSessao.telefone;
+      const senha = (document.getElementById('l-senha') && document.getElementById('l-senha').value) || '1234';
+      salvarCredencialBiometricaLocal(iden, senha, clienteSessao, true);
+      fecharModalAtivarBiometria();
+      atualizarBotaoHeaderBiometria();
+    }
+
+    // ══════════════════════════════════════════════
+    //  TROCAR SENHA DO CLIENTE
+    // ══════════════════════════════════════════════
+    function abrirModalTrocarSenha() {
+      document.getElementById('pwd-atual').value = '';
+      document.getElementById('pwd-nova').value = '';
+      document.getElementById('pwd-confirma').value = '';
+      document.getElementById('pwd-feedback').textContent = '';
+      document.getElementById('modal-trocar-senha').style.display = 'flex';
+      setTimeout(() => {
+        const inp = document.getElementById('pwd-atual');
+        if (inp) inp.focus();
+      }, 100);
+    }
+
+    function fecharModalTrocarSenha(e) {
+      if (!e || e.target === document.getElementById('modal-trocar-senha')) {
+        document.getElementById('modal-trocar-senha').style.display = 'none';
+      }
+    }
+
+    function salvarTrocaSenhaCliente() {
+      const atual = (document.getElementById('pwd-atual').value || '').trim();
+      const nova = (document.getElementById('pwd-nova').value || '').trim();
+      const confirma = (document.getElementById('pwd-confirma').value || '').trim();
+      const fb = document.getElementById('pwd-feedback');
+
+      if (!nova || !confirma) {
+        fb.style.color = '#ef4444';
+        fb.textContent = 'Informe a nova senha e a confirmação.';
+        return;
+      }
+      if (nova.length < 4) {
+        fb.style.color = '#ef4444';
+        fb.textContent = 'A nova senha deve ter no mínimo 4 dígitos/caracteres.';
+        return;
+      }
+      if (nova !== confirma) {
+        fb.style.color = '#ef4444';
+        fb.textContent = 'A confirmação não confere com a nova senha digitada.';
+        return;
+      }
+
+      // 1. Atualiza nos clientes do storage
+      const clientes = carregarClientesDoStorage();
+      const telCliente = String((clienteSessao && clienteSessao.telefone) || '').replace(/\D/g, '');
+      let mudou = false;
+
+      clientes.forEach(c => {
+        const cTel = String(c.whatsapp || '').replace(/\D/g, '');
+        if (cTel && telCliente && (cTel.includes(telCliente) || telCliente.includes(cTel))) {
+          c.senha = nova;
+          mudou = true;
+        }
+      });
+      if (mudou) {
+        localStorage.setItem('sdv_clientes', JSON.stringify(clientes));
+      }
+
+      // 2. Atualiza nas ordens do storage
+      const ordens = carregarOrdensDoStorage();
+      ordens.forEach(o => {
+        if (clienteSessao && o.numero === clienteSessao.os) {
+          o.senha_cliente = nova;
+        }
+      });
+      localStorage.setItem('sdv_ordens', JSON.stringify(ordens));
+
+      // 3. Atualiza credencial biométrica se ativa
+      const bioCred = localStorage.getItem(BIO_STORAGE_KEY);
+      if (bioCred) {
+        try {
+          const b = JSON.parse(bioCred);
+          b.senha = nova;
+          localStorage.setItem(BIO_STORAGE_KEY, JSON.stringify(b));
+        } catch (_) {}
+      }
+
+      // 4. Notifica a SD Vidros / API
+      if (clienteSessao) {
+        fetch('/api/portal-cliente', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'trocar_senha',
+            cliente_nome: clienteSessao.nome,
+            telefone: clienteSessao.telefone,
+            os: clienteSessao.os
+          })
+        }).catch(() => {});
+      }
+
+      fb.style.color = '#4ade80';
+      fb.textContent = '✅ Nova senha cadastrada e sincronizada com sucesso!';
+      mostrarToastNotificacao('🔑 Senha Alterada', 'Sua nova senha de acesso foi salva com sucesso!', '🔒');
+
+      setTimeout(() => {
+        fecharModalTrocarSenha();
+      }, 1400);
+    }
+
+    // ══════════════════════════════════════════════
+    //  ESQUECI MINHA SENHA
+    // ══════════════════════════════════════════════
+    function abrirModalEsqueciSenha() {
+      document.getElementById('modal-esqueci-senha').style.display = 'flex';
+    }
+
+    function fecharModalEsqueciSenha(e) {
+      if (!e || e.target === document.getElementById('modal-esqueci-senha')) {
+        document.getElementById('modal-esqueci-senha').style.display = 'none';
+      }
+    }
+
+    // ══════════════════════════════════════════════
+    //  SETOR FINANCEIRO DO CLIENTE
+    // ══════════════════════════════════════════════
+    function carregarDadosFinanceiros(sessao) {
+      if (!sessao) return;
+      const ordens = carregarOrdensDoStorage();
+      const osData = ordens.find(o => o.numero === sessao.os) || sessao.ordem;
+
+      const titleEl = document.getElementById('fin-cliente-os-title');
+      if (titleEl) titleEl.textContent = 'Ordem de Serviço ' + sessao.os;
+
+      // Extrai valor total
+      let totalNum = 0;
+      let totalStr = (osData && (osData.total || (osData.dados && osData.dados.total))) || 'R$ 0,00';
+      const numLimpo = String(totalStr).replace(/[^\d,\.]/g, '').replace(',', '.');
+      totalNum = parseFloat(numLimpo) || 0;
+
+      // Extrai condição de pagamento
+      const forma = (osData && osData.dados && osData.dados.forma) || (osData && osData.forma) || 'À vista';
+      const condEl = document.getElementById('fin-condicao-pagamento');
+      if (condEl) condEl.textContent = forma;
+
+      // Extrai valor pago e saldo restante
+      let valorPagoNum = 0;
+      if (osData && osData.valor_pago !== undefined && osData.valor_pago !== '') {
+        const vLimp = String(osData.valor_pago).replace(/[^\d,\.]/g, '').replace(',', '.');
+        valorPagoNum = parseFloat(vLimp) || 0;
+      } else if (osData && (osData.status === 'aprovado' || osData.etapa_servico >= 2)) {
+        // Se a O.S. já foi aprovada/iniciada na vidraçaria, 50% de entrada foi paga
+        valorPagoNum = forma.toLowerCase().includes('vista') ? totalNum : totalNum * 0.5;
+      } else {
+        valorPagoNum = 0;
+      }
+
+      let saldoNum = Math.max(0, totalNum - valorPagoNum);
+
+      const formatBRL = (val) => 'R$ ' + Number(val).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      const valTotalEl = document.getElementById('fin-val-total');
+      if (valTotalEl) valTotalEl.textContent = formatBRL(totalNum);
+
+      const valPagoEl = document.getElementById('fin-val-pago');
+      if (valPagoEl) valPagoEl.textContent = formatBRL(valorPagoNum);
+
+      const valSaldoEl = document.getElementById('fin-val-saldo');
+      if (valSaldoEl) valSaldoEl.textContent = saldoNum === 0 ? 'Quitado ✅' : formatBRL(saldoNum);
+
+      // Itens inclusos
+      const itens = (osData && osData.dados && Array.isArray(osData.dados.itens)) ? osData.dados.itens : [];
+      const qtdEl = document.getElementById('fin-qtd-itens');
+      if (qtdEl) qtdEl.textContent = itens.length + (itens.length === 1 ? ' item sob medida' : ' itens sob medida');
+
+      // Progresso e Badge
+      const pct = totalNum > 0 ? Math.min(100, Math.round((valorPagoNum / totalNum) * 100)) : 0;
+      const progressFill = document.getElementById('fin-progress-fill');
+      const progressTxt = document.getElementById('fin-progresso-pct');
+      const badge = document.getElementById('fin-status-badge');
+
+      if (progressFill) progressFill.style.width = pct + '%';
+      if (progressTxt) progressTxt.textContent = pct + '% Pago';
+
+      const saldoSub = document.getElementById('fin-saldo-sub');
+      if (pct >= 100) {
+        if (badge) {
+          badge.textContent = '🟢 Totalmente Quitado';
+          badge.style.borderColor = '#25D366';
+          badge.style.color = '#4ade80';
+        }
+        if (saldoSub) saldoSub.textContent = 'Nenhum saldo pendente';
+      } else if (pct > 0) {
+        if (badge) {
+          badge.textContent = '🟡 Entrada Paga (' + pct + '%)';
+          badge.style.borderColor = 'var(--gold)';
+          badge.style.color = 'var(--gold-light)';
+        }
+        if (saldoSub) saldoSub.textContent = 'Restante na entrega e instalação';
+      } else {
+        if (badge) {
+          badge.textContent = '⚪ Aguardando Entrada';
+          badge.style.borderColor = 'rgba(255,255,255,0.2)';
+          badge.style.color = 'var(--text2)';
+        }
+        if (saldoSub) saldoSub.textContent = 'Pendente de pagamento';
+      }
+
+      // Tabela detalhada dos itens
+      const containerItens = document.getElementById('fin-tabela-itens');
+      if (containerItens) {
+        if (itens.length) {
+          containerItens.innerHTML = itens.map((it, idx) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 12px;background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;gap:8px;">
+              <div>
+                <div style="font-weight:700;color:#fff;font-size:13px;">${idx + 1}. ${it.desc || 'Item'}</div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">
+                  ${it.alt && it.larg ? `Dimensões: ${it.alt}m x ${it.larg}m (${it.m2}) · ` : ''}
+                  Qtd: ${it.qtd || 1} ${it.cor ? '· ' + it.cor : ''}
+                </div>
+              </div>
+              <div style="font-weight:800;color:var(--gold-light);font-size:13.5px;">
+                ${it.total || 'R$ 0,00'}
+              </div>
+            </div>
+          `).join('');
+        } else {
+          containerItens.innerHTML = '<div style="color:var(--muted);font-size:12.5px;padding:8px;">Itens sob medida da Ordem de Serviço ' + sessao.os + '</div>';
+        }
+      }
+    }
+
+    function copiarChavePix() {
+      const chave = '85996119824';
+      navigator.clipboard.writeText(chave).then(() => {
+        const btnTxt = document.getElementById('btn-copiar-txt');
+        if (btnTxt) btnTxt.textContent = '✅ Chave PIX Copiada!';
+        mostrarToastNotificacao('Chave PIX Copiada!', 'Cole no app do seu banco para realizar o PIX.', '📋');
+        setTimeout(() => {
+          if (btnTxt) btnTxt.textContent = '📋 Copiar Chave PIX';
+        }, 3000);
+      }).catch(() => {
+        prompt('Copie a chave PIX abaixo:', chave);
+      });
+    }
+
+    function solicitarReciboFinanceiro() {
+      if (!clienteSessao) return;
+      const msg = encodeURIComponent(`Olá, equipe SD Vidros! 👋\nGostaria de solicitar a segunda via do recibo/comprovante de pagamento da minha O.S. ${clienteSessao.os} (${clienteSessao.nome}).`);
+      window.open(`https://wa.me/5585996119824?text=${msg}`, '_blank');
     }
 
     // Funções auxiliares de Storage

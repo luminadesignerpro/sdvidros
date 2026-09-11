@@ -138,6 +138,73 @@ module.exports = async (req, res) => {
     return res.status(200).json({ success: true, foto: payloadFoto });
   }
 
+  // 4. Atualização Financeira da O.S. (pagamento, entrada, quitação)
+  if (action === 'atualizar_financeiro') {
+    const os = String(body.os || body.numero_os || '');
+    const clienteNome = String(body.cliente_nome || body.cliente || 'Cliente');
+    const valorPago = String(body.valor_pago || body.entrada || '0,00');
+    const saldoRestante = String(body.saldo_restante || '0,00');
+    const total = String(body.total || '0,00');
+    const statusPagamento = String(body.status_pagamento || 'Pendente');
+
+    const payloadFin = {
+      tipo: 'financeiro_atualizado',
+      os: os,
+      cliente_nome: clienteNome,
+      valor_pago: valorPago,
+      saldo_restante: saldoRestante,
+      total: total,
+      status_pagamento: statusPagamento,
+      atualizado_em: new Date().toISOString()
+    };
+
+    try {
+      await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+        method: 'POST',
+        headers: {
+          'Title': `💰 SD Vidros: Financeiro Atualizado - ${os}`,
+          'Tags': 'moneybag,credit_card',
+          'Priority': 'high'
+        },
+        body: JSON.stringify(payloadFin)
+      });
+    } catch (e) {
+      console.warn('Erro ao despachar financeiro no ntfy:', e.message);
+    }
+
+    return res.status(200).json({ success: true, financeiro: payloadFin });
+  }
+
+  // 5. Troca de Senha pelo Cliente
+  if (action === 'trocar_senha') {
+    const clienteNome = String(body.cliente_nome || 'Cliente');
+    const telefone = String(body.telefone || body.whatsapp || '');
+    const os = String(body.os || '');
+
+    const payloadSenha = {
+      tipo: 'troca_senha_cliente',
+      cliente_nome: clienteNome,
+      telefone: telefone,
+      os: os,
+      data_hora: new Date().toISOString()
+    };
+
+    try {
+      await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+        method: 'POST',
+        headers: {
+          'Title': `🔑 Senha Alterada pelo Cliente - ${clienteNome}`,
+          'Tags': 'key,lock'
+        },
+        body: JSON.stringify(payloadSenha)
+      });
+    } catch (e) {
+      console.warn('Erro ao despachar troca_senha no ntfy:', e.message);
+    }
+
+    return res.status(200).json({ success: true, alterado: true });
+  }
+
   // Endpoint de status / teste
   return res.status(200).json({
     status: 'online',

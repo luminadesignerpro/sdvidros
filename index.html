@@ -1223,6 +1223,23 @@
       <input id="pos-obs" placeholder="Ex: Vidros cortados e encaminhados para a têmpera. Ferragens separadas." />
     </div>
 
+    <!-- Gestão Financeira da O.S. -->
+    <div class="field-row" style="margin-top:10px;">
+      <div class="field">
+        <label>Valor Pago / Entrada (R$)</label>
+        <input id="pos-valor-pago" placeholder="Ex: 1500,00" />
+      </div>
+      <div class="field">
+        <label>Status do Pagamento no Portal</label>
+        <select id="pos-status-pagamento" style="width:100%;padding:10px;background:#08080f;border:1.5px solid var(--gold);border-radius:10px;color:#fff;font-weight:700;font-size:13px;">
+          <option value="Pendente">⚪ Pendente de Pagamento</option>
+          <option value="Entrada Paga">🟡 Entrada Paga (50%)</option>
+          <option value="Restante na Entrega">🚚 Restante na Entrega</option>
+          <option value="Quitado">🟢 Totalmente Quitado</option>
+        </select>
+      </div>
+    </div>
+
     <div class="field-row" style="margin-top:10px;">
       <div class="field">
         <label>Senha de Acesso do Cliente</label>
@@ -4584,13 +4601,18 @@ function abrirModalPortalOs(id) {
   document.getElementById('pos-num-display').textContent = os.numero || '#0001';
   document.getElementById('pos-nome-display').textContent = os.nome || 'Cliente';
 
-  // Preenche etapa e observação salvas
+  // Preenche etapa, observação e financeiro salvos
   const etapaEl = document.getElementById('pos-etapa');
   if (etapaEl) etapaEl.value = os.etapa_servico || '3';
   const previsaoEl = document.getElementById('pos-previsao');
   if (previsaoEl) previsaoEl.value = os.previsao_instalacao || '';
   const obsEl = document.getElementById('pos-obs');
   if (obsEl) obsEl.value = os.status_obs || '';
+
+  const vPagoEl = document.getElementById('pos-valor-pago');
+  if (vPagoEl) vPagoEl.value = os.valor_pago || '';
+  const stPagEl = document.getElementById('pos-status-pagamento');
+  if (stPagEl) stPagEl.value = os.status_pagamento || 'Pendente';
 
   // Busca senha do cliente correspondente
   const cli = clientes.find(c => {
@@ -4677,6 +4699,8 @@ function salvarStatusOsModal() {
   const previsao = (document.getElementById('pos-previsao').value || '').trim();
   const obs = (document.getElementById('pos-obs').value || '').trim();
   const senhaDigitada = (document.getElementById('pos-senha').value || '').trim();
+  const valorPago = (document.getElementById('pos-valor-pago').value || '').trim();
+  const statusPag = document.getElementById('pos-status-pagamento').value;
 
   const etapaTextos = [
     '', 'Orçamento Aprovado', 'Medição Técnica Concluída',
@@ -4692,6 +4716,8 @@ function salvarStatusOsModal() {
     historico[idx].status_servico_texto = statusTexto;
     historico[idx].status_obs = obs;
     historico[idx].previsao_instalacao = previsao;
+    historico[idx].valor_pago = valorPago;
+    historico[idx].status_pagamento = statusPag;
     save(K.orders, historico);
     renderHist();
   }
@@ -4709,7 +4735,7 @@ function salvarStatusOsModal() {
     }
   }
 
-  // Publica no barramento em tempo real (ntfy) para o cliente receber
+  // Publica no barramento em tempo real (ntfy) para o cliente receber status e financeiro
   fetch('/api/portal-cliente', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -4724,6 +4750,21 @@ function salvarStatusOsModal() {
       previsao: previsao
     })
   }).catch(() => {});
+
+  if (valorPago || statusPag) {
+    fetch('/api/portal-cliente', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'atualizar_financeiro',
+        os: osPortalAtual.numero,
+        cliente_nome: osPortalAtual.nome,
+        valor_pago: valorPago,
+        status_pagamento: statusPag,
+        total: osPortalAtual.total
+      })
+    }).catch(() => {});
+  }
 
   const fb = document.getElementById('pos-feedback-msg');
   if (fb) {
