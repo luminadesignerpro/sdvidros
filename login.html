@@ -234,6 +234,97 @@
     .footer-area { text-align: center; margin-top: 26px; }
     .footer-area p { font-size: 11.5px; color: rgba(148, 163, 184, 0.6); letter-spacing: 0.04em; }
     .hint { font-size: 10.5px; color: rgba(106,98,117,0.45); margin-top: 6px; }
+
+    /* ── SELETOR DE EMPRESA / LICENÇA NA PÁGINA INICIAL ── */
+    .empresa-switch-wrap {
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1.5px solid rgba(201, 168, 76, 0.28);
+      border-radius: 18px;
+      padding: 12px 10px 10px;
+      position: relative;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
+    }
+    .empresa-switch-label {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 10px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .empresa-switch-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .empresa-switch-card {
+      background: #080811;
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      border-radius: 13px;
+      padding: 10px 6px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 3px;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      font-family: var(--font);
+    }
+    .empresa-switch-card:hover {
+      border-color: rgba(201, 168, 76, 0.5);
+      transform: translateY(-2px);
+      background: #0d0d1a;
+    }
+    .empresa-switch-card.active {
+      border-color: var(--gold);
+      background: linear-gradient(180deg, rgba(201, 168, 76, 0.18) 0%, rgba(16, 16, 26, 0.98) 100%);
+      box-shadow: 0 0 22px rgba(201, 168, 76, 0.28);
+    }
+    .empresa-switch-icon {
+      font-size: 22px;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+    .empresa-switch-title {
+      font-size: 12.5px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .empresa-switch-card.active .empresa-switch-title {
+      color: var(--gold-light);
+    }
+    .empresa-switch-desc {
+      font-size: 9px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .empresa-switch-card.active .empresa-switch-desc {
+      color: rgba(240, 236, 228, 0.85);
+    }
+    .empresa-switch-badge {
+      position: absolute;
+      top: 5px;
+      right: 7px;
+      font-size: 10px;
+      font-weight: 900;
+      color: #4ade80;
+      display: none;
+    }
+    .empresa-switch-card.active .empresa-switch-badge {
+      display: block;
+    }
+
     @media(max-width: 480px) { .login-box { padding: 30px 20px; border-radius: 22px; } .brand-name { font-size: 25px; } }
   </style>
 </head>
@@ -242,11 +333,32 @@
 <div class="login-box">
   <div class="logo-area">
     <div class="logo-img-wrap">
-      <img src="logo.jpg" alt="SD Vidros Logo">
+      <img id="login-logo-img" src="logo.jpg" alt="Logo" style="transition: opacity 0.25s ease;">
     </div>
-    <div class="brand-name">SD VIDROS</div>
-    <div class="brand-sub">SISTEMA DE GESTÃO & ORÇAMENTOS</div>
+    <div class="brand-name" id="login-brand-name">SD VIDROS</div>
+    <div class="brand-sub" id="login-brand-sub">SISTEMA DE GESTÃO & ORÇAMENTOS</div>
     <div class="gold-divider"></div>
+  </div>
+
+  <!-- SELETOR DE LICENÇA / EMPRESA NA PÁGINA INICIAL -->
+  <div class="empresa-switch-wrap">
+    <div class="empresa-switch-label">
+      <span>🏢</span> Escolha a Empresa para Acessar:
+    </div>
+    <div class="empresa-switch-grid">
+      <button type="button" class="empresa-switch-card active" id="card-empresa-vidros" onclick="selecionarEmpresaLogin('sdvidros')" title="Acessar Sistema como SD Vidros">
+        <span class="empresa-switch-badge">✓</span>
+        <div class="empresa-switch-icon">💎</div>
+        <div class="empresa-switch-title">SD Vidros</div>
+        <div class="empresa-switch-desc">Alumínio & Vidraçaria</div>
+      </button>
+      <button type="button" class="empresa-switch-card" id="card-empresa-moveis" onclick="selecionarEmpresaLogin('sdmoveis')" title="Acessar Sistema como SD Móveis Projetados">
+        <span class="empresa-switch-badge">✓</span>
+        <div class="empresa-switch-icon">🛋️</div>
+        <div class="empresa-switch-title">SD Móveis</div>
+        <div class="empresa-switch-desc">Móveis Projetados</div>
+      </button>
+    </div>
   </div>
 
   <!-- SELETOR EMPRESA / CLIENTE -->
@@ -328,14 +440,18 @@
   <div id="login-msg"></div>
 
   <div class="footer-area">
-    <p>SD Vidros • Sistema Seguro</p>
+    <p id="login-footer-empresa">SD Vidros • Sistema Seguro</p>
     <p class="hint">Primeiro acesso: usuário <strong>admin</strong> / senha <strong>admin123</strong></p>
   </div>
 </div>
 
 <script>
-  // Se já tiver sessão persistida em localStorage ou sessionStorage, entra direto
+  // Se o usuário veio para trocar de licença/empresa (?trocar=1), não redireciona
   (function() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('trocar') || params.get('empresa')) {
+      return;
+    }
     const savedToken = sessionStorage.getItem('sdv_token') || localStorage.getItem('sdv_token');
     if (savedToken) {
       if (!sessionStorage.getItem('sdv_token')) {
@@ -545,7 +661,59 @@
     }, 350);
   }
 
+  // ══════════════════════════════════════════════
+  //  SELEÇÃO DE LICENÇA / EMPRESA NA PÁGINA INICIAL
+  // ══════════════════════════════════════════════
+  function selecionarEmpresaLogin(id) {
+    localStorage.setItem('sdv_licenca_ativa', id);
+    atualizarVisualEmpresaLogin(id);
+  }
+
+  function atualizarVisualEmpresaLogin(id) {
+    if (!id) id = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+
+    let nome = (id === 'sdmoveis') ? 'SD MÓVEIS PROJETADOS' : 'SD VIDROS';
+    let sub = (id === 'sdmoveis') ? 'MÓVEIS PLANEJADOS & MARCENARIA DE LUXO' : 'SISTEMA DE GESTÃO & ORÇAMENTOS';
+    let logo = (id === 'sdmoveis') ? 'logo_moveis.jpg' : 'logo.jpg';
+
+    try {
+      const salvas = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
+      const emp = salvas.find(l => l.id === id);
+      if (emp) {
+        if (emp.nome) nome = emp.nome.toUpperCase();
+        if (emp.segmento) sub = emp.segmento.toUpperCase();
+        if (emp.logo) logo = emp.logo;
+      }
+    } catch (_) {}
+
+    // Destaca o card ativo
+    const cardVidros = document.getElementById('card-empresa-vidros');
+    const cardMoveis = document.getElementById('card-empresa-moveis');
+    if (cardVidros) cardVidros.classList.toggle('active', id === 'sdvidros');
+    if (cardMoveis) cardMoveis.classList.toggle('active', id === 'sdmoveis');
+
+    // Atualiza logo
+    const logoImg = document.getElementById('login-logo-img');
+    if (logoImg) {
+      logoImg.src = logo;
+      logoImg.alt = nome;
+    }
+
+    // Atualiza nome e subtítulo
+    const brandName = document.getElementById('login-brand-name');
+    if (brandName) brandName.textContent = nome;
+
+    const brandSub = document.getElementById('login-brand-sub');
+    if (brandSub) brandSub.textContent = sub;
+
+    // Atualiza rodapé
+    const footerTxt = document.getElementById('login-footer-empresa');
+    if (footerTxt) footerTxt.textContent = (id === 'sdmoveis' ? 'SD Móveis Projetados' : 'SD Vidros') + ' • Sistema Seguro';
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
+    atualizarVisualEmpresaLogin();
+
     if (localStorage.getItem('sdv_bio_enabled') === 'true' || localStorage.getItem('sdv_bio_user')) {
       const btnBio = document.getElementById('btn-biometria');
       if (btnBio) {
