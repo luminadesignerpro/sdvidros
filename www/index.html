@@ -801,18 +801,12 @@
     <img id="banner-img-main" src="banner.jpg" alt="SD Vidros – Alumínio e Vidraçaria">
   </div>
 
-  <!-- BARRA DE CONTROLE SUPERIOR (EMPRESA ATIVA, USUÁRIO E SAIR) -->
-  <div class="top-nav-bar" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;padding:4px 2px;flex-wrap:wrap;">
-    <div class="user-pill" id="empresa-pill-top" onclick="abrirModalTrocaEmpresaRapida()" style="cursor:pointer;background:#101018;border:1.5px solid var(--gold);padding:6px 14px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,0.4);" title="Clique para alternar entre SD Vidros e SD Móveis">
-      <span id="empresa-icon-top">🏢</span>
-      <strong id="empresa-nome-top" style="color:var(--gold-light);">SD Vidros</strong> ▾
+  <!-- BARRA DE CONTROLE SUPERIOR (USUÁRIO E SAIR - SEM MOSTRAR NOME DA EMPRESA) -->
+  <div class="top-nav-bar" style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:12px;padding:4px 2px;">
+    <div class="user-pill" style="background:#101018;border:1px solid rgba(255,255,255,0.12);padding:6px 14px;border-radius:20px;">
+      <span id="usuario-logado">👤 Admin</span>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
-      <div class="user-pill" style="background:#101018;border:1px solid rgba(255,255,255,0.12);padding:6px 12px;border-radius:20px;">
-        <span id="usuario-logado">👤 Admin</span>
-      </div>
-      <button class="btn-sair" onclick="sair()" style="background:#181824;border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:6px 14px;border-radius:20px;cursor:pointer;">🚪 Sair</button>
-    </div>
+    <button class="btn-sair" onclick="sair()" style="background:#181824;border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:6px 14px;border-radius:20px;cursor:pointer;">🚪 Sair</button>
   </div>
 
   <!-- TABS -->

@@ -384,6 +384,28 @@
       overflow-y: auto;
     }
 
+    /* BOTÃO DO CADEADO STANDALONE (EXATAMENTE COMO NA TERCEIRA IMAGEM) */
+    .btn-cadeado-standalone {
+      width: 58px;
+      height: 52px;
+      border-radius: 14px;
+      border: 1.5px solid rgba(201, 168, 76, 0.45);
+      background: #0e0f18;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-cadeado-standalone:hover {
+      border-color: var(--gold);
+      background: #141624;
+      transform: translateY(-2px) scale(1.06);
+      box-shadow: 0 0 24px rgba(201, 168, 76, 0.4);
+    }
+
     /* BOTÃO DO CADEADO (SÓ O DESENHO DO CADEADO) */
     .btn-cadeado {
       flex: 0 0 54px !important;
@@ -436,12 +458,9 @@
     <div class="gold-divider"></div>
   </div>
 
-  <!-- NAVEGAÇÃO ENTRE LOGIN E CADEADO DE ACESSO (TERCEIRA IMAGEM: SÓ O DESENHO DO CADEADO) -->
-  <div class="top-nav-pills" style="display:flex;align-items:center;gap:8px;">
-    <button type="button" id="tab-btn-login" class="top-nav-pill active" onclick="mostrarAbaPrincipal('login')" style="flex:1;">
-      🔑 Login
-    </button>
-    <button type="button" id="tab-btn-cadeado" class="btn-cadeado" onclick="abrirModalAcessoCadeado()" title="Acesso com Cadeado / Alternar Empresa">
+  <!-- BOTÃO DO CADEADO (EXATAMENTE COMO NA TERCEIRA IMAGEM) -->
+  <div style="display:flex;justify-content:center;margin-bottom:18px;">
+    <button type="button" id="tab-btn-cadeado" class="btn-cadeado-standalone" onclick="abrirModalAcessoCadeado()" title="Acesso com Cadeado / Alternar Empresa">
       🔒
     </button>
   </div>
