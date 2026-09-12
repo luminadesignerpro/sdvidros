@@ -65,24 +65,29 @@
       min-height: 140px;
       object-fit: cover;
     }
-    .banner-overlay-top {
-      position: absolute; top: 12px; right: 14px;
-      display: flex; align-items: center; gap: 8px;
-      z-index: 10;
+    .top-nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 4px 2px;
+      flex-wrap: wrap;
     }
     .user-pill {
-      font-size: 11px; font-weight: 700; color: #fff;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-      background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
-      padding: 5px 12px; border-radius: 999px;
+      font-size: 11.5px; font-weight: 700; color: #fff;
+      background: #101018;
+      padding: 6px 14px; border-radius: 999px;
       border: 1px solid rgba(201,168,76,0.3);
       display: flex; align-items: center; gap: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
     .btn-sair {
-      font-size: 11px; font-weight: 700; color: #fff;
-      background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 5px 12px; border-radius: 999px; cursor: pointer;
+      font-size: 11.5px; font-weight: 700; color: #fca5a5;
+      background: #181824;
+      border: 1px solid rgba(239,68,68,0.35);
+      padding: 6px 14px; border-radius: 999px; cursor: pointer;
+      transition: all 0.2s;
       font-family: var(--font); transition: all 0.2s;
     }
     .btn-sair:hover { background: rgba(224,68,68,0.6); border-color: rgba(224,68,68,0.8); }
@@ -791,18 +796,22 @@
 
 <div class="app">
 
-  <!-- BANNER GRÁFICO (ESTILO NEWBOX DA SD VIDROS) -->
+  <!-- BANNER GRÁFICO LIMPO (ESTILO NEWBOX DA SD VIDROS - SEM TEXTO POR CIMA) -->
   <div class="banner">
     <img id="banner-img-main" src="banner.jpg" alt="SD Vidros – Alumínio e Vidraçaria">
-    <div class="banner-overlay-top">
-      <div class="user-pill" id="empresa-pill-top" onclick="abrirModalTrocaEmpresaRapida()" style="cursor:pointer;background:rgba(0,0,0,0.78);border-color:var(--gold);" title="Clique para alternar entre SD Vidros e SD Móveis">
-        <span id="empresa-icon-top">🏢</span>
-        <strong id="empresa-nome-top" style="color:var(--gold-light);">SD Vidros</strong> ▾
-      </div>
-      <div class="user-pill">
+  </div>
+
+  <!-- BARRA DE CONTROLE SUPERIOR (EMPRESA ATIVA, USUÁRIO E SAIR) -->
+  <div class="top-nav-bar" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;padding:4px 2px;flex-wrap:wrap;">
+    <div class="user-pill" id="empresa-pill-top" onclick="abrirModalTrocaEmpresaRapida()" style="cursor:pointer;background:#101018;border:1.5px solid var(--gold);padding:6px 14px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,0.4);" title="Clique para alternar entre SD Vidros e SD Móveis">
+      <span id="empresa-icon-top">🏢</span>
+      <strong id="empresa-nome-top" style="color:var(--gold-light);">SD Vidros</strong> ▾
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+      <div class="user-pill" style="background:#101018;border:1px solid rgba(255,255,255,0.12);padding:6px 12px;border-radius:20px;">
         <span id="usuario-logado">👤 Admin</span>
       </div>
-      <button class="btn-sair" onclick="sair()">🚪 Sair</button>
+      <button class="btn-sair" onclick="sair()" style="background:#181824;border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:6px 14px;border-radius:20px;cursor:pointer;">🚪 Sair</button>
     </div>
   </div>
 
@@ -815,7 +824,6 @@
     <button id="tab-ponto" class="tab" data-tab="ponto" onclick="goTab('ponto')">👷 Funcionários & Ponto</button>
     <button id="tab-contratos" class="tab" data-tab="contratos" onclick="goTab('contratos')">📄 Contratos</button>
     <button id="tab-usuarios" class="tab" data-tab="usuarios" onclick="goTab('usuarios')">👥 Usuários</button>
-    <button id="tab-licenca" class="tab" data-tab="licenca" onclick="goTab('licenca')">🏢 Licença & Marca</button>
     <button type="button" id="tab-portal-cliente" class="tab" onclick="window.open('cliente.html','_blank')" title="Acessar Portal do Cliente">🌐 Portal do Cliente</button>
     <button type="button" id="btn-central-mensagens" class="tab" onclick="abrirModalCentralMensagens()" title="Central de Mensagens com Clientes">💬 Mensagens <span id="badge-msg-clientes" style="display:none;background:#ef4444;color:#fff;font-size:9.5px;padding:1px 6px;border-radius:999px;font-weight:900;margin-left:4px;">0</span></button>
   </div>
@@ -869,9 +877,6 @@
     <!-- Services / Calculations -->
     <div class="card">
       <div class="card-title">🔧 Itens, Metro Quadrado (m²) e Valores</div>
-
-      <div style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;">Adicionar Rápido do Catálogo</div>
-      <div class="svc-chips" id="quick-catalog-chips"></div>
 
       <!-- SPREADSHEET CALCULATION TABLE -->
       <div class="calc-table-wrap">
@@ -2226,16 +2231,6 @@ function updateDatalistProdutos() {
   const dl = document.getElementById('lista-produtos-sugeridos');
   if (!dl) return;
   dl.innerHTML = produtos.map(p => `<option value="${esc(p.nome)}">${p.cat ? p.cat + ' - ' : ''}R$ ${p.vm2 ? p.vm2 + '/m²' : p.vunit + ' un'}</option>`).join('');
-
-  // Update quick catalog chips
-  const chipsDiv = document.getElementById('quick-catalog-chips');
-  if (chipsDiv) {
-    chipsDiv.innerHTML = produtos.slice(0, 8).map(p => `
-      <button class="svc-chip" onclick="addProdutoDoCatalogo(${p.id})">
-        ✨ ${esc(p.nome.split(' ')[0])} ${esc(p.nome.split(' ')[1]||'')}
-      </button>
-    `).join('');
-  }
 }
 
 let itemEmEdicaoId = null;

@@ -65,24 +65,29 @@
       min-height: 140px;
       object-fit: cover;
     }
-    .banner-overlay-top {
-      position: absolute; top: 12px; right: 14px;
-      display: flex; align-items: center; gap: 8px;
-      z-index: 10;
+    .top-nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 4px 2px;
+      flex-wrap: wrap;
     }
     .user-pill {
-      font-size: 11px; font-weight: 700; color: #fff;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-      background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
-      padding: 5px 12px; border-radius: 999px;
+      font-size: 11.5px; font-weight: 700; color: #fff;
+      background: #101018;
+      padding: 6px 14px; border-radius: 999px;
       border: 1px solid rgba(201,168,76,0.3);
       display: flex; align-items: center; gap: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
     .btn-sair {
-      font-size: 11px; font-weight: 700; color: #fff;
-      background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 5px 12px; border-radius: 999px; cursor: pointer;
+      font-size: 11.5px; font-weight: 700; color: #fca5a5;
+      background: #181824;
+      border: 1px solid rgba(239,68,68,0.35);
+      padding: 6px 14px; border-radius: 999px; cursor: pointer;
+      transition: all 0.2s;
       font-family: var(--font); transition: all 0.2s;
     }
     .btn-sair:hover { background: rgba(224,68,68,0.6); border-color: rgba(224,68,68,0.8); }
@@ -510,6 +515,254 @@
       background: linear-gradient(135deg, #38bdf8, #0ea5e9);
       box-shadow: 0 4px 18px rgba(14,165,233,0.4);
     }
+
+    /* ══ CENTRAL DE MENSAGENS RESPONSIVA ══ */
+    .chat-admin-modal-box {
+      background: #0d0d18;
+      border: 1px solid rgba(201,168,76,0.28);
+      border-radius: 18px;
+      padding: 16px 20px;
+      width: 100%;
+      max-width: 860px;
+      height: 640px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.85), 0 0 30px rgba(201,168,76,0.15);
+      box-sizing: border-box;
+    }
+    .chat-admin-container {
+      display: flex;
+      gap: 14px;
+      flex: 1;
+      min-height: 0;
+      position: relative;
+    }
+    .chat-admin-sidebar {
+      width: 270px;
+      flex-shrink: 0;
+      background: #080812;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-admin-sidebar-header {
+      padding: 10px 14px;
+      background: #111122;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-admin-sidebar-title {
+      font-size: 11.5px;
+      font-weight: 800;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .chat-admin-lista {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .chat-admin-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      user-select: none;
+    }
+    .chat-admin-card:hover {
+      background: rgba(201,168,76,0.08);
+      border-color: rgba(201,168,76,0.3);
+      transform: translateY(-1px);
+    }
+    .chat-admin-card.active {
+      background: rgba(201,168,76,0.15);
+      border-color: var(--gold);
+      box-shadow: 0 4px 14px rgba(201,168,76,0.15);
+    }
+    .chat-admin-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      background: #090914;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .chat-admin-header {
+      padding: 10px 14px;
+      background: #121224;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      min-height: 52px;
+      flex-shrink: 0;
+    }
+    .chat-admin-back-btn {
+      display: none;
+      background: rgba(201,168,76,0.15);
+      border: 1px solid rgba(201,168,76,0.35);
+      color: var(--gold-light);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .chat-admin-back-btn:hover {
+      background: rgba(201,168,76,0.25);
+    }
+    .chat-admin-messages-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: radial-gradient(circle at center top, rgba(20,20,38,0.4), transparent);
+    }
+    .chat-admin-footer {
+      padding: 10px 14px;
+      background: #111122;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    /* ── COMPORTAMENTO MOBILE / RESPONSIVO ── */
+    @media (max-width: 768px) {
+      .chat-admin-modal-box {
+        width: 96vw !important;
+        max-width: 100% !important;
+        height: 88vh !important;
+        max-height: 88vh !important;
+        padding: 12px !important;
+        margin: auto;
+        border-radius: 14px;
+      }
+      .chat-admin-container {
+        position: relative;
+        overflow: hidden;
+      }
+      /* Modo 1: Lista de conversas visível (chat oculto) */
+      .chat-admin-container:not(.view-chat-active) .chat-admin-sidebar {
+        width: 100% !important;
+        display: flex !important;
+        flex: 1 !important;
+      }
+      .chat-admin-container:not(.view-chat-active) .chat-admin-main {
+        display: none !important;
+      }
+      /* Modo 2: Chat ativo visível (lista oculta) */
+      .chat-admin-container.view-chat-active .chat-admin-sidebar {
+        display: none !important;
+      }
+      .chat-admin-container.view-chat-active .chat-admin-main {
+        width: 100% !important;
+        display: flex !important;
+        flex: 1 !important;
+      }
+      .chat-admin-back-btn {
+        display: inline-flex !important;
+      }
+      .chat-admin-footer {
+        padding: 8px 10px !important;
+      }
+      #admin-chat-input {
+        font-size: 13.5px !important;
+        padding: 9px 10px !important;
+      }
+    }
+
+    /* ══ MÓDULO DE LICENÇA E MULTI-EMPRESA ══ */
+    .licenca-selector-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .licenca-card-option {
+      background: rgba(255,255,255,0.03);
+      border: 1.5px solid rgba(255,255,255,0.09);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .licenca-card-option:hover {
+      border-color: rgba(201,168,76,0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .licenca-card-option.active {
+      border-color: var(--gold);
+      background: linear-gradient(180deg, rgba(201,168,76,0.12) 0%, rgba(13,13,21,0.95) 100%);
+      box-shadow: 0 8px 30px rgba(201,168,76,0.18);
+    }
+    .licenca-thumb-banner {
+      width: 100%;
+      height: 120px;
+      background: #000;
+      position: relative;
+      overflow: hidden;
+    }
+    .licenca-thumb-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .licenca-body-content {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .licenca-active-tag {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(16,185,129,0.9);
+      color: #fff;
+      font-size: 10.5px;
+      font-weight: 900;
+      padding: 3px 10px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .licenca-upload-preview {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      border: 1.5px solid var(--gold);
+      object-fit: cover;
+      background: #000;
+    }
   </style>
   <script src="pdf-lib.min.js"></script>
   <script>
@@ -543,14 +796,22 @@
 
 <div class="app">
 
-  <!-- BANNER GRÁFICO (ESTILO NEWBOX DA SD VIDROS) -->
+  <!-- BANNER GRÁFICO LIMPO (ESTILO NEWBOX DA SD VIDROS - SEM TEXTO POR CIMA) -->
   <div class="banner">
-    <img src="banner.jpg" alt="SD Vidros – Alumínio e Vidraçaria | Box de vidro e acrílico, Corrimão, Portão automático, Janelas, Grades, Fechamento de área. Tel/WhatsApp: (85) 99611-9824 - Itaitinga - CE">
-    <div class="banner-overlay-top">
-      <div class="user-pill">
+    <img id="banner-img-main" src="banner.jpg" alt="SD Vidros – Alumínio e Vidraçaria">
+  </div>
+
+  <!-- BARRA DE CONTROLE SUPERIOR (EMPRESA ATIVA, USUÁRIO E SAIR) -->
+  <div class="top-nav-bar" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;padding:4px 2px;flex-wrap:wrap;">
+    <div class="user-pill" id="empresa-pill-top" onclick="abrirModalTrocaEmpresaRapida()" style="cursor:pointer;background:#101018;border:1.5px solid var(--gold);padding:6px 14px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,0.4);" title="Clique para alternar entre SD Vidros e SD Móveis">
+      <span id="empresa-icon-top">🏢</span>
+      <strong id="empresa-nome-top" style="color:var(--gold-light);">SD Vidros</strong> ▾
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+      <div class="user-pill" style="background:#101018;border:1px solid rgba(255,255,255,0.12);padding:6px 12px;border-radius:20px;">
         <span id="usuario-logado">👤 Admin</span>
       </div>
-      <button class="btn-sair" onclick="sair()">🚪 Sair</button>
+      <button class="btn-sair" onclick="sair()" style="background:#181824;border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:6px 14px;border-radius:20px;cursor:pointer;">🚪 Sair</button>
     </div>
   </div>
 
@@ -563,6 +824,8 @@
     <button id="tab-ponto" class="tab" data-tab="ponto" onclick="goTab('ponto')">👷 Funcionários & Ponto</button>
     <button id="tab-contratos" class="tab" data-tab="contratos" onclick="goTab('contratos')">📄 Contratos</button>
     <button id="tab-usuarios" class="tab" data-tab="usuarios" onclick="goTab('usuarios')">👥 Usuários</button>
+    <button type="button" id="tab-portal-cliente" class="tab" onclick="window.open('cliente.html','_blank')" title="Acessar Portal do Cliente">🌐 Portal do Cliente</button>
+    <button type="button" id="btn-central-mensagens" class="tab" onclick="abrirModalCentralMensagens()" title="Central de Mensagens com Clientes">💬 Mensagens <span id="badge-msg-clientes" style="display:none;background:#ef4444;color:#fff;font-size:9.5px;padding:1px 6px;border-radius:999px;font-weight:900;margin-left:4px;">0</span></button>
   </div>
 
   <!-- ══════════════════════════════════════════ -->
@@ -614,9 +877,6 @@
     <!-- Services / Calculations -->
     <div class="card">
       <div class="card-title">🔧 Itens, Metro Quadrado (m²) e Valores</div>
-
-      <div style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;">Adicionar Rápido do Catálogo</div>
-      <div class="svc-chips" id="quick-catalog-chips"></div>
 
       <!-- SPREADSHEET CALCULATION TABLE -->
       <div class="calc-table-wrap">
@@ -752,6 +1012,9 @@
       <div class="field-row">
         <div class="field"><label>Bairro</label><input id="c-bairro" placeholder="Bairro" /></div>
         <div class="field"><label>Cidade</label><input id="c-cidade" placeholder="Itaitinga" /></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Senha de Acesso do Cliente ao Portal (Opcional)</label><input id="c-senha" placeholder="Deixe vazio para usar os 4 últimos dígitos do WhatsApp (ou defina aqui)" /></div>
       </div>
       <div class="actions">
         <button class="btn btn-primary" id="btn-salvar-cli" onclick="salvarCliente()">💾 Salvar cliente</button>
@@ -967,7 +1230,159 @@
     </div>
   </div>
 
-  <footer class="credits">SD Vidros · Itaitinga - CE · (85) 99611-9824 · @sdvidros</footer>
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANEL: LICENÇA & EMPRESA (MULTI-EMPRESA / WHITE-LABEL) -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="panel-licenca" class="panel">
+
+    <!-- Card 1: Licença & Empresa Ativa no Momento (Alternador com 1 Clique) -->
+    <div class="card" style="border:1.5px solid rgba(201,168,76,0.35);">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+        <div>
+          <div class="card-title" style="margin-bottom:4px;">🏢 Licença & Empresa Ativa</div>
+          <div style="font-size:12px;color:var(--muted);">Alterne instantaneamente a marca, logo, banner, catálogo e dados do sistema com 1 clique</div>
+        </div>
+        <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,0.12);border:1px solid #22c55e;color:#4ade80;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:800;">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4ade80;"></span>
+          <span id="licenca-status-badge">Licença Ativa: SD Vidros</span>
+        </div>
+      </div>
+
+      <!-- Grid de Licenças Pré-Configuradas / Disponíveis -->
+      <div class="licenca-selector-grid" id="licenca-cards-container">
+        <!-- Gerado dinamicamente via JS -->
+      </div>
+    </div>
+
+    <!-- Card 2: Configuração e Personalização da Licença Selecionada -->
+    <div class="card">
+      <div class="card-title">⚙️ Personalizar Marca, Logos e Dados da Licença</div>
+      
+      <div class="field-row">
+        <div class="field">
+          <label>Nome Fantasia da Empresa *</label>
+          <input id="lic-nome" placeholder="Ex: SD Vidros ou SD Móveis Projetados" />
+        </div>
+        <div class="field">
+          <label>Segmento / Ramo de Atuação *</label>
+          <input id="lic-segmento" placeholder="Ex: Alumínio & Vidraçaria ou Móveis Projetados" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Slogan / Descrição Curta</label>
+          <input id="lic-slogan" placeholder="Ex: Box, Espelhos, Esquadrias ou Ambientes Sob Medida" />
+        </div>
+        <div class="field">
+          <label>WhatsApp / Telefone Comercial *</label>
+          <input id="lic-telefone" placeholder="(85) 99611-9824" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Cidade / Estado</label>
+          <input id="lic-cidade" placeholder="Ex: Itaitinga - CE" />
+        </div>
+        <div class="field">
+          <label>CNPJ (opcional)</label>
+          <input id="lic-cnpj" placeholder="00.000.000/0001-00" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Chave PIX da Empresa</label>
+          <input id="lic-pix" placeholder="85996119824" />
+        </div>
+        <div class="field">
+          <label>Chave de Registro da Licença</label>
+          <input id="lic-chave" placeholder="Ex: SDV-PRO-2026-VIP" readonly style="opacity:0.8;background:#06060c;" />
+        </div>
+      </div>
+
+      <!-- Upload / Troca de Imagens (Logo e Banner) -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:14px;margin-top:14px;padding:16px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:14px;">
+        <!-- Trocar Logotipo -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:8px;">Logotipo da Empresa</label>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <img id="lic-preview-logo" src="logo.jpg" class="licenca-upload-preview" alt="Logo">
+            <div style="flex:1;">
+              <input type="file" id="lic-upload-logo" accept="image/*" style="display:none" onchange="processarUploadImagemLicenca(event, 'logo')">
+              <button type="button" class="btn btn-sec btn-sm" onclick="document.getElementById('lic-upload-logo').click()">📁 Escolher Nova Logo</button>
+              <div style="font-size:10.5px;color:var(--muted);margin-top:4px;">JPG, PNG ou WebP</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trocar Banner -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:8px;">Banner do Topo (Showroom)</label>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <img id="lic-preview-banner" src="banner.jpg" style="width:100px;height:50px;border-radius:8px;border:1.5px solid var(--gold);object-fit:cover;background:#000;" alt="Banner">
+            <div style="flex:1;">
+              <input type="file" id="lic-upload-banner" accept="image/*" style="display:none" onchange="processarUploadImagemLicenca(event, 'banner')">
+              <button type="button" class="btn btn-sec btn-sm" onclick="document.getElementById('lic-upload-banner').click()">📁 Escolher Novo Banner</button>
+              <div style="font-size:10.5px;color:var(--muted);margin-top:4px;">Panorâmico (16:9)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top:16px;">
+        <button type="button" class="btn btn-primary" onclick="salvarConfiguracoesLicencaAtiva()">💾 Salvar Dados da Licença</button>
+        <button type="button" class="btn btn-gold" onclick="abrirModalNovaLicenca()">➕ Criar Novo Perfil de Empresa</button>
+      </div>
+      <div id="lic-feedback-msg" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- Card 3: Catálogo Rápido do Segmento -->
+    <div class="card">
+      <div class="card-title">📦 Carregar Catálogo de Produtos Sugeridos por Segmento</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5;">
+        Deseja importar automaticamente a lista de itens e valores sugeridos para o ramo da empresa ativa?
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button type="button" class="btn btn-gold btn-sm" onclick="carregarCatalogoPadraoSegmento('vidros')">
+          💎 Carregar Produtos de Vidraçaria (Box, Espelhos, Janelas...)
+        </button>
+        <button type="button" class="btn btn-cyan btn-sm" onclick="carregarCatalogoPadraoSegmento('moveis')">
+          🛋️ Carregar Produtos de Móveis Projetados (Cozinhas, Closets, Painéis...)
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="credits" id="footer-credits-main">SD Vidros · Itaitinga - CE · (85) 99611-9824 · @sdvidros</footer>
+</div>
+
+<!-- ══ MODAL TROCA RÁPIDA DE EMPRESA / LICENÇA ══ -->
+<div id="modal-troca-empresa-rapida" class="modal-overlay" style="display:none" onclick="fecharModalTrocaEmpresaRapida(event)">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:540px;">
+    <div class="modal-title">
+      🏢 Alternar Empresa / Licença
+      <button class="modal-close" onclick="fecharModalTrocaEmpresaRapida()">✕</button>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5;">
+      Escolha qual empresa você deseja acessar e gerenciar agora:
+    </div>
+
+    <div id="modal-troca-empresa-cards" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin-bottom:16px;">
+      <!-- Gerado dinamicamente via JS -->
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);">
+      <button type="button" class="btn btn-sec btn-sm" onclick="irParaTelaInicialLogin()" title="Ir para a página de login">
+        🚪 Ir para Página Inicial (Login)
+      </button>
+      <button type="button" class="btn btn-gold btn-sm" onclick="fecharModalTrocaEmpresaRapida();goTab('licenca');" title="Abrir painel completo de licenças">
+        ⚙️ Configurações da Marca
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- ══ CLIENT PICKER MODAL ══ -->
@@ -1172,6 +1587,166 @@
   </div>
 </div>
 
+<!-- ══ MODAL GESTÃO DO STATUS E GALERIA DO CLIENTE (PORTAL) ══ -->
+<div id="modal-portal-os" class="modal-overlay" style="display:none" onclick="fecharModalPortalOs(event)">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:680px;">
+    <div class="modal-title">
+      <span id="portal-os-modal-titulo">🚀 Portal do Cliente – Acompanhamento da O.S.</span>
+      <button class="modal-close" onclick="fecharModalPortalOs()">✕</button>
+    </div>
+
+    <!-- Identificação da OS e Cliente -->
+    <div style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-size:11px;color:var(--gold-light);font-weight:800;text-transform:uppercase;">Ordem de Serviço</div>
+        <div style="font-size:18px;font-weight:900;color:#fff;" id="pos-num-display">#0001</div>
+        <div style="font-size:13px;color:var(--text);font-weight:700;" id="pos-nome-display">Nome do Cliente</div>
+      </div>
+      <div style="text-align:right;">
+        <button type="button" class="btn btn-whats btn-sm" onclick="enviarAcessoZapModal()" style="font-weight:800;gap:6px;">
+          📱 Enviar Link & Senha no WhatsApp
+        </button>
+      </div>
+    </div>
+
+    <!-- Etapa do Serviço -->
+    <div class="field-row">
+      <div class="field" style="flex:2;">
+        <label>Etapa Atual do Serviço *</label>
+        <select id="pos-etapa" style="width:100%;padding:10px;background:#08080f;border:1.5px solid var(--gold);border-radius:10px;color:#fff;font-weight:700;font-size:13px;">
+          <option value="1">1. 📝 Orçamento Aprovado</option>
+          <option value="2">2. 📐 Medição Técnica Concluída</option>
+          <option value="3" selected>3. 🏭 Em Fabricação & Têmpera (Vidros e Perfis)</option>
+          <option value="4">4. 🚚 Pronto para Instalação / Rota</option>
+          <option value="5">5. 🔧 Em Instalação no Local</option>
+          <option value="6">6. 🏆 Concluído e Entregue (Garantia Ativa)</option>
+        </select>
+      </div>
+      <div class="field" style="flex:1;">
+        <label>Previsão de Instalação</label>
+        <input id="pos-previsao" placeholder="Ex: Sexta, 10:00" />
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:10px;">
+      <label>Mensagem / Observação do Status (visível para o cliente no portal)</label>
+      <input id="pos-obs" placeholder="Ex: Vidros cortados e encaminhados para a têmpera. Ferragens separadas." />
+    </div>
+
+    <!-- Gestão Financeira da O.S. -->
+    <div class="field-row" style="margin-top:10px;">
+      <div class="field">
+        <label>Valor Pago / Entrada (R$)</label>
+        <input id="pos-valor-pago" placeholder="Ex: 1500,00" />
+      </div>
+      <div class="field">
+        <label>Status do Pagamento no Portal</label>
+        <select id="pos-status-pagamento" style="width:100%;padding:10px;background:#08080f;border:1.5px solid var(--gold);border-radius:10px;color:#fff;font-weight:700;font-size:13px;">
+          <option value="Pendente">⚪ Pendente de Pagamento</option>
+          <option value="Entrada Paga">🟡 Entrada Paga (50%)</option>
+          <option value="Restante na Entrega">🚚 Restante na Entrega</option>
+          <option value="Quitado">🟢 Totalmente Quitado</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-row" style="margin-top:10px;">
+      <div class="field">
+        <label>Senha de Acesso do Cliente</label>
+        <input id="pos-senha" placeholder="Deixe em branco para usar os 4 últimos dígitos do WhatsApp" />
+      </div>
+      <div class="field" style="display:flex;align-items:flex-end;">
+        <button type="button" class="btn btn-gold btn-full" onclick="salvarStatusOsModal()">
+          🔔 Salvar e Notificar Cliente em Tempo Real
+        </button>
+      </div>
+    </div>
+
+    <!-- Galeria de Fotos da Obra -->
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="font-weight:800;font-size:14px;color:var(--gold-light);">
+          📸 Galeria de Fotos da Obra (visível para o cliente)
+        </div>
+        <div>
+          <input type="file" id="pos-file-foto" accept="image/*" style="display:none" onchange="uploadFotoOsModal(event)">
+          <button type="button" class="btn btn-sec btn-sm" onclick="document.getElementById('pos-file-foto').click()">
+            + Adicionar Foto
+          </button>
+        </div>
+      </div>
+      <div id="pos-galeria-lista" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));gap:10px;max-height:160px;overflow-y:auto;padding:4px;">
+        <!-- Thumbnails de fotos -->
+      </div>
+    </div>
+
+    <div id="pos-feedback-msg" style="margin-top:12px;font-size:13px;font-weight:700;"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL CENTRAL DE MENSAGENS DOS CLIENTES ══ -->
+<div id="modal-central-mensagens" class="modal-overlay" style="display:none" onclick="fecharModalCentralMensagens(event)">
+  <div class="modal-box chat-admin-modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title" style="margin-bottom:12px;flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:18px;">💬</span>
+        <div>
+          <div style="font-size:15px;font-weight:800;color:var(--gold-light);line-height:1.2;">Central de Mensagens dos Clientes</div>
+          <div style="font-size:11px;color:var(--muted);font-weight:600;">Comunicação direta em tempo real</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="fecharModalCentralMensagens()" title="Fechar">✕</button>
+    </div>
+
+    <div id="chat-admin-container" class="chat-admin-container">
+      <!-- Coluna Esquerda: Lista de Conversas -->
+      <div class="chat-admin-sidebar">
+        <div class="chat-admin-sidebar-header">
+          <span class="chat-admin-sidebar-title">Conversas</span>
+          <span id="chat-admin-total-badge" style="font-size:10.5px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);color:var(--gold-light);padding:2px 8px;border-radius:999px;font-weight:800;">0</span>
+        </div>
+        <div style="padding:8px 8px 4px 8px;border-bottom:1px solid rgba(255,255,255,0.05);">
+          <input type="text" id="chat-admin-filtro" placeholder="🔍 Filtrar conversa..." oninput="filtrarConversasAdmin(this.value)" style="width:100%;background:#06060c;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 10px;color:#fff;font-size:12px;outline:none;font-family:var(--font);">
+        </div>
+        <div class="chat-admin-lista" id="admin-chat-lista-conversas">
+          <!-- Conversas carregadas dinamicamente -->
+        </div>
+      </div>
+
+      <!-- Coluna Direita: Chat Ativo -->
+      <div class="chat-admin-main">
+        <div class="chat-admin-header">
+          <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+            <button type="button" class="chat-admin-back-btn" onclick="voltarParaListaConversasAdmin()" title="Voltar para a lista de conversas">
+              ← Conversas
+            </button>
+            <div style="min-width:0;">
+              <div style="font-size:14px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="admin-chat-nome-ativo">Selecione uma conversa</div>
+              <div style="font-size:11px;color:var(--gold-light);font-weight:700;" id="admin-chat-os-ativo">O.S. #0000</div>
+            </div>
+          </div>
+          <a id="admin-chat-btn-zap" href="#" target="_blank" style="display:none;background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.4);color:#25D366;text-decoration:none;padding:6px 12px;border-radius:8px;font-size:11.5px;font-weight:700;align-items:center;gap:5px;flex-shrink:0;">
+            <span>💬</span> WhatsApp
+          </a>
+        </div>
+
+        <div class="chat-admin-messages-box" id="admin-chat-mensagens-box">
+          <div style="text-align:center;color:var(--muted);font-size:13px;margin-top:40px;">
+            Selecione uma conversa ao lado para visualizar e responder as mensagens.
+          </div>
+        </div>
+
+        <div class="chat-admin-footer">
+          <input type="text" id="admin-chat-input" placeholder="Digite uma resposta para o cliente..." style="flex:1;background:#070710;border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:10px 14px;color:#fff;font-family:var(--font);font-size:13px;outline:none;" onkeydown="if(event.key==='Enter') enviarRespostaAdmin()">
+          <button type="button" class="btn btn-gold btn-sm" onclick="enviarRespostaAdmin()" style="padding:10px 18px;font-weight:800;flex-shrink:0;">
+            Enviar ➔
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════
 //  STORAGE & KEYS
@@ -1208,7 +1783,7 @@ let editandoProdId = null;
 let editandoUserId = null;
 
 // ══════════════════════════════════════════════
-//  DEFAULT CATALOG (PRODUTOS E SERVIÇOS DA 2ª IMAGEM)
+//  CATÁLOGOS PADRÃO (VIDRAÇARIA & MÓVEIS PROJETADOS)
 // ══════════════════════════════════════════════
 const PRODUTOS_PADRAO = [
   { id: 1,  nome: 'Box de Vidro Temperado 8mm Frontal (2 Folhas)', cat: 'Box', vm2: 200, vunit: 0 },
@@ -1226,6 +1801,370 @@ const PRODUTOS_PADRAO = [
   { id: 13, nome: 'Grade de Alumínio / Fachada',                   cat: 'Grades', vm2: 280, vunit: 0 },
   { id: 14, nome: 'Manutenção / Troca de Roldanas e Vedação',      cat: 'Serviços', vm2: 0, vunit: 150 }
 ];
+
+const PRODUTOS_PADRAO_MOVEIS = [
+  { id: 101, nome: 'Cozinha Planejada em MDF Ultra Naval (m linear)', cat: 'Cozinhas', vm2: 0, vunit: 1450 },
+  { id: 102, nome: 'Armário Superior de Cozinha com Portas Reflecta', cat: 'Cozinhas', vm2: 480, vunit: 0 },
+  { id: 103, nome: 'Ilha Gourmet com Gaveteiros e Torre de Tomadas', cat: 'Cozinhas', vm2: 0, vunit: 2600 },
+  { id: 104, nome: 'Roupeiro / Closet Sob Medida com Iluminação LED', cat: 'Dormitórios', vm2: 520, vunit: 0 },
+  { id: 105, nome: 'Painel Ripado em MDF Freijó / Carvalho para TV', cat: 'Salas', vm2: 380, vunit: 0 },
+  { id: 106, nome: 'Rack Suspenso com Portas Basculantes e Fecho-Toque', cat: 'Salas', vm2: 0, vunit: 950 },
+  { id: 107, nome: 'Gabinete para Banheiro em MDF Hidrófugo c/ Espelho', cat: 'Banheiros', vm2: 0, vunit: 850 },
+  { id: 108, nome: 'Home Office Planejado (Mesa + Nichos + Painel)', cat: 'Escritório', vm2: 0, vunit: 1850 },
+  { id: 109, nome: 'Aparador / Buffet de Jantar com Pés Metálicos', cat: 'Salas', vm2: 0, vunit: 1200 },
+  { id: 110, nome: 'Cabeceira Estofada Modular com Frisos Dourados', cat: 'Dormitórios', vm2: 340, vunit: 0 },
+  { id: 111, nome: 'Divisória de Ambientes em Madeira Ripada Giratória', cat: 'Painéis', vm2: 420, vunit: 0 },
+  { id: 112, nome: 'Montagem e Instalação Técnica Especializada', cat: 'Serviços', vm2: 0, vunit: 250 }
+];
+
+// ══════════════════════════════════════════════
+//  MÓDULO DE LICENÇA & MULTI-EMPRESA (SD VIDROS / SD MÓVEIS / WHITE-LABEL)
+// ══════════════════════════════════════════════
+const LICENCAS_PADRAO = [
+  {
+    id: 'sdvidros',
+    nome: 'SD Vidros',
+    segmento: 'Alumínio, Vidros & Esquadrias',
+    slogan: 'Box, Espelhos, Portas, Janelas & Guarda-Corpo',
+    telefone: '(85) 99611-9824',
+    cidade: 'Itaitinga - CE',
+    cnpj: '',
+    pix: '85996119824',
+    chaveLicenca: 'SDV-VIDROS-PRO-2026',
+    logo: 'logo.jpg',
+    banner: 'banner.jpg',
+    tipoContrato: 'vidros'
+  },
+  {
+    id: 'sdmoveis',
+    nome: 'SD Móveis Projetados',
+    segmento: 'Móveis Planejados & Marcenaria de Luxo',
+    slogan: 'Cozinhas Planejadas, Closets & Ambientes Sob Medida',
+    telefone: '(85) 99611-9824',
+    cidade: 'Itaitinga - CE',
+    cnpj: '',
+    pix: '85996119824',
+    chaveLicenca: 'SDM-MOVEIS-LUX-2026',
+    logo: 'logo_moveis.jpg',
+    banner: 'banner_moveis.jpg',
+    tipoContrato: 'moveis'
+  }
+];
+
+function obterLicencas() {
+  try {
+    let lista = JSON.parse(localStorage.getItem('sdv_licencas'));
+    if (!Array.isArray(lista) || !lista.length) {
+      lista = LICENCAS_PADRAO;
+      localStorage.setItem('sdv_licencas', JSON.stringify(lista));
+    }
+    return lista;
+  } catch(_) {
+    return LICENCAS_PADRAO;
+  }
+}
+
+function salvarLicencas(lista) {
+  localStorage.setItem('sdv_licencas', JSON.stringify(lista));
+}
+
+function obterLicencaAtiva() {
+  const lista = obterLicencas();
+  const idAtivo = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+  return lista.find(l => l.id === idAtivo) || lista[0] || LICENCAS_PADRAO[0];
+}
+
+function aplicarLicencaVisual(lic) {
+  if (!lic) lic = obterLicencaAtiva();
+
+  // 1. Banner do topo
+  const bannerImg = document.getElementById('banner-img-main');
+  if (bannerImg && lic.banner) {
+    bannerImg.src = lic.banner;
+    bannerImg.alt = `${lic.nome} – ${lic.segmento}`;
+  }
+
+  // 2. Pill do topo
+  const empresaPillNome = document.getElementById('empresa-nome-top');
+  if (empresaPillNome) {
+    empresaPillNome.textContent = lic.nome || 'SD Vidros';
+  }
+
+  // 3. Título da aba do navegador
+  document.title = `${lic.nome || 'SD Vidros'} · Sistema de Gestão & Orçamentos`;
+
+  // 4. Rodapé
+  const footerEl = document.getElementById('footer-credits-main');
+  if (footerEl) {
+    footerEl.textContent = `${lic.nome || 'SD Vidros'} · ${lic.cidade || 'Itaitinga - CE'} · ${lic.telefone || '(85) 99611-9824'} · @${(lic.id === 'sdmoveis' ? 'sdmoveisprojetados' : 'sdvidros')}`;
+  }
+
+  // 5. Badge no painel
+  const badgeEl = document.getElementById('licenca-status-badge');
+  if (badgeEl) {
+    badgeEl.textContent = `Licença Ativa: ${lic.nome || 'SD Vidros'}`;
+  }
+}
+
+function ativarLicenca(id, silencioso = false) {
+  const lista = obterLicencas();
+  const nova = lista.find(l => l.id === id);
+  if (!nova) return;
+
+  localStorage.setItem('sdv_licenca_ativa', id);
+  aplicarLicencaVisual(nova);
+  renderPainelLicenca();
+
+  if (!silencioso) {
+    const mudarCatalogo = confirm(`🏢 Licença alterada com sucesso para "${nova.nome}"!\n\nDeseja carregar automaticamente os produtos e serviços recomendados para ${nova.segmento}?`);
+    if (mudarCatalogo) {
+      carregarCatalogoPadraoSegmento(nova.tipoContrato || (id === 'sdmoveis' ? 'moveis' : 'vidros'));
+    }
+  }
+}
+
+function renderPainelLicenca() {
+  const lista = obterLicencas();
+  const ativa = obterLicencaAtiva();
+
+  // 1. Renderiza os cards de alternância rápida
+  const container = document.getElementById('licenca-cards-container');
+  if (container) {
+    container.innerHTML = lista.map(l => {
+      const isAtiva = (l.id === ativa.id);
+      return `
+        <div class="licenca-card-option ${isAtiva ? 'active' : ''}" onclick="ativarLicenca('${l.id}')" style="cursor:pointer;">
+          <div class="licenca-thumb-banner">
+            <img src="${l.banner || 'banner.jpg'}" alt="${esc(l.nome)}">
+            ${isAtiva ? '<div class="licenca-active-tag">✓ ATIVA & EM USO</div>' : ''}
+          </div>
+          <div class="licenca-body-content">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <img src="${l.logo || 'logo.jpg'}" style="width:42px;height:42px;border-radius:10px;border:1.5px solid var(--gold);object-fit:cover;background:#000;" alt="Logo">
+              <div style="min-width:0;flex:1;">
+                <div style="font-size:15px;font-weight:900;color:${isAtiva ? 'var(--gold-light)' : '#fff'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  ${esc(l.nome)}
+                </div>
+                <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  ${esc(l.segmento)}
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px;line-height:1.4;">
+              ${esc(l.slogan || '')}
+            </div>
+
+            <div style="margin-top:auto;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);">
+              <span>📱 ${esc(l.telefone || '')}</span>
+              <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:700;">${esc(l.chaveLicenca || '')}</span>
+            </div>
+
+            <button type="button" class="btn ${isAtiva ? 'btn-gold' : 'btn-sec'} btn-sm" style="margin-top:12px;width:100%;font-weight:800;" onclick="event.stopPropagation();ativarLicenca('${l.id}')">
+              ${isAtiva ? '✓ Perfil Ativo no Momento' : '⚡ Mudar para Esta Empresa'}
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 2. Preenche o formulário de personalização
+  const fNome = document.getElementById('lic-nome');
+  if (fNome) fNome.value = ativa.nome || '';
+  const fSeg = document.getElementById('lic-segmento');
+  if (fSeg) fSeg.value = ativa.segmento || '';
+  const fSlo = document.getElementById('lic-slogan');
+  if (fSlo) fSlo.value = ativa.slogan || '';
+  const fTel = document.getElementById('lic-telefone');
+  if (fTel) fTel.value = ativa.telefone || '';
+  const fCid = document.getElementById('lic-cidade');
+  if (fCid) fCid.value = ativa.cidade || '';
+  const fCnpj = document.getElementById('lic-cnpj');
+  if (fCnpj) fCnpj.value = ativa.cnpj || '';
+  const fPix = document.getElementById('lic-pix');
+  if (fPix) fPix.value = ativa.pix || '';
+  const fChave = document.getElementById('lic-chave');
+  if (fChave) fChave.value = ativa.chaveLicenca || '';
+
+  const prevLogo = document.getElementById('lic-preview-logo');
+  if (prevLogo) prevLogo.src = ativa.logo || 'logo.jpg';
+
+  const prevBanner = document.getElementById('lic-preview-banner');
+  if (prevBanner) prevBanner.src = ativa.banner || 'banner.jpg';
+}
+
+function salvarConfiguracoesLicencaAtiva() {
+  const lista = obterLicencas();
+  const ativa = obterLicencaAtiva();
+  const idx = lista.findIndex(l => l.id === ativa.id);
+  if (idx === -1) return;
+
+  const nome = (document.getElementById('lic-nome') && document.getElementById('lic-nome').value.trim()) || '';
+  const segmento = (document.getElementById('lic-segmento') && document.getElementById('lic-segmento').value.trim()) || '';
+  const slogan = (document.getElementById('lic-slogan') && document.getElementById('lic-slogan').value.trim()) || '';
+  const telefone = (document.getElementById('lic-telefone') && document.getElementById('lic-telefone').value.trim()) || '';
+  const cidade = (document.getElementById('lic-cidade') && document.getElementById('lic-cidade').value.trim()) || '';
+  const cnpj = (document.getElementById('lic-cnpj') && document.getElementById('lic-cnpj').value.trim()) || '';
+  const pix = (document.getElementById('lic-pix') && document.getElementById('lic-pix').value.trim()) || '';
+
+  if (!nome) {
+    alert('Informe o nome da empresa.');
+    return;
+  }
+
+  lista[idx].nome = nome;
+  lista[idx].segmento = segmento;
+  lista[idx].slogan = slogan;
+  lista[idx].telefone = telefone;
+  lista[idx].cidade = cidade;
+  lista[idx].cnpj = cnpj;
+  lista[idx].pix = pix;
+
+  salvarLicencas(lista);
+  aplicarLicencaVisual(lista[idx]);
+  renderPainelLicenca();
+
+  const fb = document.getElementById('lic-feedback-msg');
+  if (fb) {
+    fb.style.color = '#4ade80';
+    fb.innerHTML = `✅ Dados da empresa "<strong>${esc(nome)}</strong>" salvos com sucesso!`;
+    setTimeout(() => { if (fb) fb.innerHTML = ''; }, 4000);
+  }
+}
+
+function processarUploadImagemLicenca(event, tipo) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (file.size > 2.5 * 1024 * 1024) {
+    alert('A imagem é muito grande (máximo 2.5MB). Escolha uma imagem mais leve.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64 = e.target.result;
+    const lista = obterLicencas();
+    const ativa = obterLicencaAtiva();
+    const idx = lista.findIndex(l => l.id === ativa.id);
+    if (idx === -1) return;
+
+    if (tipo === 'logo') {
+      lista[idx].logo = base64;
+      const prev = document.getElementById('lic-preview-logo');
+      if (prev) prev.src = base64;
+    } else if (tipo === 'banner') {
+      lista[idx].banner = base64;
+      const prev = document.getElementById('lic-preview-banner');
+      if (prev) prev.src = base64;
+      const mainBanner = document.getElementById('banner-img-main');
+      if (mainBanner) mainBanner.src = base64;
+    }
+
+    salvarLicencas(lista);
+    renderPainelLicenca();
+    alert(`✅ ${tipo === 'logo' ? 'Logotipo' : 'Banner'} da empresa atualizado com sucesso!`);
+  };
+  reader.readAsDataURL(file);
+}
+
+function carregarCatalogoPadraoSegmento(segmento) {
+  const nomeSegmento = segmento === 'moveis' ? 'Móveis Projetados' : 'Vidraçaria & Esquadrias';
+  if (!confirm(`Deseja substituir o catálogo atual pelo catálogo padrão de "${nomeSegmento}"?`)) return;
+
+  produtos = (segmento === 'moveis') ? PRODUTOS_PADRAO_MOVEIS : PRODUTOS_PADRAO;
+  save(K.products, produtos);
+  updateDatalistProdutos();
+  renderProdutos();
+  alert(`✅ Catálogo de ${nomeSegmento} carregado com sucesso! Foram adicionados ${produtos.length} itens.`);
+}
+
+function abrirModalNovaLicenca() {
+  const nome = prompt('Digite o Nome Fantasia da nova empresa / licença: (Ex: SD Marmoraria)');
+  if (!nome || !nome.trim()) return;
+
+  const idNovo = 'empresa_' + Date.now();
+  const segmento = prompt('Digite o Segmento da empresa: (Ex: Mármores, Granitos & Quartzo)') || 'Serviços Especializados';
+
+  const lista = obterLicencas();
+  const nova = {
+    id: idNovo,
+    nome: nome.trim(),
+    segmento: segmento.trim(),
+    slogan: 'Atendimento de Excelência & Qualidade Sob Medida',
+    telefone: '(85) 99611-9824',
+    cidade: 'Itaitinga - CE',
+    cnpj: '',
+    pix: '85996119824',
+    chaveLicenca: 'SD-' + Math.random().toString(36).substring(2, 7).toUpperCase() + '-VIP',
+    logo: 'logo.jpg',
+    banner: 'banner.jpg',
+    tipoContrato: 'geral'
+  };
+
+  lista.push(nova);
+  salvarLicencas(lista);
+  ativarLicenca(idNovo, false);
+}
+
+// ══════════════════════════════════════════════
+//  MODAL FLUTUANTE DE TROCA RÁPIDA DE EMPRESA
+// ══════════════════════════════════════════════
+function abrirModalTrocaEmpresaRapida() {
+  const modal = document.getElementById('modal-troca-empresa-rapida');
+  if (!modal) return;
+  renderCardsTrocaEmpresaRapida();
+  modal.style.display = 'flex';
+}
+
+function fecharModalTrocaEmpresaRapida(e) {
+  if (!e || e.target === document.getElementById('modal-troca-empresa-rapida')) {
+    document.getElementById('modal-troca-empresa-rapida').style.display = 'none';
+  }
+}
+
+function renderCardsTrocaEmpresaRapida() {
+  const container = document.getElementById('modal-troca-empresa-cards');
+  if (!container) return;
+  const lista = obterLicencas();
+  const ativa = obterLicencaAtiva();
+
+  container.innerHTML = lista.map(l => {
+    const isAtiva = (l.id === ativa.id);
+    return `
+      <div class="licenca-card-option ${isAtiva ? 'active' : ''}" onclick="alternarEmpresaPeloModal('${l.id}')" style="cursor:pointer;padding:12px;display:flex;flex-direction:column;border-radius:14px;background:rgba(255,255,255,0.03);">
+        <div style="width:100%;height:85px;border-radius:8px;overflow:hidden;background:#000;margin-bottom:10px;position:relative;">
+          <img src="${l.banner || 'banner.jpg'}" style="width:100%;height:100%;object-fit:cover;" alt="${esc(l.nome)}">
+          ${isAtiva ? '<span style="position:absolute;top:6px;right:6px;background:#10b981;color:#fff;font-size:9.5px;font-weight:900;padding:2px 8px;border-radius:999px;">✓ ATIVA</span>' : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <img src="${l.logo || 'logo.jpg'}" style="width:34px;height:34px;border-radius:8px;border:1px solid var(--gold);object-fit:cover;" alt="Logo">
+          <div style="min-width:0;flex:1;">
+            <div style="font-size:13.5px;font-weight:900;color:${isAtiva ? 'var(--gold-light)' : '#fff'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              ${esc(l.nome)}
+            </div>
+            <div style="font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              ${esc(l.segmento)}
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn ${isAtiva ? 'btn-gold' : 'btn-sec'} btn-sm" style="width:100%;margin-top:auto;font-weight:800;font-size:11.5px;">
+          ${isAtiva ? '✓ Empresa em Uso' : '⚡ Mudar para Esta'}
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+function alternarEmpresaPeloModal(id) {
+  ativarLicenca(id, false);
+  fecharModalTrocaEmpresaRapida();
+}
+
+function irParaTelaInicialLogin() {
+  window.location.href = 'login.html?trocar=1';
+}
 
 // ══════════════════════════════════════════════
 //  AUTH
@@ -1247,7 +2186,7 @@ function getUser() {
 //  TABS
 // ══════════════════════════════════════════════
 function goTab(t) {
-  ['orcamento','historico','produtos','clientes','ponto','contratos','usuarios'].forEach(p => {
+  ['orcamento','historico','produtos','clientes','ponto','contratos','usuarios','licenca'].forEach(p => {
     const pan = document.getElementById('panel-'+p);
     if (pan) pan.classList.toggle('active', p===t);
     const tab = document.getElementById('tab-'+p);
@@ -1259,6 +2198,7 @@ function goTab(t) {
   if (t==='ponto')     { renderPontoView(); }
   if (t==='contratos') { renderHist(); renderSelectContratos(); carregarListaContratos(); sincronizarStatusContratos(); }
   if (t==='usuarios')  renderUsuarios();
+  if (t==='licenca')   renderPainelLicenca();
 }
 
 // ══════════════════════════════════════════════
@@ -1291,16 +2231,6 @@ function updateDatalistProdutos() {
   const dl = document.getElementById('lista-produtos-sugeridos');
   if (!dl) return;
   dl.innerHTML = produtos.map(p => `<option value="${esc(p.nome)}">${p.cat ? p.cat + ' - ' : ''}R$ ${p.vm2 ? p.vm2 + '/m²' : p.vunit + ' un'}</option>`).join('');
-
-  // Update quick catalog chips
-  const chipsDiv = document.getElementById('quick-catalog-chips');
-  if (chipsDiv) {
-    chipsDiv.innerHTML = produtos.slice(0, 8).map(p => `
-      <button class="svc-chip" onclick="addProdutoDoCatalogo(${p.id})">
-        ✨ ${esc(p.nome.split(' ')[0])} ${esc(p.nome.split(' ')[1]||'')}
-      </button>
-    `).join('');
-  }
 }
 
 let itemEmEdicaoId = null;
@@ -1907,6 +2837,7 @@ function renderHist() {
           ${st !== 'aprovado' ? `<button class="btn btn-sm" onclick="aprovarOsDireto(${o.id})" style="background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.6);color:#25D366;font-weight:700;" title="Aprovar com 1 toque">✅ Aprovar</button>` : ''}
           <button class="btn btn-gold btn-sm" onclick="baixarPdfOs(${o.id})" title="Baixar / Compartilhar PDF">📄 PDF</button>
           <button class="btn btn-whats btn-sm" onclick="enviarWhatsOs(${o.id})" title="Enviar WhatsApp com links de aprovação">📱 WhatsApp</button>
+          <button class="btn btn-sm" onclick="abrirModalPortalOs(${o.id})" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.5);color:var(--gold-light);font-weight:800;" title="Gerenciar Portal do Cliente">🚀 Portal</button>
           <button class="btn btn-sec btn-sm" onclick="editarOs(${o.id})">✏️ Editar</button>
           <button class="btn btn-danger btn-sm" onclick="deletarOs(${o.id})">✕</button>
         </div>
@@ -2136,7 +3067,8 @@ function renderProdutos(filtro = '') {
 function salvarCliente() {
   const nome = document.getElementById('c-nome').value.trim();
   if (!nome) { showMsg('cli-msg','Informe o nome do cliente.',false); return; }
-  const novo = { nome, whatsapp:document.getElementById('c-tel').value.trim(), bairro:document.getElementById('c-bairro').value.trim(), cidade:document.getElementById('c-cidade').value.trim()||'Itaitinga' };
+  const senhaInput = document.getElementById('c-senha');
+  const novo = { nome, whatsapp:document.getElementById('c-tel').value.trim(), bairro:document.getElementById('c-bairro').value.trim(), cidade:document.getElementById('c-cidade').value.trim()||'Itaitinga', senha: (senhaInput && senhaInput.value.trim()) || '' };
   if (editandoCliId) {
     const idx = clientes.findIndex(x=>x.id===editandoCliId);
     if (idx!==-1) clientes[idx]={...clientes[idx],...novo};
@@ -2150,7 +3082,7 @@ function salvarCliente() {
 
 function limparCli() {
   editandoCliId = null;
-  ['c-nome','c-tel','c-bairro','c-cidade'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['c-nome','c-tel','c-bairro','c-cidade','c-senha'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('btn-salvar-cli').innerHTML = '💾 Salvar cliente';
 }
 
@@ -2162,6 +3094,8 @@ function editarCli(id) {
   document.getElementById('c-tel').value = c.whatsapp||'';
   document.getElementById('c-bairro').value = c.bairro||'';
   document.getElementById('c-cidade').value = c.cidade||'';
+  const senhaEl = document.getElementById('c-senha');
+  if (senhaEl) senhaEl.value = c.senha||'';
   document.getElementById('btn-salvar-cli').innerHTML = '💾 Atualizar cliente';
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -2187,11 +3121,15 @@ function renderCli(container='cli-lista', modoModal=false) {
   const badge = document.getElementById('cli-count');
   if (badge && !modoModal) badge.textContent = clientes.length;
   if (!clientes.length) { el.innerHTML = '<div class="empty">Nenhum cliente cadastrado.</div>'; return; }
-  el.innerHTML = clientes.slice().reverse().map(c => `
+  el.innerHTML = clientes.slice().reverse().map(c => {
+    const telLimpo = String(c.whatsapp||'').replace(/\D/g,'');
+    const senhaExibir = c.senha ? c.senha : (telLimpo.length>=4 ? telLimpo.slice(-4) : '****');
+    return `
     <div class="cli-card">
       <div>
         <div class="cli-name">${c.nome}</div>
         <div class="cli-det">${c.whatsapp||(c.bairro?'':'(sem tel)')}${c.bairro?' · '+c.bairro:''} ${c.cidade?'· '+c.cidade:''}</div>
+        <div style="font-size:10.5px;color:var(--gold-light);margin-top:3px;font-weight:700;">🔑 Senha Portal: ${esc(senhaExibir)}</div>
       </div>
       <div class="cli-btns">
         ${modoModal
@@ -2201,7 +3139,8 @@ function renderCli(container='cli-lista', modoModal=false) {
              <button class="btn btn-danger btn-sm" onclick="deletarCli(${c.id})">✕</button>`
         }
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function abrirModalCliente() {
@@ -3006,6 +3945,7 @@ function renderSelectContratos() {
 }
 
 function montarTextoContrato(d) {
+  const lic = obterLicencaAtiva();
   const hoje = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
   const endCliente = [d.end, d.num, d.apto, d.bairro].filter(Boolean).join(', ');
   const itensStr = (d.itens || []).map((it, i) => {
@@ -3016,17 +3956,21 @@ function montarTextoContrato(d) {
     return `  ${i + 1}. ${it.desc}${detalhe} - Qtd: ${it.qtd} - Total: ${it.total}`;
   }).join('\n') || '  (itens não especificados)';
 
+  const ehMoveis = (lic.tipoContrato === 'moveis' || (lic.segmento && lic.segmento.toLowerCase().includes('móveis')));
+  const ramoDesc = ehMoveis ? 'marcenaria sob medida e móveis planejados' : 'vidraçaria, esquadrias e vidros temperados';
+
   return `CONTRATO DE PRESTAÇÃO DE SERVIÇOS
 N° ${d.numero}
-Itaitinga - CE, ${hoje}
+${lic.cidade || 'Itaitinga - CE'}, ${hoje}
 
 ══════════════════════════════════════════════════════════════
 
 CONTRATADA:
-Razão Social.....: SD Vidros
-WhatsApp.........: (85) 99611-9824
-Instagram........: @sdvidros
-Cidade...........: Itaitinga - CE
+Razão Social.....: ${lic.nome || 'SD Vidros'}
+Segmento.........: ${lic.segmento || 'Alumínio & Vidraçaria'}
+WhatsApp.........: ${lic.telefone || '(85) 99611-9824'}
+Cidade...........: ${lic.cidade || 'Itaitinga - CE'}
+${lic.cnpj ? 'CNPJ.............: ' + lic.cnpj + '\n' : ''}Chave Licença....: ${lic.chaveLicenca || 'OFICIAL-VIP'}
 
 CONTRATANTE (CLIENTE):
 Nome.............: ${d.nome || 'Não informado'}
@@ -3038,8 +3982,8 @@ ${d.resp ? 'Responsável......: ' + d.resp : ''}
 
 CLÁUSULA 1ª – DO OBJETO
 
-A CONTRATADA obriga-se a fornecer e instalar ao CONTRATANTE os seguintes
-serviços de vidraçaria e esquadrias:
+A CONTRATADA obriga-se a fornecer, produzir e instalar ao CONTRATANTE os seguintes
+serviços de ${ramoDesc}:
 
 ${itensStr}
 
@@ -3052,7 +3996,7 @@ Forma de Pagamento: ${d.forma || 'À vista'}
 ${d.obs ? '\nObservações: ' + d.obs : ''}
 
 A CONTRATANTE efetuará o pagamento conforme a forma descrita acima.
-Chave Pix para pagamento: (85) 99760-2237
+Chave Pix para pagamento: ${lic.pix || '(85) 99611-9824'}
 
 ══════════════════════════════════════════════════════════════
 
@@ -3067,7 +4011,7 @@ todos os detalhes técnicos do projeto.
 CLÁUSULA 4ª – DA GARANTIA
 
 A CONTRATADA oferece garantia de ${d.garantia || '1 (um) ano'} contra defeitos de
-fabricação e instalação, excluindo danos causados por mau uso, vandalismo,
+fabricação e montagem, excluindo danos causados por mau uso, vandalismo,
 acidentes ou fenômenos naturais.
 
 ══════════════════════════════════════════════════════════════
@@ -3079,12 +4023,12 @@ CLÁUSULA 5ª – DAS OBRIGAÇÕES DAS PARTES
 
 ══════════════════════════════════════════════════════════════
 
-Itaitinga - CE, ${hoje}
+${lic.cidade || 'Itaitinga - CE'}, ${hoje}
 
 
 _________________________________________________
-CONTRATADA: SD Vidros
-WhatsApp: (85) 99611-9824
+CONTRATADA: ${lic.nome || 'SD Vidros'}
+WhatsApp: ${lic.telefone || '(85) 99611-9824'}
 
 
 _________________________________________________
@@ -4350,10 +5294,14 @@ window.addEventListener('DOMContentLoaded', function() {
   const users = load(K.users);
   if (!users.length) save(K.users,[{id:1,username:'admin',nome:'Administrador',senha:'admin123',ativo:true,role:'admin'}]);
 
+  // Inicializa Licença e Marca Ativa
+  const licAtiva = obterLicencaAtiva();
+  aplicarLicencaVisual(licAtiva);
+
   // Load catalog products or initialize defaults
   produtos = load(K.products);
   if (!produtos || !produtos.length) {
-    produtos = PRODUTOS_PADRAO;
+    produtos = (licAtiva.tipoContrato === 'moveis' || licAtiva.id === 'sdmoveis') ? PRODUTOS_PADRAO_MOVEIS : PRODUTOS_PADRAO;
     save(K.products, produtos);
   }
 
@@ -4420,7 +5368,533 @@ window.addEventListener('DOMContentLoaded', function() {
   const user = getUser();
   const el = document.getElementById('usuario-logado');
   if (el) el.textContent = '👤 ' + (user.nome || user.username || 'Usuário');
+  iniciarRealtimePortalAdmin();
 });
+
+// ══════════════════════════════════════════════
+//  PORTAL DO CLIENTE – FUNÇÕES DO ADMINISTRADOR
+// ══════════════════════════════════════════════
+const NTFY_PORTAL = 'sdvidros_portal_notificacoes';
+let osPortalAtual = null;
+let adminChatOsAtiva = null;
+let adminNovasMensagens = 0;
+
+function getGaleriaKey(os) {
+  return 'sdv_galeria_' + String(os||'').replace(/\D/g,'');
+}
+function getChatKey(os) {
+  return 'sdv_chat_' + String(os||'').replace(/\D/g,'');
+}
+
+// Abre o modal de gestão do Portal para uma OS específica
+function abrirModalPortalOs(id) {
+  const os = historico.find(x => x.id === id);
+  if (!os) return;
+  osPortalAtual = os;
+
+  document.getElementById('pos-num-display').textContent = os.numero || '#0001';
+  document.getElementById('pos-nome-display').textContent = os.nome || 'Cliente';
+
+  // Preenche etapa, observação e financeiro salvos
+  const etapaEl = document.getElementById('pos-etapa');
+  if (etapaEl) etapaEl.value = os.etapa_servico || '3';
+  const previsaoEl = document.getElementById('pos-previsao');
+  if (previsaoEl) previsaoEl.value = os.previsao_instalacao || '';
+  const obsEl = document.getElementById('pos-obs');
+  if (obsEl) obsEl.value = os.status_obs || '';
+
+  const vPagoEl = document.getElementById('pos-valor-pago');
+  if (vPagoEl) vPagoEl.value = os.valor_pago || '';
+  const stPagEl = document.getElementById('pos-status-pagamento');
+  if (stPagEl) stPagEl.value = os.status_pagamento || 'Pendente';
+
+  // Busca senha do cliente correspondente
+  const cli = clientes.find(c => {
+    const telCli = String(c.whatsapp||'').replace(/\D/g,'');
+    const telOs = String((os.dados && os.dados.tel)||'').replace(/\D/g,'');
+    return telCli && telOs && telCli.includes(telOs);
+  });
+  const senhaEl = document.getElementById('pos-senha');
+  if (senhaEl) senhaEl.value = (cli && cli.senha) || '';
+
+  // Renderiza galeria existente
+  renderGaleriaOsModal(os.numero);
+
+  document.getElementById('modal-portal-os').style.display = 'flex';
+}
+
+function fecharModalPortalOs(e) {
+  if (!e || e.target === document.getElementById('modal-portal-os')) {
+    document.getElementById('modal-portal-os').style.display = 'none';
+    osPortalAtual = null;
+  }
+}
+
+function renderGaleriaOsModal(osNumero) {
+  const grid = document.getElementById('pos-galeria-lista');
+  if (!grid) return;
+  const key = getGaleriaKey(osNumero);
+  let fotos = [];
+  try { fotos = JSON.parse(localStorage.getItem(key) || '[]'); } catch(_) {}
+  if (!fotos.length) {
+    grid.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:10px;">Nenhuma foto adicionada ainda. Clique em "+ Adicionar Foto" para enviar.</div>';
+    return;
+  }
+  grid.innerHTML = fotos.map(f => `
+    <div style="position:relative;background:#08080f;border-radius:8px;overflow:hidden;cursor:pointer;" title="${esc(f.legenda||'Foto')}">
+      <img src="${f.foto}" style="width:100%;height:90px;object-fit:cover;" alt="Foto" onerror="this.src='banner.jpg'">
+      <div style="font-size:9.5px;padding:4px 6px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(f.legenda||'')}</div>
+    </div>
+  `).join('');
+}
+
+function uploadFotoOsModal(event) {
+  if (!osPortalAtual) return;
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const key = getGaleriaKey(osPortalAtual.numero);
+    let fotos = [];
+    try { fotos = JSON.parse(localStorage.getItem(key) || '[]'); } catch(_) {}
+    const novaFoto = {
+      id: Date.now(),
+      foto: e.target.result,
+      legenda: 'Foto da Instalação',
+      tag: 'Instalação',
+      data: new Date().toLocaleDateString('pt-BR'),
+      remetente: 'empresa'
+    };
+    fotos.unshift(novaFoto);
+    localStorage.setItem(key, JSON.stringify(fotos));
+    renderGaleriaOsModal(osPortalAtual.numero);
+    // Notifica cliente via ntfy
+    fetch('/api/portal-cliente', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'adicionar_foto',
+        os: osPortalAtual.numero,
+        cliente_nome: osPortalAtual.nome,
+        foto_url: '',
+        legenda: novaFoto.legenda,
+        remetente: 'empresa'
+      })
+    }).catch(() => {});
+    const fb = document.getElementById('pos-feedback-msg');
+    if (fb) { fb.style.color = '#4ade80'; fb.textContent = '✅ Foto adicionada e cliente notificado!'; }
+  };
+  reader.readAsDataURL(file);
+}
+
+function salvarStatusOsModal() {
+  if (!osPortalAtual) return;
+  const etapa = Number(document.getElementById('pos-etapa').value || 3);
+  const previsao = (document.getElementById('pos-previsao').value || '').trim();
+  const obs = (document.getElementById('pos-obs').value || '').trim();
+  const senhaDigitada = (document.getElementById('pos-senha').value || '').trim();
+  const valorPago = (document.getElementById('pos-valor-pago').value || '').trim();
+  const statusPag = document.getElementById('pos-status-pagamento').value;
+
+  const etapaTextos = [
+    '', 'Orçamento Aprovado', 'Medição Técnica Concluída',
+    'Em Fabricação & Têmpera', 'Pronto para Instalação',
+    'Em Instalação no Local', 'Concluído e Entregue'
+  ];
+  const statusTexto = etapaTextos[etapa] || 'Em andamento';
+
+  // Atualiza a OS no localStorage
+  const idx = historico.findIndex(x => x.id === osPortalAtual.id);
+  if (idx !== -1) {
+    historico[idx].etapa_servico = etapa;
+    historico[idx].status_servico_texto = statusTexto;
+    historico[idx].status_obs = obs;
+    historico[idx].previsao_instalacao = previsao;
+    historico[idx].valor_pago = valorPago;
+    historico[idx].status_pagamento = statusPag;
+    save(K.orders, historico);
+    renderHist();
+  }
+
+  // Atualiza senha se digitada
+  if (senhaDigitada) {
+    const telOs = String((osPortalAtual.dados && osPortalAtual.dados.tel)||'').replace(/\D/g,'');
+    const cliIdx = clientes.findIndex(c => {
+      const telCli = String(c.whatsapp||'').replace(/\D/g,'');
+      return telCli && telOs && telCli.includes(telOs);
+    });
+    if (cliIdx !== -1) {
+      clientes[cliIdx].senha = senhaDigitada;
+      save(K.clients, clientes);
+    }
+  }
+
+  // Publica no barramento em tempo real (ntfy) para o cliente receber status e financeiro
+  fetch('/api/portal-cliente', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'atualizar_status',
+      os: osPortalAtual.numero,
+      cliente_nome: osPortalAtual.nome,
+      telefone: (osPortalAtual.dados && osPortalAtual.dados.tel) || '',
+      status: statusTexto,
+      etapa: etapa,
+      obs: obs,
+      previsao: previsao
+    })
+  }).catch(() => {});
+
+  if (valorPago || statusPag) {
+    fetch('/api/portal-cliente', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'atualizar_financeiro',
+        os: osPortalAtual.numero,
+        cliente_nome: osPortalAtual.nome,
+        valor_pago: valorPago,
+        status_pagamento: statusPag,
+        total: osPortalAtual.total
+      })
+    }).catch(() => {});
+  }
+
+  const fb = document.getElementById('pos-feedback-msg');
+  if (fb) {
+    fb.style.color = '#4ade80';
+    fb.textContent = `✅ Status "${statusTexto}" salvo e cliente notificado em tempo real!`;
+    setTimeout(() => { if(fb) fb.textContent = ''; }, 4000);
+  }
+}
+
+function enviarAcessoZapModal() {
+  if (!osPortalAtual) return;
+  const telOs = String((osPortalAtual.dados && osPortalAtual.dados.tel) || '').replace(/\D/g, '');
+  const nomeCliente = osPortalAtual.nome || 'Cliente';
+  const os = osPortalAtual.numero || '#0001';
+
+  // Descobre senha do cliente
+  const cli = clientes.find(c => {
+    const telCli = String(c.whatsapp||'').replace(/\D/g,'');
+    return telCli && telOs && telCli.includes(telOs);
+  });
+  const senhaDigitada = (document.getElementById('pos-senha') && document.getElementById('pos-senha').value.trim()) || '';
+  const senha = senhaDigitada || (cli && cli.senha) || (telOs.length >= 4 ? telOs.slice(-4) : '****');
+
+  const baseUrl = window.location.origin + window.location.pathname.replace('index.html','');
+  const linkPortal = `${baseUrl}cliente.html?tel=${telOs}&s=${senha}`;
+
+  const msg = encodeURIComponent(
+    `Olá, ${nomeCliente}! 👋\n\n` +
+    `Sua *Área Exclusiva SD Vidros* está pronta! 🎉\n` +
+    `Acompanhe o status do seu serviço *${os}*, galeria de fotos e fale diretamente conosco:\n\n` +
+    `🔗 *${linkPortal}*\n\n` +
+    `📱 WhatsApp de acesso: *${telOs || 'seu número'}*\n` +
+    `🔑 Senha: *${senha}*\n\n` +
+    `_SD Vidros – Itaitinga, CE_`
+  );
+
+  const zapNum = telOs || '5585996119824';
+  window.open(`https://wa.me/${zapNum}?text=${msg}`, '_blank');
+}
+
+// ══════════════════════════════════════════════
+//  CENTRAL DE MENSAGENS DO ADMIN
+// ══════════════════════════════════════════════
+let adminChatConversasCache = [];
+
+function abrirModalCentralMensagens() {
+  document.getElementById('modal-central-mensagens').style.display = 'flex';
+  voltarParaListaConversasAdmin();
+  const filtroInput = document.getElementById('chat-admin-filtro');
+  if (filtroInput) filtroInput.value = '';
+  carregarConversasAdmin();
+  adminNovasMensagens = 0;
+  const badge = document.getElementById('badge-msg-clientes');
+  if (badge) badge.style.display = 'none';
+}
+
+function fecharModalCentralMensagens(e) {
+  if (!e || e.target === document.getElementById('modal-central-mensagens')) {
+    document.getElementById('modal-central-mensagens').style.display = 'none';
+  }
+}
+
+function voltarParaListaConversasAdmin() {
+  const container = document.getElementById('chat-admin-container');
+  if (container) {
+    container.classList.remove('view-chat-active');
+  }
+}
+
+function carregarConversasAdmin() {
+  const lista = document.getElementById('admin-chat-lista-conversas');
+  if (!lista) return;
+
+  // Busca todas as OSs que têm mensagens de clientes ou da empresa
+  const conversas = historico.map(o => {
+    const key = getChatKey(o.numero);
+    let msgs = [];
+    try { msgs = JSON.parse(localStorage.getItem(key) || '[]'); } catch(_) {}
+    const clienteMsgs = msgs.filter(m => m.remetente === 'cliente');
+    return { os: o, msgs, clienteMsgs, ultimaMsg: msgs[msgs.length - 1] || null };
+  }).filter(x => x.msgs.length > 0);
+
+  adminChatConversasCache = conversas;
+  renderizarListaConversasAdmin(conversas);
+}
+
+function renderizarListaConversasAdmin(conversas) {
+  const lista = document.getElementById('admin-chat-lista-conversas');
+  if (!lista) return;
+
+  const totalBadge = document.getElementById('chat-admin-total-badge');
+  if (totalBadge) totalBadge.textContent = conversas.length;
+
+  if (!conversas.length) {
+    lista.innerHTML = `
+      <div style="padding:28px 12px;font-size:12.5px;color:var(--muted);text-align:center;line-height:1.5;">
+        <div style="font-size:26px;margin-bottom:8px;">💬</div>
+        Nenhuma conversa iniciada ainda.<br>
+        <span style="font-size:11px;opacity:0.75;">Quando um cliente enviar mensagens pelo portal, aparecerá aqui.</span>
+      </div>
+    `;
+    return;
+  }
+
+  lista.innerHTML = conversas.map(c => {
+    const osNum = esc(c.os.numero);
+    const nomeCli = esc(c.os.nome || 'Cliente');
+    const tel = esc((c.os.dados && c.os.dados.tel) || '');
+    const isActive = (adminChatOsAtiva === c.os.numero);
+    const unreadCount = c.clienteMsgs.length;
+    const ultTexto = c.ultimaMsg ? esc(c.ultimaMsg.texto || '') : '';
+    const ultHora = c.ultimaMsg ? (c.ultimaMsg.hora || '') : '';
+
+    return `
+      <div class="chat-admin-card ${isActive ? 'active' : ''}" id="chat-card-${osNum}" onclick="selecionarConversaAdmin('${osNum}', '${nomeCli}', '${tel}')">
+        <div style="font-size:13px;font-weight:800;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:6px;">
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${nomeCli}</span>
+          ${unreadCount ? `<span style="background:#ef4444;color:#fff;font-size:9.5px;padding:1px 7px;border-radius:999px;font-weight:900;flex-shrink:0;">${unreadCount}</span>` : ''}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px;">
+          <span style="font-size:11px;color:var(--gold-light);font-weight:700;">${osNum}</span>
+          ${ultHora ? `<span style="font-size:10px;color:var(--muted);">${ultHora}</span>` : ''}
+        </div>
+        ${ultTexto ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ultTexto}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function filtrarConversasAdmin(filtro) {
+  const term = (filtro || '').toLowerCase().trim();
+  if (!term) {
+    renderizarListaConversasAdmin(adminChatConversasCache);
+    return;
+  }
+  const filtradas = adminChatConversasCache.filter(c => {
+    const nome = (c.os.nome || '').toLowerCase();
+    const num = (c.os.numero || '').toLowerCase();
+    const tel = ((c.os.dados && c.os.dados.tel) || '').toLowerCase();
+    return nome.includes(term) || num.includes(term) || tel.includes(term);
+  });
+  renderizarListaConversasAdmin(filtradas);
+}
+
+function selecionarConversaAdmin(osNum, nomeCliente, telefone) {
+  adminChatOsAtiva = osNum;
+
+  // No mobile, ativa visualização do chat
+  const container = document.getElementById('chat-admin-container');
+  if (container) {
+    container.classList.add('view-chat-active');
+  }
+
+  // Destaca card ativo na lista
+  document.querySelectorAll('.chat-admin-card').forEach(card => card.classList.remove('active'));
+  const cardAtivo = document.getElementById('chat-card-' + osNum);
+  if (cardAtivo) cardAtivo.classList.add('active');
+
+  document.getElementById('admin-chat-nome-ativo').textContent = nomeCliente;
+  document.getElementById('admin-chat-os-ativo').textContent = 'O.S. ' + osNum;
+
+  const btnZap = document.getElementById('admin-chat-btn-zap');
+  if (btnZap && telefone) {
+    btnZap.href = 'https://wa.me/' + telefone.replace(/\D/g,'');
+    btnZap.style.display = 'inline-flex';
+  } else if (btnZap) {
+    btnZap.style.display = 'none';
+  }
+
+  const key = getChatKey(osNum);
+  let msgs = [];
+  try { msgs = JSON.parse(localStorage.getItem(key) || '[]'); } catch(_) {}
+
+  const box = document.getElementById('admin-chat-mensagens-box');
+  if (!box) return;
+
+  if (!msgs.length) {
+    box.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;margin-top:40px;">Nenhuma mensagem ainda nesta conversa.</div>';
+    return;
+  }
+
+  box.innerHTML = msgs.map(m => {
+    const ehEmpresa = m.remetente === 'empresa';
+    return `
+      <div style="max-width:85%;padding:10px 14px;border-radius:14px;${ehEmpresa ? 'align-self:flex-start;background:rgba(201,168,76,0.14);border:1px solid rgba(201,168,76,0.35);' : 'align-self:flex-end;background:linear-gradient(135deg,#108548,#075e33);'};box-shadow:0 2px 8px rgba(0,0,0,0.35);animation:fadeUp 0.2s ease;">
+        <div style="font-size:10px;font-weight:800;color:${ehEmpresa ? 'var(--gold-light)' : '#bbf7d0'};margin-bottom:3px;display:flex;align-items:center;gap:4px;">
+          <span>${ehEmpresa ? '💎 SD Vidros' : '👤 ' + esc(nomeCliente)}</span>
+        </div>
+        <div style="font-size:13px;color:#fff;word-break:break-word;line-height:1.4;">${esc(m.texto || '')}</div>
+        <div style="font-size:9.5px;opacity:0.65;text-align:right;margin-top:4px;">${m.hora || ''}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Scroll para o final
+  setTimeout(() => { box.scrollTop = box.scrollHeight; }, 60);
+
+  // Foca no input se não for toque mobile inicial
+  const input = document.getElementById('admin-chat-input');
+  if (input && window.innerWidth > 768) input.focus();
+}
+
+function enviarRespostaAdmin() {
+  if (!adminChatOsAtiva) {
+    alert('Selecione uma conversa antes de enviar a resposta.');
+    return;
+  }
+  const input = document.getElementById('admin-chat-input');
+  const texto = (input && input.value || '').trim();
+  if (!texto) return;
+
+  const key = getChatKey(adminChatOsAtiva);
+  let msgs = [];
+  try { msgs = JSON.parse(localStorage.getItem(key) || '[]'); } catch(_) {}
+
+  const os = historico.find(x => x.numero === adminChatOsAtiva);
+  const nomeCliente = (os && os.nome) || 'Cliente';
+
+  const novaMsg = {
+    id: Date.now(),
+    remetente: 'empresa',
+    texto: texto,
+    hora: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  };
+  msgs.push(novaMsg);
+  localStorage.setItem(key, JSON.stringify(msgs));
+  if (input) input.value = '';
+
+  // Atualiza o painel de chat e a sidebar
+  selecionarConversaAdmin(adminChatOsAtiva, nomeCliente, (os && os.dados && os.dados.tel) || '');
+  carregarConversasAdmin();
+
+  // Publica no barramento para o cliente receber em tempo real
+  fetch('/api/portal-cliente', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'mensagem',
+      remetente: 'empresa',
+      cliente_nome: nomeCliente,
+      os: adminChatOsAtiva,
+      texto: texto,
+      telefone: (os && os.dados && os.dados.tel) || ''
+    })
+  }).catch(() => {});
+}
+
+// ══════════════════════════════════════════════
+//  REALTIME ADMIN: RECEBE MENSAGENS DE CLIENTES
+// ══════════════════════════════════════════════
+let ssePortalAdmin = null;
+
+function iniciarRealtimePortalAdmin() {
+  if (typeof EventSource === 'undefined') return;
+  try {
+    if (ssePortalAdmin) { try { ssePortalAdmin.close(); } catch(_) {} }
+    ssePortalAdmin = new EventSource(`https://ntfy.sh/${NTFY_PORTAL}/sse?since=10m`);
+
+    ssePortalAdmin.onmessage = function(ev) {
+      try {
+        const data = JSON.parse(ev.data);
+        if (data.event === 'message' && data.message) {
+          const evento = JSON.parse(data.message);
+          processarEventoPortalAdmin(evento);
+        }
+      } catch(_) {}
+    };
+
+    ssePortalAdmin.onerror = function() {
+      if (ssePortalAdmin) { try { ssePortalAdmin.close(); } catch(_) {} }
+      setTimeout(iniciarRealtimePortalAdmin, 7000);
+    };
+  } catch(err) {
+    console.warn('Realtime Portal Admin SSE:', err);
+  }
+}
+
+function processarEventoPortalAdmin(ev) {
+  // Processa apenas mensagens enviadas PELO cliente
+  if (ev.tipo === 'mensagem' && ev.remetente === 'cliente') {
+    const key = getChatKey(ev.os);
+    let msgs = [];
+    try { msgs = JSON.parse(localStorage.getItem(key) || '[]'); } catch(_) {}
+
+    // Evita duplicata
+    if (!msgs.some(m => m.texto === ev.texto && m.remetente === 'cliente')) {
+      msgs.push({
+        id: Date.now(),
+        remetente: 'cliente',
+        texto: ev.texto,
+        hora: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      });
+      localStorage.setItem(key, JSON.stringify(msgs));
+    }
+
+    // Alerta sonoro e toast
+    tocarAlertaPortal();
+    mostrarToastAprovacao(`💬 Mensagem de ${ev.cliente_nome || 'Cliente'} (${ev.os || ''}): ${(ev.texto || '').substring(0, 60)}`);
+
+    // Atualiza badge de mensagens
+    adminNovasMensagens++;
+    const badge = document.getElementById('badge-msg-clientes');
+    if (badge) {
+      badge.textContent = adminNovasMensagens;
+      badge.style.display = 'inline-block';
+    }
+
+    // Se o modal de mensagens estiver aberto e a conversa ativa for esta, atualiza
+    if (adminChatOsAtiva === ev.os) {
+      const os = historico.find(x => x.numero === ev.os);
+      selecionarConversaAdmin(ev.os, ev.cliente_nome || 'Cliente', (os && os.dados && os.dados.tel) || '');
+    }
+    // Recarrega lista de conversas se o modal estiver visível
+    if (document.getElementById('modal-central-mensagens').style.display !== 'none') {
+      carregarConversasAdmin();
+    }
+  }
+}
+
+function tocarAlertaPortal() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    [659.25, 880].forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.25, audioCtx.currentTime + i * 0.14);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.14 + 0.2);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(audioCtx.currentTime + i * 0.14);
+      osc.stop(audioCtx.currentTime + i * 0.14 + 0.2);
+    });
+  } catch(_) {}
+}
 </script>
 </body>
 </html>
