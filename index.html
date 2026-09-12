@@ -688,6 +688,76 @@
         padding: 9px 10px !important;
       }
     }
+
+    /* ══ MÓDULO DE LICENÇA E MULTI-EMPRESA ══ */
+    .licenca-selector-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .licenca-card-option {
+      background: rgba(255,255,255,0.03);
+      border: 1.5px solid rgba(255,255,255,0.09);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .licenca-card-option:hover {
+      border-color: rgba(201,168,76,0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .licenca-card-option.active {
+      border-color: var(--gold);
+      background: linear-gradient(180deg, rgba(201,168,76,0.12) 0%, rgba(13,13,21,0.95) 100%);
+      box-shadow: 0 8px 30px rgba(201,168,76,0.18);
+    }
+    .licenca-thumb-banner {
+      width: 100%;
+      height: 120px;
+      background: #000;
+      position: relative;
+      overflow: hidden;
+    }
+    .licenca-thumb-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .licenca-body-content {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .licenca-active-tag {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(16,185,129,0.9);
+      color: #fff;
+      font-size: 10.5px;
+      font-weight: 900;
+      padding: 3px 10px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .licenca-upload-preview {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      border: 1.5px solid var(--gold);
+      object-fit: cover;
+      background: #000;
+    }
   </style>
   <script src="pdf-lib.min.js"></script>
   <script>
@@ -723,8 +793,12 @@
 
   <!-- BANNER GRÁFICO (ESTILO NEWBOX DA SD VIDROS) -->
   <div class="banner">
-    <img src="banner.jpg" alt="SD Vidros – Alumínio e Vidraçaria | Box de vidro e acrílico, Corrimão, Portão automático, Janelas, Grades, Fechamento de área. Tel/WhatsApp: (85) 99611-9824 - Itaitinga - CE">
+    <img id="banner-img-main" src="banner.jpg" alt="SD Vidros – Alumínio e Vidraçaria">
     <div class="banner-overlay-top">
+      <div class="user-pill" id="empresa-pill-top" onclick="goTab('licenca')" style="cursor:pointer;background:rgba(0,0,0,0.78);border-color:var(--gold);" title="Clique para gerenciar a licença e alternar entre SD Vidros e SD Móveis">
+        <span id="empresa-icon-top">🏢</span>
+        <strong id="empresa-nome-top" style="color:var(--gold-light);">SD Vidros</strong> ▾
+      </div>
       <div class="user-pill">
         <span id="usuario-logado">👤 Admin</span>
       </div>
@@ -741,6 +815,7 @@
     <button id="tab-ponto" class="tab" data-tab="ponto" onclick="goTab('ponto')">👷 Funcionários & Ponto</button>
     <button id="tab-contratos" class="tab" data-tab="contratos" onclick="goTab('contratos')">📄 Contratos</button>
     <button id="tab-usuarios" class="tab" data-tab="usuarios" onclick="goTab('usuarios')">👥 Usuários</button>
+    <button id="tab-licenca" class="tab" data-tab="licenca" onclick="goTab('licenca')">🏢 Licença & Marca</button>
     <button type="button" id="tab-portal-cliente" class="tab" onclick="window.open('cliente.html','_blank')" title="Acessar Portal do Cliente">🌐 Portal do Cliente</button>
     <button type="button" id="btn-central-mensagens" class="tab" onclick="abrirModalCentralMensagens()" title="Central de Mensagens com Clientes">💬 Mensagens <span id="badge-msg-clientes" style="display:none;background:#ef4444;color:#fff;font-size:9.5px;padding:1px 6px;border-radius:999px;font-weight:900;margin-left:4px;">0</span></button>
   </div>
@@ -1150,7 +1225,133 @@
     </div>
   </div>
 
-  <footer class="credits">SD Vidros · Itaitinga - CE · (85) 99611-9824 · @sdvidros</footer>
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANEL: LICENÇA & EMPRESA (MULTI-EMPRESA / WHITE-LABEL) -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="panel-licenca" class="panel">
+
+    <!-- Card 1: Licença & Empresa Ativa no Momento (Alternador com 1 Clique) -->
+    <div class="card" style="border:1.5px solid rgba(201,168,76,0.35);">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+        <div>
+          <div class="card-title" style="margin-bottom:4px;">🏢 Licença & Empresa Ativa</div>
+          <div style="font-size:12px;color:var(--muted);">Alterne instantaneamente a marca, logo, banner, catálogo e dados do sistema com 1 clique</div>
+        </div>
+        <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,0.12);border:1px solid #22c55e;color:#4ade80;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:800;">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4ade80;"></span>
+          <span id="licenca-status-badge">Licença Ativa: SD Vidros</span>
+        </div>
+      </div>
+
+      <!-- Grid de Licenças Pré-Configuradas / Disponíveis -->
+      <div class="licenca-selector-grid" id="licenca-cards-container">
+        <!-- Gerado dinamicamente via JS -->
+      </div>
+    </div>
+
+    <!-- Card 2: Configuração e Personalização da Licença Selecionada -->
+    <div class="card">
+      <div class="card-title">⚙️ Personalizar Marca, Logos e Dados da Licença</div>
+      
+      <div class="field-row">
+        <div class="field">
+          <label>Nome Fantasia da Empresa *</label>
+          <input id="lic-nome" placeholder="Ex: SD Vidros ou SD Móveis Projetados" />
+        </div>
+        <div class="field">
+          <label>Segmento / Ramo de Atuação *</label>
+          <input id="lic-segmento" placeholder="Ex: Alumínio & Vidraçaria ou Móveis Projetados" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Slogan / Descrição Curta</label>
+          <input id="lic-slogan" placeholder="Ex: Box, Espelhos, Esquadrias ou Ambientes Sob Medida" />
+        </div>
+        <div class="field">
+          <label>WhatsApp / Telefone Comercial *</label>
+          <input id="lic-telefone" placeholder="(85) 99611-9824" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Cidade / Estado</label>
+          <input id="lic-cidade" placeholder="Ex: Itaitinga - CE" />
+        </div>
+        <div class="field">
+          <label>CNPJ (opcional)</label>
+          <input id="lic-cnpj" placeholder="00.000.000/0001-00" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Chave PIX da Empresa</label>
+          <input id="lic-pix" placeholder="85996119824" />
+        </div>
+        <div class="field">
+          <label>Chave de Registro da Licença</label>
+          <input id="lic-chave" placeholder="Ex: SDV-PRO-2026-VIP" readonly style="opacity:0.8;background:#06060c;" />
+        </div>
+      </div>
+
+      <!-- Upload / Troca de Imagens (Logo e Banner) -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:14px;margin-top:14px;padding:16px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:14px;">
+        <!-- Trocar Logotipo -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:8px;">Logotipo da Empresa</label>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <img id="lic-preview-logo" src="logo.jpg" class="licenca-upload-preview" alt="Logo">
+            <div style="flex:1;">
+              <input type="file" id="lic-upload-logo" accept="image/*" style="display:none" onchange="processarUploadImagemLicenca(event, 'logo')">
+              <button type="button" class="btn btn-sec btn-sm" onclick="document.getElementById('lic-upload-logo').click()">📁 Escolher Nova Logo</button>
+              <div style="font-size:10.5px;color:var(--muted);margin-top:4px;">JPG, PNG ou WebP</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trocar Banner -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:8px;">Banner do Topo (Showroom)</label>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <img id="lic-preview-banner" src="banner.jpg" style="width:100px;height:50px;border-radius:8px;border:1.5px solid var(--gold);object-fit:cover;background:#000;" alt="Banner">
+            <div style="flex:1;">
+              <input type="file" id="lic-upload-banner" accept="image/*" style="display:none" onchange="processarUploadImagemLicenca(event, 'banner')">
+              <button type="button" class="btn btn-sec btn-sm" onclick="document.getElementById('lic-upload-banner').click()">📁 Escolher Novo Banner</button>
+              <div style="font-size:10.5px;color:var(--muted);margin-top:4px;">Panorâmico (16:9)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top:16px;">
+        <button type="button" class="btn btn-primary" onclick="salvarConfiguracoesLicencaAtiva()">💾 Salvar Dados da Licença</button>
+        <button type="button" class="btn btn-gold" onclick="abrirModalNovaLicenca()">➕ Criar Novo Perfil de Empresa</button>
+      </div>
+      <div id="lic-feedback-msg" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- Card 3: Catálogo Rápido do Segmento -->
+    <div class="card">
+      <div class="card-title">📦 Carregar Catálogo de Produtos Sugeridos por Segmento</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5;">
+        Deseja importar automaticamente a lista de itens e valores sugeridos para o ramo da empresa ativa?
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button type="button" class="btn btn-gold btn-sm" onclick="carregarCatalogoPadraoSegmento('vidros')">
+          💎 Carregar Produtos de Vidraçaria (Box, Espelhos, Janelas...)
+        </button>
+        <button type="button" class="btn btn-cyan btn-sm" onclick="carregarCatalogoPadraoSegmento('moveis')">
+          🛋️ Carregar Produtos de Móveis Projetados (Cozinhas, Closets, Painéis...)
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="credits" id="footer-credits-main">SD Vidros · Itaitinga - CE · (85) 99611-9824 · @sdvidros</footer>
 </div>
 
 <!-- ══ CLIENT PICKER MODAL ══ -->
@@ -1551,7 +1752,7 @@ let editandoProdId = null;
 let editandoUserId = null;
 
 // ══════════════════════════════════════════════
-//  DEFAULT CATALOG (PRODUTOS E SERVIÇOS DA 2ª IMAGEM)
+//  CATÁLOGOS PADRÃO (VIDRAÇARIA & MÓVEIS PROJETADOS)
 // ══════════════════════════════════════════════
 const PRODUTOS_PADRAO = [
   { id: 1,  nome: 'Box de Vidro Temperado 8mm Frontal (2 Folhas)', cat: 'Box', vm2: 200, vunit: 0 },
@@ -1569,6 +1770,312 @@ const PRODUTOS_PADRAO = [
   { id: 13, nome: 'Grade de Alumínio / Fachada',                   cat: 'Grades', vm2: 280, vunit: 0 },
   { id: 14, nome: 'Manutenção / Troca de Roldanas e Vedação',      cat: 'Serviços', vm2: 0, vunit: 150 }
 ];
+
+const PRODUTOS_PADRAO_MOVEIS = [
+  { id: 101, nome: 'Cozinha Planejada em MDF Ultra Naval (m linear)', cat: 'Cozinhas', vm2: 0, vunit: 1450 },
+  { id: 102, nome: 'Armário Superior de Cozinha com Portas Reflecta', cat: 'Cozinhas', vm2: 480, vunit: 0 },
+  { id: 103, nome: 'Ilha Gourmet com Gaveteiros e Torre de Tomadas', cat: 'Cozinhas', vm2: 0, vunit: 2600 },
+  { id: 104, nome: 'Roupeiro / Closet Sob Medida com Iluminação LED', cat: 'Dormitórios', vm2: 520, vunit: 0 },
+  { id: 105, nome: 'Painel Ripado em MDF Freijó / Carvalho para TV', cat: 'Salas', vm2: 380, vunit: 0 },
+  { id: 106, nome: 'Rack Suspenso com Portas Basculantes e Fecho-Toque', cat: 'Salas', vm2: 0, vunit: 950 },
+  { id: 107, nome: 'Gabinete para Banheiro em MDF Hidrófugo c/ Espelho', cat: 'Banheiros', vm2: 0, vunit: 850 },
+  { id: 108, nome: 'Home Office Planejado (Mesa + Nichos + Painel)', cat: 'Escritório', vm2: 0, vunit: 1850 },
+  { id: 109, nome: 'Aparador / Buffet de Jantar com Pés Metálicos', cat: 'Salas', vm2: 0, vunit: 1200 },
+  { id: 110, nome: 'Cabeceira Estofada Modular com Frisos Dourados', cat: 'Dormitórios', vm2: 340, vunit: 0 },
+  { id: 111, nome: 'Divisória de Ambientes em Madeira Ripada Giratória', cat: 'Painéis', vm2: 420, vunit: 0 },
+  { id: 112, nome: 'Montagem e Instalação Técnica Especializada', cat: 'Serviços', vm2: 0, vunit: 250 }
+];
+
+// ══════════════════════════════════════════════
+//  MÓDULO DE LICENÇA & MULTI-EMPRESA (SD VIDROS / SD MÓVEIS / WHITE-LABEL)
+// ══════════════════════════════════════════════
+const LICENCAS_PADRAO = [
+  {
+    id: 'sdvidros',
+    nome: 'SD Vidros',
+    segmento: 'Alumínio, Vidros & Esquadrias',
+    slogan: 'Box, Espelhos, Portas, Janelas & Guarda-Corpo',
+    telefone: '(85) 99611-9824',
+    cidade: 'Itaitinga - CE',
+    cnpj: '',
+    pix: '85996119824',
+    chaveLicenca: 'SDV-VIDROS-PRO-2026',
+    logo: 'logo.jpg',
+    banner: 'banner.jpg',
+    tipoContrato: 'vidros'
+  },
+  {
+    id: 'sdmoveis',
+    nome: 'SD Móveis Projetados',
+    segmento: 'Móveis Planejados & Marcenaria de Luxo',
+    slogan: 'Cozinhas Planejadas, Closets & Ambientes Sob Medida',
+    telefone: '(85) 99611-9824',
+    cidade: 'Itaitinga - CE',
+    cnpj: '',
+    pix: '85996119824',
+    chaveLicenca: 'SDM-MOVEIS-LUX-2026',
+    logo: 'logo_moveis.jpg',
+    banner: 'banner_moveis.jpg',
+    tipoContrato: 'moveis'
+  }
+];
+
+function obterLicencas() {
+  try {
+    let lista = JSON.parse(localStorage.getItem('sdv_licencas'));
+    if (!Array.isArray(lista) || !lista.length) {
+      lista = LICENCAS_PADRAO;
+      localStorage.setItem('sdv_licencas', JSON.stringify(lista));
+    }
+    return lista;
+  } catch(_) {
+    return LICENCAS_PADRAO;
+  }
+}
+
+function salvarLicencas(lista) {
+  localStorage.setItem('sdv_licencas', JSON.stringify(lista));
+}
+
+function obterLicencaAtiva() {
+  const lista = obterLicencas();
+  const idAtivo = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+  return lista.find(l => l.id === idAtivo) || lista[0] || LICENCAS_PADRAO[0];
+}
+
+function aplicarLicencaVisual(lic) {
+  if (!lic) lic = obterLicencaAtiva();
+
+  // 1. Banner do topo
+  const bannerImg = document.getElementById('banner-img-main');
+  if (bannerImg && lic.banner) {
+    bannerImg.src = lic.banner;
+    bannerImg.alt = `${lic.nome} – ${lic.segmento}`;
+  }
+
+  // 2. Pill do topo
+  const empresaPillNome = document.getElementById('empresa-nome-top');
+  if (empresaPillNome) {
+    empresaPillNome.textContent = lic.nome || 'SD Vidros';
+  }
+
+  // 3. Título da aba do navegador
+  document.title = `${lic.nome || 'SD Vidros'} · Sistema de Gestão & Orçamentos`;
+
+  // 4. Rodapé
+  const footerEl = document.getElementById('footer-credits-main');
+  if (footerEl) {
+    footerEl.textContent = `${lic.nome || 'SD Vidros'} · ${lic.cidade || 'Itaitinga - CE'} · ${lic.telefone || '(85) 99611-9824'} · @${(lic.id === 'sdmoveis' ? 'sdmoveisprojetados' : 'sdvidros')}`;
+  }
+
+  // 5. Badge no painel
+  const badgeEl = document.getElementById('licenca-status-badge');
+  if (badgeEl) {
+    badgeEl.textContent = `Licença Ativa: ${lic.nome || 'SD Vidros'}`;
+  }
+}
+
+function ativarLicenca(id, silencioso = false) {
+  const lista = obterLicencas();
+  const nova = lista.find(l => l.id === id);
+  if (!nova) return;
+
+  localStorage.setItem('sdv_licenca_ativa', id);
+  aplicarLicencaVisual(nova);
+  renderPainelLicenca();
+
+  if (!silencioso) {
+    const mudarCatalogo = confirm(`🏢 Licença alterada com sucesso para "${nova.nome}"!\n\nDeseja carregar automaticamente os produtos e serviços recomendados para ${nova.segmento}?`);
+    if (mudarCatalogo) {
+      carregarCatalogoPadraoSegmento(nova.tipoContrato || (id === 'sdmoveis' ? 'moveis' : 'vidros'));
+    }
+  }
+}
+
+function renderPainelLicenca() {
+  const lista = obterLicencas();
+  const ativa = obterLicencaAtiva();
+
+  // 1. Renderiza os cards de alternância rápida
+  const container = document.getElementById('licenca-cards-container');
+  if (container) {
+    container.innerHTML = lista.map(l => {
+      const isAtiva = (l.id === ativa.id);
+      return `
+        <div class="licenca-card-option ${isAtiva ? 'active' : ''}" onclick="ativarLicenca('${l.id}')" style="cursor:pointer;">
+          <div class="licenca-thumb-banner">
+            <img src="${l.banner || 'banner.jpg'}" alt="${esc(l.nome)}">
+            ${isAtiva ? '<div class="licenca-active-tag">✓ ATIVA & EM USO</div>' : ''}
+          </div>
+          <div class="licenca-body-content">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <img src="${l.logo || 'logo.jpg'}" style="width:42px;height:42px;border-radius:10px;border:1.5px solid var(--gold);object-fit:cover;background:#000;" alt="Logo">
+              <div style="min-width:0;flex:1;">
+                <div style="font-size:15px;font-weight:900;color:${isAtiva ? 'var(--gold-light)' : '#fff'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  ${esc(l.nome)}
+                </div>
+                <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  ${esc(l.segmento)}
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px;line-height:1.4;">
+              ${esc(l.slogan || '')}
+            </div>
+
+            <div style="margin-top:auto;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);">
+              <span>📱 ${esc(l.telefone || '')}</span>
+              <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:700;">${esc(l.chaveLicenca || '')}</span>
+            </div>
+
+            <button type="button" class="btn ${isAtiva ? 'btn-gold' : 'btn-sec'} btn-sm" style="margin-top:12px;width:100%;font-weight:800;" onclick="event.stopPropagation();ativarLicenca('${l.id}')">
+              ${isAtiva ? '✓ Perfil Ativo no Momento' : '⚡ Mudar para Esta Empresa'}
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 2. Preenche o formulário de personalização
+  const fNome = document.getElementById('lic-nome');
+  if (fNome) fNome.value = ativa.nome || '';
+  const fSeg = document.getElementById('lic-segmento');
+  if (fSeg) fSeg.value = ativa.segmento || '';
+  const fSlo = document.getElementById('lic-slogan');
+  if (fSlo) fSlo.value = ativa.slogan || '';
+  const fTel = document.getElementById('lic-telefone');
+  if (fTel) fTel.value = ativa.telefone || '';
+  const fCid = document.getElementById('lic-cidade');
+  if (fCid) fCid.value = ativa.cidade || '';
+  const fCnpj = document.getElementById('lic-cnpj');
+  if (fCnpj) fCnpj.value = ativa.cnpj || '';
+  const fPix = document.getElementById('lic-pix');
+  if (fPix) fPix.value = ativa.pix || '';
+  const fChave = document.getElementById('lic-chave');
+  if (fChave) fChave.value = ativa.chaveLicenca || '';
+
+  const prevLogo = document.getElementById('lic-preview-logo');
+  if (prevLogo) prevLogo.src = ativa.logo || 'logo.jpg';
+
+  const prevBanner = document.getElementById('lic-preview-banner');
+  if (prevBanner) prevBanner.src = ativa.banner || 'banner.jpg';
+}
+
+function salvarConfiguracoesLicencaAtiva() {
+  const lista = obterLicencas();
+  const ativa = obterLicencaAtiva();
+  const idx = lista.findIndex(l => l.id === ativa.id);
+  if (idx === -1) return;
+
+  const nome = (document.getElementById('lic-nome') && document.getElementById('lic-nome').value.trim()) || '';
+  const segmento = (document.getElementById('lic-segmento') && document.getElementById('lic-segmento').value.trim()) || '';
+  const slogan = (document.getElementById('lic-slogan') && document.getElementById('lic-slogan').value.trim()) || '';
+  const telefone = (document.getElementById('lic-telefone') && document.getElementById('lic-telefone').value.trim()) || '';
+  const cidade = (document.getElementById('lic-cidade') && document.getElementById('lic-cidade').value.trim()) || '';
+  const cnpj = (document.getElementById('lic-cnpj') && document.getElementById('lic-cnpj').value.trim()) || '';
+  const pix = (document.getElementById('lic-pix') && document.getElementById('lic-pix').value.trim()) || '';
+
+  if (!nome) {
+    alert('Informe o nome da empresa.');
+    return;
+  }
+
+  lista[idx].nome = nome;
+  lista[idx].segmento = segmento;
+  lista[idx].slogan = slogan;
+  lista[idx].telefone = telefone;
+  lista[idx].cidade = cidade;
+  lista[idx].cnpj = cnpj;
+  lista[idx].pix = pix;
+
+  salvarLicencas(lista);
+  aplicarLicencaVisual(lista[idx]);
+  renderPainelLicenca();
+
+  const fb = document.getElementById('lic-feedback-msg');
+  if (fb) {
+    fb.style.color = '#4ade80';
+    fb.innerHTML = `✅ Dados da empresa "<strong>${esc(nome)}</strong>" salvos com sucesso!`;
+    setTimeout(() => { if (fb) fb.innerHTML = ''; }, 4000);
+  }
+}
+
+function processarUploadImagemLicenca(event, tipo) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (file.size > 2.5 * 1024 * 1024) {
+    alert('A imagem é muito grande (máximo 2.5MB). Escolha uma imagem mais leve.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64 = e.target.result;
+    const lista = obterLicencas();
+    const ativa = obterLicencaAtiva();
+    const idx = lista.findIndex(l => l.id === ativa.id);
+    if (idx === -1) return;
+
+    if (tipo === 'logo') {
+      lista[idx].logo = base64;
+      const prev = document.getElementById('lic-preview-logo');
+      if (prev) prev.src = base64;
+    } else if (tipo === 'banner') {
+      lista[idx].banner = base64;
+      const prev = document.getElementById('lic-preview-banner');
+      if (prev) prev.src = base64;
+      const mainBanner = document.getElementById('banner-img-main');
+      if (mainBanner) mainBanner.src = base64;
+    }
+
+    salvarLicencas(lista);
+    renderPainelLicenca();
+    alert(`✅ ${tipo === 'logo' ? 'Logotipo' : 'Banner'} da empresa atualizado com sucesso!`);
+  };
+  reader.readAsDataURL(file);
+}
+
+function carregarCatalogoPadraoSegmento(segmento) {
+  const nomeSegmento = segmento === 'moveis' ? 'Móveis Projetados' : 'Vidraçaria & Esquadrias';
+  if (!confirm(`Deseja substituir o catálogo atual pelo catálogo padrão de "${nomeSegmento}"?`)) return;
+
+  produtos = (segmento === 'moveis') ? PRODUTOS_PADRAO_MOVEIS : PRODUTOS_PADRAO;
+  save(K.products, produtos);
+  updateDatalistProdutos();
+  renderProdutos();
+  alert(`✅ Catálogo de ${nomeSegmento} carregado com sucesso! Foram adicionados ${produtos.length} itens.`);
+}
+
+function abrirModalNovaLicenca() {
+  const nome = prompt('Digite o Nome Fantasia da nova empresa / licença: (Ex: SD Marmoraria)');
+  if (!nome || !nome.trim()) return;
+
+  const idNovo = 'empresa_' + Date.now();
+  const segmento = prompt('Digite o Segmento da empresa: (Ex: Mármores, Granitos & Quartzo)') || 'Serviços Especializados';
+
+  const lista = obterLicencas();
+  const nova = {
+    id: idNovo,
+    nome: nome.trim(),
+    segmento: segmento.trim(),
+    slogan: 'Atendimento de Excelência & Qualidade Sob Medida',
+    telefone: '(85) 99611-9824',
+    cidade: 'Itaitinga - CE',
+    cnpj: '',
+    pix: '85996119824',
+    chaveLicenca: 'SD-' + Math.random().toString(36).substring(2, 7).toUpperCase() + '-VIP',
+    logo: 'logo.jpg',
+    banner: 'banner.jpg',
+    tipoContrato: 'geral'
+  };
+
+  lista.push(nova);
+  salvarLicencas(lista);
+  ativarLicenca(idNovo, false);
+}
 
 // ══════════════════════════════════════════════
 //  AUTH
@@ -1590,7 +2097,7 @@ function getUser() {
 //  TABS
 // ══════════════════════════════════════════════
 function goTab(t) {
-  ['orcamento','historico','produtos','clientes','ponto','contratos','usuarios'].forEach(p => {
+  ['orcamento','historico','produtos','clientes','ponto','contratos','usuarios','licenca'].forEach(p => {
     const pan = document.getElementById('panel-'+p);
     if (pan) pan.classList.toggle('active', p===t);
     const tab = document.getElementById('tab-'+p);
@@ -1602,6 +2109,7 @@ function goTab(t) {
   if (t==='ponto')     { renderPontoView(); }
   if (t==='contratos') { renderHist(); renderSelectContratos(); carregarListaContratos(); sincronizarStatusContratos(); }
   if (t==='usuarios')  renderUsuarios();
+  if (t==='licenca')   renderPainelLicenca();
 }
 
 // ══════════════════════════════════════════════
@@ -3358,6 +3866,7 @@ function renderSelectContratos() {
 }
 
 function montarTextoContrato(d) {
+  const lic = obterLicencaAtiva();
   const hoje = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
   const endCliente = [d.end, d.num, d.apto, d.bairro].filter(Boolean).join(', ');
   const itensStr = (d.itens || []).map((it, i) => {
@@ -3368,17 +3877,21 @@ function montarTextoContrato(d) {
     return `  ${i + 1}. ${it.desc}${detalhe} - Qtd: ${it.qtd} - Total: ${it.total}`;
   }).join('\n') || '  (itens não especificados)';
 
+  const ehMoveis = (lic.tipoContrato === 'moveis' || (lic.segmento && lic.segmento.toLowerCase().includes('móveis')));
+  const ramoDesc = ehMoveis ? 'marcenaria sob medida e móveis planejados' : 'vidraçaria, esquadrias e vidros temperados';
+
   return `CONTRATO DE PRESTAÇÃO DE SERVIÇOS
 N° ${d.numero}
-Itaitinga - CE, ${hoje}
+${lic.cidade || 'Itaitinga - CE'}, ${hoje}
 
 ══════════════════════════════════════════════════════════════
 
 CONTRATADA:
-Razão Social.....: SD Vidros
-WhatsApp.........: (85) 99611-9824
-Instagram........: @sdvidros
-Cidade...........: Itaitinga - CE
+Razão Social.....: ${lic.nome || 'SD Vidros'}
+Segmento.........: ${lic.segmento || 'Alumínio & Vidraçaria'}
+WhatsApp.........: ${lic.telefone || '(85) 99611-9824'}
+Cidade...........: ${lic.cidade || 'Itaitinga - CE'}
+${lic.cnpj ? 'CNPJ.............: ' + lic.cnpj + '\n' : ''}Chave Licença....: ${lic.chaveLicenca || 'OFICIAL-VIP'}
 
 CONTRATANTE (CLIENTE):
 Nome.............: ${d.nome || 'Não informado'}
@@ -3390,8 +3903,8 @@ ${d.resp ? 'Responsável......: ' + d.resp : ''}
 
 CLÁUSULA 1ª – DO OBJETO
 
-A CONTRATADA obriga-se a fornecer e instalar ao CONTRATANTE os seguintes
-serviços de vidraçaria e esquadrias:
+A CONTRATADA obriga-se a fornecer, produzir e instalar ao CONTRATANTE os seguintes
+serviços de ${ramoDesc}:
 
 ${itensStr}
 
@@ -3404,7 +3917,7 @@ Forma de Pagamento: ${d.forma || 'À vista'}
 ${d.obs ? '\nObservações: ' + d.obs : ''}
 
 A CONTRATANTE efetuará o pagamento conforme a forma descrita acima.
-Chave Pix para pagamento: (85) 99760-2237
+Chave Pix para pagamento: ${lic.pix || '(85) 99611-9824'}
 
 ══════════════════════════════════════════════════════════════
 
@@ -3419,7 +3932,7 @@ todos os detalhes técnicos do projeto.
 CLÁUSULA 4ª – DA GARANTIA
 
 A CONTRATADA oferece garantia de ${d.garantia || '1 (um) ano'} contra defeitos de
-fabricação e instalação, excluindo danos causados por mau uso, vandalismo,
+fabricação e montagem, excluindo danos causados por mau uso, vandalismo,
 acidentes ou fenômenos naturais.
 
 ══════════════════════════════════════════════════════════════
@@ -3431,12 +3944,12 @@ CLÁUSULA 5ª – DAS OBRIGAÇÕES DAS PARTES
 
 ══════════════════════════════════════════════════════════════
 
-Itaitinga - CE, ${hoje}
+${lic.cidade || 'Itaitinga - CE'}, ${hoje}
 
 
 _________________________________________________
-CONTRATADA: SD Vidros
-WhatsApp: (85) 99611-9824
+CONTRATADA: ${lic.nome || 'SD Vidros'}
+WhatsApp: ${lic.telefone || '(85) 99611-9824'}
 
 
 _________________________________________________
@@ -4702,10 +5215,14 @@ window.addEventListener('DOMContentLoaded', function() {
   const users = load(K.users);
   if (!users.length) save(K.users,[{id:1,username:'admin',nome:'Administrador',senha:'admin123',ativo:true,role:'admin'}]);
 
+  // Inicializa Licença e Marca Ativa
+  const licAtiva = obterLicencaAtiva();
+  aplicarLicencaVisual(licAtiva);
+
   // Load catalog products or initialize defaults
   produtos = load(K.products);
   if (!produtos || !produtos.length) {
-    produtos = PRODUTOS_PADRAO;
+    produtos = (licAtiva.tipoContrato === 'moveis' || licAtiva.id === 'sdmoveis') ? PRODUTOS_PADRAO_MOVEIS : PRODUTOS_PADRAO;
     save(K.products, produtos);
   }
 

@@ -1370,10 +1370,10 @@
     <!-- ══════════════════════════════════════════════ -->
     <div id="view-login" class="login-container">
       <div class="login-logo">
-        <img src="logo.jpg" alt="SD Vidros" onerror="this.src='icon-192.png'">
+        <img id="portal-login-logo" src="logo.jpg" alt="Logo" onerror="this.src='icon-192.png'">
       </div>
       <h2 class="login-title">Área do Cliente</h2>
-      <p class="login-sub">SD Vidros · Acompanhamento de Serviços</p>
+      <p class="login-sub" id="portal-login-sub">SD Vidros · Acompanhamento de Serviços</p>
 
       <div class="field-box">
         <label>WhatsApp / Telefone ou CPF</label>
@@ -1413,7 +1413,7 @@
       <div id="login-feedback" style="margin-top: 12px; font-size: 13px; font-weight: 700;"></div>
 
       <div class="login-info-box">
-        💡 <strong>Primeiro acesso?</strong> Caso ainda não possua uma senha cadastrada, utilize os <strong>4 últimos dígitos do seu WhatsApp</strong> ou entre em contato pelo suporte: <strong style="color:var(--gold-light);">(85) 99611-9824</strong>.
+        💡 <strong>Primeiro acesso?</strong> Caso ainda não possua uma senha cadastrada, utilize os <strong>4 últimos dígitos do seu WhatsApp</strong> ou entre em contato pelo suporte: <strong style="color:var(--gold-light);" id="portal-support-tel">(85) 99611-9824</strong>.
       </div>
     </div>
 
@@ -1434,7 +1434,7 @@
               🚪 Sair
             </button>
           </div>
-          <img src="banner.jpg" alt="SD Vidros – Alumínio e Vidraçaria | Box de vidro, Espelhos, Janelas, Fechamento de área, Corrimão. Itaitinga - CE">
+          <img id="portal-banner-img" src="banner.jpg" alt="Showroom e Projetos Sob Medida">
         </div>
       </div>
 
@@ -1595,7 +1595,7 @@
             <div class="chat-header-info">
               <div class="chat-avatar">💎</div>
               <div>
-                <div class="chat-header-name">Suporte & Técnico SD Vidros</div>
+                <div class="chat-header-name" id="portal-chat-company-title">Suporte & Técnico SD Vidros</div>
                 <div class="chat-status-text">
                   <span style="width: 7px; height: 7px; border-radius: 50%; background: #4ade80; display: inline-block;"></span>
                   Online para atendimento
@@ -1686,19 +1686,19 @@
             </div>
             <div>
               <div style="font-size:15px;font-weight:800;color:#fff;">Pagamento Rápido via PIX</div>
-              <div style="font-size:11.5px;color:#86efac;">SD Vidros · Chave Oficial Telefone/WhatsApp</div>
+              <div style="font-size:11.5px;color:#86efac;" id="pix-company-sub">SD Vidros · Chave Oficial Telefone/WhatsApp</div>
             </div>
           </div>
 
           <p style="font-size:12.5px;color:var(--text2);line-height:1.5;">
-            Pague sua entrada ou saldo final diretamente pelo PIX. A chave é o telefone oficial da nossa vidraçaria:
+            Pague sua entrada ou saldo final diretamente pelo PIX. A chave é o telefone oficial da nossa empresa:
           </p>
 
           <div class="pix-key-wrap">
             <div>
               <div style="font-size:10.5px;color:var(--muted);text-transform:uppercase;font-weight:700;">Chave PIX (Telefone):</div>
               <div class="pix-key-val" id="pix-chave-texto">(85) 99611-9824</div>
-              <div style="font-size:10.5px;color:var(--muted);margin-top:2px;">Favorecido: SD Vidros - Itaitinga/CE</div>
+              <div style="font-size:10.5px;color:var(--muted);margin-top:2px;" id="pix-favorecido-text">Favorecido: SD Vidros - Itaitinga/CE</div>
             </div>
             <button type="button" class="btn-copiar-pix" onclick="copiarChavePix()">
               <span id="btn-copiar-txt">📋 Copiar Chave PIX</span>
@@ -1889,9 +1889,101 @@
     }
 
     // ══════════════════════════════════════════════
+    //  MULTI-LICENÇA & MARCA ATIVA (SD VIDROS / SD MÓVEIS / WHITE-LABEL)
+    // ══════════════════════════════════════════════
+    function obterLicencaAtivaCliente() {
+      try {
+        const lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
+        const idAtivo = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+        if (Array.isArray(lista) && lista.length) {
+          const encontrada = lista.find(l => l.id === idAtivo);
+          if (encontrada) return encontrada;
+        }
+      } catch(_) {}
+      return {
+        id: 'sdvidros',
+        nome: 'SD Vidros',
+        segmento: 'Alumínio, Vidros & Esquadrias',
+        slogan: 'Box, Espelhos, Portas, Janelas & Guarda-Corpo',
+        telefone: '(85) 99611-9824',
+        cidade: 'Itaitinga - CE',
+        pix: '85996119824',
+        logo: 'logo.jpg',
+        banner: 'banner.jpg',
+        tipoContrato: 'vidros'
+      };
+    }
+
+    function aplicarLicencaAtivaCliente() {
+      const lic = obterLicencaAtivaCliente();
+
+      // 1. Título da página
+      document.title = `${lic.nome || 'SD Vidros'} – Área Exclusiva do Cliente`;
+
+      // 2. Logo da tela de login
+      const logoEl = document.getElementById('portal-login-logo');
+      if (logoEl && lic.logo) {
+        logoEl.src = lic.logo;
+        logoEl.alt = lic.nome || 'SD Vidros';
+      }
+
+      // 3. Subtítulo de login
+      const subEl = document.getElementById('portal-login-sub');
+      if (subEl) {
+        subEl.textContent = `${lic.nome || 'SD Vidros'} · ${lic.slogan || 'Acompanhamento de Serviços'}`;
+      }
+
+      // 4. Banner principal
+      const bannerEl = document.getElementById('portal-banner-img');
+      if (bannerEl && lic.banner) {
+        bannerEl.src = lic.banner;
+        bannerEl.alt = `${lic.nome} – ${lic.segmento}`;
+      }
+
+      // 5. Suporte Telefone no Login
+      const supTel = document.getElementById('portal-support-tel');
+      if (supTel && lic.telefone) {
+        supTel.textContent = lic.telefone;
+      }
+
+      // 6. Título do Chat
+      const chatTitle = document.getElementById('portal-chat-company-title');
+      if (chatTitle) {
+        chatTitle.textContent = `Suporte & Técnico ${lic.nome || 'SD Vidros'}`;
+      }
+
+      // 7. PIX
+      const pixSub = document.getElementById('pix-company-sub');
+      if (pixSub) {
+        pixSub.textContent = `${lic.nome || 'SD Vidros'} · Chave Oficial Telefone/WhatsApp`;
+      }
+      const pixChave = document.getElementById('pix-chave-texto');
+      if (pixChave && lic.pix) {
+        pixChave.textContent = lic.pix;
+      }
+      const pixFav = document.getElementById('pix-favorecido-text');
+      if (pixFav) {
+        pixFav.textContent = `Favorecido: ${lic.nome || 'SD Vidros'} - ${lic.cidade || 'Itaitinga/CE'}`;
+      }
+
+      // 8. Links WhatsApp
+      if (lic.telefone) {
+        const rawTel = lic.telefone.replace(/\D/g, '');
+        const linksZap = document.querySelectorAll('a[href*="wa.me"]');
+        linksZap.forEach(a => {
+          try {
+            const url = new URL(a.href);
+            a.href = `https://wa.me/${rawTel || '5585996119824'}${url.search}`;
+          } catch(_) {}
+        });
+      }
+    }
+
+    // ══════════════════════════════════════════════
     //  AUTENTICAÇÃO & INICIALIZAÇÃO
     // ══════════════════════════════════════════════
     window.addEventListener('DOMContentLoaded', () => {
+      aplicarLicencaAtivaCliente();
       solicitarPermissaoNotificacao();
       checarParametrosUrl();
       verificarSuporteBiometria();
@@ -2903,12 +2995,16 @@
         return;
       }
 
+      const lic = obterLicencaAtivaCliente();
+      const ehMoveis = (lic.tipoContrato === 'moveis' || (lic.segmento && lic.segmento.toLowerCase().includes('móveis')));
+      const descObjeto = ehMoveis ? 'produzir, beneficiar e instalar os móveis sob medida e itens de marcenaria' : 'fabricar, beneficiar e instalar os materiais e vidros temperados';
+
       janela.document.write(`
         <!DOCTYPE html>
         <html lang="pt-BR">
         <head>
           <meta charset="utf-8">
-          <title>Contrato Autorizado SD Vidros - O.S. ${clienteSessao.os}</title>
+          <title>Contrato Autorizado ${lic.nome} - O.S. ${clienteSessao.os}</title>
           <style>
             body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: #222; margin: 30px; line-height: 1.5; font-size: 13px; }
             .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #C9A84C; padding-bottom: 15px; margin-bottom: 20px; }
@@ -2937,9 +3033,9 @@
 
           <div class="header">
             <div>
-              <div class="logo-title">SD VIDROS</div>
-              <div class="logo-sub">Vidraçaria & Esquadrias de Alumínio · Especialista em Vidros Temperados</div>
-              <div style="font-size: 11px; color: #555; margin-top: 3px;">Itaitinga - Ceará · WhatsApp / Telefone: (85) 99611-9824</div>
+              <div class="logo-title">${lic.nome.toUpperCase()}</div>
+              <div class="logo-sub">${lic.segmento} · ${lic.slogan || ''}</div>
+              <div style="font-size: 11px; color: #555; margin-top: 3px;">${lic.cidade} · WhatsApp / Telefone: ${lic.telefone}</div>
             </div>
             <div style="text-align: right;">
               <div style="font-size: 16px; font-weight: 900;">ORDEM DE SERVIÇO ${clienteSessao.os}</div>
@@ -2950,7 +3046,7 @@
           <div class="selo">
             <strong style="color: #047857; font-size: 13px;">✓ CONTRATO AUTORIZADO DIGITALMENTE PELO CLIENTE</strong><br>
             <span style="font-size: 12px; color: #374151;">
-              Signatário Responsável: <strong>${signatario}</strong> · Autenticado via <strong>Portal Oficial SD Vidros / WhatsApp</strong><br>
+              Signatário Responsável: <strong>${signatario}</strong> · Autenticado via <strong>Portal Oficial ${lic.nome} / WhatsApp</strong><br>
               Validação de segurança registrada nos servidores em: ${dataContrato}
             </span>
           </div>
@@ -2958,9 +3054,9 @@
           <div class="partes">
             <div class="parte-box">
               <strong style="text-transform: uppercase; color: #C9A84C;">Contratada (Fornecedora)</strong><br>
-              <strong>SD VIDROS</strong><br>
-              Vidraçaria e Esquadrias de Alumínio<br>
-              Itaitinga - CE · Telefone: (85) 99611-9824
+              <strong>${lic.nome.toUpperCase()}</strong><br>
+              ${lic.segmento}<br>
+              ${lic.cidade} · Telefone: ${lic.telefone}
             </div>
             <div class="parte-box">
               <strong style="text-transform: uppercase; color: #C9A84C;">Contratante (Cliente)</strong><br>
@@ -2997,7 +3093,7 @@
           </div>
 
           <div class="clausula">
-            <strong>1. DO OBJETO:</strong> A CONTRATADA obriga-se a fabricar, beneficiar e instalar os materiais e vidros temperados acima discriminados, observando as normas ABNT NBR 14698 e NBR 7199.
+            <strong>1. DO OBJETO:</strong> A CONTRATADA obriga-se a ${descObjeto} acima discriminados, em estrita conformidade com os padrões técnicos de qualidade.
           </div>
           <div class="clausula">
             <strong>2. DO PREÇO E PAGAMENTO:</strong> O valor total contratado e as condições de pagamento pactuadas vinculam a entrega dos materiais. A quitação final dar-se-á na entrega e conclusão da montagem.
@@ -3006,12 +3102,12 @@
             <strong>3. DO PRAZO:</strong> A montagem seguirá o cronograma técnico informado pela CONTRATADA no local da instalação.
           </div>
           <div class="clausula">
-            <strong>4. DA GARANTIA (1 ANO):</strong> A SD Vidros concede garantia integral de 1 (um) ano contra defeitos de fixação, regulagem e qualidade dos vidros e acessórios, a contar da entrega.
+            <strong>4. DA GARANTIA (1 ANO):</strong> A ${lic.nome} concede garantia integral de 1 (um) ano contra defeitos de fabricação, montagem e fixação, a contar da entrega.
           </div>
 
           <div class="assinaturas">
             <div class="linha-ass">
-              <strong>SD VIDROS</strong><br>
+              <strong>${lic.nome.toUpperCase()}</strong><br>
               Contratada Oficial
             </div>
             <div class="linha-ass">
@@ -3029,7 +3125,8 @@
     }
 
     function copiarChavePix() {
-      const chave = '85996119824';
+      const lic = obterLicencaAtivaCliente();
+      const chave = lic.pix || '85996119824';
       navigator.clipboard.writeText(chave).then(() => {
         const btnTxt = document.getElementById('btn-copiar-txt');
         if (btnTxt) btnTxt.textContent = '✅ Chave PIX Copiada!';
