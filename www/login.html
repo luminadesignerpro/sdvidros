@@ -384,6 +384,43 @@
       overflow-y: auto;
     }
 
+    /* BOTÃO DO CADEADO (SÓ O DESENHO DO CADEADO) */
+    .btn-cadeado {
+      flex: 0 0 54px !important;
+      padding: 9px 0 !important;
+      border-radius: 12px !important;
+      border: 1.5px solid rgba(201,168,76,0.3) !important;
+      background: rgba(255,255,255,0.04) !important;
+      color: var(--gold-light) !important;
+      font-size: 20px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      cursor: pointer !important;
+      transition: all 0.22s ease !important;
+    }
+    .btn-cadeado:hover {
+      background: rgba(201,168,76,0.18) !important;
+      border-color: var(--gold) !important;
+      transform: scale(1.06) !important;
+      box-shadow: 0 0 16px rgba(201,168,76,0.35) !important;
+    }
+
+    /* CARDS DE BANNERS GERADOS POR IA */
+    .ai-banner-card {
+      background: #0d0d16;
+      border: 1.5px solid rgba(201,168,76,0.22);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: all 0.22s ease;
+      cursor: pointer;
+    }
+    .ai-banner-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(201,168,76,0.25);
+    }
+
     @media(max-width: 480px) { .login-box { padding: 30px 20px; border-radius: 22px; } .brand-name { font-size: 25px; } }
   </style>
 </head>
@@ -399,30 +436,20 @@
     <div class="gold-divider"></div>
   </div>
 
-  <!-- NAVEGAÇÃO ENTRE LOGIN E ADICIONAR/CONFIGURAR MARCAS (SEGUNDA IMAGEM) -->
-  <div class="top-nav-pills">
-    <button type="button" id="tab-btn-login" class="top-nav-pill active" onclick="mostrarAbaPrincipal('login')">
+  <!-- NAVEGAÇÃO ENTRE LOGIN E CADEADO DE ACESSO (TERCEIRA IMAGEM: SÓ O DESENHO DO CADEADO) -->
+  <div class="top-nav-pills" style="display:flex;align-items:center;gap:8px;">
+    <button type="button" id="tab-btn-login" class="top-nav-pill active" onclick="mostrarAbaPrincipal('login')" style="flex:1;">
       🔑 Login
     </button>
-    <button type="button" id="tab-btn-adicionar" class="top-nav-pill" onclick="solicitarSenhaGestaoMarcas()">
-      <span>➕ Mudar Logo & Marca</span> <span style="font-size:11px;">🔒</span>
+    <button type="button" id="tab-btn-cadeado" class="btn-cadeado" onclick="abrirModalAcessoCadeado()" title="Acesso com Cadeado / Alternar Empresa">
+      🔒
     </button>
   </div>
 
   <!-- ══════════════════════════════════════════════ -->
-  <!-- ABA 1: TELA DE LOGIN PRINCIPAL -->
+  <!-- ABA 1: TELA DE LOGIN PRINCIPAL (SEM MOSTRAR OUTRAS EMPRESAS) -->
   <!-- ══════════════════════════════════════════════ -->
   <div id="view-login-principal">
-    <!-- SELETOR DE LICENÇA / EMPRESA NA PÁGINA INICIAL -->
-    <div class="empresa-switch-wrap">
-      <div class="empresa-switch-label">
-        <span>🏢</span> Escolha a Empresa para Acessar:
-      </div>
-      <div class="empresa-switch-grid" id="empresa-switch-grid-container">
-        <!-- Renderizado dinamicamente via JS -->
-      </div>
-    </div>
-
     <div class="form-title">Entre com suas credenciais de acesso</div>
 
     <!-- USUÁRIO -->
@@ -505,13 +532,13 @@
   </div>
 
   <!-- ══════════════════════════════════════════════ -->
-  <!-- ABA 2: PAINEL DE GESTÃO DE MARCAS / LOGO / ADICIONAR (PROTEGIDO POR SENHA) -->
+  <!-- ABA 2: PAINEL DE GESTÃO DE MARCAS / LOGO / BANNER IA (ADMINISTRADOR) -->
   <!-- ══════════════════════════════════════════════ -->
   <div id="view-gestao-marcas" style="display:none;">
     <div style="text-align:center;margin-bottom:18px;">
-      <div style="font-size:22px;margin-bottom:4px;">🏢 ⚙️</div>
+      <div style="font-size:24px;margin-bottom:4px;">🏢 ⚙️</div>
       <h3 style="font-size:16px;font-weight:900;color:var(--gold-light);">Personalizar Logo & Empresa</h3>
-      <p style="font-size:11.5px;color:var(--muted);margin-top:2px;">Mude a logo, banner, adicione empresas ou altere dados cadastrais</p>
+      <p style="font-size:11.5px;color:var(--muted);margin-top:2px;">Mude a logo, escolha banner com IA ou cadastre novas empresas</p>
     </div>
 
     <!-- SELETOR DE QUAL EMPRESA MODIFICAR -->
@@ -544,19 +571,24 @@
       </div>
     </div>
 
-    <!-- UPLOAD DE BANNER -->
+    <!-- UPLOAD / ESCOLHA DE BANNER COM IA -->
     <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(201,168,76,0.2);border-radius:14px;padding:14px;margin-bottom:14px;">
       <label style="font-size:10.5px;font-weight:800;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:10px;">
         Banner do Topo (Showroom)
       </label>
       <div style="display:flex;align-items:center;gap:14px;">
-        <img id="preview-banner-gestao" src="banner.jpg" style="width:100px;height:52px;border-radius:10px;border:1.5px solid var(--gold);object-fit:cover;background:#000;" alt="Banner Preview">
+        <img id="preview-banner-gestao" src="banner.jpg" style="width:105px;height:54px;border-radius:10px;border:1.5px solid var(--gold);object-fit:cover;background:#000;" alt="Banner Preview">
         <div style="flex:1;">
           <input type="file" id="input-upload-banner-gestao" accept="image/*" style="display:none;" onchange="processarUploadArquivo(event, 'banner')">
-          <button type="button" onclick="document.getElementById('input-upload-banner-gestao').click()" style="width:100%;padding:10px 12px;background:#181824;border:1px solid var(--gold);border-radius:10px;color:var(--gold-light);font-weight:700;font-size:12px;cursor:pointer;font-family:var(--font);">
-            📁 Escolher Novo Banner
-          </button>
-          <div style="font-size:10px;color:var(--muted);margin-top:6px;">Banner fotográfico do showroom</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <button type="button" onclick="abrirModalBannerIA()" style="width:100%;padding:10px 12px;background:linear-gradient(135deg,rgba(201,168,76,0.32),rgba(201,168,76,0.12));border:1.5px solid var(--gold);border-radius:10px;color:var(--gold-light);font-weight:800;font-size:12px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 0 16px rgba(201,168,76,0.22);">
+              <span>✨ Escolher com IA (Novo Banner)</span>
+            </button>
+            <button type="button" onclick="document.getElementById('input-upload-banner-gestao').click()" style="width:100%;padding:8px 12px;background:#181824;border:1px solid rgba(201,168,76,0.35);border-radius:10px;color:#cbd5e1;font-weight:600;font-size:11.5px;cursor:pointer;font-family:var(--font);">
+              📁 Escolher do Celular/PC
+            </button>
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:6px;">Showroom de vidro ou móveis gerados por IA</div>
         </div>
       </div>
     </div>
@@ -611,6 +643,213 @@
 </div>
 
 <!-- ══════════════════════════════════════════════ -->
+<!-- MODAL: ACESSO COM CADEADO (DIGITAR NOME DA EMPRESA + LOGIN / BIOMETRIA) -->
+<!-- ══════════════════════════════════════════════ -->
+<div id="modal-acesso-cadeado" class="modal-overlay">
+  <div class="modal-card" style="max-width:400px;text-align:center;">
+    <div style="width:68px;height:68px;margin:0 auto 12px;background:rgba(201,168,76,0.12);border:2px solid var(--gold);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 0 25px rgba(201,168,76,0.25);">
+      🔒
+    </div>
+    <h3 style="font-size:18px;font-weight:900;color:var(--gold-light);margin-bottom:4px;">Acesso com Cadeado</h3>
+    <p style="font-size:12px;color:rgba(240,236,228,0.75);margin-bottom:18px;line-height:1.4;">
+      Digite o nome da empresa e acesse com login ou biometria:
+    </p>
+
+    <!-- DIGITAR NOME DA EMPRESA -->
+    <div class="field" style="text-align:left;margin-bottom:12px;">
+      <label>NOME DA EMPRESA</label>
+      <div class="input-wrap">
+        <input id="cad-empresa-nome" type="text" placeholder="Ex: SD Vidros ou SD Móveis" autocomplete="off">
+        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+      </div>
+    </div>
+
+    <!-- USUÁRIO -->
+    <div class="field" style="text-align:left;margin-bottom:12px;">
+      <label>USUÁRIO</label>
+      <div class="input-wrap">
+        <input id="cad-user" type="text" placeholder="seu usuário (ex: admin)" autocomplete="username">
+        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </div>
+    </div>
+
+    <!-- SENHA -->
+    <div class="field" style="text-align:left;margin-bottom:16px;">
+      <label>SENHA</label>
+      <div class="input-wrap">
+        <input id="cad-senha" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') loginPeloCadeado();">
+        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+    </div>
+
+    <div id="cad-msg" style="margin-bottom:12px;"></div>
+
+    <!-- BOTÃO ENTRAR -->
+    <button class="btn-login" id="btn-login-cad" onclick="loginPeloCadeado()" style="margin-bottom:10px;">
+      <span>Entrar no Sistema</span>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </button>
+
+    <!-- BOTÃO BIOMETRIA DENTRO DO CADEADO -->
+    <button class="btn-bio" id="btn-bio-cad" type="button" onclick="loginBiometriaPeloCadeado()" style="margin-top:0;margin-bottom:16px;">
+      <div class="bio-icon-wrap">
+        <svg class="bio-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"></path>
+          <path d="M14 13.12c0 2.38 0 6.38-1 8.88"></path>
+          <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"></path>
+          <path d="M2 12a10 10 0 0 1 18-6"></path>
+          <path d="M2 16h.01"></path>
+          <path d="M21.8 16c.2-2 .131-5.354 0-6"></path>
+          <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"></path>
+          <path d="M8.65 22c.21-.66.45-1.32.57-2"></path>
+          <path d="M9 6.8a6 6 0 0 1 9 5.2v2"></path>
+        </svg>
+      </div>
+      <span id="txt-bio-cad">Acessar com Biometria / Digital</span>
+    </button>
+
+    <!-- OPÇÕES INFERIORES -->
+    <div style="border-top:1px dashed rgba(201,168,76,0.25);padding-top:14px;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+      <button type="button" onclick="abrirGestaoPeloCadeado()" style="background:none;border:none;color:var(--gold-light);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;">
+        ⚙️ Mudar Logo & Banners com IA
+      </button>
+      <button type="button" onclick="fecharModalAcessoCadeado()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;">
+        Fechar ✕
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- MODAL: ESCOLHER NOVO BANNER COM IA -->
+<!-- ══════════════════════════════════════════════ -->
+<div id="modal-banner-ia" class="modal-overlay">
+  <div class="modal-card" style="max-width:480px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div>
+        <h3 style="font-size:17px;font-weight:900;color:var(--gold-light);display:flex;align-items:center;gap:6px;">
+          <span>✨ Escolher Banner com IA</span>
+        </h3>
+        <p style="font-size:11.5px;color:var(--muted);margin-top:2px;">
+          Banners hiper-realistas em 4K gerados por IA para seu showroom
+        </p>
+      </div>
+      <button type="button" onclick="fecharModalBannerIA()" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;padding:4px;">✕</button>
+    </div>
+
+    <!-- CARDS DE BANNERS IA DISPONÍVEIS -->
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
+      
+      <!-- Opção IA 1: Vidros & Penthouse -->
+      <div class="ai-banner-card" onclick="aplicarBannerIA('banner_ia_vidros.jpg', 'Showroom IA Vidros (Penthouse & Dourado)')">
+        <div style="width:100%;height:100px;overflow:hidden;position:relative;">
+          <img src="banner_ia_vidros.jpg" style="width:100%;height:100%;object-fit:cover;" alt="Banner IA Vidros">
+          <span style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.8);border:1px solid var(--gold);color:var(--gold-light);font-size:9.5px;font-weight:900;padding:2px 8px;border-radius:999px;">
+            💎 IA SHOWROOM VIDROS
+          </span>
+        </div>
+        <div style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div>
+            <div style="font-size:13px;font-weight:800;color:#fff;">Showroom Penthouse & Esquadrias Douradas</div>
+            <div style="font-size:10.5px;color:var(--muted);">Box temperado de luxo, espelhos LED e vista panorâmica</div>
+          </div>
+          <button type="button" style="padding:6px 12px;background:var(--gold);color:#000;border:none;border-radius:8px;font-weight:800;font-size:11px;white-space:nowrap;cursor:pointer;">
+            Aplicar ✨
+          </button>
+        </div>
+      </div>
+
+      <!-- Opção IA 2: Móveis Planejados & Marcenaria Nobre -->
+      <div class="ai-banner-card" onclick="aplicarBannerIA('banner_ia_moveis.jpg', 'Showroom IA Móveis Planejados')">
+        <div style="width:100%;height:100px;overflow:hidden;position:relative;">
+          <img src="banner_ia_moveis.jpg" style="width:100%;height:100%;object-fit:cover;" alt="Banner IA Móveis">
+          <span style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.8);border:1px solid var(--gold);color:var(--gold-light);font-size:9.5px;font-weight:900;padding:2px 8px;border-radius:999px;">
+            🛋️ IA ALTA MARCENARIA
+          </span>
+        </div>
+        <div style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div>
+            <div style="font-size:13px;font-weight:800;color:#fff;">Cozinha em Mármore & Closet Integrado</div>
+            <div style="font-size:10.5px;color:var(--muted);">Ilha de mármore italiano, marcenaria ripada e portas bronze</div>
+          </div>
+          <button type="button" style="padding:6px 12px;background:var(--gold);color:#000;border:none;border-radius:8px;font-weight:800;font-size:11px;white-space:nowrap;cursor:pointer;">
+            Aplicar ✨
+          </button>
+        </div>
+      </div>
+
+      <!-- Opção IA 3: NewBox Clássico -->
+      <div class="ai-banner-card" onclick="aplicarBannerIA('banner.jpg', 'Showroom SD Vidros Original')">
+        <div style="width:100%;height:100px;overflow:hidden;position:relative;">
+          <img src="banner.jpg" style="width:100%;height:100%;object-fit:cover;" alt="Banner Original">
+          <span style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.8);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:9.5px;font-weight:900;padding:2px 8px;border-radius:999px;">
+            🏢 ORIGINAL VIDRAÇARIA
+          </span>
+        </div>
+        <div style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div>
+            <div style="font-size:13px;font-weight:800;color:#fff;">Showroom SD Vidros & Esquadrias</div>
+            <div style="font-size:10.5px;color:var(--muted);">Banner original com catálogo visual de esquadrias</div>
+          </div>
+          <button type="button" style="padding:6px 12px;background:#1e1e2d;color:#fff;border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-weight:700;font-size:11px;white-space:nowrap;cursor:pointer;">
+            Aplicar
+          </button>
+        </div>
+      </div>
+
+      <!-- Opção IA 4: Móveis Sob Medida -->
+      <div class="ai-banner-card" onclick="aplicarBannerIA('banner_moveis.jpg', 'Showroom SD Móveis')">
+        <div style="width:100%;height:100px;overflow:hidden;position:relative;">
+          <img src="banner_moveis.jpg" style="width:100%;height:100%;object-fit:cover;" alt="Banner Móveis">
+          <span style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.8);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:9.5px;font-weight:900;padding:2px 8px;border-radius:999px;">
+            🛋️ ORIGINAL MÓVEIS
+          </span>
+        </div>
+        <div style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div>
+            <div style="font-size:13px;font-weight:800;color:#fff;">Showroom SD Móveis Projetados</div>
+            <div style="font-size:10.5px;color:var(--muted);">Living contemporâneo sob medida com painéis e iluminação</div>
+          </div>
+          <button type="button" style="padding:6px 12px;background:#1e1e2d;color:#fff;border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-weight:700;font-size:11px;white-space:nowrap;cursor:pointer;">
+            Aplicar
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- GERADOR DE ESTILO PERSONALIZADO COM IA -->
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.25);border-radius:14px;padding:14px;margin-bottom:14px;">
+      <label style="font-size:11px;font-weight:800;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:8px;">
+        Descreva o Estilo do Showroom para a IA
+      </label>
+      <div style="display:flex;gap:8px;">
+        <input id="prompt-ia-banner" type="text" placeholder="Ex: Box dourado, espelhos LED, esquadrias pretas..." style="flex:1;padding:10px 12px;background:#080811;border:1px solid rgba(201,168,76,0.3);border-radius:10px;color:#fff;font-size:12px;font-family:var(--font);">
+        <button type="button" onclick="gerarBannerEstiloIA()" style="padding:10px 14px;background:linear-gradient(135deg,var(--gold-light),var(--gold));border:none;border-radius:10px;color:#000;font-weight:900;font-size:12px;cursor:pointer;white-space:nowrap;">
+          ✨ IA Gerar
+        </button>
+      </div>
+    </div>
+
+    <button type="button" onclick="fecharModalBannerIA()" style="width:100%;padding:12px;background:#181824;border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:#cbd5e1;font-weight:700;cursor:pointer;font-family:var(--font);">
+      Fechar
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
 <!-- MODAL: SENHA DE ACESSO À CONFIGURAÇÃO / MARCAS -->
 <!-- ══════════════════════════════════════════════ -->
 <div id="modal-senha-gestao" class="modal-overlay">
@@ -619,7 +858,7 @@
       <div style="font-size:36px;margin-bottom:6px;">🔒</div>
       <h3 style="font-size:18px;font-weight:900;color:var(--gold-light);">Acesso Administrativo</h3>
       <p style="font-size:12px;color:rgba(240,236,228,0.8);margin-top:6px;line-height:1.4;">
-        Digite a senha de administrador para entrar, mudar a logo, banner e modificar marcas:
+        Digite a senha de administrador para entrar, mudar a logo, banner IA e marcas:
       </p>
     </div>
 
@@ -925,16 +1164,15 @@
 
   function mostrarAbaPrincipal(aba) {
     const btnLogin = document.getElementById('tab-btn-login');
-    const btnAdicionar = document.getElementById('tab-btn-adicionar');
+    const btnCadeado = document.getElementById('tab-btn-cadeado');
     const viewLogin = document.getElementById('view-login-principal');
     const viewGestao = document.getElementById('view-gestao-marcas');
 
     if (aba === 'login') {
       if (btnLogin) btnLogin.classList.add('active');
-      if (btnAdicionar) btnAdicionar.classList.remove('active');
+      if (btnCadeado) btnCadeado.classList.remove('active');
       if (viewLogin) viewLogin.style.display = 'block';
       if (viewGestao) viewGestao.style.display = 'none';
-      renderEmpresasLogin();
       atualizarVisualEmpresaLogin();
     } else if (aba === 'adicionar') {
       if (sessionStorage.getItem('sdv_gestao_autenticada') !== 'true') {
@@ -942,7 +1180,7 @@
         return;
       }
       if (btnLogin) btnLogin.classList.remove('active');
-      if (btnAdicionar) btnAdicionar.classList.add('active');
+      if (btnCadeado) btnCadeado.classList.add('active');
       if (viewLogin) viewLogin.style.display = 'none';
       if (viewGestao) viewGestao.style.display = 'block';
       carregarPainelGestao();
@@ -1254,6 +1492,175 @@
     carregarPainelGestao();
     renderEmpresasLogin();
     atualizarVisualEmpresaLogin('sdvidros');
+  }
+
+  // ══════════════════════════════════════════════
+  //  ACESSO PELO CADEADO (DIGITAR EMPRESA + LOGIN / BIOMETRIA)
+  // ══════════════════════════════════════════════
+  function abrirModalAcessoCadeado() {
+    const modal = document.getElementById('modal-acesso-cadeado');
+    const msg = document.getElementById('cad-msg');
+    if (msg) msg.innerHTML = '';
+    const inpEmp = document.getElementById('cad-empresa-nome');
+    if (inpEmp) {
+      const ativaId = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+      const lista = obterLicencasLogin();
+      const emp = lista.find(e => e.id === ativaId);
+      inpEmp.value = emp ? emp.nome : '';
+    }
+    if (modal) {
+      modal.style.display = 'flex';
+      setTimeout(() => {
+        if (inpEmp) inpEmp.focus();
+      }, 150);
+    }
+  }
+
+  function fecharModalAcessoCadeado() {
+    const modal = document.getElementById('modal-acesso-cadeado');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function abrirGestaoPeloCadeado() {
+    fecharModalAcessoCadeado();
+    solicitarSenhaGestaoMarcas();
+  }
+
+  function loginPeloCadeado() {
+    const empNomeDigitado = (document.getElementById('cad-empresa-nome').value || '').trim();
+    const username = (document.getElementById('cad-user').value || '').trim().toLowerCase();
+    const senha = document.getElementById('cad-senha').value;
+    const msgEl = document.getElementById('cad-msg');
+    const btn = document.getElementById('btn-login-cad');
+
+    if (!empNomeDigitado) {
+      if (msgEl) msgEl.innerHTML = '<div class="msg err">Digite o nome da empresa.</div>';
+      return;
+    }
+    if (!username || !senha) {
+      if (msgEl) msgEl.innerHTML = '<div class="msg err">Digite seu usuário e senha.</div>';
+      return;
+    }
+
+    // Localiza empresa por nome
+    const lista = obterLicencasLogin();
+    const empEncontrada = lista.find(e => 
+      e.nome.toLowerCase() === empNomeDigitado.toLowerCase() ||
+      e.id.toLowerCase() === empNomeDigitado.toLowerCase() ||
+      e.nome.toLowerCase().includes(empNomeDigitado.toLowerCase())
+    );
+
+    let idEmpresaAtivar = 'sdvidros';
+    if (empEncontrada) {
+      idEmpresaAtivar = empEncontrada.id;
+    } else {
+      // Cadastra automaticamente a nova empresa com esse nome
+      idEmpresaAtivar = 'emp_' + Date.now();
+      lista.push({
+        id: idEmpresaAtivar,
+        nome: empNomeDigitado,
+        segmento: 'Empresa Cadastrada',
+        slogan: empNomeDigitado,
+        telefone: '(85) 99611-9824',
+        cidade: 'Itaitinga - CE',
+        cnpj: '',
+        pix: '85996119824',
+        chaveLicenca: 'LIC-' + Date.now(),
+        logo: 'logo.jpg',
+        banner: 'banner.jpg',
+        tipoContrato: 'vidros'
+      });
+      salvarLicencasLogin(lista);
+    }
+
+    localStorage.setItem('sdv_licenca_ativa', idEmpresaAtivar);
+    atualizarVisualEmpresaLogin(idEmpresaAtivar);
+
+    if (btn) { btn.disabled = true; btn.textContent = 'Verificando...'; }
+
+    setTimeout(async () => {
+      const users = getUsers();
+      const user = users.find(u => u.username === username && u.senha === senha && u.ativo);
+      if (user) {
+        if (msgEl) msgEl.innerHTML = '<div class="msg suc">✅ Acesso autorizado para ' + empNomeDigitado + '! Entrando...</div>';
+        await ativarBiometriaParaUsuario(user);
+        setTimeout(() => concluirLogin(user, false), 350);
+      } else {
+        if (btn) { btn.disabled = false; btn.textContent = 'Entrar no Sistema'; }
+        if (msgEl) msgEl.innerHTML = '<div class="msg err">❌ Usuário ou senha incorretos.</div>';
+      }
+    }, 350);
+  }
+
+  async function loginBiometriaPeloCadeado() {
+    const empNomeDigitado = (document.getElementById('cad-empresa-nome').value || '').trim();
+    if (empNomeDigitado) {
+      const lista = obterLicencasLogin();
+      const emp = lista.find(e => 
+        e.nome.toLowerCase() === empNomeDigitado.toLowerCase() ||
+        e.id.toLowerCase() === empNomeDigitado.toLowerCase() ||
+        e.nome.toLowerCase().includes(empNomeDigitado.toLowerCase())
+      );
+      if (emp) {
+        localStorage.setItem('sdv_licenca_ativa', emp.id);
+        atualizarVisualEmpresaLogin(emp.id);
+      }
+    }
+    fecharModalAcessoCadeado();
+    loginComBiometria();
+  }
+
+  // ══════════════════════════════════════════════
+  //  MODAL: ESCOLHA DE BANNER COM IA
+  // ══════════════════════════════════════════════
+  function abrirModalBannerIA() {
+    const modal = document.getElementById('modal-banner-ia');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  function fecharModalBannerIA() {
+    const modal = document.getElementById('modal-banner-ia');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function aplicarBannerIA(arquivo, desc) {
+    bannerEmEdicaoBase64 = arquivo;
+    const prev = document.getElementById('preview-banner-gestao');
+    if (prev) prev.src = arquivo;
+
+    let lista = obterLicencasLogin();
+    let idx = lista.findIndex(e => e.id === idEmpresaEditando);
+    if (idx >= 0) {
+      lista[idx].banner = arquivo;
+      salvarLicencasLogin(lista);
+    }
+
+    fecharModalBannerIA();
+
+    const msg = document.getElementById('gestao-msg');
+    if (msg) {
+      msg.innerHTML = '<div class="msg suc">✨ Banner ' + desc + ' selecionado com sucesso!</div>';
+      setTimeout(() => { if (msg) msg.innerHTML = ''; }, 3500);
+    }
+  }
+
+  function gerarBannerEstiloIA() {
+    const promptInput = document.getElementById('prompt-ia-banner');
+    const txt = (promptInput ? promptInput.value : '').toLowerCase();
+
+    // Inteligência de seleção baseada na descrição
+    let bannerEscolhido = 'banner_ia_vidros.jpg';
+    let estiloNome = 'Showroom Vidros & Iluminação de Luxo';
+
+    if (txt.includes('móvel') || txt.includes('moveis') || txt.includes('marcenaria') || txt.includes('cozinha') || txt.includes('closet') || txt.includes('madeira')) {
+      bannerEscolhido = 'banner_ia_moveis.jpg';
+      estiloNome = 'Alta Marcenaria & Móveis Planejados';
+    } else if (txt.includes('original') || txt.includes('newbox') || txt.includes('box')) {
+      bannerEscolhido = 'banner_ia_vidros.jpg';
+      estiloNome = 'Showroom Penthouse & Box Dourado';
+    }
+
+    aplicarBannerIA(bannerEscolhido, estiloNome);
   }
 
   window.addEventListener('DOMContentLoaded', () => {
