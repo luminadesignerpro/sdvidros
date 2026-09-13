@@ -1500,8 +1500,8 @@
 </div>
 
 <!-- ══ SIGNATURE VIEW MODAL ══ -->
-<div id="modal-assinatura" class="modal-overlay" style="display:none" onclick="fecharModalAssinatura(event)">
-  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:540px;">
+<div id="modal-assinatura" class="modal-overlay" style="display:none; z-index:99999;" onclick="fecharModalAssinatura(event)">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:540px; background:#14141c; border:1px solid rgba(74,222,128,0.3); box-shadow:0 20px 60px rgba(0,0,0,0.95), 0 0 30px rgba(74,222,128,0.15);">
     <div class="modal-title">
       <span>✍️ Detalhes da Assinatura Digital</span>
       <button class="modal-close" onclick="fecharModalAssinatura()">✕</button>
@@ -3028,7 +3028,7 @@ function abrirModalVersoesPdf(id) {
           <button type="button" class="btn btn-whats btn-sm" onclick="enviarWhatsVersaoEspecifica(${o.id}, ${v.versao})" style="flex:1;min-width:120px;">
             📱 WhatsApp
           </button>
-          ${(v.assinado_por || o.assinado_por) ? `<button type="button" class="btn btn-sm" onclick="abrirModalAssinaturaOs(${o.id})" style="background:rgba(74,222,128,0.18);border:1px solid #4ade80;color:#4ade80;font-weight:700;">✍️ Ver Assinatura</button>` : ''}
+          ${(v.assinado_por || o.assinado_por) ? `<button type="button" class="btn btn-sm" onclick="abrirModalAssinaturaOs(${o.id}, ${v.versao})" style="background:rgba(74,222,128,0.18);border:1px solid #4ade80;color:#4ade80;font-weight:700;">✍️ Ver Assinatura</button>` : ''}
         </div>
       </div>
     `;
@@ -3271,9 +3271,17 @@ async function visualizarPdfOrcamentoAtual() {
 // ══════════════════════════════════════════════
 //  VISUALIZAR ASSINATURA DIGITAL DO CLIENTE
 // ══════════════════════════════════════════════
-function abrirModalAssinaturaOs(id) {
-  const o = historico.find(x => x.id === id);
-  if (!o) return;
+function abrirModalAssinaturaOs(id, versaoNum = null) {
+  const o = historico.find(x => String(x.id) === String(id));
+  if (!o) {
+    alert('Ordem de serviço não localizada no histórico.');
+    return;
+  }
+
+  let v = null;
+  if (versaoNum && o.versoes_pdf) {
+    v = o.versoes_pdf.find(x => x.versao === versaoNum);
+  }
 
   const numLimpo = String(o.numero || '').replace(/\D/g, '');
   let reg = o.assinatura_digital || null;
@@ -3294,9 +3302,9 @@ function abrirModalAssinaturaOs(id) {
     const c = listaContratosCache.find(x => String(x.numero_os || '').replace(/\D/g, '') === numLimpo && x.assinado);
     if (c) {
       reg = {
-        nome: c.assinante_nome || c.cliente_nome || o.assinado_por || 'Cliente',
+        nome: c.assinante_nome || c.cliente_nome || (v && v.assinado_por) || o.assinado_por || 'Cliente',
         rubrica: c.assinatura_base64 || '',
-        data: c.assinado_em || o.assinado_em || '',
+        data: c.assinado_em || (v && v.data) || o.assinado_em || '',
         os: o.numero
       };
     }
@@ -3306,18 +3314,20 @@ function abrirModalAssinaturaOs(id) {
   const conteudo = document.getElementById('modal-assinatura-conteudo');
   if (!modal || !conteudo) return;
 
-  const nomeAssinante = (reg && reg.nome) || o.assinado_por || o.nome || 'Cliente';
+  const nomeAssinante = (reg && reg.nome) || (v && v.assinado_por) || o.assinado_por || o.nome || 'Cliente';
   let dataHora = '';
   if (reg && reg.data) {
     try { dataHora = new Date(reg.data).toLocaleString('pt-BR'); } catch (e) { dataHora = reg.data; }
   } else if (o.assinado_em) {
     try { dataHora = new Date(o.assinado_em).toLocaleString('pt-BR'); } catch (e) { dataHora = o.assinado_em; }
   } else {
-    dataHora = o.data_orc || new Date().toLocaleDateString('pt-BR');
+    dataHora = (v && v.data) || o.data_orc || new Date().toLocaleDateString('pt-BR');
   }
 
   const rubricaImg = (reg && reg.rubrica) ? reg.rubrica : '';
   const hashComprovante = 'SDV-' + numLimpo.padStart(4, '0') + '-' + Math.abs((o.id || 1000) * 31).toString(16).toUpperCase();
+  const valorTotal = (v && v.total) || o.total || 'R$ 0,00';
+  const versaoStr = v ? ` (${v.titulo || 'Versão ' + v.versao})` : '';
 
   conteudo.innerHTML = `
     <div style="background:linear-gradient(135deg, rgba(37,211,102,0.08), rgba(201,168,76,0.05)); border:1.5px solid rgba(74,222,128,0.3); border-radius:14px; padding:18px; margin-bottom:14px;">
@@ -3327,7 +3337,7 @@ function abrirModalAssinaturaOs(id) {
             🛡️ Certificado de Assinatura Digital
           </span>
           <div style="font-size:16px; font-weight:900; color:#fff; margin-top:2px;">
-            Ordem de Serviço ${esc(o.numero)}
+            Ordem de Serviço ${esc(o.numero)}${versaoStr}
           </div>
         </div>
         <div style="background:rgba(37,211,102,0.2); border:1px solid #10b981; color:#4ade80; font-size:11px; font-weight:800; padding:4px 10px; border-radius:20px;">
@@ -3350,7 +3360,7 @@ function abrirModalAssinaturaOs(id) {
         </div>
         <div>
           <span style="color:var(--muted); display:block; font-size:11px;">Valor Aprovado:</span>
-          <strong style="color:var(--gold); font-size:13px;">${esc(o.total || 'R$ 0,00')}</strong>
+          <strong style="color:var(--gold); font-size:13px;">${esc(valorTotal)}</strong>
         </div>
       </div>
 
@@ -3368,10 +3378,13 @@ function abrirModalAssinaturaOs(id) {
           </div>
         ` : `
           <div style="background:rgba(0,0,0,0.3); border:1px dashed rgba(255,255,255,0.15); border-radius:10px; padding:16px; text-align:center;">
-            <div style="font-size:24px; margin-bottom:4px;">📱</div>
-            <div style="font-size:12.5px; color:#fff; font-weight:600;">Autorizado via Confirmação Digital</div>
-            <div style="font-size:11.5px; color:var(--muted); margin-top:4px;">
+            <div style="font-size:28px; margin-bottom:6px;">✍️</div>
+            <div style="font-size:13px; color:#fff; font-weight:700;">Autorizado por Confirmação Digital</div>
+            <div style="font-size:12px; color:#34d399; margin-top:4px; font-weight:600;">
               Assinante registrado: <strong>${esc(nomeAssinante)}</strong>
+            </div>
+            <div style="font-size:11px; color:var(--muted); margin-top:4px;">
+              Autenticado via WhatsApp / Portal do Cliente
             </div>
           </div>
         `}
@@ -3384,7 +3397,7 @@ function abrirModalAssinaturaOs(id) {
     </div>
 
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button type="button" class="btn btn-gold btn-sm" onclick="fecharModalAssinatura(); visualizarPdfOs(${o.id});" style="flex:1;">
+      <button type="button" class="btn btn-gold btn-sm" onclick="fecharModalAssinatura(); visualizarPdfOs(${o.id}, ${versaoNum || 'null'});" style="flex:1;">
         👁️ Ver PDF desta O.S.
       </button>
       <button type="button" class="btn btn-whats btn-sm" onclick="enviarWhatsOs(${o.id})" style="flex:1;">
@@ -3393,6 +3406,7 @@ function abrirModalAssinaturaOs(id) {
     </div>
   `;
 
+  modal.style.zIndex = '99999';
   modal.style.display = 'flex';
 }
 
