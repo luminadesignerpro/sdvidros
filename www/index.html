@@ -1513,6 +1513,37 @@
   </div>
 </div>
 
+<!-- ══ MODAL SELETOR RÁPIDO DE STATUS DA O.S. ══ -->
+<div id="modal-seletor-status" class="modal-overlay" style="display:none; z-index:99999;" onclick="fecharModalSeletorStatus(event)">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:400px; background:#14141c; border:1px solid rgba(201,168,76,0.35); box-shadow:0 20px 60px rgba(0,0,0,0.95), 0 0 25px rgba(201,168,76,0.15); border-radius:18px; padding:20px;">
+    <div class="modal-title" style="margin-bottom:12px;">
+      <span style="font-weight:800; font-size:15px; color:var(--gold-light);">🏷️ Alterar Status da O.S.</span>
+      <button class="modal-close" onclick="fecharModalSeletorStatus()">✕</button>
+    </div>
+    <div id="seletor-status-os-ident" style="font-size:12.5px; color:var(--muted); margin-bottom:14px; background:rgba(0,0,0,0.25); padding:8px 12px; border-radius:8px;"></div>
+    <div style="display:flex; flex-direction:column; gap:9px;">
+      <button type="button" class="btn" onclick="aplicarNovoStatusOs('aprovado')" style="background:rgba(37,211,102,0.15); border:1.5px solid #25D366; color:#25D366; font-weight:800; justify-content:flex-start; padding:11px 14px; font-size:13px; border-radius:10px;">
+        🟢 Aprovado
+      </button>
+      <button type="button" class="btn" onclick="aplicarNovoStatusOs('pendente')" style="background:rgba(234,179,8,0.15); border:1.5px solid #eab308; color:#facc15; font-weight:800; justify-content:flex-start; padding:11px 14px; font-size:13px; border-radius:10px;">
+        🟡 Aguardando Resposta (Pendente)
+      </button>
+      <button type="button" class="btn" onclick="aplicarNovoStatusOs('reajustar')" style="background:rgba(249,115,22,0.15); border:1.5px solid #f97316; color:#fb923c; font-weight:800; justify-content:flex-start; padding:11px 14px; font-size:13px; border-radius:10px;">
+        🟠 Reajustar Detalhes
+      </button>
+      <button type="button" class="btn" onclick="aplicarNovoStatusOs('modificacao_aprovada')" style="background:rgba(16,185,129,0.15); border:1.5px solid #10b981; color:#34d399; font-weight:800; justify-content:flex-start; padding:11px 14px; font-size:13px; border-radius:10px;">
+        🟢 Modificação Aprovada
+      </button>
+      <button type="button" class="btn" onclick="aplicarNovoStatusOs('recusado')" style="background:rgba(239,68,68,0.15); border:1.5px solid #ef4444; color:#f87171; font-weight:800; justify-content:flex-start; padding:11px 14px; font-size:13px; border-radius:10px;">
+        🔴 Não Aprovado / Recusado
+      </button>
+    </div>
+    <div style="display:flex; justify-content:flex-end; margin-top:14px;">
+      <button type="button" class="btn btn-sec btn-sm" onclick="fecharModalSeletorStatus()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MODAL VISUALIZADOR DE PDF NA TELA ══ -->
 <div id="modal-preview-pdf" class="modal-overlay" style="display:none; z-index:99999;" onclick="fecharModalPreviewPdf(event)">
   <div class="modal-box" onclick="event.stopPropagation()" style="max-width:920px; width:95vw; height:92vh; max-height:94vh; display:flex; flex-direction:column; padding:16px; background:#13131a; border:1px solid rgba(201,168,76,0.3); box-shadow:0 20px 60px rgba(0,0,0,0.95), 0 0 30px rgba(201,168,76,0.2);">
@@ -1913,6 +1944,7 @@ const K = {
 };
 function load(k, d=[]) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }
 function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+function salvarHistorico() { save(K.orders, historico); }
 
 // ══════════════════════════════════════════════
 //  STATE
@@ -2942,23 +2974,39 @@ function editarOs(id) {
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function deletarOs(id) {
-  if (!confirm('Tem certeza que deseja excluir esta Ordem de Serviço?')) return;
-  historico = historico.filter(x=>x.id!==id);
-  save(K.orders, historico); renderHist(); renderSelectContratos();
+let osIdEditandoStatus = null;
+
+function abrirModalSeletorStatus(id) {
+  const o = historico.find(x => String(x.id) === String(id) || String(x.numero) === String(id));
+  if (!o) return;
+  osIdEditandoStatus = o.id;
+  const ident = document.getElementById('seletor-status-os-ident');
+  if (ident) {
+    ident.innerHTML = `Ordem de Serviço <strong>${esc(o.numero)}</strong> • Cliente: <strong>${esc(o.nome || 'Cliente')}</strong>`;
+  }
+  const modal = document.getElementById('modal-seletor-status');
+  if (modal) {
+    modal.style.zIndex = '99999';
+    modal.style.display = 'flex';
+  }
 }
 
-function alternarStatusOs(id) {
-  const idx = historico.findIndex(x => x.id === id);
+function fecharModalSeletorStatus(e) {
+  if (!e || e.target === document.getElementById('modal-seletor-status')) {
+    const modal = document.getElementById('modal-seletor-status');
+    if (modal) modal.style.display = 'none';
+  }
+}
+
+function aplicarNovoStatusOs(novoStatus) {
+  if (!osIdEditandoStatus) return;
+  const idx = historico.findIndex(x => String(x.id) === String(osIdEditandoStatus) || String(x.numero) === String(osIdEditandoStatus));
   if (idx === -1) return;
-  const ordem = ['pendente', 'aprovado', 'reajustar', 'modificacao_aprovada', 'recusado'];
-  const atual = historico[idx].status || 'pendente';
-  const prox = ordem[(ordem.indexOf(atual) + 1) % ordem.length];
-  historico[idx].status = prox;
-  if (prox === 'aprovado' || prox === 'modificacao_aprovada') {
-    historico[idx].assinado_por = historico[idx].assinado_por || (prox === 'modificacao_aprovada' ? 'Modificação Aprovada' : 'Aprovado Manualmente');
-    historico[idx].assinado_em = new Date().toISOString();
-    // Sincroniza em segundo plano com a API
+
+  historico[idx].status = novoStatus;
+  if (novoStatus === 'aprovado' || novoStatus === 'modificacao_aprovada') {
+    historico[idx].assinado_por = historico[idx].assinado_por || (novoStatus === 'modificacao_aprovada' ? 'Modificação Aprovada' : 'Aprovado pelo Usuário');
+    if (!historico[idx].assinado_em) historico[idx].assinado_em = new Date().toISOString();
     fetch('/api/aprovar-orcamento', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2969,8 +3017,23 @@ function alternarStatusOs(id) {
       })
     }).catch(() => {});
   }
+
   save(K.orders, historico);
   renderHist();
+  fecharModalSeletorStatus();
+  mostrarToastAprovacao(`Status da O.S. ${historico[idx].numero} atualizado para ${statusLabels[novoStatus] || novoStatus}!`);
+}
+
+function alternarStatusOs(id) {
+  abrirModalSeletorStatus(id);
+}
+
+function deletarOs(id) {
+  if (!confirm('Tem certeza que deseja excluir esta Ordem de Serviço?')) return;
+  historico = historico.filter(x => String(x.id) !== String(id));
+  save(K.orders, historico);
+  renderHist();
+  renderSelectContratos();
 }
 
 function abrirModalVersoesPdf(id) {
@@ -3759,13 +3822,13 @@ function processarConfirmacaoZapColada() {
 }
 
 function baixarPdfOs(id) {
-  const os = historico.find(x => x.id === id);
+  const os = historico.find(x => String(x.id) === String(id) || String(x.numero) === String(id));
   if (!os || !os.dados) return;
   enviarOuBaixarPdfOrcamento(os.dados);
 }
 
 function enviarWhatsOs(id) {
-  const os = historico.find(x => x.id === id);
+  const os = historico.find(x => String(x.id) === String(id) || String(x.numero) === String(id));
   if (!os || !os.dados) return;
   enviarWhatsComAprovacao(os.dados);
 }
@@ -3795,7 +3858,7 @@ function renderHist() {
     let assinadoBadge = '';
     if ((st === 'aprovado' || st === 'modificacao_aprovada') && o.assinado_por) {
       assinadoBadge = `
-        <div onclick="abrirModalAssinaturaOs(${o.id})" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; background:rgba(74,222,128,0.12); border:1.5px solid rgba(74,222,128,0.35); padding:5px 12px; border-radius:10px; font-size:12px; color:#4ade80; margin-top:6px; font-weight:700; transition:all 0.2s;" title="Toque para visualizar a assinatura digital do cliente">
+        <div onclick="abrirModalAssinaturaOs('${o.id}')" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; background:rgba(74,222,128,0.12); border:1.5px solid rgba(74,222,128,0.35); padding:5px 12px; border-radius:10px; font-size:12px; color:#4ade80; margin-top:6px; font-weight:700; transition:all 0.2s;" title="Toque para visualizar a assinatura digital do cliente">
           ✍️ Autorizado por: ${esc(o.assinado_por)}
           <span style="font-size:11px; text-decoration:underline; opacity:0.9; margin-left:3px;">(Ver Assinatura)</span>
         </div>`;
@@ -3807,19 +3870,19 @@ function renderHist() {
 
     const numVersoes = (o.versoes_pdf && o.versoes_pdf.length) || 1;
     const btnPdf = numVersoes > 1
-      ? `<button class="btn btn-gold btn-sm" onclick="abrirModalVersoesPdf(${o.id})" title="Ver e visualizar ${numVersoes} versões do PDF">📑 PDFs (${numVersoes} versões)</button>`
-      : `<button class="btn btn-gold btn-sm" onclick="visualizarPdfOs(${o.id})" title="Visualizar e ler PDF na tela">👁️ Visualizar PDF</button>`;
+      ? `<button class="btn btn-gold btn-sm" onclick="abrirModalVersoesPdf('${o.id}')" title="Ver e visualizar ${numVersoes} versões do PDF">📑 PDFs (${numVersoes} versões)</button>`
+      : `<button class="btn btn-gold btn-sm" onclick="visualizarPdfOs('${o.id}')" title="Visualizar e ler PDF na tela">👁️ Visualizar PDF</button>`;
 
     let btnAcaoAprovacao = '';
     if (st === 'reajustar') {
-      btnAcaoAprovacao = `<button class="btn btn-sm" onclick="aprovarModificacaoDireto(${o.id})" style="background:rgba(16,185,129,0.18);border:1.5px solid #10b981;color:#34d399;font-weight:800;" title="Aprovar modificações da O.S.">✓ Aprovar Modificação</button>`;
+      btnAcaoAprovacao = `<button class="btn btn-sm" onclick="aprovarModificacaoDireto('${o.id}')" style="background:rgba(16,185,129,0.18);border:1.5px solid #10b981;color:#34d399;font-weight:800;" title="Aprovar modificações da O.S.">✓ Aprovar Modificação</button>`;
     } else if (st === 'pendente') {
-      btnAcaoAprovacao = `<button class="btn btn-sm" onclick="aprovarOsDireto(${o.id})" style="background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.6);color:#25D366;font-weight:700;" title="Aprovar com 1 toque">✅ Aprovar</button>`;
+      btnAcaoAprovacao = `<button class="btn btn-sm" onclick="aprovarOsDireto('${o.id}')" style="background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.6);color:#25D366;font-weight:700;" title="Aprovar com 1 toque">✅ Aprovar</button>`;
     }
 
     let btnVerAssinatura = '';
     if (temAssinatura || o.assinado_por) {
-      btnVerAssinatura = `<button class="btn btn-sm" onclick="abrirModalAssinaturaOs(${o.id})" style="background:rgba(52,211,153,0.18);border:1.5px solid #10b981;color:#34d399;font-weight:800;" title="Visualizar a assinatura digital do cliente">✍️ Assinatura</button>`;
+      btnVerAssinatura = `<button class="btn btn-sm" onclick="abrirModalAssinaturaOs('${o.id}')" style="background:rgba(52,211,153,0.18);border:1.5px solid #10b981;color:#34d399;font-weight:800;" title="Visualizar a assinatura digital do cliente">✍️ Assinatura</button>`;
     }
 
     return `
@@ -3827,7 +3890,7 @@ function renderHist() {
       <div class="hist-top">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <span class="hist-num">${esc(o.numero)}</span>
-          <span class="status-pill ${st}" onclick="alternarStatusOs(${o.id})" title="Clique para alternar o status (${statusLabels[st] || st})">${statusLabels[st] || '🟡 Aguardando'}</span>
+          <span class="status-pill ${st}" onclick="abrirModalSeletorStatus('${o.id}')" style="cursor:pointer;" title="Clique para alterar o status">${statusLabels[st] || '🟡 Aguardando'} ▾</span>
         </div>
         <span class="hist-date">${esc(o.data_orc || '')}</span>
       </div>
@@ -3840,10 +3903,10 @@ function renderHist() {
           ${btnAcaoAprovacao}
           ${btnVerAssinatura}
           ${btnPdf}
-          <button class="btn btn-whats btn-sm" onclick="enviarWhatsOs(${o.id})" title="Enviar WhatsApp com links de aprovação">📱 WhatsApp</button>
-          <button class="btn btn-sm" onclick="abrirModalPortalOs(${o.id})" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.5);color:var(--gold-light);font-weight:800;" title="Gerenciar Portal do Cliente">🚀 Portal</button>
-          <button class="btn btn-sec btn-sm" onclick="editarOs(${o.id})">✏️ Editar</button>
-          <button class="btn btn-danger btn-sm" onclick="deletarOs(${o.id})">✕</button>
+          <button class="btn btn-whats btn-sm" onclick="enviarWhatsOs('${o.id}')" title="Enviar WhatsApp com links de aprovação">📱 WhatsApp</button>
+          <button class="btn btn-sm" onclick="abrirModalPortalOs('${o.id}')" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.5);color:var(--gold-light);font-weight:800;" title="Gerenciar Portal do Cliente">🚀 Portal</button>
+          <button class="btn btn-sec btn-sm" onclick="editarOs('${o.id}')">✏️ Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="deletarOs('${o.id}')">✕</button>
         </div>
       </div>
     </div>`;
@@ -3851,10 +3914,13 @@ function renderHist() {
 }
 
 function aprovarOsDireto(id) {
-  const idx = historico.findIndex(x => x.id === id);
-  if (idx === -1) return;
+  const idx = historico.findIndex(x => String(x.id) === String(id) || String(x.numero) === String(id));
+  if (idx === -1) {
+    alert('Ordem de serviço não localizada.');
+    return;
+  }
   historico[idx].status = 'aprovado';
-  historico[idx].assinado_por = 'Confirmado via WhatsApp';
+  historico[idx].assinado_por = historico[idx].assinado_por || 'Confirmado via WhatsApp';
   historico[idx].assinado_em = new Date().toISOString();
   save(K.orders, historico);
   renderHist();
