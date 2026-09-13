@@ -1151,6 +1151,32 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
           const nomeFinal = nomeAssinante || clienteNome || 'Cliente';
           const info = atualizarCardPortalCliente(numeroOs, nomeFinal, telCli);
 
+          try {
+            const numLimpo = String(numeroOs || '').replace(/\D/g, '');
+            const regAssinatura = {
+              nome: nomeFinal,
+              rubrica: assinaturaBase64,
+              data: new Date().toISOString(),
+              os: info.osFormatada || numeroOs
+            };
+            localStorage.setItem('sdv_assinatura_' + numLimpo, JSON.stringify(regAssinatura));
+            const assinaturasGerais = JSON.parse(localStorage.getItem('sdv_assinaturas_map') || '{}');
+            assinaturasGerais[numLimpo] = regAssinatura;
+            localStorage.setItem('sdv_assinaturas_map', JSON.stringify(assinaturasGerais));
+
+            const ordens = JSON.parse(localStorage.getItem('sdv_ordens') || '[]');
+            const idx = ordens.findIndex(x => String(x.numero || '').replace(/\D/g, '') === numLimpo);
+            if (idx !== -1) {
+              ordens[idx].status = 'aprovado';
+              ordens[idx].assinado_por = nomeFinal;
+              ordens[idx].assinado_em = new Date().toISOString();
+              ordens[idx].assinatura_digital = regAssinatura;
+              localStorage.setItem('sdv_ordens', JSON.stringify(ordens));
+            }
+          } catch (e) {
+            console.warn('Aviso storage assinatura:', e);
+          }
+
           const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* 🪟\n\n'
             + 'Olá ' + info.lic.nome + '! Acabei de aprovar e assinar a Ordem de Serviço ' + info.osFormatada + '!\n'
             + '👤 *Assinado por:* ' + nomeFinal + '\n\n'

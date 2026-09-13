@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
 
     const { data, error } = await supabase
       .from('contratos')
-      .select('numero_os, cliente_nome, texto, assinado, assinante_nome, assinado_em')
+      .select('numero_os, cliente_nome, texto, assinado, assinante_nome, assinado_em, assinatura_base64')
       .eq('id', id)
       .single();
 

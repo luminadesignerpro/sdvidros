@@ -1031,10 +1031,15 @@
         </div>
       </div>
 
-      <button class="btn btn-gold btn-full" onclick="enviarOuBaixarPdfOrcamento()" style="font-size:15px;padding:15px;" id="btn-pdf-orc">
-        <span id="pdf-orc-spinner" class="spinner" style="display:none"></span>
-        <span id="pdf-orc-btn-text">📄 Enviar PDF do Orçamento</span>
-      </button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
+        <button type="button" class="btn btn-gold" onclick="enviarOuBaixarPdfOrcamento()" style="font-size:14px;padding:14px;" id="btn-pdf-orc">
+          <span id="pdf-orc-spinner" class="spinner" style="display:none"></span>
+          <span id="pdf-orc-btn-text">📄 Enviar PDF</span>
+        </button>
+        <button type="button" class="btn btn-sec" onclick="visualizarPdfOrcamentoAtual()" style="font-size:14px;padding:14px;border:1.5px solid var(--gold);color:var(--gold-light);font-weight:700;" id="btn-preview-orc-atual" title="Pré-visualizar o PDF deste orçamento diretamente na tela">
+          👁️ Visualizar PDF
+        </button>
+      </div>
       <button class="btn btn-ia btn-full" onclick="enviarOrcamentoParaAssinaturaDigital()" style="font-size:15px;padding:15px;margin-top:10px;" id="btn-orc-assinatura">
         <span id="orc-assinatura-spinner" class="spinner" style="display:none"></span>
         <span id="orc-assinatura-btn-text">✍️ Enviar para Assinatura Digital</span>
@@ -1490,13 +1495,41 @@
 
 <!-- ══ SIGNATURE VIEW MODAL ══ -->
 <div id="modal-assinatura" class="modal-overlay" style="display:none" onclick="fecharModalAssinatura(event)">
-  <div class="modal-box" onclick="event.stopPropagation()">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:540px;">
     <div class="modal-title">
-      ✍️ Detalhes da Assinatura Digital
+      <span>✍️ Detalhes da Assinatura Digital</span>
       <button class="modal-close" onclick="fecharModalAssinatura()">✕</button>
     </div>
     <div id="modal-assinatura-conteudo"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+      <button type="button" class="btn btn-sec btn-sm" onclick="fecharModalAssinatura()">✕ Fechar</button>
+    </div>
   </div>
+</div>
+
+<!-- ══ MODAL VISUALIZADOR DE PDF NA TELA ══ -->
+<div id="modal-preview-pdf" class="modal-overlay" style="display:none" onclick="fecharModalPreviewPdf(event)">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:920px; width:95vw; height:92vh; display:flex; flex-direction:column; padding:18px;">
+    <div class="modal-title" style="margin-bottom:10px; flex-shrink:0;">
+      <span id="preview-pdf-titulo" style="font-size:15px; font-weight:800; color:var(--gold-light);">👁️ Visualizar PDF</span>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button type="button" class="btn btn-sm btn-gold" id="btn-preview-abrir-nova-aba" onclick="abrirPdfNovaAba()" title="Abrir em Tela Cheia / Nova Aba">↗️ Tela Cheia</button>
+        <button type="button" class="btn btn-sm btn-sec" id="btn-preview-baixar" onclick="baixarPdfAtualDoPreview()" title="Baixar Arquivo PDF">📥 Baixar</button>
+        <button class="modal-close" onclick="fecharModalPreviewPdf()">✕</button>
+      </div>
+    </div>
+    
+    <div id="preview-pdf-mobile-tip" style="background:rgba(201,168,76,0.12); border:1px solid rgba(201,168,76,0.3); border-radius:10px; padding:8px 12px; margin-bottom:10px; font-size:12px; color:var(--gold-light); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+      <span>📱 Toque em <strong>Tela Cheia</strong> para ler com zoom ou salvar no celular</span>
+      <button type="button" class="btn btn-gold btn-sm" onclick="abrirPdfNovaAba()" style="font-size:11px; padding:4px 10px;">↗️ Abrir PDF</button>
+    </div>
+
+    <div style="flex:1; width:100%; border-radius:12px; overflow:hidden; background:#1c1c24; border:1px solid rgba(255,255,255,0.1); position:relative;">
+      <iframe id="iframe-preview-pdf" src="" style="width:100%; height:100%; border:none;" title="Pré-visualização do PDF"></iframe>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MODAL VERSÕES DE PDF DO ORÇAMENTO / O.S. (PROTEÇÃO DO ORIGINAL ASSINADO) ══ -->
 <div id="modal-versoes-pdf" class="modal-overlay" style="display:none" onclick="fecharModalVersoesPdf(event)">
   <div class="modal-box" onclick="event.stopPropagation()" style="max-width:560px;">
@@ -2978,13 +3011,17 @@ function abrirModalVersoesPdf(id) {
           <div style="font-size:15px;font-weight:900;color:var(--gold);">${esc(v.total || 'R$ 0,00')}</div>
         </div>
 
-        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-          <button type="button" class="btn btn-gold btn-sm" onclick="baixarPdfVersaoEspecifica(${o.id}, ${v.versao})" style="flex:1;min-width:140px;">
-            📄 Baixar Este PDF
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-gold btn-sm" onclick="visualizarPdfVersaoEspecifica(${o.id}, ${v.versao})" style="flex:1;min-width:120px;font-weight:800;">
+            👁️ Visualizar PDF
           </button>
-          <button type="button" class="btn btn-whats btn-sm" onclick="enviarWhatsVersaoEspecifica(${o.id}, ${v.versao})" style="flex:1;min-width:140px;">
-            📱 Enviar no WhatsApp
+          <button type="button" class="btn btn-sec btn-sm" onclick="baixarPdfVersaoEspecifica(${o.id}, ${v.versao})" style="flex:1;min-width:110px;">
+            📥 Baixar PDF
           </button>
+          <button type="button" class="btn btn-whats btn-sm" onclick="enviarWhatsVersaoEspecifica(${o.id}, ${v.versao})" style="flex:1;min-width:120px;">
+            📱 WhatsApp
+          </button>
+          ${(v.assinado_por || o.assinado_por) ? `<button type="button" class="btn btn-sm" onclick="abrirModalAssinaturaOs(${o.id})" style="background:rgba(74,222,128,0.18);border:1px solid #4ade80;color:#4ade80;font-weight:700;">✍️ Ver Assinatura</button>` : ''}
         </div>
       </div>
     `;
@@ -2997,6 +3034,276 @@ function fecharModalVersoesPdf(e) {
   if (!e || e.target === document.getElementById('modal-versoes-pdf')) {
     const modal = document.getElementById('modal-versoes-pdf');
     if (modal) modal.style.display = 'none';
+  }
+}
+
+// ══════════════════════════════════════════════
+//  VISUALIZAÇÃO DE PDF NA TELA (MODAL PREVIEW)
+// ══════════════════════════════════════════════
+let currentPdfBlobUrl = null;
+let currentPdfFileName = 'Orcamento.pdf';
+
+function abrirPdfNovaAba() {
+  if (currentPdfBlobUrl) {
+    window.open(currentPdfBlobUrl, '_blank');
+  } else {
+    alert('Nenhum documento PDF carregado.');
+  }
+}
+
+function baixarPdfAtualDoPreview() {
+  if (!currentPdfBlobUrl) return;
+  const a = document.createElement('a');
+  a.href = currentPdfBlobUrl;
+  a.download = currentPdfFileName || 'Orcamento.pdf';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function fecharModalPreviewPdf(e) {
+  if (!e || e.target === document.getElementById('modal-preview-pdf')) {
+    const m = document.getElementById('modal-preview-pdf');
+    if (m) m.style.display = 'none';
+    const iframe = document.getElementById('iframe-preview-pdf');
+    if (iframe) iframe.src = '';
+  }
+}
+
+async function abrirVisualizadorPdfParaDados(dadosPdf, tituloModal, fileName) {
+  const modal = document.getElementById('modal-preview-pdf');
+  const tituloEl = document.getElementById('preview-pdf-titulo');
+  const iframe = document.getElementById('iframe-preview-pdf');
+  if (!modal || !iframe) return;
+
+  if (tituloEl) tituloEl.textContent = '⏳ Gerando visualização do PDF...';
+  modal.style.display = 'flex';
+  iframe.src = 'about:blank';
+
+  try {
+    const blob = await obterPdfOrcamentoBlob(dadosPdf);
+    if (currentPdfBlobUrl) {
+      try { URL.revokeObjectURL(currentPdfBlobUrl); } catch (e) {}
+    }
+    currentPdfBlobUrl = URL.createObjectURL(blob);
+    currentPdfFileName = fileName || 'Orcamento.pdf';
+
+    if (tituloEl) tituloEl.textContent = tituloModal || '👁️ Visualizar PDF';
+    iframe.src = currentPdfBlobUrl;
+  } catch (err) {
+    alert('Erro ao carregar pré-visualização do PDF: ' + (err.message || err));
+    fecharModalPreviewPdf();
+  }
+}
+
+async function visualizarPdfOs(id, versaoNum = null) {
+  const o = historico.find(x => x.id === id);
+  if (!o) return;
+
+  let dados = o.dados;
+  let titulo = `👁️ Visualizar PDF - O.S. ${o.numero || ''}`;
+  let fileName = `Orcamento-${(o.numero || '0001').replace('#', '')}.pdf`;
+
+  if (versaoNum && o.versoes_pdf) {
+    const v = o.versoes_pdf.find(x => x.versao === versaoNum);
+    if (v && v.dados) {
+      dados = v.dados;
+      titulo += ` (${v.titulo || 'Versão ' + v.versao})`;
+      fileName = `Orcamento-${(o.numero || '0001').replace('#', '')}-v${versaoNum}.pdf`;
+    }
+  }
+
+  if (!dados) {
+    alert('Dados do orçamento não encontrados.');
+    return;
+  }
+
+  await abrirVisualizadorPdfParaDados(dados, titulo, fileName);
+}
+
+async function visualizarPdfVersaoEspecifica(id, versaoNum) {
+  return visualizarPdfOs(id, versaoNum);
+}
+
+async function visualizarPdfOrcamentoAtual() {
+  const o = getOrc();
+  if (!o.nome && (!o.itens || !o.itens.length)) {
+    alert('Preencha pelo menos o nome do cliente ou um item antes de visualizar o PDF.');
+    return;
+  }
+
+  let bNome = (o.bairro || '').trim();
+  let cNome = '';
+  if (bNome.includes(',')) {
+    const parts = bNome.split(',').map(s => s.trim());
+    bNome = parts[0] || '';
+    cNome = parts[1] || '';
+  } else if (bNome.includes('-')) {
+    const parts = bNome.split('-').map(s => s.trim());
+    bNome = parts[0] || '';
+    cNome = parts[1] || '';
+  }
+
+  let endCompleto = (o.end || '').trim();
+  if (o.num && !endCompleto.includes(o.num)) {
+    endCompleto = endCompleto ? `${endCompleto}, Nº ${o.num}` : `Nº ${o.num}`;
+  }
+
+  const dadosPdf = {
+    numero: o.numero,
+    dataStr: o.data || new Date().toLocaleDateString('pt-BR'),
+    nome: o.nome || '',
+    cnpj: o.cnpj || '',
+    tel: o.tel || '',
+    endereco: endCompleto,
+    bairro: bNome,
+    cidade: cNome,
+    apto: o.apto || '',
+    resp: o.resp || '',
+    itens: o.itens || [],
+    total: o.total || '',
+    forma: o.forma || '',
+    obs: o.obs || '',
+    prazo: o.prazo || '',
+    garantia: o.garantia || ''
+  };
+
+  const fileName = `Orcamento-${(o.numero || '0001').replace('#', '')}.pdf`;
+  await abrirVisualizadorPdfParaDados(dadosPdf, `👁️ Visualizar Orçamento ${o.numero || ''}`, fileName);
+}
+
+// ══════════════════════════════════════════════
+//  VISUALIZAR ASSINATURA DIGITAL DO CLIENTE
+// ══════════════════════════════════════════════
+function abrirModalAssinaturaOs(id) {
+  const o = historico.find(x => x.id === id);
+  if (!o) return;
+
+  const numLimpo = String(o.numero || '').replace(/\D/g, '');
+  let reg = o.assinatura_digital || null;
+
+  if (!reg) {
+    try {
+      const salvo = localStorage.getItem('sdv_assinatura_' + numLimpo);
+      if (salvo) reg = JSON.parse(salvo);
+    } catch (e) {}
+  }
+  if (!reg) {
+    try {
+      const mapa = JSON.parse(localStorage.getItem('sdv_assinaturas_map') || '{}');
+      if (mapa[numLimpo]) reg = mapa[numLimpo];
+    } catch (e) {}
+  }
+  if (!reg && typeof listaContratosCache !== 'undefined' && Array.isArray(listaContratosCache)) {
+    const c = listaContratosCache.find(x => String(x.numero_os || '').replace(/\D/g, '') === numLimpo && x.assinado);
+    if (c) {
+      reg = {
+        nome: c.assinante_nome || c.cliente_nome || o.assinado_por || 'Cliente',
+        rubrica: c.assinatura_base64 || '',
+        data: c.assinado_em || o.assinado_em || '',
+        os: o.numero
+      };
+    }
+  }
+
+  const modal = document.getElementById('modal-assinatura');
+  const conteudo = document.getElementById('modal-assinatura-conteudo');
+  if (!modal || !conteudo) return;
+
+  const nomeAssinante = (reg && reg.nome) || o.assinado_por || o.nome || 'Cliente';
+  let dataHora = '';
+  if (reg && reg.data) {
+    try { dataHora = new Date(reg.data).toLocaleString('pt-BR'); } catch (e) { dataHora = reg.data; }
+  } else if (o.assinado_em) {
+    try { dataHora = new Date(o.assinado_em).toLocaleString('pt-BR'); } catch (e) { dataHora = o.assinado_em; }
+  } else {
+    dataHora = o.data_orc || new Date().toLocaleDateString('pt-BR');
+  }
+
+  const rubricaImg = (reg && reg.rubrica) ? reg.rubrica : '';
+  const hashComprovante = 'SDV-' + numLimpo.padStart(4, '0') + '-' + Math.abs((o.id || 1000) * 31).toString(16).toUpperCase();
+
+  conteudo.innerHTML = `
+    <div style="background:linear-gradient(135deg, rgba(37,211,102,0.08), rgba(201,168,76,0.05)); border:1.5px solid rgba(74,222,128,0.3); border-radius:14px; padding:18px; margin-bottom:14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+        <div>
+          <span style="font-size:11px; font-weight:800; color:#34d399; text-transform:uppercase; letter-spacing:0.05em; display:flex; align-items:center; gap:6px;">
+            🛡️ Certificado de Assinatura Digital
+          </span>
+          <div style="font-size:16px; font-weight:900; color:#fff; margin-top:2px;">
+            Ordem de Serviço ${esc(o.numero)}
+          </div>
+        </div>
+        <div style="background:rgba(37,211,102,0.2); border:1px solid #10b981; color:#4ade80; font-size:11px; font-weight:800; padding:4px 10px; border-radius:20px;">
+          ✓ Aprovado e Assinado
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:12.5px; margin-bottom:14px;">
+        <div>
+          <span style="color:var(--muted); display:block; font-size:11px;">Assinado por:</span>
+          <strong style="color:#fff; font-size:13.5px;">${esc(nomeAssinante)}</strong>
+        </div>
+        <div>
+          <span style="color:var(--muted); display:block; font-size:11px;">Data e Horário:</span>
+          <strong style="color:var(--gold-light);">${esc(dataHora)}</strong>
+        </div>
+        <div>
+          <span style="color:var(--muted); display:block; font-size:11px;">Cliente:</span>
+          <strong style="color:#fff;">${esc(o.nome || '')}</strong>
+        </div>
+        <div>
+          <span style="color:var(--muted); display:block; font-size:11px;">Valor Aprovado:</span>
+          <strong style="color:var(--gold); font-size:13px;">${esc(o.total || 'R$ 0,00')}</strong>
+        </div>
+      </div>
+
+      <!-- Rubrica desenhada pelo cliente -->
+      <div style="margin-top:14px;">
+        <span style="color:var(--muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; display:block; margin-bottom:6px;">
+          ✍️ Rubrica / Assinatura do Cliente:
+        </span>
+        ${rubricaImg ? `
+          <div style="background:#ffffff; border-radius:12px; padding:12px; text-align:center; border:2px dashed rgba(201,168,76,0.6); box-shadow:0 4px 15px rgba(0,0,0,0.35);">
+            <img src="${rubricaImg}" style="max-height:140px; max-width:100%; object-fit:contain; filter:contrast(1.1);" alt="Rubrica do Cliente" />
+            <div style="border-top:1px solid #e2e8f0; margin-top:8px; padding-top:4px; font-size:10.5px; color:#64748b; font-family:monospace;">
+              ${esc(nomeAssinante)} • Assinatura Capturada Digitalmente
+            </div>
+          </div>
+        ` : `
+          <div style="background:rgba(0,0,0,0.3); border:1px dashed rgba(255,255,255,0.15); border-radius:10px; padding:16px; text-align:center;">
+            <div style="font-size:24px; margin-bottom:4px;">📱</div>
+            <div style="font-size:12.5px; color:#fff; font-weight:600;">Autorizado via Confirmação Digital</div>
+            <div style="font-size:11.5px; color:var(--muted); margin-top:4px;">
+              Assinante registrado: <strong>${esc(nomeAssinante)}</strong>
+            </div>
+          </div>
+        `}
+      </div>
+
+      <div style="margin-top:14px; background:rgba(0,0,0,0.3); border-radius:8px; padding:8px 12px; font-size:11px; color:var(--muted); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
+        <span>Código de Autenticação: <code style="color:var(--gold-light);">${hashComprovante}</code></span>
+        <span>Canal: <span style="color:#4ade80;">Portal / Assinatura Online</span></span>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button type="button" class="btn btn-gold btn-sm" onclick="fecharModalAssinatura(); visualizarPdfOs(${o.id});" style="flex:1;">
+        👁️ Ver PDF desta O.S.
+      </button>
+      <button type="button" class="btn btn-whats btn-sm" onclick="enviarWhatsOs(${o.id})" style="flex:1;">
+        📱 Reenviar WhatsApp
+      </button>
+    </div>
+  `;
+
+  modal.style.display = 'flex';
+}
+
+function fecharModalAssinatura(e) {
+  if (!e || e.target === document.getElementById('modal-assinatura')) {
+    const m = document.getElementById('modal-assinatura');
+    if (m) m.style.display = 'none';
   }
 }
 
@@ -3134,9 +3441,16 @@ function renderHist() {
 
   el.innerHTML = historico.slice().reverse().map(o => {
     const st = o.status || 'pendente';
+    const numLimpo = String(o.numero || '').replace(/\D/g, '');
+    const temAssinatura = !!(o.assinado_por || o.assinatura_digital || localStorage.getItem('sdv_assinatura_' + numLimpo));
+
     let assinadoBadge = '';
-    if (st === 'aprovado' && o.assinado_por) {
-      assinadoBadge = `<div style="font-size:11.5px;color:#4ade80;margin-top:4px;font-weight:600;">✍️ Autorizado por: ${esc(o.assinado_por)}</div>`;
+    if ((st === 'aprovado' || st === 'modificacao_aprovada') && o.assinado_por) {
+      assinadoBadge = `
+        <div onclick="abrirModalAssinaturaOs(${o.id})" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; background:rgba(74,222,128,0.12); border:1.5px solid rgba(74,222,128,0.35); padding:5px 12px; border-radius:10px; font-size:12px; color:#4ade80; margin-top:6px; font-weight:700; transition:all 0.2s;" title="Toque para visualizar a assinatura digital do cliente">
+          ✍️ Autorizado por: ${esc(o.assinado_por)}
+          <span style="font-size:11px; text-decoration:underline; opacity:0.9; margin-left:3px;">(Ver Assinatura)</span>
+        </div>`;
     } else if (st === 'modificacao_aprovada') {
       assinadoBadge = `<div style="font-size:11.5px;color:#34d399;margin-top:4px;font-weight:700;">✓ Modificação Aprovada pelo Cliente</div>`;
     } else if (st === 'reajustar') {
@@ -3145,14 +3459,19 @@ function renderHist() {
 
     const numVersoes = (o.versoes_pdf && o.versoes_pdf.length) || 1;
     const btnPdf = numVersoes > 1
-      ? `<button class="btn btn-gold btn-sm" onclick="abrirModalVersoesPdf(${o.id})" title="Ver ${numVersoes} versões do PDF (Original e Modificado)">📑 PDFs (${numVersoes} versões)</button>`
-      : `<button class="btn btn-gold btn-sm" onclick="baixarPdfOs(${o.id})" title="Baixar / Compartilhar PDF">📄 PDF</button>`;
+      ? `<button class="btn btn-gold btn-sm" onclick="abrirModalVersoesPdf(${o.id})" title="Ver e visualizar ${numVersoes} versões do PDF">📑 PDFs (${numVersoes} versões)</button>`
+      : `<button class="btn btn-gold btn-sm" onclick="visualizarPdfOs(${o.id})" title="Visualizar e ler PDF na tela">👁️ Visualizar PDF</button>`;
 
     let btnAcaoAprovacao = '';
     if (st === 'reajustar') {
       btnAcaoAprovacao = `<button class="btn btn-sm" onclick="aprovarModificacaoDireto(${o.id})" style="background:rgba(16,185,129,0.18);border:1.5px solid #10b981;color:#34d399;font-weight:800;" title="Aprovar modificações da O.S.">✓ Aprovar Modificação</button>`;
     } else if (st === 'pendente') {
       btnAcaoAprovacao = `<button class="btn btn-sm" onclick="aprovarOsDireto(${o.id})" style="background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.6);color:#25D366;font-weight:700;" title="Aprovar com 1 toque">✅ Aprovar</button>`;
+    }
+
+    let btnVerAssinatura = '';
+    if (temAssinatura || o.assinado_por) {
+      btnVerAssinatura = `<button class="btn btn-sm" onclick="abrirModalAssinaturaOs(${o.id})" style="background:rgba(52,211,153,0.18);border:1.5px solid #10b981;color:#34d399;font-weight:800;" title="Visualizar a assinatura digital do cliente">✍️ Assinatura</button>`;
     }
 
     return `
@@ -3171,6 +3490,7 @@ function renderHist() {
         <div class="hist-total">${esc(o.total || 'R$ 0,00')}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           ${btnAcaoAprovacao}
+          ${btnVerAssinatura}
           ${btnPdf}
           <button class="btn btn-whats btn-sm" onclick="enviarWhatsOs(${o.id})" title="Enviar WhatsApp com links de aprovação">📱 WhatsApp</button>
           <button class="btn btn-sm" onclick="abrirModalPortalOs(${o.id})" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.5);color:var(--gold-light);font-weight:800;" title="Gerenciar Portal do Cliente">🚀 Portal</button>
@@ -4769,11 +5089,26 @@ function sincronizarStatusContratos() {
       if ((c.assinado || c.status === 'aprovado') && c.numero_os) {
         const normC = norm(c.numero_os);
         const idx = historico.findIndex(o => norm(o.numero) === normC);
-        if (idx !== -1 && historico[idx].status !== 'aprovado') {
-          historico[idx].status = 'aprovado';
-          historico[idx].assinado_por = c.assinante_nome || c.cliente || 'Confirmado via WhatsApp';
-          historico[idx].assinado_em = c.assinado_em || new Date().toISOString();
-          alterou = true;
+        if (idx !== -1) {
+          const jaTinhaRubrica = !!(historico[idx].assinatura_digital && historico[idx].assinatura_digital.rubrica);
+          if (historico[idx].status !== 'aprovado' || (!jaTinhaRubrica && c.assinatura_base64)) {
+            historico[idx].status = 'aprovado';
+            historico[idx].assinado_por = c.assinante_nome || c.cliente || 'Confirmado via WhatsApp';
+            historico[idx].assinado_em = c.assinado_em || new Date().toISOString();
+            if (c.assinatura_base64) {
+              historico[idx].assinatura_digital = {
+                nome: c.assinante_nome || c.cliente || 'Cliente',
+                rubrica: c.assinatura_base64,
+                data: c.assinado_em || new Date().toISOString(),
+                os: c.numero_os
+              };
+              const nLimpo = String(c.numero_os).replace(/\D/g, '');
+              try {
+                localStorage.setItem('sdv_assinatura_' + nLimpo, JSON.stringify(historico[idx].assinatura_digital));
+              } catch(e) {}
+            }
+            alterou = true;
+          }
         }
       }
     });
