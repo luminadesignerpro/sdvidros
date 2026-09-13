@@ -9,7 +9,7 @@
   <meta name="description" content="SD Vidros – Gestão de orçamentos por m², clientes e contratos. Itaitinga - CE.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Caveat:wght@700&display=swap" rel="stylesheet">
   <style>
     :root {
       --gold: #C9A84C;
@@ -3298,6 +3298,14 @@ function abrirModalAssinaturaOs(id, versaoNum = null) {
       if (mapa[numLimpo]) reg = mapa[numLimpo];
     } catch (e) {}
   }
+  if (!reg && (o.assinatura_base64 || o.rubrica_base64 || (v && v.assinatura_base64))) {
+    reg = {
+      nome: o.assinado_por || (v && v.assinado_por) || o.nome || 'Cliente',
+      rubrica: o.assinatura_base64 || o.rubrica_base64 || (v && v.assinatura_base64) || '',
+      data: o.assinado_em || (v && v.data) || o.data_orc || '',
+      os: o.numero
+    };
+  }
   if (!reg && typeof listaContratosCache !== 'undefined' && Array.isArray(listaContratosCache)) {
     const c = listaContratosCache.find(x => String(x.numero_os || '').replace(/\D/g, '') === numLimpo && x.assinado);
     if (c) {
@@ -3324,7 +3332,7 @@ function abrirModalAssinaturaOs(id, versaoNum = null) {
     dataHora = (v && v.data) || o.data_orc || new Date().toLocaleDateString('pt-BR');
   }
 
-  const rubricaImg = (reg && reg.rubrica) ? reg.rubrica : '';
+  const rubricaImg = (reg && reg.rubrica) ? reg.rubrica : (o.assinatura_base64 || o.rubrica_base64 || (v && v.assinatura_base64) || '');
   const hashComprovante = 'SDV-' + numLimpo.padStart(4, '0') + '-' + Math.abs((o.id || 1000) * 31).toString(16).toUpperCase();
   const valorTotal = (v && v.total) || o.total || 'R$ 0,00';
   const versaoStr = v ? ` (${v.titulo || 'Versão ' + v.versao})` : '';
@@ -3364,30 +3372,66 @@ function abrirModalAssinaturaOs(id, versaoNum = null) {
         </div>
       </div>
 
-      <!-- Rubrica desenhada pelo cliente -->
+      <!-- Rubrica desenhada pelo cliente ou Assinatura Digitalizada -->
       <div style="margin-top:14px;">
         <span style="color:var(--muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; display:block; margin-bottom:6px;">
           ✍️ Rubrica / Assinatura do Cliente:
         </span>
+        
+        <div id="area-rubrica-exibicao">
         ${rubricaImg ? `
-          <div style="background:#ffffff; border-radius:12px; padding:12px; text-align:center; border:2px dashed rgba(201,168,76,0.6); box-shadow:0 4px 15px rgba(0,0,0,0.35);">
-            <img src="${rubricaImg}" style="max-height:140px; max-width:100%; object-fit:contain; filter:contrast(1.1);" alt="Rubrica do Cliente" />
-            <div style="border-top:1px solid #e2e8f0; margin-top:8px; padding-top:4px; font-size:10.5px; color:#64748b; font-family:monospace;">
-              ${esc(nomeAssinante)} • Assinatura Capturada Digitalmente
+          <div style="background:#ffffff; border-radius:12px; padding:14px; text-align:center; border:2px dashed rgba(201,168,76,0.7); box-shadow:0 6px 20px rgba(0,0,0,0.4);">
+            <div style="display:inline-block; max-width:100%; min-height:80px;">
+              <img id="img-rubrica-preview" src="${rubricaImg}" style="max-height:130px; max-width:100%; object-fit:contain; filter:contrast(1.15);" alt="Assinatura Digital do Cliente" />
+            </div>
+            <div style="border-top:1px solid #e2e8f0; margin-top:8px; padding-top:6px; font-size:11px; color:#475569; font-weight:600;">
+              ✍️ ${esc(nomeAssinante)} • Assinatura Capturada Digitalmente
             </div>
           </div>
         ` : `
-          <div style="background:rgba(0,0,0,0.3); border:1px dashed rgba(255,255,255,0.15); border-radius:10px; padding:16px; text-align:center;">
-            <div style="font-size:28px; margin-bottom:6px;">✍️</div>
-            <div style="font-size:13px; color:#fff; font-weight:700;">Autorizado por Confirmação Digital</div>
-            <div style="font-size:12px; color:#34d399; margin-top:4px; font-weight:600;">
-              Assinante registrado: <strong>${esc(nomeAssinante)}</strong>
+          <div style="background:#ffffff; border-radius:12px; padding:18px 14px; text-align:center; border:2px dashed rgba(201,168,76,0.7); box-shadow:0 6px 20px rgba(0,0,0,0.4); position:relative; overflow:hidden;">
+            <div style="position:absolute; right:10px; top:10px; border:1.5px solid rgba(16,185,129,0.4); color:#059669; font-size:9px; font-weight:800; padding:2px 6px; border-radius:6px; transform:rotate(6deg); text-transform:uppercase; pointer-events:none; background:rgba(209,250,229,0.5);">
+              ✓ Autenticado
             </div>
-            <div style="font-size:11px; color:var(--muted); margin-top:4px;">
-              Autenticado via WhatsApp / Portal do Cliente
+            <div style="font-family:'Caveat', cursive, sans-serif; font-size:38px; color:#0f172a; font-weight:700; transform:rotate(-2deg); line-height:1.1; margin:6px 0; letter-spacing:0.5px;">
+              ${esc(nomeAssinante)}
+            </div>
+            <div style="width:65%; max-width:200px; height:1.5px; background:linear-gradient(90deg, transparent, #475569, transparent); margin:4px auto 8px auto;"></div>
+            <div style="font-size:10.5px; color:#64748b; font-weight:600;">
+              Assinatura Eletrônica Certificada via WhatsApp / Portal
             </div>
           </div>
         `}
+        </div>
+
+        <!-- Botões de ação rápida para desenhar ou reenviar -->
+        <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-sm" onclick="alternarDesenhoAssinaturaModal(${o.id}, ${versaoNum || 'null'})" style="flex:1; background:rgba(201,168,76,0.18); border:1px solid rgba(201,168,76,0.5); color:var(--gold-light); font-weight:700; font-size:11.5px; padding:7px 10px; border-radius:8px;">
+            ✍️ ${rubricaImg ? 'Redesenhar com o Dedo' : 'Desenhar Rubrica com o Dedo'}
+          </button>
+          <button type="button" class="btn btn-sm" onclick="enviarLinkAssinarComDedo(${o.id})" style="flex:1; background:rgba(37,211,102,0.18); border:1px solid rgba(37,211,102,0.5); color:#4ade80; font-weight:700; font-size:11.5px; padding:7px 10px; border-radius:8px;">
+            📱 Link p/ Cliente Assinar
+          </button>
+        </div>
+
+        <!-- Box interativo de desenho na tela (aberto via botão) -->
+        <div id="box-desenho-assinatura-modal" style="display:none; margin-top:10px; background:#1c1c28; border:1px solid rgba(201,168,76,0.4); border-radius:12px; padding:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-size:11px; font-weight:800; color:var(--gold-light);">✍️ Desenhe sua rubrica com o dedo abaixo:</span>
+            <button type="button" onclick="limparCanvasAssinaturaModal()" style="background:none; border:none; color:#f87171; font-size:11px; font-weight:700; cursor:pointer;">🧹 Limpar</button>
+          </div>
+          <div style="background:#ffffff; border-radius:8px; border:2px solid #c9a84c; overflow:hidden; touch-action:none;">
+            <canvas id="canvas-rubrica-modal" width="460" height="150" style="width:100%; height:130px; display:block; background:#ffffff; cursor:crosshair;"></canvas>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:10px;">
+            <button type="button" class="btn btn-gold btn-sm" onclick="salvarCanvasAssinaturaModal(${o.id}, ${versaoNum || 'null'})" style="flex:1; font-weight:800;">
+              💾 Salvar Assinatura na O.S.
+            </button>
+            <button type="button" class="btn btn-sec btn-sm" onclick="alternarDesenhoAssinaturaModal(${o.id})" style="padding:6px 12px;">
+              Cancelar
+            </button>
+          </div>
+        </div>
       </div>
 
       <div style="margin-top:14px; background:rgba(0,0,0,0.3); border-radius:8px; padding:8px 12px; font-size:11px; color:var(--muted); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
@@ -3408,6 +3452,200 @@ function abrirModalAssinaturaOs(id, versaoNum = null) {
 
   modal.style.zIndex = '99999';
   modal.style.display = 'flex';
+
+  // Buscar assinatura em segundo plano no Supabase se ainda não tiver imagem de rubrica
+  if (!rubricaImg) {
+    fetch(`/api/contrato?os=${encodeURIComponent(numLimpo)}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d && d.assinatura_base64) {
+          o.assinatura_base64 = d.assinatura_base64;
+          o.rubrica_base64 = d.assinatura_base64;
+          if (v) v.assinatura_base64 = d.assinatura_base64;
+          const area = document.getElementById('area-rubrica-exibicao');
+          if (area) {
+            area.innerHTML = `
+              <div style="background:#ffffff; border-radius:12px; padding:14px; text-align:center; border:2px dashed rgba(201,168,76,0.7); box-shadow:0 6px 20px rgba(0,0,0,0.4);">
+                <div style="display:inline-block; max-width:100%; min-height:80px;">
+                  <img id="img-rubrica-preview" src="${d.assinatura_base64}" style="max-height:130px; max-width:100%; object-fit:contain; filter:contrast(1.15);" alt="Assinatura Digital do Cliente" />
+                </div>
+                <div style="border-top:1px solid #e2e8f0; margin-top:8px; padding-top:6px; font-size:11px; color:#475569; font-weight:600;">
+                  ✍️ ${esc(d.assinante_nome || nomeAssinante)} • Assinatura Capturada Digitalmente
+                </div>
+              </div>
+            `;
+          }
+          try {
+            const regAtualizado = {
+              nome: d.assinante_nome || nomeAssinante,
+              rubrica: d.assinatura_base64,
+              data: d.assinado_em || o.assinado_em,
+              os: o.numero
+            };
+            localStorage.setItem('sdv_assinatura_' + numLimpo, JSON.stringify(regAtualizado));
+            salvarHistorico();
+          } catch (e) {}
+        }
+      })
+      .catch(() => {});
+  }
+}
+
+let modalCanvasDrawing = false;
+let modalCanvasCtx = null;
+let modalCanvasHasStroke = false;
+
+function iniciarCanvasAssinaturaModal() {
+  const canvas = document.getElementById('canvas-rubrica-modal');
+  if (!canvas) return;
+  modalCanvasCtx = canvas.getContext('2d');
+  modalCanvasCtx.strokeStyle = '#0f172a';
+  modalCanvasCtx.lineWidth = 3;
+  modalCanvasCtx.lineCap = 'round';
+  modalCanvasCtx.lineJoin = 'round';
+  modalCanvasHasStroke = false;
+
+  function getPos(e) {
+    const r = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / r.width;
+    const scaleY = canvas.height / r.height;
+    if (e.touches && e.touches.length > 0) {
+      return {
+        x: (e.touches[0].clientX - r.left) * scaleX,
+        y: (e.touches[0].clientY - r.top) * scaleY
+      };
+    }
+    return {
+      x: (e.clientX - r.left) * scaleX,
+      y: (e.clientY - r.top) * scaleY
+    };
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    modalCanvasDrawing = true;
+    modalCanvasHasStroke = true;
+    const pos = getPos(e);
+    modalCanvasCtx.beginPath();
+    modalCanvasCtx.moveTo(pos.x, pos.y);
+  }
+
+  function moveDraw(e) {
+    if (!modalCanvasDrawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    modalCanvasCtx.lineTo(pos.x, pos.y);
+    modalCanvasCtx.stroke();
+  }
+
+  function endDraw(e) {
+    if (!modalCanvasDrawing) return;
+    e.preventDefault();
+    modalCanvasDrawing = false;
+  }
+
+  canvas.onmousedown = startDraw;
+  canvas.onmousemove = moveDraw;
+  window.onmouseup = function() { modalCanvasDrawing = false; };
+
+  canvas.ontouchstart = startDraw;
+  canvas.ontouchmove = moveDraw;
+  canvas.ontouchend = endDraw;
+}
+
+function alternarDesenhoAssinaturaModal(id, versaoNum) {
+  const box = document.getElementById('box-desenho-assinatura-modal');
+  if (!box) return;
+  if (box.style.display === 'none' || !box.style.display) {
+    box.style.display = 'block';
+    setTimeout(() => {
+      iniciarCanvasAssinaturaModal();
+    }, 60);
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+function limparCanvasAssinaturaModal() {
+  const canvas = document.getElementById('canvas-rubrica-modal');
+  if (!canvas || !modalCanvasCtx) return;
+  modalCanvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+  modalCanvasHasStroke = false;
+}
+
+async function salvarCanvasAssinaturaModal(id, versaoNum) {
+  const canvas = document.getElementById('canvas-rubrica-modal');
+  if (!canvas || !modalCanvasHasStroke) {
+    alert('Por favor, desenhe sua rubrica no espaço indicado antes de salvar.');
+    return;
+  }
+  const dataUrl = canvas.toDataURL('image/png');
+  const o = historico.find(x => String(x.id) === String(id));
+  if (!o) return;
+
+  const numLimpo = String(o.numero || '').replace(/\D/g, '');
+  const nomeAssinante = o.assinado_por || o.nome || 'Cliente';
+
+  o.assinatura_base64 = dataUrl;
+  o.rubrica_base64 = dataUrl;
+  o.assinado = true;
+  o.status = 'Aprovado';
+  if (!o.assinado_em) o.assinado_em = new Date().toISOString();
+
+  let v = null;
+  if (versaoNum && o.versoes_pdf) {
+    v = o.versoes_pdf.find(x => x.versao === versaoNum);
+    if (v) {
+      v.assinatura_base64 = dataUrl;
+      v.status = 'Aprovado';
+    }
+  }
+
+  const reg = {
+    nome: nomeAssinante,
+    rubrica: dataUrl,
+    data: o.assinado_em,
+    os: o.numero
+  };
+  try {
+    localStorage.setItem('sdv_assinatura_' + numLimpo, JSON.stringify(reg));
+    const mapa = JSON.parse(localStorage.getItem('sdv_assinaturas_map') || '{}');
+    mapa[numLimpo] = reg;
+    localStorage.setItem('sdv_assinaturas_map', JSON.stringify(mapa));
+    salvarHistorico();
+  } catch (e) { console.warn('Erro ao salvar localmente:', e); }
+
+  try {
+    fetch('/api/assinar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: o.id,
+        numero_os: numLimpo,
+        assinante_nome: nomeAssinante,
+        assinatura_base64: dataUrl,
+        sobrescrever: true
+      })
+    }).catch(() => {});
+  } catch (e) {}
+
+  alert('Assinatura salva com sucesso!');
+  abrirModalAssinaturaOs(id, versaoNum);
+}
+
+function enviarLinkAssinarComDedo(id) {
+  const o = historico.find(x => String(x.id) === String(id));
+  if (!o) return;
+  const numLimpo = String(o.numero || '').replace(/\D/g, '');
+  const urlAssinatura = `https://sdvidros.vercel.app/assinar.html?os=${numLimpo}`;
+  const msg = `*SD Vidros - Assinatura Digital da O.S.*\n\nOlá, *${o.nome || 'Cliente'}*!\nPara assinar sua Ordem de Serviço *#${o.numero}* desenhando com o dedo na tela do seu celular, toque no link seguro abaixo:\n\n👉 ${urlAssinatura}\n\nSua assinatura será registrada e anexada automaticamente!`;
+  
+  let fone = String(o.fone || '').replace(/\D/g, '');
+  if (fone.length >= 10 && !fone.startsWith('55')) fone = '55' + fone;
+  const linkWhats = fone.length >= 12
+    ? `https://api.whatsapp.com/send?phone=${fone}&text=${encodeURIComponent(msg)}`
+    : `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+  window.open(linkWhats, '_blank');
 }
 
 function fecharModalAssinatura(e) {

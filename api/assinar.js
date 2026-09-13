@@ -3,8 +3,8 @@ const { getClient } = require('./_supabase');
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
   try {
-    const { id, assinante_nome, assinatura_base64 } = req.body || {};
-    if (!id || !assinante_nome || !assinatura_base64) {
+    const { id, numero_os, assinante_nome, assinatura_base64, sobrescrever } = req.body || {};
+    if ((!id && !numero_os) || !assinante_nome || !assinatura_base64) {
       return res.status(400).json({ error: 'Dados incompletos para assinatura.' });
     }
 
@@ -15,11 +15,14 @@ module.exports = async (req, res) => {
       return res.status(503).json({ error: cfgErr.message });
     }
 
-    const { data: existente, error: errBusca } = await supabase
-      .from('contratos')
-      .select('assinado')
-      .eq('id', id)
-      .single();
+    let query = supabase.from('contratos').select('id, assinado, assinatura_base64');
+    if (id) {
+      query = query.eq('id', id);
+    } else {
+      query = query.eq('numero_os', numero_os);
+    }
+    const { data: existente, error: errBusca } = await query.maybeSingle();
+
     if (errBusca) {
       const msg = errBusca.message || '';
       if (msg.includes('fetch failed') || msg.includes('ENOTFOUND')) {
@@ -27,19 +30,24 @@ module.exports = async (req, res) => {
       }
       throw errBusca;
     }
-    if (existente && existente.assinado) {
-      return res.status(409).json({ error: 'Este contrato já foi assinado anteriormente.' });
+    if (existente && existente.assinado && existente.assinatura_base64 && !sobrescrever) {
+      return res.status(409).json({ error: 'Este contrato já possui assinatura registrada.' });
     }
 
-    const { error } = await supabase
-      .from('contratos')
-      .update({
-        assinante_nome,
-        assinatura_base64,
-        assinado: true,
-        assinado_em: new Date().toISOString()
-      })
-      .eq('id', id);
+    const targetId = existente ? existente.id : id;
+    let upQuery = supabase.from('contratos').update({
+      assinante_nome,
+      assinatura_base64,
+      assinado: true,
+      assinado_em: new Date().toISOString()
+    });
+
+    if (targetId) {
+      upQuery = upQuery.eq('id', targetId);
+    } else {
+      upQuery = upQuery.eq('numero_os', numero_os);
+    }
+    const { error } = await upQuery;
 
     if (error) {
       const msg = error.message || '';

@@ -53,8 +53,9 @@ module.exports = async (req, res) => {
 
     if (Array.isArray(dbData)) {
       dbData.forEach(c => {
-        if (c && c.numero_os && !contratosMap.has(c.numero_os)) {
-          contratosMap.set(c.numero_os, c);
+        if (c && c.numero_os) {
+          const anterior = contratosMap.get(c.numero_os) || {};
+          contratosMap.set(c.numero_os, { ...anterior, ...c });
         }
       });
     }

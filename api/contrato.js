@@ -3,8 +3,8 @@ const { getClient } = require('./_supabase');
 module.exports = async (req, res) => {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Método não permitido' });
   try {
-    const { id } = req.query;
-    if (!id) return res.status(400).json({ error: 'ID não informado.' });
+    const { id, os } = req.query;
+    if (!id && !os) return res.status(400).json({ error: 'ID ou OS não informado.' });
 
     let supabase;
     try {
@@ -13,11 +13,19 @@ module.exports = async (req, res) => {
       return res.status(503).json({ error: cfgErr.message });
     }
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('contratos')
-      .select('numero_os, cliente_nome, texto, assinado, assinante_nome, assinado_em, assinatura_base64')
-      .eq('id', id)
-      .single();
+      .select('id, numero_os, cliente_nome, texto, assinado, assinante_nome, assinado_em, assinatura_base64');
+
+    if (id) {
+      query = query.eq('id', id);
+    } else if (os) {
+      const numLimpo = String(os).replace(/\D/g, '');
+      const numHash = '#' + numLimpo.padStart(4, '0');
+      query = query.or(`numero_os.eq.${numHash},numero_os.eq.${numLimpo},numero_os.ilike.%${numLimpo}%`);
+    }
+
+    const { data: records, error } = await query.order('id', { ascending: false }).limit(1);
 
     if (error) {
       const msg = error.message || '';
@@ -26,6 +34,7 @@ module.exports = async (req, res) => {
       }
       throw error;
     }
+    const data = (records && records[0]) || null;
     if (!data) return res.status(404).json({ error: 'Contrato não encontrado.' });
     res.status(200).json(data);
   } catch (e) {
