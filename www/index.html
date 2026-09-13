@@ -347,7 +347,80 @@
     }
     .status-pill.pendente { background: rgba(201,168,76,0.14); color: var(--gold-light); border-color: rgba(201,168,76,0.3); }
     .status-pill.aprovado { background: rgba(37,211,102,0.15); color: #4ade80; border-color: rgba(37,211,102,0.35); }
+    .status-pill.reajustar { background: rgba(245,158,11,0.18); color: #fbbf24; border-color: rgba(245,158,11,0.5); }
+    .status-pill.modificacao_aprovada { background: rgba(16,185,129,0.22); color: #34d399; border-color: #10b981; font-weight:800; }
     .status-pill.recusado { background: rgba(224,68,68,0.15); color: #ff8585; border-color: rgba(224,68,68,0.35); }
+
+    /* ── OPÇÕES DE STATUS NA EDIÇÃO DE O.S. ── */
+    .btn-status-choice {
+      padding: 9px 8px;
+      font-size: 11.5px;
+      font-weight: 700;
+      border-radius: 9px;
+      border: 1.5px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.35);
+      color: var(--text2);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s ease;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .btn-status-choice:hover {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+    .btn-status-choice.selected[data-status="reajustar"] {
+      background: rgba(245,158,11,0.22);
+      border-color: #f59e0b;
+      color: #fbbf24;
+      box-shadow: 0 0 10px rgba(245,158,11,0.3);
+    }
+    .btn-status-choice.selected[data-status="modificacao_aprovada"] {
+      background: rgba(16,185,129,0.22);
+      border-color: #10b981;
+      color: #34d399;
+      box-shadow: 0 0 10px rgba(16,185,129,0.3);
+    }
+    .btn-status-choice.selected[data-status="aprovado"] {
+      background: rgba(37,211,102,0.22);
+      border-color: #25D366;
+      color: #4ade80;
+      box-shadow: 0 0 10px rgba(37,211,102,0.3);
+    }
+    .btn-status-choice.selected[data-status="pendente"] {
+      background: rgba(201,168,76,0.22);
+      border-color: var(--gold);
+      color: var(--gold-light);
+      box-shadow: 0 0 10px rgba(201,168,76,0.3);
+    }
+
+    /* ── CARDS DE HISTÓRICO DE VERSÕES DO PDF ── */
+    .versao-pdf-card {
+      background: rgba(18,24,38,0.9);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .versao-pdf-card.original {
+      border-color: rgba(201,168,76,0.45);
+      background: linear-gradient(135deg, rgba(201,168,76,0.08), rgba(18,24,38,0.95));
+    }
+    .versao-pdf-card.reajuste {
+      border-color: rgba(245,158,11,0.45);
+      background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(18,24,38,0.95));
+    }
+    .versao-pdf-card.modificado-aprovado {
+      border-color: rgba(16,185,129,0.45);
+      background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(18,24,38,0.95));
+    }
 
     /* ── MÓDULO: FUNCIONÁRIOS & PONTO ── */
     .ponto-header {
@@ -933,6 +1006,31 @@
     <!-- Send / Save -->
     <div class="card">
       <div class="card-title">📤 Enviar / Salvar Orçamento</div>
+
+      <!-- SELETOR DE STATUS EM CASO DE MODIFICAÇÕES (EDIÇÃO) -->
+      <div id="edicao-status-box" style="display:none;margin-bottom:14px;padding:12px;background:rgba(201,168,76,0.08);border:1.5px solid rgba(201,168,76,0.35);border-radius:14px;">
+        <label style="font-size:11.5px;font-weight:800;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <span>🔄</span> Status da O.S. após Modificações:
+        </label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button type="button" class="btn-status-choice selected" data-status="reajustar" id="btn-choice-reajustar" onclick="selecionarStatusEdicao('reajustar')">
+            🟠 Reajustar Detalhes
+          </button>
+          <button type="button" class="btn-status-choice" data-status="modificacao_aprovada" id="btn-choice-modificacao_aprovada" onclick="selecionarStatusEdicao('modificacao_aprovada')">
+            🟢 Modificação Aprovada
+          </button>
+          <button type="button" class="btn-status-choice" data-status="aprovado" id="btn-choice-aprovado" onclick="selecionarStatusEdicao('aprovado')">
+            ✅ Manter Aprovado
+          </button>
+          <button type="button" class="btn-status-choice" data-status="pendente" id="btn-choice-pendente" onclick="selecionarStatusEdicao('pendente')">
+            🟡 Aguardando Resposta
+          </button>
+        </div>
+        <div id="edicao-status-hint" style="font-size:11px;color:var(--text2);margin-top:8px;line-height:1.4;">
+          💡 <strong>Reajustar Detalhes:</strong> O PDF anterior original fica arquivado, gerando uma nova versão para envio e nova assinatura digital.
+        </div>
+      </div>
+
       <button class="btn btn-gold btn-full" onclick="enviarOuBaixarPdfOrcamento()" style="font-size:15px;padding:15px;" id="btn-pdf-orc">
         <span id="pdf-orc-spinner" class="spinner" style="display:none"></span>
         <span id="pdf-orc-btn-text">📄 Enviar PDF do Orçamento</span>
@@ -1398,6 +1496,25 @@
       <button class="modal-close" onclick="fecharModalAssinatura()">✕</button>
     </div>
     <div id="modal-assinatura-conteudo"></div>
+  </div>
+<!-- ══ MODAL VERSÕES DE PDF DO ORÇAMENTO / O.S. (PROTEÇÃO DO ORIGINAL ASSINADO) ══ -->
+<div id="modal-versoes-pdf" class="modal-overlay" style="display:none" onclick="fecharModalVersoesPdf(event)">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:560px;">
+    <div class="modal-title">
+      📑 Versões do PDF da O.S. <span id="modal-versoes-os-num" style="color:var(--gold-light);">#0001</span>
+      <button class="modal-close" onclick="fecharModalVersoesPdf()">✕</button>
+    </div>
+    <div style="font-size:12.5px;color:var(--text2);margin-bottom:14px;line-height:1.5;">
+      🛡️ <strong>Histórico Seguro:</strong> O primeiro PDF assinado nunca é apagado. Abaixo você pode acessar tanto o contrato original quanto a nova versão com modificações:
+    </div>
+
+    <div id="modal-versoes-lista" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+      <!-- Gerado dinamicamente via JS -->
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;">
+      <button type="button" class="btn btn-sec btn-sm" onclick="fecharModalVersoesPdf()">✕ Fechar</button>
+    </div>
   </div>
 </div>
 
@@ -2595,6 +2712,30 @@ function enviarWhatsApp() {
 // ══════════════════════════════════════════════
 //  ORDERS – SAVE / EDIT / DELETE / STATUS
 // ══════════════════════════════════════════════
+let statusEdicaoSelecionado = 'reajustar';
+
+function selecionarStatusEdicao(st) {
+  statusEdicaoSelecionado = st;
+  document.querySelectorAll('.btn-status-choice').forEach(b => {
+    b.classList.toggle('selected', b.getAttribute('data-status') === st);
+  });
+  const hint = document.getElementById('edicao-status-hint');
+  const btnAssinaturaTxt = document.getElementById('orc-assinatura-btn-text');
+  if (st === 'reajustar') {
+    if (hint) hint.innerHTML = '💡 <strong>Reajustar Detalhes:</strong> O PDF anterior original fica arquivado. Gera uma nova versão com as modificações e prepara o reenvio da assinatura digital.';
+    if (btnAssinaturaTxt) btnAssinaturaTxt.textContent = '✍️ Reenviar Assinatura Digital';
+  } else if (st === 'modificacao_aprovada') {
+    if (hint) hint.innerHTML = '💡 <strong>Modificação Aprovada:</strong> Salva as alterações na O.S. mantendo o histórico de versões e marca o serviço como modificado e aprovado pelo cliente.';
+    if (btnAssinaturaTxt) btnAssinaturaTxt.textContent = '✍️ Reenviar Assinatura Digital (Opcional)';
+  } else if (st === 'aprovado') {
+    if (hint) hint.innerHTML = '💡 <strong>Manter Aprovado:</strong> Salva as alterações na O.S. mantendo o status de aprovado.';
+    if (btnAssinaturaTxt) btnAssinaturaTxt.textContent = '✍️ Reenviar Assinatura Digital';
+  } else {
+    if (hint) hint.innerHTML = '💡 <strong>Aguardando Resposta:</strong> Retorna o orçamento para o status pendente aguardando validação.';
+    if (btnAssinaturaTxt) btnAssinaturaTxt.textContent = '✍️ Enviar para Assinatura Digital';
+  }
+}
+
 function salvarOrdem() {
   const o = getOrc();
   if (!o.nome && !o.itens.length) { alert('Preencha pelo menos o nome do cliente ou um item antes de salvar.'); return; }
@@ -2620,12 +2761,74 @@ function salvarOrdem() {
 
     if (editandoOsId) {
       const idx = historico.findIndex(x => x.id===editandoOsId);
-      if (idx!==-1) historico[idx] = {...historico[idx], nome:o.nome, total:o.total, data_orc:o.data, dados:o, status: historico[idx].status || 'pendente'};
+      if (idx!==-1) {
+        const ordAntiga = historico[idx];
+        const novoStatus = statusEdicaoSelecionado || 'reajustar';
+
+        // 🛡️ PRESERVAÇÃO DE VERSÕES: Nunca apaga o primeiro PDF assinado!
+        if (!ordAntiga.versoes_pdf || !ordAntiga.versoes_pdf.length) {
+          ordAntiga.versoes_pdf = [{
+            versao: 1,
+            titulo: 'v1 (Original' + (ordAntiga.assinado_por ? ' Assinado' : '') + ')',
+            data: ordAntiga.data_orc || o.data,
+            total: ordAntiga.total,
+            status: ordAntiga.status || 'aprovado',
+            assinado_por: ordAntiga.assinado_por || '',
+            assinado_em: ordAntiga.assinado_em || '',
+            dados: JSON.parse(JSON.stringify(ordAntiga.dados || {}))
+          }];
+        }
+
+        // Registra nova versão com as modificações
+        const proximaVersao = ordAntiga.versoes_pdf.length + 1;
+        ordAntiga.versoes_pdf.push({
+          versao: proximaVersao,
+          titulo: `v${proximaVersao} (${novoStatus === 'modificacao_aprovada' ? 'Modificação Aprovada' : 'Modificações'} - ${o.data})`,
+          data: o.data,
+          total: o.total,
+          status: novoStatus,
+          dados: JSON.parse(JSON.stringify(o))
+        });
+
+        historico[idx] = {
+          ...ordAntiga,
+          nome: o.nome,
+          total: o.total,
+          data_orc: o.data,
+          dados: o,
+          status: novoStatus,
+          versoes_pdf: ordAntiga.versoes_pdf
+        };
+
+        if (novoStatus === 'reajustar') {
+          historico[idx].assinado_por = 'Aguardando Nova Assinatura';
+        } else if (novoStatus === 'modificacao_aprovada') {
+          historico[idx].assinado_por = (historico[idx].assinado_por && !historico[idx].assinado_por.includes('Modificação'))
+            ? historico[idx].assinado_por + ' (Modificação Aprovada)'
+            : 'Modificação Aprovada pelo Cliente';
+        }
+      }
       save(K.orders, historico);
-      alert('✅ Ordem '+o.numero+' atualizada com sucesso!');
+      alert('✅ Ordem ' + o.numero + ' atualizada com sucesso!\n🛡️ Histórico protegido: o PDF original assinado continua arquivado, e a nova versão com modificações foi gerada.');
       cancelarEdicaoOs();
     } else {
-      const ord = { id: Date.now(), numero:o.numero, nome:o.nome, total:o.total, data_orc:o.data, dados:o, status: 'pendente' };
+      const ord = {
+        id: Date.now(),
+        numero: o.numero,
+        nome: o.nome,
+        total: o.total,
+        data_orc: o.data,
+        dados: o,
+        status: 'pendente',
+        versoes_pdf: [{
+          versao: 1,
+          titulo: 'v1 (Original)',
+          data: o.data,
+          total: o.total,
+          status: 'pendente',
+          dados: JSON.parse(JSON.stringify(o))
+        }]
+      };
       historico.push(ord);
       save(K.orders, historico);
       proxNumero++;
@@ -2644,6 +2847,11 @@ function cancelarEdicaoOs() {
   editandoOsId = null;
   document.getElementById('btn-salvar-os').innerHTML = '✅ Salvar Ordem de Serviço';
   document.getElementById('btn-cancelar-os').style.display = 'none';
+  const statusBox = document.getElementById('edicao-status-box');
+  if (statusBox) statusBox.style.display = 'none';
+  const btnAssinaturaTxt = document.getElementById('orc-assinatura-btn-text');
+  if (btnAssinaturaTxt) btnAssinaturaTxt.textContent = '✍️ Enviar para Assinatura Digital';
+
   ['o-nome','o-cnpj','o-tel','o-bairro','o-end','o-num','o-apto','o-resp','o-prazo','o-garantia','o-obs','forma-outro']
     .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('itens-lista').innerHTML = '';
@@ -2672,8 +2880,24 @@ function editarOs(id) {
   } else {
     addItem();
   }
+
+  // Configurações do modo de edição de O.S. com modificações
+  const foiAprovadoOuReajuste = o.status === 'aprovado' || o.status === 'modificacao_aprovada' || o.status === 'reajustar' || !!o.assinado_por;
+  const statusBox = document.getElementById('edicao-status-box');
+  if (statusBox) statusBox.style.display = 'block';
+
+  // Pré-seleciona status sugerido
+  const stSugerido = (o.status === 'aprovado' || o.status === 'reajustar') ? 'reajustar' : (o.status || 'reajustar');
+  selecionarStatusEdicao(stSugerido);
+
   document.getElementById('btn-salvar-os').innerHTML = '💾 Atualizar Ordem de Serviço';
   document.getElementById('btn-cancelar-os').style.display = 'block';
+
+  const btnAssinaturaTxt = document.getElementById('orc-assinatura-btn-text');
+  if (btnAssinaturaTxt) {
+    btnAssinaturaTxt.textContent = foiAprovadoOuReajuste ? '✍️ Reenviar Assinatura Digital' : '✍️ Enviar para Assinatura Digital';
+  }
+
   goTab('orcamento');
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -2687,12 +2911,12 @@ function deletarOs(id) {
 function alternarStatusOs(id) {
   const idx = historico.findIndex(x => x.id === id);
   if (idx === -1) return;
-  const ordem = ['pendente', 'aprovado', 'recusado'];
+  const ordem = ['pendente', 'aprovado', 'reajustar', 'modificacao_aprovada', 'recusado'];
   const atual = historico[idx].status || 'pendente';
   const prox = ordem[(ordem.indexOf(atual) + 1) % ordem.length];
   historico[idx].status = prox;
-  if (prox === 'aprovado') {
-    historico[idx].assinado_por = historico[idx].assinado_por || 'Aprovado Manualmente';
+  if (prox === 'aprovado' || prox === 'modificacao_aprovada') {
+    historico[idx].assinado_por = historico[idx].assinado_por || (prox === 'modificacao_aprovada' ? 'Modificação Aprovada' : 'Aprovado Manualmente');
     historico[idx].assinado_em = new Date().toISOString();
     // Sincroniza em segundo plano com a API
     fetch('/api/aprovar-orcamento', {
@@ -2707,6 +2931,104 @@ function alternarStatusOs(id) {
   }
   save(K.orders, historico);
   renderHist();
+}
+
+function abrirModalVersoesPdf(id) {
+  const o = historico.find(x => x.id === id);
+  if (!o) return;
+  const modal = document.getElementById('modal-versoes-pdf');
+  const numEl = document.getElementById('modal-versoes-os-num');
+  const listaEl = document.getElementById('modal-versoes-lista');
+  if (!modal || !listaEl) return;
+
+  if (numEl) numEl.textContent = o.numero || '#0001';
+
+  if (!o.versoes_pdf || !o.versoes_pdf.length) {
+    o.versoes_pdf = [{
+      versao: 1,
+      titulo: 'Versão 1 (Original' + (o.assinado_por ? ' Assinado' : '') + ')',
+      data: o.data_orc || new Date().toLocaleDateString('pt-BR'),
+      total: o.total || 'R$ 0,00',
+      status: o.status || 'aprovado',
+      assinado_por: o.assinado_por || '',
+      dados: JSON.parse(JSON.stringify(o.dados || {}))
+    }];
+  }
+
+  listaEl.innerHTML = o.versoes_pdf.map((v, i) => {
+    const ehPrimeira = i === 0;
+    const ehUltima = i === o.versoes_pdf.length - 1;
+    const cardClass = ehPrimeira ? 'original' : (v.status === 'modificacao_aprovada' ? 'modificado-aprovado' : 'reajuste');
+    const badgeTxt = ehPrimeira ? '🛡️ PDF ORIGINAL ASSINADO (PROTEGIDO)' : (ehUltima ? '✨ NOVA VERSÃO COM MODIFICAÇÕES' : '📋 VERSÃO INTERMEDIÁRIA');
+
+    return `
+      <div class="versao-pdf-card ${cardClass}">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+          <div style="font-size:11px;font-weight:900;letter-spacing:0.04em;text-transform:uppercase;color:${ehPrimeira ? 'var(--gold-light)' : '#34d399'};">
+            ${badgeTxt}
+          </div>
+          <div style="font-size:12px;color:var(--muted);">${esc(v.data || '')}</div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+          <div>
+            <strong style="font-size:14px;color:#fff;">${esc(v.titulo || ('Versão ' + v.versao))}</strong>
+            ${v.assinado_por ? `<div style="font-size:11.5px;color:#4ade80;margin-top:2px;">✍️ Assinado por: <strong>${esc(v.assinado_por)}</strong></div>` : ''}
+          </div>
+          <div style="font-size:15px;font-weight:900;color:var(--gold);">${esc(v.total || 'R$ 0,00')}</div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-gold btn-sm" onclick="baixarPdfVersaoEspecifica(${o.id}, ${v.versao})" style="flex:1;min-width:140px;">
+            📄 Baixar Este PDF
+          </button>
+          <button type="button" class="btn btn-whats btn-sm" onclick="enviarWhatsVersaoEspecifica(${o.id}, ${v.versao})" style="flex:1;min-width:140px;">
+            📱 Enviar no WhatsApp
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  modal.style.display = 'flex';
+}
+
+function fecharModalVersoesPdf(e) {
+  if (!e || e.target === document.getElementById('modal-versoes-pdf')) {
+    const modal = document.getElementById('modal-versoes-pdf');
+    if (modal) modal.style.display = 'none';
+  }
+}
+
+function baixarPdfVersaoEspecifica(id, versaoNum) {
+  const o = historico.find(x => x.id === id);
+  if (!o || !o.versoes_pdf) return;
+  const v = o.versoes_pdf.find(x => x.versao === versaoNum) || o.versoes_pdf[0];
+  if (v && v.dados) {
+    enviarOuBaixarPdfOrcamento(v.dados);
+  }
+}
+
+function enviarWhatsVersaoEspecifica(id, versaoNum) {
+  const o = historico.find(x => x.id === id);
+  if (!o || !o.versoes_pdf) return;
+  const v = o.versoes_pdf.find(x => x.versao === versaoNum) || o.versoes_pdf[0];
+  if (v && v.dados) {
+    enviarWhatsComAprovacao(v.dados);
+  }
+}
+
+function aprovarModificacaoDireto(id) {
+  const idx = historico.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  historico[idx].status = 'modificacao_aprovada';
+  historico[idx].assinado_por = (historico[idx].assinado_por && !historico[idx].assinado_por.includes('Modificação'))
+    ? historico[idx].assinado_por + ' (Modificação Aprovada)'
+    : (historico[idx].assinado_por || 'Modificação Aprovada pelo Cliente');
+  historico[idx].assinado_em = new Date().toISOString();
+  save(K.orders, historico);
+  renderHist();
+  mostrarToastAprovacao(`🎉 Modificação da Ordem ${historico[idx].numero} Aprovada com sucesso!`);
 }
 
 function abrirModalConfirmacaoZap() {
@@ -2805,20 +3127,40 @@ function renderHist() {
   const statusLabels = {
     pendente: '🟡 Aguardando Resposta',
     aprovado: '🟢 Aprovado',
+    reajustar: '🟠 Reajustar Detalhes',
+    modificacao_aprovada: '🟢 Modificação Aprovada',
     recusado: '🔴 Não Aprovado'
   };
 
   el.innerHTML = historico.slice().reverse().map(o => {
     const st = o.status || 'pendente';
-    const assinadoBadge = (st === 'aprovado' && o.assinado_por)
-      ? `<div style="font-size:11.5px;color:#4ade80;margin-top:4px;font-weight:600;">✍️ Autorizado por: ${esc(o.assinado_por)}</div>`
-      : '';
+    let assinadoBadge = '';
+    if (st === 'aprovado' && o.assinado_por) {
+      assinadoBadge = `<div style="font-size:11.5px;color:#4ade80;margin-top:4px;font-weight:600;">✍️ Autorizado por: ${esc(o.assinado_por)}</div>`;
+    } else if (st === 'modificacao_aprovada') {
+      assinadoBadge = `<div style="font-size:11.5px;color:#34d399;margin-top:4px;font-weight:700;">✓ Modificação Aprovada pelo Cliente</div>`;
+    } else if (st === 'reajustar') {
+      assinadoBadge = `<div style="font-size:11.5px;color:#fbbf24;margin-top:4px;font-weight:600;">🔄 Detalhes em Reajuste / Nova Versão</div>`;
+    }
+
+    const numVersoes = (o.versoes_pdf && o.versoes_pdf.length) || 1;
+    const btnPdf = numVersoes > 1
+      ? `<button class="btn btn-gold btn-sm" onclick="abrirModalVersoesPdf(${o.id})" title="Ver ${numVersoes} versões do PDF (Original e Modificado)">📑 PDFs (${numVersoes} versões)</button>`
+      : `<button class="btn btn-gold btn-sm" onclick="baixarPdfOs(${o.id})" title="Baixar / Compartilhar PDF">📄 PDF</button>`;
+
+    let btnAcaoAprovacao = '';
+    if (st === 'reajustar') {
+      btnAcaoAprovacao = `<button class="btn btn-sm" onclick="aprovarModificacaoDireto(${o.id})" style="background:rgba(16,185,129,0.18);border:1.5px solid #10b981;color:#34d399;font-weight:800;" title="Aprovar modificações da O.S.">✓ Aprovar Modificação</button>`;
+    } else if (st === 'pendente') {
+      btnAcaoAprovacao = `<button class="btn btn-sm" onclick="aprovarOsDireto(${o.id})" style="background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.6);color:#25D366;font-weight:700;" title="Aprovar com 1 toque">✅ Aprovar</button>`;
+    }
+
     return `
     <div class="hist-card">
       <div class="hist-top">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <span class="hist-num">${esc(o.numero)}</span>
-          <span class="status-pill ${st}" onclick="alternarStatusOs(${o.id})" title="Clique para alternar o status de aprovação">${statusLabels[st] || '🟡 Aguardando'}</span>
+          <span class="status-pill ${st}" onclick="alternarStatusOs(${o.id})" title="Clique para alternar o status (${statusLabels[st] || st})">${statusLabels[st] || '🟡 Aguardando'}</span>
         </div>
         <span class="hist-date">${esc(o.data_orc || '')}</span>
       </div>
@@ -2828,8 +3170,8 @@ function renderHist() {
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px">
         <div class="hist-total">${esc(o.total || 'R$ 0,00')}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          ${st !== 'aprovado' ? `<button class="btn btn-sm" onclick="aprovarOsDireto(${o.id})" style="background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.6);color:#25D366;font-weight:700;" title="Aprovar com 1 toque">✅ Aprovar</button>` : ''}
-          <button class="btn btn-gold btn-sm" onclick="baixarPdfOs(${o.id})" title="Baixar / Compartilhar PDF">📄 PDF</button>
+          ${btnAcaoAprovacao}
+          ${btnPdf}
           <button class="btn btn-whats btn-sm" onclick="enviarWhatsOs(${o.id})" title="Enviar WhatsApp com links de aprovação">📱 WhatsApp</button>
           <button class="btn btn-sm" onclick="abrirModalPortalOs(${o.id})" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.5);color:var(--gold-light);font-weight:800;" title="Gerenciar Portal do Cliente">🚀 Portal</button>
           <button class="btn btn-sec btn-sm" onclick="editarOs(${o.id})">✏️ Editar</button>
@@ -4141,13 +4483,14 @@ async function enviarOrcamentoParaAssinaturaDigital() {
   const btn = document.getElementById('btn-orc-assinatura');
   const spinner = document.getElementById('orc-assinatura-spinner');
   const btnTxt = document.getElementById('orc-assinatura-btn-text');
+  const ehReenvio = !!editandoOsId;
 
   if (btn) btn.disabled = true;
   if (spinner) spinner.style.display = 'inline-block';
-  if (btnTxt) btnTxt.textContent = ' Preparando assinatura...';
+  if (btnTxt) btnTxt.textContent = ehReenvio ? ' Preparando reenvio...' : ' Preparando assinatura...';
 
   try {
-    // 1. Automaticamente salva/atualiza a Ordem de Serviço em historico (status pendente)
+    // 1. Automaticamente salva/atualiza a Ordem de Serviço em historico
     (d.itens || []).forEach(it => {
       if (it.desc && !produtos.some(p => p.nome.toLowerCase() === it.desc.toLowerCase())) {
         produtos.push({
@@ -4163,17 +4506,49 @@ async function enviarOrcamentoParaAssinaturaDigital() {
     updateDatalistProdutos();
     renderProdutos();
 
+    const novoStatus = ehReenvio ? (statusEdicaoSelecionado || 'reajustar') : 'pendente';
+
     if (editandoOsId) {
       const idx = historico.findIndex(x => x.id === editandoOsId);
       if (idx !== -1) {
+        const ordAntiga = historico[idx];
+        // 🛡️ PRESERVAÇÃO: O primeiro PDF assinado nunca é apagado
+        if (!ordAntiga.versoes_pdf || !ordAntiga.versoes_pdf.length) {
+          ordAntiga.versoes_pdf = [{
+            versao: 1,
+            titulo: 'v1 (Original' + (ordAntiga.assinado_por ? ' Assinado' : '') + ')',
+            data: ordAntiga.data_orc || d.data,
+            total: ordAntiga.total,
+            status: ordAntiga.status || 'aprovado',
+            assinado_por: ordAntiga.assinado_por || '',
+            assinado_em: ordAntiga.assinado_em || '',
+            dados: JSON.parse(JSON.stringify(ordAntiga.dados || {}))
+          }];
+        }
+
+        const proxV = ordAntiga.versoes_pdf.length + 1;
+        ordAntiga.versoes_pdf.push({
+          versao: proxV,
+          titulo: `v${proxV} (${novoStatus === 'modificacao_aprovada' ? 'Modificação Aprovada' : 'Modificações'} - ${d.data})`,
+          data: d.data,
+          total: d.total,
+          status: novoStatus,
+          dados: JSON.parse(JSON.stringify(d))
+        });
+
         historico[idx] = {
-          ...historico[idx],
+          ...ordAntiga,
           nome: d.nome,
           total: d.total,
           data_orc: d.data,
           dados: d,
-          status: historico[idx].status || 'pendente'
+          status: novoStatus,
+          versoes_pdf: ordAntiga.versoes_pdf
         };
+
+        if (novoStatus === 'reajustar') {
+          historico[idx].assinado_por = 'Aguardando Nova Assinatura';
+        }
       }
     } else {
       const ord = {
@@ -4183,7 +4558,15 @@ async function enviarOrcamentoParaAssinaturaDigital() {
         total: d.total,
         data_orc: d.data,
         dados: d,
-        status: 'pendente'
+        status: 'pendente',
+        versoes_pdf: [{
+          versao: 1,
+          titulo: 'v1 (Original)',
+          data: d.data,
+          total: d.total,
+          status: 'pendente',
+          dados: JSON.parse(JSON.stringify(d))
+        }]
       };
       historico.push(ord);
       proxNumero++;
@@ -4260,11 +4643,20 @@ async function enviarOrcamentoParaAssinaturaDigital() {
       console.warn('Supabase offline ou inacessível, gerando link autônomo:', e);
     }
 
-    // 4. Montar mensagem exatamente como solicitado (Imagem 2)
-    const msg = '*SD VIDROS — PROPOSTA & ASSINATURA DIGITAL* ✍️\n\n'
-      + 'Olá' + (d.nome ? ', ' + d.nome : '') + '! Segue o link com seu orçamento *' + d.numero + '* no valor de *' + d.total + '*:\n\n'
-      + '📄 *Baixar PDF Oficial:*\n' + linkPdf + '\n\n'
-      + '✍️ *Assinar Orçamento Online:*\n' + linkAssinatura;
+    // 4. Montar mensagem no WhatsApp (Personalizada para Reenvio com Modificações ou Nova Proposta)
+    let msg = '';
+    if (ehReenvio) {
+      msg = '*SD VIDROS — REAJUSTE DE PROPOSTA & NOVA ASSINATURA DIGITAL* ✍️\n\n'
+        + 'Olá' + (d.nome ? ', ' + d.nome : '') + '! Conforme solicitado, atualizamos sua Ordem de Serviço *' + d.numero + '* no valor de *' + d.total + '* com as novas modificações:\n\n'
+        + '📄 *Baixar Novo PDF com Modificações:*\n' + linkPdf + '\n\n'
+        + '✍️ *Assinar Nova Versão Online:*\n' + linkAssinatura + '\n\n'
+        + '💡 _A versão anterior assinada permanece arquivada em nosso sistema com total transparência e segurança._';
+    } else {
+      msg = '*SD VIDROS — PROPOSTA & ASSINATURA DIGITAL* ✍️\n\n'
+        + 'Olá' + (d.nome ? ', ' + d.nome : '') + '! Segue o link com seu orçamento *' + d.numero + '* no valor de *' + d.total + '*:\n\n'
+        + '📄 *Baixar PDF Oficial:*\n' + linkPdf + '\n\n'
+        + '✍️ *Assinar Orçamento Online:*\n' + linkAssinatura;
+    }
 
     // 5. Enviar diretamente no WhatsApp do cliente
     abrirWhats(d.tel, msg);
@@ -4276,7 +4668,9 @@ async function enviarOrcamentoParaAssinaturaDigital() {
   } finally {
     if (btn) btn.disabled = false;
     if (spinner) spinner.style.display = 'none';
-    if (btnTxt) btnTxt.textContent = '✍️ Enviar para Assinatura Digital';
+    if (btnTxt) {
+      btnTxt.textContent = ehReenvio ? '✍️ Reenviar Assinatura Digital' : '✍️ Enviar para Assinatura Digital';
+    }
   }
 }
 

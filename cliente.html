@@ -2170,8 +2170,19 @@
 
       // Etapa atual (1 a 6)
       const etapa = (osData && osData.etapa_servico) ? Number(osData.etapa_servico) : 3;
-      const statusTexto = (osData && osData.status_servico_texto) || 'Em Fabricação & Têmpera';
-      const statusObs = (osData && osData.status_obs) || 'Vidros cortados e encaminhados para têmpera e lapidação.';
+      let statusTexto = (osData && osData.status_servico_texto);
+      let statusObs = (osData && osData.status_obs);
+
+      if (osData && osData.status === 'reajustar') {
+        statusTexto = '🔄 Detalhes em Reajuste / Modificação';
+        statusObs = 'Ajustes solicitados no projeto. Nova versão com modificações preparada pela equipe.';
+      } else if (osData && osData.status === 'modificacao_aprovada') {
+        statusTexto = '🟢 Modificação Aprovada';
+        statusObs = 'As novas alterações do projeto foram confirmadas e estão autorizadas para produção.';
+      } else if (!statusTexto) {
+        statusTexto = 'Em Fabricação & Têmpera';
+        statusObs = 'Vidros cortados e encaminhados para têmpera e lapidação.';
+      }
       const previsao = (osData && osData.previsao_instalacao) || 'A combinar com equipe';
 
       document.getElementById('hero-status-nome').textContent = statusTexto;
