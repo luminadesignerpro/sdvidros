@@ -836,6 +836,21 @@
       object-fit: cover;
       background: #000;
     }
+
+    /* ── FILTROS FINANCEIRO & AGENDA ── */
+    .btn-filter-fin, .btn-filter-agenda {
+      padding: 5px 12px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04);
+      color: var(--muted); font-size: 11.5px; font-weight: 700; cursor: pointer;
+      transition: all 0.15s; font-family: var(--font);
+    }
+    .btn-filter-fin:hover, .btn-filter-agenda:hover {
+      border-color: var(--gold); color: #fff;
+    }
+    .btn-filter-fin.active, .btn-filter-agenda.active {
+      background: rgba(201,168,76,0.18); border-color: var(--gold);
+      color: var(--gold-light);
+    }
   </style>
   <script src="pdf-lib.min.js"></script>
   <script src="pdf.min.js"></script>
@@ -892,6 +907,8 @@
   <div class="tabs">
     <button id="tab-orcamento" class="tab active" data-tab="orcamento" onclick="goTab('orcamento')">📋 Orçamento</button>
     <button id="tab-historico" class="tab" data-tab="historico" onclick="goTab('historico')">🗂️ Histórico</button>
+    <button id="tab-financeiro" class="tab" data-tab="financeiro" onclick="goTab('financeiro')">💰 Financeiro</button>
+    <button id="tab-agenda" class="tab" data-tab="agenda" onclick="goTab('agenda')">📅 Agenda</button>
     <button id="tab-produtos" class="tab" data-tab="produtos" onclick="goTab('produtos')">📦 Produtos & Serviços</button>
     <button id="tab-clientes" class="tab" data-tab="clientes" onclick="goTab('clientes')">👤 Clientes</button>
     <button id="tab-ponto" class="tab" data-tab="ponto" onclick="goTab('ponto')">👷 Funcionários & Ponto</button>
@@ -1070,6 +1087,124 @@
         </div>
       </div>
       <div id="hist-lista"><div class="empty">Nenhum orçamento salvo ainda.</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANEL: FINANCEIRO -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="panel-financeiro" class="panel">
+    <!-- Header de Ações Rápidas -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+      <div>
+        <h2 style="font-size:18px;font-weight:900;color:var(--gold-light);margin:0;display:flex;align-items:center;gap:8px;">
+          💰 Painel Financeiro & Fluxo de Caixa
+        </h2>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Gestão de receitas, faturamento de O.S. e controle de despesas</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="abrirModalNovoLancamentoFinanceiro()" style="font-size:12px;padding:8px 14px;">
+          ➕ Novo Lançamento
+        </button>
+        <a href="https://sdfinanceiro.vercel.app" target="_blank" class="btn btn-gold btn-sm" style="font-size:12px;padding:8px 14px;text-decoration:none;">
+          🚀 SD Financeiro PRO ↗
+        </a>
+      </div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin-bottom:16px;">
+      <!-- Total Aprovado -->
+      <div class="card" style="margin-bottom:0;padding:14px;border-left:4px solid #10b981;background:linear-gradient(135deg, rgba(16,185,129,0.08), rgba(20,20,30,0.7));">
+        <div style="font-size:11px;font-weight:700;color:#34d399;text-transform:uppercase;letter-spacing:0.05em;">Faturamento Realizado</div>
+        <div id="fin-kpi-receitas" style="font-size:22px;font-weight:900;color:#fff;margin-top:4px;">R$ 0,00</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">O.S. Aprovadas + Entradas</div>
+      </div>
+      <!-- A Receber (Pendentes) -->
+      <div class="card" style="margin-bottom:0;padding:14px;border-left:4px solid var(--gold);background:linear-gradient(135deg, rgba(201,168,76,0.08), rgba(20,20,30,0.7));">
+        <div style="font-size:11px;font-weight:700;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.05em;">A Receber (Pendentes)</div>
+        <div id="fin-kpi-pendentes" style="font-size:22px;font-weight:900;color:#fff;margin-top:4px;">R$ 0,00</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Orçamentos em aberto</div>
+      </div>
+      <!-- Despesas -->
+      <div class="card" style="margin-bottom:0;padding:14px;border-left:4px solid #ef4444;background:linear-gradient(135deg, rgba(239,68,68,0.08), rgba(20,20,30,0.7));">
+        <div style="font-size:11px;font-weight:700;color:#f87171;text-transform:uppercase;letter-spacing:0.05em;">Despesas / Custos</div>
+        <div id="fin-kpi-despesas" style="font-size:22px;font-weight:900;color:#fff;margin-top:4px;">R$ 0,00</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Saídas e Compras</div>
+      </div>
+      <!-- Saldo Líquido -->
+      <div class="card" style="margin-bottom:0;padding:14px;border-left:4px solid #6366f1;background:linear-gradient(135deg, rgba(99,102,241,0.08), rgba(20,20,30,0.7));">
+        <div style="font-size:11px;font-weight:700;color:#818cf8;text-transform:uppercase;letter-spacing:0.05em;">Saldo Líquido / Caixa</div>
+        <div id="fin-kpi-saldo" style="font-size:22px;font-weight:900;color:#fff;margin-top:4px;">R$ 0,00</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Receitas − Despesas</div>
+      </div>
+    </div>
+
+    <!-- Extrato de Movimentações -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <div class="card-title" style="margin-bottom:0;">📋 Movimentações & Extrato Financeiro</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button type="button" class="btn-filter-fin active" id="btn-fin-filtro-todos" onclick="filtrarFinTipo('todos')">Todos</button>
+          <button type="button" class="btn-filter-fin" id="btn-fin-filtro-receitas" onclick="filtrarFinTipo('receita')">Entradas</button>
+          <button type="button" class="btn-filter-fin" id="btn-fin-filtro-despesas" onclick="filtrarFinTipo('despesa')">Saídas</button>
+          <button type="button" class="btn-filter-fin" id="btn-fin-filtro-os" onclick="filtrarFinTipo('os')">O.S. Sistema</button>
+        </div>
+      </div>
+
+      <div id="fin-lista-movimentos">
+        <div class="empty">Nenhum lançamento registrado ainda.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANEL: AGENDA -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="panel-agenda" class="panel">
+    <!-- Header de Ações Rápidas -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+      <div>
+        <h2 style="font-size:18px;font-weight:900;color:var(--gold-light);margin:0;display:flex;align-items:center;gap:8px;">
+          📅 Agenda de Medições & Instalações
+        </h2>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Organize visitas técnicas, instalações de box, espelhos e vistorias</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="abrirModalNovoCompromissoAgenda()" style="font-size:12px;padding:8px 14px;">
+        ➕ Novo Agendamento
+      </button>
+    </div>
+
+    <!-- RESUMO RÁPIDO DA AGENDA -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin-bottom:16px;">
+      <div class="card" style="margin-bottom:0;padding:12px 14px;border-left:4px solid var(--gold);background:linear-gradient(135deg, rgba(201,168,76,0.08), rgba(20,20,30,0.7));">
+        <div style="font-size:11px;font-weight:700;color:var(--gold-light);text-transform:uppercase;">Compromissos Pendentes</div>
+        <div id="agenda-kpi-pendentes" style="font-size:22px;font-weight:900;color:#fff;margin-top:4px;">0</div>
+      </div>
+      <div class="card" style="margin-bottom:0;padding:12px 14px;border-left:4px solid #38bdf8;background:linear-gradient(135deg, rgba(56,189,248,0.08), rgba(20,20,30,0.7));">
+        <div style="font-size:11px;font-weight:700;color:#38bdf8;text-transform:uppercase;">Para Hoje</div>
+        <div id="agenda-kpi-hoje" style="font-size:22px;font-weight:900;color:#fff;margin-top:4px;">0</div>
+      </div>
+      <div class="card" style="margin-bottom:0;padding:12px 14px;border-left:4px solid #4ade80;background:linear-gradient(135deg, rgba(74,222,128,0.08), rgba(20,20,30,0.7));">
+        <div style="font-size:11px;font-weight:700;color:#4ade80;text-transform:uppercase;">Concluídos</div>
+        <div id="agenda-kpi-concluidos" style="font-size:22px;font-weight:900;color:#fff;margin-top:4px;">0</div>
+      </div>
+    </div>
+
+    <!-- Lista de Agendamentos -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <div class="card-title" style="margin-bottom:0;">🕒 Próximos Compromissos & Visitas</div>
+        <div style="display:flex;gap:6px;">
+          <button type="button" class="btn-filter-agenda active" id="btn-agenda-filtro-pendentes" onclick="filtrarAgenda('pendentes')">Pendentes</button>
+          <button type="button" class="btn-filter-agenda" id="btn-agenda-filtro-todos" onclick="filtrarAgenda('todos')">Todos</button>
+          <button type="button" class="btn-filter-agenda" id="btn-agenda-filtro-concluidos" onclick="filtrarAgenda('concluidos')">Concluídos</button>
+        </div>
+      </div>
+
+      <div id="agenda-lista-eventos">
+        <div class="empty">Nenhum compromisso agendado ainda. Clique em "Novo Agendamento" para começar.</div>
+      </div>
     </div>
   </div>
 
@@ -1929,6 +2064,139 @@
   </div>
 </div>
 
+<!-- ══ MODAL NOVO LANÇAMENTO FINANCEIRO ══ -->
+<div id="modal-fin-lancamento" class="modal-overlay" style="display:none" onclick="fecharModalNovoLancamentoFinanceiro(event)">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:440px;">
+    <div class="modal-title">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span>💰</span>
+        <span>Novo Lançamento Financeiro</span>
+      </div>
+      <button class="modal-close" onclick="fecharModalNovoLancamentoFinanceiro()">✕</button>
+    </div>
+
+    <div class="field" style="margin-bottom:12px;">
+      <label>Tipo de Movimentação</label>
+      <select id="fin-novo-tipo" style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);font-weight:700;">
+        <option value="receita">📥 Entrada / Receita (+)</option>
+        <option value="despesa">📤 Saída / Despesa (−)</option>
+      </select>
+    </div>
+
+    <div class="field" style="margin-bottom:12px;">
+      <label>Descrição do Lançamento</label>
+      <input id="fin-novo-desc" placeholder="Ex: Compra de Perfis de Alumínio, Venda Avulsa..." style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);" />
+    </div>
+
+    <div class="field-row" style="margin-bottom:12px;">
+      <div class="field">
+        <label>Categoria</label>
+        <select id="fin-novo-cat" style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);">
+          <option value="Vidros e Alumínio">Vidros e Alumínio</option>
+          <option value="Ferragens e Acessórios">Ferragens e Acessórios</option>
+          <option value="Mão de Obra e Instalação">Mão de Obra / Instalação</option>
+          <option value="Aluguel e Energia">Aluguel e Energia</option>
+          <option value="Combustível e Transporte">Combustível e Transporte</option>
+          <option value="Ferramentas">Ferramentas</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Valor (R$)</label>
+        <input id="fin-novo-valor" type="text" inputmode="decimal" placeholder="0,00" style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);font-weight:800;font-size:15px;color:var(--gold-light);" />
+      </div>
+    </div>
+
+    <div class="field-row" style="margin-bottom:16px;">
+      <div class="field">
+        <label>Data</label>
+        <input id="fin-novo-data" type="date" style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);" />
+      </div>
+      <div class="field">
+        <label>Forma de Pagamento</label>
+        <select id="fin-novo-forma" style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);">
+          <option value="PIX">PIX</option>
+          <option value="Cartão de Crédito">Cartão de Crédito</option>
+          <option value="Cartão de Débito">Cartão de Débito</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Boleto">Boleto</option>
+          <option value="Transferência">Transferência</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button type="button" class="btn btn-sec btn-sm" onclick="fecharModalNovoLancamentoFinanceiro()">Cancelar</button>
+      <button type="button" class="btn btn-primary btn-sm" onclick="salvarNovoLancamentoFinanceiro()">💾 Salvar Lançamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL NOVO AGENDAMENTO ══ -->
+<div id="modal-agenda-novo" class="modal-overlay" style="display:none" onclick="fecharModalNovoCompromissoAgenda(event)">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:460px;">
+    <div class="modal-title">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span>📅</span>
+        <span>Novo Agendamento / Visita</span>
+      </div>
+      <button class="modal-close" onclick="fecharModalNovoCompromissoAgenda()">✕</button>
+    </div>
+
+    <datalist id="agenda-lista-sugestoes-clientes"></datalist>
+
+    <div class="field" style="margin-bottom:12px;">
+      <label>Nome do Cliente</label>
+      <input id="agenda-novo-cliente" list="agenda-lista-sugestoes-clientes" oninput="aoSelecionarClienteAgenda()" placeholder="Digite ou selecione o cliente..." style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);" />
+    </div>
+
+    <div class="field-row" style="margin-bottom:12px;">
+      <div class="field">
+        <label>Telefone / WhatsApp</label>
+        <input id="agenda-novo-tel" placeholder="(85) 99999-9999" style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);" />
+      </div>
+      <div class="field">
+        <label>Tipo de Atendimento</label>
+        <select id="agenda-novo-tipo" style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);">
+          <option value="Medição Técnica">📏 Medição Técnica</option>
+          <option value="Instalação de Box">🚿 Instalação de Box</option>
+          <option value="Instalação de Vidro / Janela">🪟 Instalação Vidro/Janela</option>
+          <option value="Entrega de Espelho">🪞 Entrega de Espelho</option>
+          <option value="Manutenção / Regulagem">🔧 Manutenção / Regulagem</option>
+          <option value="Vistoria Técnica">📋 Vistoria Técnica</option>
+          <option value="Outro Atendimento">📍 Outro Atendimento</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:12px;">
+      <label>Endereço / Local da Obra</label>
+      <input id="agenda-novo-end" placeholder="Rua, número, bairro, cidade..." style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);" />
+    </div>
+
+    <div class="field-row" style="margin-bottom:12px;">
+      <div class="field">
+        <label>Data</label>
+        <input id="agenda-novo-data" type="date" style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);" />
+      </div>
+      <div class="field">
+        <label>Horário Previsto</label>
+        <input id="agenda-novo-hora" type="time" style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);" />
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:16px;">
+      <label>Observações / Itens a levar</label>
+      <textarea id="agenda-novo-obs" rows="2" placeholder="Ex: Levar trena a laser, cliente só está em casa após às 14h..." style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);resize:vertical;"></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button type="button" class="btn btn-sec btn-sm" onclick="fecharModalNovoCompromissoAgenda()">Cancelar</button>
+      <button type="button" class="btn btn-primary btn-sm" onclick="salvarNovoCompromissoAgenda()">📅 Agendar Visita</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════
 //  STORAGE & KEYS
@@ -2369,19 +2637,21 @@ function getUser() {
 //  TABS
 // ══════════════════════════════════════════════
 function goTab(t) {
-  ['orcamento','historico','produtos','clientes','ponto','contratos','usuarios','licenca'].forEach(p => {
+  ['orcamento','historico','financeiro','agenda','produtos','clientes','ponto','contratos','usuarios','licenca'].forEach(p => {
     const pan = document.getElementById('panel-'+p);
     if (pan) pan.classList.toggle('active', p===t);
     const tab = document.getElementById('tab-'+p);
     if (tab) tab.classList.toggle('active', p===t);
   });
-  if (t==='historico') { renderHist(); sincronizarStatusContratos(); }
-  if (t==='produtos')  { atualizarBannerSelecaoProduto(); renderProdutos(); }
-  if (t==='clientes')  renderCli();
-  if (t==='ponto')     { renderPontoView(); }
-  if (t==='contratos') { renderHist(); renderSelectContratos(); carregarListaContratos(); sincronizarStatusContratos(); }
-  if (t==='usuarios')  renderUsuarios();
-  if (t==='licenca')   renderPainelLicenca();
+  if (t==='historico')  { renderHist(); sincronizarStatusContratos(); }
+  if (t==='financeiro') { renderFinanceiro(); }
+  if (t==='agenda')     { renderAgenda(); }
+  if (t==='produtos')   { atualizarBannerSelecaoProduto(); renderProdutos(); }
+  if (t==='clientes')   renderCli();
+  if (t==='ponto')      { renderPontoView(); }
+  if (t==='contratos')  { renderHist(); renderSelectContratos(); carregarListaContratos(); sincronizarStatusContratos(); }
+  if (t==='usuarios')   renderUsuarios();
+  if (t==='licenca')    renderPainelLicenca();
 }
 
 // ══════════════════════════════════════════════
@@ -7030,7 +7300,409 @@ function tocarAlertaPortal() {
       osc.start(audioCtx.currentTime + i * 0.14);
       osc.stop(audioCtx.currentTime + i * 0.14 + 0.2);
     });
-  } catch(_) {}
+// ══════════════════════════════════════════════
+//  MÓDULO FINANCEIRO (FLUXO DE CAIXA & GESTÃO)
+// ══════════════════════════════════════════════
+let finFiltroAtual = 'todos';
+
+function fmtMoedaFin(v) {
+  return 'R$ ' + (Number(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function obterLancamentosFinanceiros() {
+  try {
+    return JSON.parse(localStorage.getItem('sdv_financeiro_lancamentos') || '[]');
+  } catch(e) {
+    return [];
+  }
+}
+
+function salvarLancamentosFinanceiros(lista) {
+  localStorage.setItem('sdv_financeiro_lancamentos', JSON.stringify(lista));
+}
+
+function renderFinanceiro() {
+  const lancamentos = obterLancamentosFinanceiros();
+  
+  // Calcular totais das O.S.
+  let faturadoOs = 0;
+  let pendenteOs = 0;
+  (historico || []).forEach(o => {
+    const v = parseNum(o.total || (o.dados && o.dados.total) || 0);
+    if (o.status === 'aprovado' || o.status === 'modificacao_aprovada') {
+      faturadoOs += v;
+    } else if (o.status === 'pendente' || o.status === 'reajustar') {
+      pendenteOs += v;
+    }
+  });
+
+  // Calcular totais dos lançamentos manuais
+  let receitasManuais = 0;
+  let despesasManuais = 0;
+  lancamentos.forEach(l => {
+    const v = parseNum(l.valor);
+    if (l.tipo === 'receita') receitasManuais += v;
+    else if (l.tipo === 'despesa') despesasManuais += v;
+  });
+
+  const totalReceitas = faturadoOs + receitasManuais;
+  const totalDespesas = despesasManuais;
+  const saldoLiquido = totalReceitas - totalDespesas;
+
+  const elRec = document.getElementById('fin-kpi-receitas');
+  if (elRec) elRec.textContent = fmtMoedaFin(totalReceitas);
+
+  const elPend = document.getElementById('fin-kpi-pendentes');
+  if (elPend) elPend.textContent = fmtMoedaFin(pendenteOs);
+
+  const elDesp = document.getElementById('fin-kpi-despesas');
+  if (elDesp) elDesp.textContent = fmtMoedaFin(totalDespesas);
+
+  const elSaldo = document.getElementById('fin-kpi-saldo');
+  if (elSaldo) {
+    elSaldo.textContent = fmtMoedaFin(saldoLiquido);
+    elSaldo.style.color = saldoLiquido >= 0 ? '#4ade80' : '#ef4444';
+  }
+
+  // Montar lista de movimentações combinadas
+  let listaMista = [];
+
+  // Adicionar O.S. aprovadas
+  (historico || []).forEach(o => {
+    if (o.status === 'aprovado' || o.status === 'modificacao_aprovada') {
+      listaMista.push({
+        id: 'os-' + o.id,
+        origem: 'os',
+        tipo: 'receita',
+        descricao: `O.S. #${o.numero || o.num || o.id} - ${o.cliente || o.nome || (o.dados && o.dados.nome) || 'Cliente'}`,
+        categoria: 'Orçamento / O.S.',
+        valor: parseNum(o.total || (o.dados && o.dados.total) || 0),
+        data: o.data_orc || o.data || (o.dados && o.dados.data) || '',
+        forma: o.forma || (o.dados && o.dados.forma) || 'A combinar',
+        osId: o.id
+      });
+    }
+  });
+
+  // Adicionar lançamentos manuais
+  lancamentos.forEach(l => {
+    listaMista.push({
+      ...l,
+      origem: 'manual'
+    });
+  });
+
+  // Ordenar por data mais recente
+  listaMista.sort((a,b) => {
+    const dA = a.data ? new Date(a.data) : new Date(0);
+    const dB = b.data ? new Date(b.data) : new Date(0);
+    return dB - dA;
+  });
+
+  // Filtrar
+  if (finFiltroAtual === 'receita') {
+    listaMista = listaMista.filter(x => x.tipo === 'receita');
+  } else if (finFiltroAtual === 'despesa') {
+    listaMista = listaMista.filter(x => x.tipo === 'despesa');
+  } else if (finFiltroAtual === 'os') {
+    listaMista = listaMista.filter(x => x.origem === 'os');
+  }
+
+  const container = document.getElementById('fin-lista-movimentos');
+  if (!container) return;
+
+  if (listaMista.length === 0) {
+    container.innerHTML = '<div class="empty">Nenhuma movimentação financeira encontrada para este filtro.</div>';
+    return;
+  }
+
+  container.innerHTML = listaMista.map(m => {
+    const isReceita = m.tipo === 'receita';
+    const sinal = isReceita ? '+' : '−';
+    const corVal = isReceita ? '#34d399' : '#f87171';
+    const badgeOrigem = m.origem === 'os'
+      ? `<span style="font-size:10px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);color:var(--gold-light);padding:2px 7px;border-radius:999px;font-weight:700;">O.S. Sistema</span>`
+      : `<span style="font-size:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:var(--muted);padding:2px 7px;border-radius:999px;font-weight:700;">Manual</span>`;
+
+    const acao = m.origem === 'manual'
+      ? `<button class="item-del" onclick="excluirLancamentoFinanceiro('${m.id}')" title="Excluir lançamento" style="width:26px;height:26px;font-size:11px;">✕</button>`
+      : `<button class="btn btn-gold btn-xs" onclick="carregarOrcamento(${m.osId});goTab('orcamento');" title="Abrir esta O.S." style="padding:4px 8px;font-size:11px;">Ver O.S.</button>`;
+
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.05);gap:10px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
+          <div style="width:34px;height:34px;border-radius:8px;background:${isReceita ? 'rgba(16,185,129,0.14)' : 'rgba(239,68,68,0.14)'};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">
+            ${isReceita ? '⬇️' : '⬆️'}
+          </div>
+          <div style="min-width:0;">
+            <div style="font-weight:800;font-size:13.5px;color:#fff;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              ${esc(m.descricao)}
+              ${badgeOrigem}
+            </div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">
+              📁 ${esc(m.categoria || 'Geral')} · 📅 ${m.data ? m.data.split('-').reverse().join('/') : 'Sem data'} ${m.forma ? '· 💳 ' + esc(m.forma) : ''}
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-weight:900;font-size:15px;color:${corVal};white-space:nowrap;">
+            ${sinal} ${fmtMoedaFin(m.valor)}
+          </div>
+          ${acao}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filtrarFinTipo(tipo) {
+  finFiltroAtual = tipo;
+  ['todos','receitas','despesas','os'].forEach(f => {
+    const b = document.getElementById('btn-fin-filtro-' + f);
+    if (b) b.classList.toggle('active', (tipo === 'todos' && f === 'todos') || (tipo === 'receita' && f === 'receitas') || (tipo === 'despesa' && f === 'despesas') || (tipo === 'os' && f === 'os'));
+  });
+  renderFinanceiro();
+}
+
+function abrirModalNovoLancamentoFinanceiro() {
+  document.getElementById('fin-novo-tipo').value = 'receita';
+  document.getElementById('fin-novo-desc').value = '';
+  document.getElementById('fin-novo-cat').value = 'Vidros e Alumínio';
+  document.getElementById('fin-novo-valor').value = '';
+  document.getElementById('fin-novo-data').value = new Date().toISOString().split('T')[0];
+  document.getElementById('fin-novo-forma').value = 'PIX';
+  const m = document.getElementById('modal-fin-lancamento');
+  if (m) m.style.display = 'flex';
+}
+
+function fecharModalNovoLancamentoFinanceiro(e) {
+  if (e && e.target !== e.currentTarget) return;
+  const m = document.getElementById('modal-fin-lancamento');
+  if (m) m.style.display = 'none';
+}
+
+function salvarNovoLancamentoFinanceiro() {
+  const tipo = document.getElementById('fin-novo-tipo').value;
+  const desc = document.getElementById('fin-novo-desc').value.trim();
+  const cat = document.getElementById('fin-novo-cat').value.trim();
+  const valRaw = document.getElementById('fin-novo-valor').value.trim();
+  const data = document.getElementById('fin-novo-data').value;
+  const forma = document.getElementById('fin-novo-forma').value;
+
+  const valor = parseNum(valRaw);
+  if (!desc) { alert('Informe a descrição do lançamento.'); return; }
+  if (valor <= 0) { alert('Informe um valor válido.'); return; }
+
+  const lancamentos = obterLancamentosFinanceiros();
+  lancamentos.unshift({
+    id: 'fin-' + Date.now(),
+    tipo,
+    descricao: desc,
+    categoria: cat || 'Geral',
+    valor,
+    data,
+    forma
+  });
+  salvarLancamentosFinanceiros(lancamentos);
+  fecharModalNovoLancamentoFinanceiro();
+  renderFinanceiro();
+}
+
+function excluirLancamentoFinanceiro(id) {
+  if (!confirm('Deseja realmente excluir este lançamento financeiro?')) return;
+  let lancamentos = obterLancamentosFinanceiros();
+  lancamentos = lancamentos.filter(x => x.id !== id);
+  salvarLancamentosFinanceiros(lancamentos);
+  renderFinanceiro();
+}
+
+// ══════════════════════════════════════════════
+//  MÓDULO AGENDA (VISITAS, MEDIÇÕES & INSTALAÇÕES)
+// ══════════════════════════════════════════════
+let agendaFiltroAtual = 'pendentes';
+
+function obterAgendaEventos() {
+  try {
+    return JSON.parse(localStorage.getItem('sdv_agenda_eventos') || '[]');
+  } catch(e) {
+    return [];
+  }
+}
+
+function salvarAgendaEventos(lista) {
+  localStorage.setItem('sdv_agenda_eventos', JSON.stringify(lista));
+}
+
+function renderAgenda() {
+  const eventos = obterAgendaEventos();
+  const hojeStr = new Date().toISOString().split('T')[0];
+
+  let pendentes = 0;
+  let hoje = 0;
+  let concluidos = 0;
+
+  eventos.forEach(ev => {
+    if (ev.concluido) {
+      concluidos++;
+    } else {
+      pendentes++;
+      if (ev.data === hojeStr) hoje++;
+    }
+  });
+
+  const elPend = document.getElementById('agenda-kpi-pendentes');
+  if (elPend) elPend.textContent = pendentes;
+  const elHoje = document.getElementById('agenda-kpi-hoje');
+  if (elHoje) elHoje.textContent = hoje;
+  const elConc = document.getElementById('agenda-kpi-concluidos');
+  if (elConc) elConc.textContent = concluidos;
+
+  let filtrados = [...eventos];
+  if (agendaFiltroAtual === 'pendentes') {
+    filtrados = filtrados.filter(x => !x.concluido);
+  } else if (agendaFiltroAtual === 'concluidos') {
+    filtrados = filtrados.filter(x => x.concluido);
+  }
+
+  // Ordenar: por data e horário asc
+  filtrados.sort((a,b) => {
+    const dA = a.data ? (a.data + ' ' + (a.hora || '00:00')) : '';
+    const dB = b.data ? (b.data + ' ' + (b.hora || '00:00')) : '';
+    return dA.localeCompare(dB);
+  });
+
+  const container = document.getElementById('agenda-lista-eventos');
+  if (!container) return;
+
+  if (filtrados.length === 0) {
+    container.innerHTML = `<div class="empty">Nenhum compromisso ${agendaFiltroAtual === 'pendentes' ? 'pendente' : (agendaFiltroAtual === 'concluidos' ? 'concluído' : '')} no momento.</div>`;
+    return;
+  }
+
+  container.innerHTML = filtrados.map(ev => {
+    const isHoje = ev.data === hojeStr && !ev.concluido;
+    const zapClean = (ev.tel || '').replace(/\D/g, '');
+    const zapMsg = encodeURIComponent(`Olá ${ev.cliente || ''}, confirmando o seu agendamento de *${ev.tipo || 'atendimento'}* para o dia *${ev.data ? ev.data.split('-').reverse().join('/') : ''}* às *${ev.hora || ''}* pela SD Vidros.`);
+    const zapLink = zapClean ? `https://wa.me/55${zapClean}?text=${zapMsg}` : '';
+
+    return `
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:12px;border-bottom:1px solid rgba(255,255,255,0.05);gap:12px;flex-wrap:wrap;background:${isHoje ? 'rgba(201,168,76,0.08)' : 'rgba(255,255,255,0.01)'};border-radius:8px;margin-bottom:6px;border:1px solid ${isHoje ? 'rgba(201,168,76,0.25)' : 'rgba(255,255,255,0.04)'};">
+        <div style="display:flex;align-items:flex-start;gap:10px;min-width:0;flex:1;">
+          <button onclick="alternarConcluidoAgenda('${ev.id}')" title="${ev.concluido ? 'Reabrir compromisso' : 'Marcar como concluído'}" style="margin-top:2px;background:${ev.concluido ? '#10b981' : 'transparent'};border:1.5px solid ${ev.concluido ? '#10b981' : 'rgba(255,255,255,0.2)'};color:#fff;width:24px;height:24px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">
+            ${ev.concluido ? '✓' : ''}
+          </button>
+          <div style="min-width:0;">
+            <div style="font-weight:800;font-size:14px;color:#fff;text-decoration:${ev.concluido ? 'line-through' : 'none'};opacity:${ev.concluido ? '0.6' : '1'};display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span>${esc(ev.cliente)}</span>
+              <span style="font-size:10.5px;padding:2px 8px;border-radius:999px;background:rgba(201,168,76,0.18);color:var(--gold-light);font-weight:700;">${esc(ev.tipo || 'Atendimento')}</span>
+              ${isHoje ? '<span style="font-size:10px;background:#ef4444;color:#fff;padding:1px 6px;border-radius:999px;font-weight:800;">HOJE</span>' : ''}
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+              <span>📅 ${ev.data ? ev.data.split('-').reverse().join('/') : 'Sem data'} ${ev.hora ? ' às ' + ev.hora : ''}</span>
+              ${ev.tel ? `<span>📞 ${esc(ev.tel)}</span>` : ''}
+              ${ev.end ? `<span>📍 ${esc(ev.end)}</span>` : ''}
+            </div>
+            ${ev.obs ? `<div style="font-size:11.5px;color:rgba(255,255,255,0.7);margin-top:4px;font-style:italic;">📝 ${esc(ev.obs)}</div>` : ''}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          ${zapLink ? `<a href="${zapLink}" target="_blank" class="btn btn-whats btn-xs" style="padding:4px 10px;font-size:11px;text-decoration:none;" title="Enviar lembrete pelo WhatsApp">💬 WhatsApp</a>` : ''}
+          <button class="item-del" onclick="excluirCompromissoAgenda('${ev.id}')" title="Excluir agendamento" style="width:26px;height:26px;font-size:11px;">✕</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filtrarAgenda(filtro) {
+  agendaFiltroAtual = filtro;
+  ['pendentes','todos','concluidos'].forEach(f => {
+    const b = document.getElementById('btn-agenda-filtro-' + f);
+    if (b) b.classList.toggle('active', f === filtro);
+  });
+  renderAgenda();
+}
+
+function alternarConcluidoAgenda(id) {
+  const eventos = obterAgendaEventos();
+  const ev = eventos.find(x => x.id === id);
+  if (ev) {
+    ev.concluido = !ev.concluido;
+    salvarAgendaEventos(eventos);
+    renderAgenda();
+  }
+}
+
+function excluirCompromissoAgenda(id) {
+  if (!confirm('Deseja excluir este agendamento?')) return;
+  let eventos = obterAgendaEventos();
+  eventos = eventos.filter(x => x.id !== id);
+  salvarAgendaEventos(eventos);
+  renderAgenda();
+}
+
+function abrirModalNovoCompromissoAgenda() {
+  document.getElementById('agenda-novo-cliente').value = '';
+  document.getElementById('agenda-novo-tel').value = '';
+  document.getElementById('agenda-novo-end').value = '';
+  document.getElementById('agenda-novo-tipo').value = 'Medição Técnica';
+  document.getElementById('agenda-novo-data').value = new Date().toISOString().split('T')[0];
+  document.getElementById('agenda-novo-hora').value = '09:00';
+  document.getElementById('agenda-novo-obs').value = '';
+  
+  // Atualizar datalist de clientes se disponível
+  const dl = document.getElementById('agenda-lista-sugestoes-clientes');
+  if (dl && clientes && clientes.length) {
+    dl.innerHTML = clientes.map(c => `<option value="${esc(c.nome)}">${esc(c.tel || '')}</option>`).join('');
+  }
+
+  const m = document.getElementById('modal-agenda-novo');
+  if (m) m.style.display = 'flex';
+}
+
+function aoSelecionarClienteAgenda() {
+  const nome = document.getElementById('agenda-novo-cliente').value.trim();
+  if (!nome || !clientes) return;
+  const c = clientes.find(x => x.nome.toLowerCase() === nome.toLowerCase());
+  if (c) {
+    if (c.tel) document.getElementById('agenda-novo-tel').value = c.tel;
+    if (c.end) document.getElementById('agenda-novo-end').value = c.end + (c.cidade ? ' - ' + c.cidade : '');
+  }
+}
+
+function fecharModalNovoCompromissoAgenda(e) {
+  if (e && e.target !== e.currentTarget) return;
+  const m = document.getElementById('modal-agenda-novo');
+  if (m) m.style.display = 'none';
+}
+
+function salvarNovoCompromissoAgenda() {
+  const cliente = document.getElementById('agenda-novo-cliente').value.trim();
+  const tel = document.getElementById('agenda-novo-tel').value.trim();
+  const end = document.getElementById('agenda-novo-end').value.trim();
+  const tipo = document.getElementById('agenda-novo-tipo').value;
+  const data = document.getElementById('agenda-novo-data').value;
+  const hora = document.getElementById('agenda-novo-hora').value;
+  const obs = document.getElementById('agenda-novo-obs').value.trim();
+
+  if (!cliente) { alert('Informe o nome do cliente.'); return; }
+  if (!data) { alert('Informe a data do agendamento.'); return; }
+
+  const eventos = obterAgendaEventos();
+  eventos.push({
+    id: 'ag-' + Date.now(),
+    cliente,
+    tel,
+    end,
+    tipo,
+    data,
+    hora,
+    obs,
+    concluido: false
+  });
+  salvarAgendaEventos(eventos);
+  fecharModalNovoCompromissoAgenda();
+  renderAgenda();
 }
 </script>
 </body>
