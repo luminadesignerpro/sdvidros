@@ -222,11 +222,165 @@
   .hidden { display: none !important; }
   .sucesso-tela {
     text-align: center;
-    padding: 30px 10px;
+    padding: 24px 12px;
   }
   .sucesso-icon {
-    font-size: 56px;
+    font-size: 52px;
+    margin-bottom: 10px;
+    animation: popIcon 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes popIcon {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .portal-promo-card {
+    background: linear-gradient(145deg, rgba(201,168,76,0.14), rgba(18,24,38,0.98));
+    border: 1.5px solid rgba(201,168,76,0.45);
+    border-radius: 16px;
+    padding: 18px 16px;
+    margin: 18px 0;
+    text-align: left;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.55), 0 0 24px rgba(201,168,76,0.12);
+    position: relative;
+    overflow: hidden;
+  }
+  .portal-promo-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #c9a038, #f3c760, #c9a038);
+  }
+  .portal-promo-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     margin-bottom: 12px;
+  }
+  .portal-promo-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(201,168,76,0.2);
+    border: 1px solid rgba(201,168,76,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .portal-promo-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #f3c760;
+    letter-spacing: 0.02em;
+  }
+  .portal-badge-new {
+    background: #22c55e;
+    color: #000;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+  }
+  .portal-promo-sub {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+  .portal-promo-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 14px 0;
+  }
+  .portal-feature-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    color: #e2e8f0;
+    background: rgba(0,0,0,0.3);
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.06);
+    font-weight: 600;
+  }
+  .btn-portal-gold {
+    background: linear-gradient(135deg, #f3c760, #c9a038);
+    color: #000 !important;
+    font-size: 15px;
+    font-weight: 900;
+    padding: 14px 18px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(201,168,76,0.35);
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .btn-portal-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(201,168,76,0.5);
+  }
+  .portal-link-input-wrap {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .portal-link-input {
+    flex: 1;
+    background: #090d14;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 12px;
+    color: #cbd5e1;
+    font-family: monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    min-width: 0;
+  }
+  .btn-copiar-link {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid #475569;
+    color: #fff;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn-copiar-link:hover {
+    background: rgba(201,168,76,0.2);
+    border-color: #c9a038;
+    color: #f3c760;
+  }
+  .portal-hint-pass {
+    margin-top: 12px;
+    font-size: 11.5px;
+    color: #94a3b8;
+    background: rgba(0,0,0,0.35);
+    padding: 9px 12px;
+    border-radius: 8px;
+    line-height: 1.4;
+    border-left: 3px solid #c9a038;
   }
   .actions-grid {
     display: flex;
@@ -241,10 +395,10 @@
 <div class="container">
   <!-- Brand Header -->
   <div class="header-brand">
-    <div class="brand-title">
+    <div class="brand-title" id="header-brand-title">
       <span>🪟</span> SD VIDROS
     </div>
-    <div class="brand-badge">Soluções em Vidros & Esquadrias de Alumínio</div>
+    <div class="brand-badge" id="header-brand-badge">Soluções em Vidros & Esquadrias de Alumínio</div>
   </div>
 
   <!-- Loading State -->
@@ -265,17 +419,67 @@
   <!-- Success State -->
   <div id="tela-sucesso" class="card sucesso-tela hidden">
     <div class="sucesso-icon">✅</div>
-    <h1 style="color:#4ade80;font-size:20px;margin-bottom:8px;">Orçamento Aprovado com Sucesso!</h1>
-    <p style="color:#cbd5e1;font-size:14px;line-height:1.6;margin-bottom:18px;" id="msg-sucesso">
-      Sua <strong>Ordem de Serviço foi autorizada</strong>.<br>
+    <h1 style="color:#4ade80;font-size:20px;margin-bottom:6px;">Orçamento Aprovado com Sucesso!</h1>
+    <p style="color:#cbd5e1;font-size:13.5px;line-height:1.5;margin-bottom:16px;" id="msg-sucesso">
+      Sua <strong>Ordem de Serviço foi autorizada</strong> com validade jurídica digital.<br>
       Nossa equipe já foi notificada para iniciar os preparativos e a produção.
     </p>
-    <a id="btn-notificar-sdv" href="#" target="_blank" class="btn btn-whats" style="display:none;margin-bottom:12px;">
-      📱 Enviar Confirmação para SD Vidros
-    </a>
-    <button id="btn-baixar-pdf-sucesso" class="btn btn-outline" onclick="baixarPdfAtual()">
-      📄 Baixar Cópia do Contrato (PDF)
-    </button>
+
+    <!-- CARD VIP: LINK PARA A ÁREA DO CLIENTE -->
+    <div class="portal-promo-card" id="card-link-portal">
+      <div class="portal-promo-header">
+        <div class="portal-promo-icon">👤</div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="portal-promo-title">Área Exclusiva do Cliente</div>
+            <span class="portal-badge-new">Liberada</span>
+          </div>
+          <div class="portal-promo-sub" id="portal-promo-desc">
+            Acompanhe o status da sua obra em tempo real, fotos, pagamentos e chat:
+          </div>
+        </div>
+      </div>
+
+      <!-- Recursos Rápidos do Portal -->
+      <div class="portal-promo-features">
+        <div class="portal-feature-item"><span>📊</span> Status da Obra</div>
+        <div class="portal-feature-item"><span>📸</span> Fotos do Projeto</div>
+        <div class="portal-feature-item"><span>💳</span> Chave PIX & Recibos</div>
+        <div class="portal-feature-item"><span>💬</span> Suporte & Mensagens</div>
+      </div>
+
+      <!-- Botão Principal: Acessar Área do Cliente -->
+      <a id="btn-acessar-cliente" href="cliente.html" class="btn-portal-gold">
+        🚀 Acessar Minha Área do Cliente ➔
+      </a>
+
+      <!-- Caixa para Copiar Link de Acesso -->
+      <div style="margin-top:14px;">
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">
+          Seu Link de Acesso Exclusivo:
+        </div>
+        <div class="portal-link-input-wrap">
+          <input type="text" id="input-link-cliente" class="portal-link-input" readonly value="" onclick="copiarLinkCliente()" title="Clique para copiar">
+          <button type="button" id="btn-copiar-link-cliente" class="btn-copiar-link" onclick="copiarLinkCliente()">
+            📋 Copiar Link
+          </button>
+        </div>
+      </div>
+
+      <div class="portal-hint-pass">
+        💡 <strong>Como acessar:</strong> Seu identificador é o seu WhatsApp e a senha inicial são os <strong>4 últimos dígitos do seu telefone</strong>.
+      </div>
+    </div>
+
+    <!-- Ações Secundárias: WhatsApp e PDF -->
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">
+      <a id="btn-notificar-sdv" href="#" target="_blank" class="btn btn-whats" style="display:none;">
+        📱 Enviar Confirmação & Link no WhatsApp
+      </a>
+      <button id="btn-baixar-pdf-sucesso" class="btn btn-outline" onclick="baixarPdfAtual()">
+        📄 Baixar Cópia do Contrato (PDF)
+      </button>
+    </div>
   </div>
 
   <!-- Main Proposal & Signing View -->
@@ -397,6 +601,138 @@
     if (telaErro) telaErro.classList.remove('hidden');
   }
 
+  function obterLicencaAtiva() {
+    try {
+      const lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
+      const idAtivo = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+      if (Array.isArray(lista) && lista.length) {
+        const encontrada = lista.find(l => l.id === idAtivo);
+        if (encontrada) return encontrada;
+      }
+    } catch (_) {}
+    return {
+      id: 'sdvidros',
+      nome: 'SD Vidros',
+      segmento: 'Soluções em Vidros & Esquadrias de Alumínio',
+      telefone: '(85) 99611-9824'
+    };
+  }
+
+  function aplicarBrandingLicenca() {
+    const lic = obterLicencaAtiva();
+    const titleEl = document.getElementById('header-brand-title');
+    const badgeEl = document.getElementById('header-brand-badge');
+    if (titleEl) {
+      const icone = (lic.id === 'sdmoveis' || String(lic.nome).toLowerCase().includes('móveis') || String(lic.nome).toLowerCase().includes('moveis')) ? '🪑' : '🪟';
+      titleEl.innerHTML = `<span>${icone}</span> ${lic.nome.toUpperCase()}`;
+    }
+    if (badgeEl && lic.segmento) {
+      badgeEl.textContent = lic.segmento;
+    }
+    document.title = `Aprovação & Assinatura Digital — ${lic.nome}`;
+  }
+
+  try { aplicarBrandingLicenca(); } catch (_) {}
+
+  function atualizarCardPortalCliente(numOs, cliNome, cliTel) {
+    const lic = obterLicencaAtiva();
+    const osFormatada = numOs ? (String(numOs).startsWith('#') ? String(numOs) : '#' + numOs) : '#0001';
+    const telLimpo = String(cliTel || '').replace(/\D/g, '');
+    const osLimpa = String(numOs || '').replace(/[^0-9a-zA-Z]/g, '');
+
+    const params = new URLSearchParams();
+    if (osLimpa) params.set('os', osLimpa);
+    if (telLimpo) params.set('tel', telLimpo);
+    if (cliNome && cliNome !== 'Não informado') params.set('nome', cliNome);
+    params.set('auto', '1');
+
+    const urlRelativa = 'cliente.html?' + params.toString();
+    const urlCompleta = window.location.origin + '/' + urlRelativa;
+
+    const btnAcessar = document.getElementById('btn-acessar-cliente');
+    if (btnAcessar) {
+      btnAcessar.href = urlRelativa;
+    }
+
+    const inputLink = document.getElementById('input-link-cliente');
+    if (inputLink) {
+      inputLink.value = urlCompleta;
+    }
+
+    const descEl = document.getElementById('portal-promo-desc');
+    if (descEl) {
+      descEl.innerHTML = `Olá, <strong>${cliNome || 'Cliente'}</strong>! Acompanhe o status da sua obra <strong>${osFormatada}</strong>, fotos e pagamentos:`;
+    }
+
+    // Grava sessão no localStorage para login imediato
+    try {
+      const sessaoCli = {
+        nome: cliNome || 'Cliente Especial',
+        telefone: cliTel || '',
+        os: osFormatada,
+        ordem: {
+          numero: osFormatada,
+          nome: cliNome || 'Cliente Especial',
+          dados: { tel: cliTel, nome: cliNome },
+          etapa_servico: 2,
+          status_servico_texto: 'O.S. Aprovada & Em Produção',
+          status_obs: 'Assinatura digital confirmada com sucesso. Materiais enviados para fábrica.',
+          previsao_instalacao: 'Em agendamento com a equipe'
+        }
+      };
+      localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessaoCli));
+      if (cliTel) localStorage.setItem('sdv_cli_tel', cliTel);
+      if (cliNome) localStorage.setItem('sdv_cliente_ativo', cliNome);
+
+      // Salva ordem na lista de ordens para cliente.html reconhecer
+      const ordens = JSON.parse(localStorage.getItem('sdv_ordens') || '[]');
+      const idx = ordens.findIndex(o => String(o.numero) === String(osFormatada));
+      if (idx === -1) {
+        ordens.push(sessaoCli.ordem);
+        localStorage.setItem('sdv_ordens', JSON.stringify(ordens));
+      }
+    } catch (_) {}
+
+    return { urlRelativa, urlCompleta, lic, osFormatada };
+  }
+
+  window.copiarLinkCliente = function() {
+    const input = document.getElementById('input-link-cliente');
+    const url = input && input.value ? input.value : (window.location.origin + '/cliente.html');
+    const btn = document.getElementById('btn-copiar-link-cliente');
+
+    function feedbackSucesso() {
+      if (btn) {
+        btn.textContent = '✅ Link Copiado!';
+        btn.style.borderColor = '#4ade80';
+        btn.style.color = '#4ade80';
+        setTimeout(() => {
+          btn.textContent = '📋 Copiar Link';
+          btn.style.borderColor = '';
+          btn.style.color = '';
+        }, 3000);
+      }
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(feedbackSucesso).catch(() => {
+        fallbackCopy(url);
+      });
+    } else {
+      fallbackCopy(url);
+    }
+
+    function fallbackCopy(val) {
+      if (input) {
+        input.select();
+        document.execCommand('copy');
+      } else {
+        prompt('Copie o link da sua Área do Cliente abaixo:', val);
+      }
+      feedbackSucesso();
+    }
+  };
+
   window.irParaAssinatura = function() {
     const el = document.getElementById('card-assinatura');
     if (el) {
@@ -447,6 +783,20 @@
           msgSuc.innerHTML =
             'Esta proposta/contrato já foi <strong>aprovada e assinada</strong> por <strong>' + (data.assinante_nome || '') + '</strong>' +
             (data.assinado_em ? ' em ' + new Date(data.assinado_em).toLocaleDateString('pt-BR') : '') + '.';
+        }
+        const telCli = data.cliente_tel || data.tel || data.t || '';
+        const nomeFinal = data.assinante_nome || data.cliente_nome || 'Cliente';
+        const info = atualizarCardPortalCliente(data.numero_os, nomeFinal, telCli);
+        const btnNotif = document.getElementById('btn-notificar-sdv');
+        if (btnNotif) {
+          const numZap = (info.lic.telefone ? info.lic.telefone.replace(/\D/g, '') : '5585996119824');
+          const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* 🪟\n\n'
+            + 'Olá ' + info.lic.nome + '! Já confirmei a aprovação da Ordem de Serviço ' + info.osFormatada + '!\n'
+            + '👤 *Assinado por:* ' + nomeFinal + '\n\n'
+            + '🔗 *Área Exclusiva do Cliente:* ' + info.urlCompleta + '\n'
+            + '💡 _Acesse para acompanhar a produção, fotos e pagamentos._';
+          btnNotif.href = 'https://wa.me/' + (numZap.startsWith('55') ? numZap : '55' + numZap) + '?text=' + encodeURIComponent(zapMsg);
+          btnNotif.style.display = 'inline-flex';
         }
       }
       return;
@@ -797,14 +1147,21 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
           telaForm.classList.add('hidden');
           telaSucesso.classList.remove('hidden');
 
+          const telCli = (contratoCache && (contratoCache.cliente_tel || contratoCache.tel || contratoCache.t)) || '';
+          const nomeFinal = nomeAssinante || clienteNome || 'Cliente';
+          const info = atualizarCardPortalCliente(numeroOs, nomeFinal, telCli);
+
           const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* 🪟\n\n'
-            + 'Olá SD Vidros! Acabei de aprovar e assinar a Ordem de Serviço ' + numeroOs + '!\n'
-            + '👤 Assinado por: ' + (nomeAssinante || clienteNome) + '\n\n'
+            + 'Olá ' + info.lic.nome + '! Acabei de aprovar e assinar a Ordem de Serviço ' + info.osFormatada + '!\n'
+            + '👤 *Assinado por:* ' + nomeFinal + '\n\n'
+            + '🔗 *Área Exclusiva do Cliente:* ' + info.urlCompleta + '\n'
+            + '💡 _Acompanhamento em tempo real da produção, fotos e pagamentos._\n\n'
             + 'A Ordem de Serviço está autorizada. Podemos iniciar a produção!';
 
           const btnNotif = document.getElementById('btn-notificar-sdv');
           if (btnNotif) {
-            btnNotif.href = 'https://wa.me/5585996119824?text=' + encodeURIComponent(zapMsg);
+            const numZap = (info.lic.telefone ? info.lic.telefone.replace(/\D/g, '') : '5585996119824');
+            btnNotif.href = 'https://wa.me/' + (numZap.startsWith('55') ? numZap : '55' + numZap) + '?text=' + encodeURIComponent(zapMsg);
             btnNotif.style.display = 'inline-flex';
           }
         };
