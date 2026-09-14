@@ -1259,6 +1259,57 @@
       color: var(--text2);
       line-height: 1.55;
     }
+
+    /* ── ESTILOS MÓDULO PONTO DO FUNCIONÁRIO ── */
+    .ponto-clock-card {
+      background: radial-gradient(ellipse 70% 50% at 50% 20%, rgba(14,165,233,0.14) 0%, rgba(16,16,24,0.95) 75%);
+      border: 1.5px solid rgba(14,165,233,0.3); border-radius: 16px;
+      padding: 22px 18px; text-align: center; margin-bottom: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .ponto-date-display {
+      font-size: 12.5px; font-weight: 800; color: #38bdf8; text-transform: uppercase;
+      letter-spacing: 0.12em; margin-bottom: 6px;
+    }
+    .ponto-clock-display {
+      font-size: clamp(36px, 8vw, 54px); font-weight: 900; color: #ffffff;
+      letter-spacing: 0.04em; text-shadow: 0 0 24px rgba(56,189,248,0.5);
+      line-height: 1.1; margin-bottom: 16px; font-variant-numeric: tabular-nums;
+    }
+    .ponto-grid-actions {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    }
+    @media(max-width: 480px) {
+      .ponto-grid-actions { grid-template-columns: repeat(2, 1fr); }
+    }
+    .ponto-btn-action {
+      background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 12px; padding: 14px 8px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 6px; cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .ponto-btn-action:hover { transform: translateY(-2px); }
+    .ponto-btn-action:active { transform: scale(0.96); }
+    .ponto-btn-action .ponto-act-icon { font-size: 22px; line-height: 1; }
+    .ponto-btn-action .ponto-act-label { font-size: 12px; font-weight: 800; white-space: nowrap; font-family: var(--font); }
+
+    .ponto-act-entrada { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.4); color: #34d399; }
+    .ponto-act-entrada:hover { background: rgba(16,185,129,0.22); border-color: #10b981; box-shadow: 0 6px 20px rgba(16,185,129,0.3); }
+
+    .ponto-act-almoco { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.4); color: #fbbf24; }
+    .ponto-act-almoco:hover { background: rgba(245,158,11,0.22); border-color: #f59e0b; box-shadow: 0 6px 20px rgba(245,158,11,0.3); }
+
+    .ponto-act-volta { background: rgba(20,184,166,0.12); border-color: rgba(20,184,166,0.4); color: #2dd4bf; }
+    .ponto-act-volta:hover { background: rgba(20,184,166,0.22); border-color: #14b8a6; box-shadow: 0 6px 20px rgba(20,184,166,0.3); }
+
+    .ponto-act-saida { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.4); color: #f87171; }
+    .ponto-act-saida:hover { background: rgba(239,68,68,0.22); border-color: #ef4444; box-shadow: 0 6px 20px rgba(239,68,68,0.3); }
+
+    .ponto-act-falta { background: rgba(220,38,38,0.12); border-color: rgba(220,38,38,0.35); color: #fca5a5; }
+    .ponto-act-falta:hover { background: rgba(220,38,38,0.22); border-color: #dc2626; box-shadow: 0 6px 20px rgba(220,38,38,0.3); }
+
+    .ponto-act-doente { background: rgba(168,85,247,0.12); border-color: rgba(168,85,247,0.35); color: #c084fc; }
+    .ponto-act-doente:hover { background: rgba(168,85,247,0.22); border-color: #a855f7; box-shadow: 0 6px 20px rgba(168,85,247,0.3); }
   </style>
 </head>
 <body>
@@ -1425,6 +1476,14 @@
       <div class="login-info-box">
         💡 <strong>Primeiro acesso?</strong> Caso ainda não possua uma senha cadastrada, utilize os <strong>4 últimos dígitos do seu WhatsApp</strong> ou entre em contato pelo suporte: <strong style="color:var(--gold-light);" id="portal-support-tel">(85) 99611-9824</strong>.
       </div>
+
+      <!-- ACESSO DIRETO PORTAL DO FUNCIONÁRIO / COLABORADOR -->
+      <div style="margin-top:16px;padding-top:14px;border-top:1px dashed rgba(201,168,76,0.25);text-align:center;">
+        <button type="button" onclick="entrarComoColaboradorDireto()" style="width:100%;padding:13px 14px;background:rgba(14,165,233,0.12);border:1.5px solid #38bdf8;border-radius:12px;color:#fff;font-weight:800;font-size:13px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(14,165,233,0.18);transition:all 0.2s;">
+          <span>👷</span> <span>Acessar como Colaborador / Bater Ponto</span>
+        </button>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:6px;">Acesso ao registro de ponto e acompanhamento de obras</div>
+      </div>
     </div>
 
     <!-- ══════════════════════════════════════════════ -->
@@ -1438,13 +1497,10 @@
           <img id="portal-banner-img" src="banner.jpg" alt="Showroom e Projetos Sob Medida">
         </div>
         <div class="banner-bottom-bar">
-          <div class="user-pill">
+          <div class="user-pill" style="width:100%; justify-content:center;">
             <span>👤</span>
             <span id="lbl-cliente-nome">Samuel David</span>
           </div>
-          <button type="button" class="btn-sair-top" onclick="sairCliente()" title="Sair da conta">
-            🚪 Sair
-          </button>
         </div>
       </div>
 
@@ -1483,7 +1539,7 @@
             <span>💬</span> <span>Mensagens</span> <span class="tab-badge" id="badge-msg-count" style="display:none">0</span>
           </button>
           <button type="button" class="portal-tab" id="btn-tab-financeiro" onclick="mudarAba('financeiro')">
-            <span>💳</span> <span>Setor Financeiro</span>
+            <span id="tab-fin-icone">💳</span> <span id="tab-fin-rotulo">Setor Financeiro</span>
           </button>
         </div>
       </div>
@@ -1646,8 +1702,11 @@
         </div>
       </div>
 
-      <!-- ── ABA 4: SETOR FINANCEIRO DO CLIENTE ── -->
+      <!-- ── ABA 4: SETOR FINANCEIRO DO CLIENTE / PONTO DO FUNCIONÁRIO ── -->
       <div id="pane-financeiro" class="tab-pane">
+        
+        <!-- ══ CONTEÚDO FINANCEIRO EXCLUSIVO DO CLIENTE (OCULTO PARA FUNCIONÁRIOS) ══ -->
+        <div id="conteudo-financeiro-cliente">
         
         <!-- 1. HERO: STATUS DE PAGAMENTO DO CLIENTE -->
         <div class="fin-hero">
@@ -1858,7 +1917,105 @@
             </div>
           </div>
         </div>
+        </div> <!-- FIM #conteudo-financeiro-cliente -->
 
+        <!-- ══ PONTO DO FUNCIONÁRIO (SUBSTITUI O SETOR FINANCEIRO PARA COLABORADORES) ══ -->
+        <div id="conteudo-ponto-funcionario" style="display:none;">
+          <!-- Card de Identificação do Colaborador -->
+          <div style="background:linear-gradient(135deg,rgba(14,165,233,0.16),rgba(201,168,76,0.12));border:1.5px solid rgba(56,189,248,0.35);border-radius:16px;padding:16px 18px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+            <div>
+              <div style="font-size:11px;color:#38bdf8;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;">
+                Portal do Colaborador · Ponto Digital Oficial
+              </div>
+              <div style="font-size:20px;font-weight:900;color:#fff;margin-top:2px;" id="ponto-func-colab-titulo">
+                Samuel David
+              </div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px;" id="ponto-func-colab-sub">
+                Instalador / Técnico Líder · SD Vidros
+              </div>
+            </div>
+            <div id="ponto-func-badge-status" style="background:rgba(16,185,129,0.18);border:1.5px solid #10b981;color:#4ade80;padding:6px 16px;border-radius:999px;font-size:12.5px;font-weight:800;letter-spacing:0.04em;">
+              • Presente
+            </div>
+          </div>
+
+          <!-- Card Relógio Digital & Batedor de Ponto -->
+          <div class="ponto-clock-card">
+            <div class="ponto-date-display" id="cliente-ponto-data-atual">SEGUNDA-FEIRA, 14 DE SETEMBRO DE 2026</div>
+            <div class="ponto-clock-display" id="cliente-ponto-hora-atual">00:00:00</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:16px;">
+              Toque no botão correspondente para registrar seu horário oficial:
+            </div>
+
+            <!-- Grade de 6 Botões de Batida -->
+            <div class="ponto-grid-actions">
+              <button type="button" class="ponto-btn-action ponto-act-entrada" onclick="baterPontoNoCliente('entrada1')">
+                <span class="ponto-act-icon">➔]</span>
+                <span class="ponto-act-label">1ª Entrada</span>
+              </button>
+              <button type="button" class="ponto-btn-action ponto-act-almoco" onclick="baterPontoNoCliente('saidaAlmoco')">
+                <span class="ponto-act-icon">☕</span>
+                <span class="ponto-act-label">Saída Almoço</span>
+              </button>
+              <button type="button" class="ponto-btn-action ponto-act-volta" onclick="baterPontoNoCliente('voltaAlmoco')">
+                <span class="ponto-act-icon">▶️</span>
+                <span class="ponto-act-label">Volta Almoço</span>
+              </button>
+              <button type="button" class="ponto-btn-action ponto-act-saida" onclick="baterPontoNoCliente('saidaFinal')">
+                <span class="ponto-act-icon">[➔</span>
+                <span class="ponto-act-label">Saída Final</span>
+              </button>
+              <button type="button" class="ponto-btn-action ponto-act-falta" onclick="baterPontoNoCliente('falta')">
+                <span class="ponto-act-icon">👤✕</span>
+                <span class="ponto-act-label">Falta</span>
+              </button>
+              <button type="button" class="ponto-btn-action ponto-act-doente" onclick="baterPontoNoCliente('faltaDoente')">
+                <span class="ponto-act-icon">⚡</span>
+                <span class="ponto-act-label">Falta Doente</span>
+              </button>
+            </div>
+
+            <div id="cliente-ponto-msg" style="margin-top:14px;font-size:13.5px;font-weight:700;display:none;padding:10px 14px;border-radius:10px;"></div>
+          </div>
+
+          <!-- Card Resumo das Batidas de Hoje -->
+          <div style="background:#0c0d16;border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;padding:18px;margin-top:16px;box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+              <div style="font-size:14px;font-weight:900;color:#fff;display:flex;align-items:center;gap:7px;">
+                <span>📋</span> <span>Resumo do Seu Ponto de Hoje</span>
+              </div>
+              <span id="cliente-ponto-total-horas" style="font-size:12px;font-weight:800;color:#38bdf8;background:rgba(14,165,233,0.15);padding:4px 12px;border-radius:999px;border:1px solid rgba(56,189,248,0.3);">
+                00h 00m trabalhadas
+              </span>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;" id="cliente-ponto-grid-horas">
+              <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px 6px;">
+                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:800;">1ª Entrada</div>
+                <div id="resumo-ponto-ent1" style="font-size:16px;font-weight:900;color:#34d399;margin-top:5px;">--:--</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px 6px;">
+                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:800;">Saída Almoço</div>
+                <div id="resumo-ponto-alm" style="font-size:16px;font-weight:900;color:#fbbf24;margin-top:5px;">--:--</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px 6px;">
+                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:800;">Volta Almoço</div>
+                <div id="resumo-ponto-vol" style="font-size:16px;font-weight:900;color:#2dd4bf;margin-top:5px;">--:--</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px 6px;">
+                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:800;">Saída Final</div>
+                <div id="resumo-ponto-sai" style="font-size:16px;font-weight:900;color:#f87171;margin-top:5px;">--:--</div>
+              </div>
+            </div>
+
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--text2);flex-wrap:wrap;gap:8px;">
+              <span id="cliente-ponto-sync-info">⚡ Sincronizado com a Central SD Vidros</span>
+              <button type="button" onclick="renderizarResumoPontoCliente(true)" style="background:transparent;border:none;color:#38bdf8;font-weight:700;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                🔄 Atualizar
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -2023,19 +2180,24 @@
 
     function checarParametrosUrl() {
       const urlParams = new URLSearchParams(window.location.search);
-      const paramPortal = urlParams.get('portal') || urlParams.get('modo') || urlParams.get('tipo');
+      const paramPortal = (urlParams.get('portal') || urlParams.get('modo') || urlParams.get('tipo') || '').toLowerCase();
       const paramOs = urlParams.get('os');
       const paramTel = urlParams.get('tel');
       const paramSenha = urlParams.get('senha') || urlParams.get('s');
       const paramNome = urlParams.get('nome');
       const autoLogin = urlParams.get('auto') === '1' || urlParams.get('direct') === '1';
+      const isFuncParam = paramPortal === 'funcionario' || paramPortal === 'colaborador' || urlParams.get('func') === '1' || urlParams.get('funcionario') === '1';
 
       // Se aberto como Portal do Funcionário
-      if (paramPortal === 'funcionario') {
+      if (isFuncParam) {
         const ordens = carregarOrdensDoStorage();
         const ultOrdem = ordens.length ? ordens[ordens.length - 1] : { numero: '#0001', nome: 'Samuel David' };
+        const idColab = parseInt(urlParams.get('funcId') || urlParams.get('id') || 100);
+        const nomeColab = paramNome ? decodeURIComponent(paramNome) : 'Samuel David';
         const sessaoFunc = {
-          nome: 'Samuel David (Instalador / Técnico)',
+          id: idColab,
+          nome: nomeColab,
+          cargo: urlParams.get('cargo') ? decodeURIComponent(urlParams.get('cargo')) : 'Instalador / Técnico Líder',
           os: ultOrdem.numero || '#0001',
           isFuncionario: true,
           ordem: ultOrdem
@@ -2063,6 +2225,10 @@
       if (salvo) {
         try {
           const c = JSON.parse(salvo);
+          // Se for sessão de funcionário (por flag ou pelo nome)
+          if (c.isFuncionario || (c.nome && (c.nome.toLowerCase().includes('instalador') || c.nome.toLowerCase().includes('técnico') || c.nome.toLowerCase().includes('tecnico')))) {
+            c.isFuncionario = true;
+          }
           if (paramOs && c.os && !c.os.includes(paramOs)) {
             c.os = paramOs.startsWith('#') ? paramOs : '#' + paramOs;
             if (paramNome) c.nome = paramNome;
@@ -2180,11 +2346,35 @@
         if (elOs) elOs.textContent = '📋 O.S. ' + sessao.os;
       }
 
+      // ── MODO FUNCIONÁRIO VS CLIENTE (EXCLUSÃO TOTAL DO SETOR FINANCEIRO) ──
+      const tabRotulo = document.getElementById('tab-fin-rotulo');
+      const tabIcone = document.getElementById('tab-fin-icone');
+      const contFin = document.getElementById('conteudo-financeiro-cliente');
+      const contPonto = document.getElementById('conteudo-ponto-funcionario');
+
+      if (sessao.isFuncionario) {
+        // Altera o título da aba para Ponto do Funcionário
+        if (tabRotulo) tabRotulo.textContent = 'Ponto do Funcionário';
+        if (tabIcone) tabIcone.textContent = '👷';
+        // EXCLUI TOTALMENTE O SETOR FINANCEIRO DO CLIENTE
+        if (contFin) contFin.style.display = 'none';
+        if (contPonto) contPonto.style.display = 'block';
+
+        iniciarRelogioPontoCliente();
+        renderizarResumoPontoCliente();
+      } else {
+        // Restaura para cliente normal
+        if (tabRotulo) tabRotulo.textContent = 'Setor Financeiro';
+        if (tabIcone) tabIcone.textContent = '💳';
+        if (contFin) contFin.style.display = 'block';
+        if (contPonto) contPonto.style.display = 'none';
+        carregarDadosFinanceiros(sessao);
+      }
+
       carregarDadosStatus(sessao);
       carregarGaleriaFotos(sessao);
       carregarMensagensChat(sessao);
       renderizarOrdensMensagens();
-      carregarDadosFinanceiros(sessao);
       conectarRealtimePortal(sessao);
       atualizarBotaoHeaderBiometria();
     }
@@ -2205,8 +2395,270 @@
       }
 
       if (tab === 'financeiro') {
-        carregarDadosFinanceiros(clienteSessao);
+        if (clienteSessao && clienteSessao.isFuncionario) {
+          renderizarResumoPontoCliente();
+        } else {
+          carregarDadosFinanceiros(clienteSessao);
+        }
       }
+    }
+
+    // ══════════════════════════════════════════════
+    //  MÓDULO DE PONTO ELETRÔNICO DO COLABORADOR
+    // ══════════════════════════════════════════════
+    let timerRelogioPontoCliente = null;
+
+    function iniciarRelogioPontoCliente() {
+      if (timerRelogioPontoCliente) clearInterval(timerRelogioPontoCliente);
+      atualizarRelogioPontoCliente();
+      timerRelogioPontoCliente = setInterval(atualizarRelogioPontoCliente, 1000);
+    }
+
+    function atualizarRelogioPontoCliente() {
+      const elHora = document.getElementById('cliente-ponto-hora-atual');
+      const elData = document.getElementById('cliente-ponto-data-atual');
+      if (!elHora && !elData) return;
+
+      const agora = new Date();
+      const dias = ['DOMINGO', 'SEGUNDA-FEIRA', 'TERÇA-FEIRA', 'QUARTA-FEIRA', 'QUINTA-FEIRA', 'SEXTA-FEIRA', 'SÁBADO'];
+      const meses = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+
+      const diaSemana = dias[agora.getDay()];
+      const diaNum = agora.getDate();
+      const mesNome = meses[agora.getMonth()];
+      const anoNum = agora.getFullYear();
+
+      if (elData) elData.textContent = `${diaSemana}, ${diaNum} DE ${mesNome} DE ${anoNum}`;
+
+      const hh = String(agora.getHours()).padStart(2, '0');
+      const mm = String(agora.getMinutes()).padStart(2, '0');
+      const ss = String(agora.getSeconds()).padStart(2, '0');
+      if (elHora) elHora.textContent = `${hh}:${mm}:${ss}`;
+    }
+
+    function getHojeFormatadoPonto() {
+      const agora = new Date();
+      const dd = String(agora.getDate()).padStart(2, '0');
+      const mm = String(agora.getMonth() + 1).padStart(2, '0');
+      const yyyy = agora.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    function obterFuncionarioAtivoPonto() {
+      const lista = carregarFuncionariosDoStorage();
+      let colab = null;
+      if (clienteSessao && clienteSessao.id) {
+        colab = lista.find(f => f.id === clienteSessao.id);
+      }
+      if (!colab && clienteSessao && clienteSessao.nome) {
+        const nLimpo = clienteSessao.nome.toLowerCase();
+        colab = lista.find(f => nLimpo.includes((f.nome || '').toLowerCase()) || (f.nome || '').toLowerCase().includes(nLimpo.split(' ')[0]));
+      }
+      if (!colab) {
+        colab = {
+          id: (clienteSessao && clienteSessao.id) || 100,
+          nome: (clienteSessao && clienteSessao.nome) || 'Samuel David',
+          cargo: (clienteSessao && clienteSessao.cargo) || 'Instalador / Técnico Líder',
+          whatsapp: '(85) 99611-9824',
+          departamento: 'Operações',
+          status: 'Presente',
+          salario: 4500,
+          valorHora: 25.50
+        };
+        lista.push(colab);
+        try { localStorage.setItem('sdv_funcionarios', JSON.stringify(lista)); } catch(_) {}
+      }
+      return colab;
+    }
+
+    function carregarFuncionariosDoStorage() {
+      try {
+        const raw = localStorage.getItem('sdv_funcionarios');
+        if (raw) return JSON.parse(raw);
+      } catch(_) {}
+      return [
+        { id: 100, nome: 'Samuel David', cargo: 'Instalador / Técnico Líder', whatsapp: '(85) 99611-9824', departamento: 'Operações', status: 'Presente', valorHora: 25.50 }
+      ];
+    }
+
+    function carregarPontosDoStorage() {
+      try {
+        const raw = localStorage.getItem('sdv_pontos');
+        if (raw) return JSON.parse(raw);
+      } catch(_) {}
+      return [];
+    }
+
+    function renderizarResumoPontoCliente(comFeedback = false) {
+      const colab = obterFuncionarioAtivoPonto();
+      const tituloEl = document.getElementById('ponto-func-colab-titulo');
+      const subEl = document.getElementById('ponto-func-colab-sub');
+      const statusBadge = document.getElementById('ponto-func-badge-status');
+
+      if (tituloEl) tituloEl.textContent = colab.nome;
+      if (subEl) subEl.textContent = `${colab.cargo || 'Colaborador'} · SD Vidros`;
+
+      const st = colab.status || 'Presente';
+      if (statusBadge) {
+        statusBadge.textContent = `• ${st}`;
+        if (st === 'Em Almoço') {
+          statusBadge.style.borderColor = '#f59e0b';
+          statusBadge.style.color = '#fbbf24';
+          statusBadge.style.background = 'rgba(245,158,11,0.18)';
+        } else if (st === 'Folga' || st === 'Ausente') {
+          statusBadge.style.borderColor = '#ef4444';
+          statusBadge.style.color = '#f87171';
+          statusBadge.style.background = 'rgba(239,68,68,0.18)';
+        } else {
+          statusBadge.style.borderColor = '#10b981';
+          statusBadge.style.color = '#4ade80';
+          statusBadge.style.background = 'rgba(16,185,129,0.18)';
+        }
+      }
+
+      const dataHoje = getHojeFormatadoPonto();
+      const pontos = carregarPontosDoStorage();
+      const reg = pontos.find(p => (p.colaboradorId === colab.id || (p.colaboradorNome && p.colaboradorNome.toLowerCase() === colab.nome.toLowerCase())) && p.data === dataHoje);
+
+      const ent1El = document.getElementById('resumo-ponto-ent1');
+      const almEl = document.getElementById('resumo-ponto-alm');
+      const volEl = document.getElementById('resumo-ponto-vol');
+      const saiEl = document.getElementById('resumo-ponto-sai');
+      const totEl = document.getElementById('cliente-ponto-total-horas');
+
+      if (ent1El) ent1El.textContent = (reg && reg.entrada1) ? reg.entrada1 : '--:--';
+      if (almEl) almEl.textContent = (reg && reg.saidaAlmoco) ? reg.saidaAlmoco : '--:--';
+      if (volEl) volEl.textContent = (reg && reg.voltaAlmoco) ? reg.voltaAlmoco : '--:--';
+      if (saiEl) saiEl.textContent = (reg && reg.saidaFinal) ? reg.saidaFinal : '--:--';
+      if (totEl) totEl.textContent = (reg && reg.tempoTrabalhado) ? `${reg.tempoTrabalhado} trabalhadas` : '00h 00m trabalhadas';
+
+      if (comFeedback) {
+        mostrarToastPontoCliente('Horários sincronizados com sucesso!', true);
+      }
+    }
+
+    function baterPontoNoCliente(tipo) {
+      const colab = obterFuncionarioAtivoPonto();
+      const agora = new Date();
+      const hh = String(agora.getHours()).padStart(2, '0');
+      const mm = String(agora.getMinutes()).padStart(2, '0');
+      const horaStr = `${hh}:${mm}`;
+      const dataHoje = getHojeFormatadoPonto();
+
+      let pontos = carregarPontosDoStorage();
+      let funcionarios = carregarFuncionariosDoStorage();
+      const idxFunc = funcionarios.findIndex(f => f.id === colab.id);
+
+      let p = pontos.find(x => (x.colaboradorId === colab.id || (x.colaboradorNome && x.colaboradorNome.toLowerCase() === colab.nome.toLowerCase())) && x.data === dataHoje);
+      if (!p) {
+        p = {
+          id: Date.now(),
+          colaboradorId: colab.id,
+          colaboradorNome: colab.nome,
+          data: dataHoje,
+          entrada1: '',
+          saidaAlmoco: '',
+          voltaAlmoco: '',
+          saidaFinal: '',
+          tempoTrabalhado: '00h 00m',
+          valorSalario: 'R$ 0,00',
+          valorHoraInfo: `(R$ ${(colab.valorHora || 25.50).toFixed(2).replace('.', ',')}/h)`,
+          status: 'Presente'
+        };
+        pontos.unshift(p);
+      }
+
+      let labelTipo = '';
+      if (tipo === 'entrada1') {
+        p.entrada1 = horaStr;
+        colab.status = 'Presente';
+        p.status = 'Presente';
+        labelTipo = '1ª Entrada';
+      } else if (tipo === 'saidaAlmoco') {
+        p.saidaAlmoco = horaStr;
+        colab.status = 'Em Almoço';
+        p.status = 'Em Almoço';
+        labelTipo = 'Saída Almoço';
+      } else if (tipo === 'voltaAlmoco') {
+        p.voltaAlmoco = horaStr;
+        colab.status = 'Presente';
+        p.status = 'Presente';
+        labelTipo = 'Volta Almoço';
+      } else if (tipo === 'saidaFinal') {
+        p.saidaFinal = horaStr;
+        colab.status = 'Folga';
+        p.status = 'Folga';
+        labelTipo = 'Saída Final';
+      } else if (tipo === 'falta') {
+        p.status = 'Ausente';
+        colab.status = 'Ausente';
+        labelTipo = 'Falta Registrada';
+      } else if (tipo === 'faltaDoente') {
+        p.status = 'Atestado/Médico';
+        colab.status = 'Atestado';
+        labelTipo = 'Falta Médica Registrada';
+      }
+
+      // Calcula horas trabalhadas
+      const parseMin = (str) => {
+        if (!str || !str.includes(':')) return null;
+        const parts = str.split(':').map(Number);
+        if (isNaN(parts[0]) || isNaN(parts[1])) return null;
+        return parts[0] * 60 + parts[1];
+      };
+
+      const mEnt = parseMin(p.entrada1);
+      const mAlm = parseMin(p.saidaAlmoco);
+      const mVol = parseMin(p.voltaAlmoco);
+      const mSai = parseMin(p.saidaFinal);
+
+      let totalMin = 0;
+      if (mEnt !== null && mAlm !== null && mAlm >= mEnt) totalMin += (mAlm - mEnt);
+      else if (mEnt !== null && mSai !== null && mSai >= mEnt && mAlm === null) totalMin += (mSai - mEnt);
+
+      if (mVol !== null && mSai !== null && mSai >= mVol) totalMin += (mSai - mVol);
+
+      const hFinal = Math.floor(totalMin / 60);
+      const mFinal = totalMin % 60;
+      p.tempoTrabalhado = `${String(hFinal).padStart(2, '0')}h ${String(mFinal).padStart(2, '0')}m`;
+
+      if (idxFunc !== -1) funcionarios[idxFunc] = colab;
+      else funcionarios.push(colab);
+
+      localStorage.setItem('sdv_pontos', JSON.stringify(pontos));
+      localStorage.setItem('sdv_funcionarios', JSON.stringify(funcionarios));
+
+      renderizarResumoPontoCliente();
+      mostrarToastPontoCliente(`✅ ${labelTipo} registrada com sucesso às ${horaStr}!`, true);
+      if (typeof tocarAlertaSonoro === 'function') tocarAlertaSonoro();
+    }
+
+    function mostrarToastPontoCliente(msg, sucesso = true) {
+      const el = document.getElementById('cliente-ponto-msg');
+      if (!el) { alert(msg); return; }
+      el.style.display = 'block';
+      el.style.background = sucesso ? 'rgba(16,185,129,0.18)' : 'rgba(220,38,38,0.18)';
+      el.style.border = sucesso ? '1px solid #10b981' : '1px solid #dc2626';
+      el.style.color = sucesso ? '#4ade80' : '#f87171';
+      el.innerHTML = msg;
+      setTimeout(() => {
+        if (el) el.style.display = 'none';
+      }, 4500);
+    }
+
+    function entrarComoColaboradorDireto() {
+      const ordens = carregarOrdensDoStorage();
+      const ultOrdem = ordens.length ? ordens[ordens.length - 1] : { numero: '#0001', nome: 'Samuel David' };
+      const sessaoFunc = {
+        id: 100,
+        nome: 'Samuel David (Instalador / Técnico)',
+        cargo: 'Instalador / Técnico Líder',
+        os: ultOrdem.numero || '#0001',
+        isFuncionario: true,
+        ordem: ultOrdem
+      };
+      localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessaoFunc));
+      iniciarPortalCliente(sessaoFunc);
     }
 
     // ══════════════════════════════════════════════

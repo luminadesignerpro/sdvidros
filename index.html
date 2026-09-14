@@ -2292,6 +2292,46 @@
   </div>
 </div>
 
+<!-- ══ MODAL LINKS DO PORTAL DO FUNCIONÁRIO ══ -->
+<div id="modal-portal-links-funcionario" class="modal-overlay" style="display:none" onclick="fecharModalLinksFuncionarios(event)">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:540px;padding:24px 20px;">
+    <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:26px;">👷</span>
+        <div>
+          <div style="font-size:16px;font-weight:900;color:#fff;">Enviar Link do Portal do Funcionário</div>
+          <div style="font-size:11.5px;color:var(--muted);font-weight:500;">Ponto eletrônico e acompanhamento sem visualização de valores financeiros</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="fecharModalLinksFuncionarios()">✕</button>
+    </div>
+
+    <!-- BOTÃO ACESSO DIRETO IMEDIATO -->
+    <div style="margin-bottom:14px;">
+      <button type="button" class="btn btn-primary" onclick="abrirPortalFuncionarioDireto()" style="width:100%;padding:12px;font-size:13.5px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(201,168,76,0.35);">
+        <span>🚀</span> <span>Acessar Portal do Funcionário Agora</span>
+      </button>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <input type="text" id="portal-func-busca" oninput="filtrarModalLinksFuncionarios()" placeholder="🔍 Buscar funcionário por nome ou cargo..." style="width:100%;padding:10px 14px;border-radius:10px;background:#080811;border:1px solid rgba(201,168,76,0.3);color:#fff;font-family:var(--font);font-size:13px;" />
+    </div>
+
+    <div id="portal-func-lista-cards" style="max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px;">
+      <!-- Preenchido via JavaScript -->
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);flex-wrap:wrap;gap:10px;">
+      <button type="button" class="btn btn-sec btn-sm" onclick="irParaGestaoFuncionarios()" style="font-size:11.5px;">
+        👥 Gerenciar Funcionários / Novo
+      </button>
+      <button type="button" class="btn btn-primary btn-sm" onclick="fecharModalLinksFuncionarios()">
+        Concluir
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════
 //  STORAGE & KEYS
@@ -3299,7 +3339,146 @@ function cancelarEdicaoOs() {
 }
 
 function abrirPortalFuncionario() {
-  window.open('cliente.html?portal=funcionario', '_blank');
+  abrirModalLinksFuncionarios();
+}
+
+function abrirModalLinksFuncionarios() {
+  const m = document.getElementById('modal-portal-links-funcionario');
+  if (m) {
+    m.style.display = 'flex';
+    renderizarModalLinksFuncionarios();
+    const busca = document.getElementById('portal-func-busca');
+    if (busca) { busca.value = ''; busca.focus(); }
+  }
+}
+
+function fecharModalLinksFuncionarios(e) {
+  if (e && e.target && e.target !== document.getElementById('modal-portal-links-funcionario')) return;
+  const m = document.getElementById('modal-portal-links-funcionario');
+  if (m) m.style.display = 'none';
+}
+
+function renderizarModalLinksFuncionarios(filtro = '') {
+  const cont = document.getElementById('portal-func-lista-cards');
+  if (!cont) return;
+
+  let lista = Array.isArray(funcionariosLista) && funcionariosLista.length ? [...funcionariosLista] : [];
+  
+  // Se a lista estiver vazia ou não tiver Samuel David, adicionar para pronta utilização
+  if (!lista.some(f => (f.nome || '').toLowerCase().includes('samuel david'))) {
+    lista.unshift({
+      id: 100,
+      nome: 'Samuel David',
+      cargo: 'Instalador / Técnico Líder',
+      whatsapp: '(85) 99611-9824',
+      departamento: 'Operações'
+    });
+  }
+
+  if (filtro) {
+    const fLower = filtro.toLowerCase().trim();
+    lista = lista.filter(f => 
+      (f.nome || '').toLowerCase().includes(fLower) || 
+      (f.cargo || '').toLowerCase().includes(fLower) ||
+      (f.whatsapp || '').includes(fLower)
+    );
+  }
+
+  if (!lista.length) {
+    cont.innerHTML = `
+      <div style="text-align:center;padding:24px 12px;color:var(--muted);font-size:13px;">
+        Nenhum colaborador encontrado com o termo buscado.
+      </div>`;
+    return;
+  }
+
+  const baseOrigin = window.location.origin;
+  const basePath = window.location.pathname.replace(/\/index\.html$/i, '').replace(/\/$/, '');
+
+  cont.innerHTML = lista.map(f => {
+    const idParam = f.id || String(f.nome || 'colaborador').replace(/\s+/g, '_');
+    const nomeParam = encodeURIComponent(f.nome || 'Colaborador');
+    const linkPortal = `${baseOrigin}${basePath}/cliente.html?portal=funcionario&funcId=${idParam}&nome=${nomeParam}`;
+    const telLimpo = (f.whatsapp || f.tel || '').replace(/\D/g, '');
+    const msgZap = `Olá ${f.nome}! Segue seu link oficial do Portal do Funcionário SD Vidros (registro de ponto eletrônico e acompanhamento de obras):\n\n${linkPortal}\n\nSalve nos favoritos do seu celular!`;
+    const urlZap = telLimpo ? `https://wa.me/55${telLimpo}?text=${encodeURIComponent(msgZap)}` : `https://wa.me/?text=${encodeURIComponent(msgZap)}`;
+
+    return `
+      <div style="background:rgba(255,255,255,0.03);border:1.5px solid rgba(201,168,76,0.25);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+          <div>
+            <div style="font-weight:800;font-size:14px;color:#fff;display:flex;align-items:center;gap:6px;">
+              <span>👤</span> <span>${esc(f.nome)}</span>
+            </div>
+            <div style="font-size:11.5px;color:var(--gold-light);margin-top:2px;">
+              ${esc(f.cargo || 'Colaborador')} ${f.whatsapp ? '· ' + esc(f.whatsapp) : ''}
+            </div>
+          </div>
+          <button type="button" class="btn btn-sec btn-xs" onclick="abrirLinkPortalFuncionario('${linkPortal}')" style="padding:4px 9px;font-size:11px;" title="Abrir portal como este funcionário">
+            🚀 Abrir Portal
+          </button>
+        </div>
+
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="text" readonly value="${linkPortal}" style="flex:1;padding:6px 8px;background:#080810;border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#94a3b8;font-size:11px;font-family:monospace;" />
+          <button type="button" class="btn btn-sec btn-xs" onclick="copiarLinkPortalFuncionario('${linkPortal}', this)" style="padding:6px 10px;font-size:11px;white-space:nowrap;">
+            📋 Copiar
+          </button>
+          <a href="${urlZap}" target="_blank" class="btn btn-whats btn-xs" style="padding:6px 10px;font-size:11px;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+            💬 Enviar WhatsApp
+          </a>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function abrirLinkPortalFuncionario(link) {
+  try {
+    const w = window.open(link, '_blank');
+    if (!w || w.closed || typeof w.closed === 'undefined') {
+      window.location.href = link;
+    }
+  } catch(_) {
+    window.location.href = link;
+  }
+}
+
+function abrirPortalFuncionarioDireto() {
+  const baseOrigin = window.location.origin;
+  const basePath = window.location.pathname.replace(/\/index\.html$/i, '').replace(/\/$/, '');
+  const url = `${baseOrigin}${basePath}/cliente.html?portal=funcionario`;
+  abrirLinkPortalFuncionario(url);
+}
+
+function filtrarModalLinksFuncionarios() {
+  const busca = document.getElementById('portal-func-busca');
+  const txt = busca ? busca.value : '';
+  renderizarModalLinksFuncionarios(txt);
+}
+
+function copiarLinkPortalFuncionario(link, btn) {
+  if (!link) return;
+  navigator.clipboard.writeText(link).then(() => {
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✓ Copiado!';
+      btn.style.borderColor = '#10b981';
+      btn.style.color = '#34d399';
+      setTimeout(() => {
+        btn.innerHTML = orig;
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      }, 2000);
+    }
+  }).catch(() => {
+    prompt('Copie o link abaixo:', link);
+  });
+}
+
+function irParaGestaoFuncionarios() {
+  fecharModalLinksFuncionarios();
+  if (typeof goTab === 'function') goTab('ponto');
 }
 
 function notificarNovaOrdemGerada(ord) {
