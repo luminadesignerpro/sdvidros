@@ -3398,7 +3398,7 @@ function renderizarModalLinksFuncionarios(filtro = '') {
   cont.innerHTML = lista.map(f => {
     const idParam = f.id || String(f.nome || 'colaborador').replace(/\s+/g, '_');
     const nomeParam = encodeURIComponent(f.nome || 'Colaborador');
-    const linkPortal = `${baseOrigin}${basePath}/cliente.html?portal=funcionario&funcId=${idParam}&nome=${nomeParam}`;
+    const linkPortal = `${baseOrigin}${basePath}/funcionario.html?funcId=${idParam}&nome=${nomeParam}`;
     const telLimpo = (f.whatsapp || f.tel || '').replace(/\D/g, '');
     const msgZap = `Olá ${f.nome}! Segue seu link oficial do Portal do Funcionário SD Vidros (registro de ponto eletrônico e acompanhamento de obras):\n\n${linkPortal}\n\nSalve nos favoritos do seu celular!`;
     const urlZap = telLimpo ? `https://wa.me/55${telLimpo}?text=${encodeURIComponent(msgZap)}` : `https://wa.me/?text=${encodeURIComponent(msgZap)}`;
@@ -3447,7 +3447,7 @@ function abrirLinkPortalFuncionario(link) {
 function abrirPortalFuncionarioDireto() {
   const baseOrigin = window.location.origin;
   const basePath = window.location.pathname.replace(/\/index\.html$/i, '').replace(/\/$/, '');
-  const url = `${baseOrigin}${basePath}/cliente.html?portal=funcionario`;
+  const url = `${baseOrigin}${basePath}/funcionario.html`;
   abrirLinkPortalFuncionario(url);
 }
 

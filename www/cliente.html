@@ -2197,22 +2197,9 @@
       const autoLogin = urlParams.get('auto') === '1' || urlParams.get('direct') === '1';
       const isFuncParam = paramPortal === 'funcionario' || paramPortal === 'colaborador' || urlParams.get('func') === '1' || urlParams.get('funcionario') === '1';
 
-      // Se aberto como Portal do Funcionário
+      // Se aberto como Portal do Funcionário, redireciona para a página dedicada do colaborador
       if (isFuncParam) {
-        const ordens = carregarOrdensDoStorage();
-        const ultOrdem = ordens.length ? ordens[ordens.length - 1] : { numero: '#0001', nome: 'Samuel David' };
-        const idColab = parseInt(urlParams.get('funcId') || urlParams.get('id') || 100);
-        const nomeColab = paramNome ? decodeURIComponent(paramNome) : 'Samuel David';
-        const sessaoFunc = {
-          id: idColab,
-          nome: nomeColab,
-          cargo: urlParams.get('cargo') ? decodeURIComponent(urlParams.get('cargo')) : 'Instalador / Técnico Líder',
-          os: ultOrdem.numero || '#0001',
-          isFuncionario: true,
-          ordem: ultOrdem
-        };
-        localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessaoFunc));
-        iniciarPortalCliente(sessaoFunc);
+        window.location.replace('funcionario.html' + (window.location.search ? window.location.search : ''));
         return;
       }
 

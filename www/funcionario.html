@@ -6,8 +6,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>SD Vidros – Área Exclusiva do Cliente</title>
-  <meta name="description" content="Acompanhe o status do seu serviço, galeria de fotos e fale diretamente com a SD Vidros.">
+  <title>SD Vidros – Portal do Funcionário & Ponto Eletrônico</title>
+  <meta name="description" content="Portal oficial do colaborador SD Vidros: registro de ponto eletrônico, acompanhamento de obras e ordens de serviço.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -1427,54 +1427,46 @@
   <div class="container">
 
     <!-- ══════════════════════════════════════════════ -->
-    <!-- TELA 1: LOGIN DO CLIENTE                     -->
+    <!-- TELA 1: LOGIN DO FUNCIONÁRIO / COLABORADOR     -->
     <!-- ══════════════════════════════════════════════ -->
     <div id="view-login" class="login-container">
       <div class="login-logo">
         <img id="portal-login-logo" src="logo.jpg" alt="Logo" onerror="this.src='icon-192.png'">
       </div>
-      <h2 class="login-title">Área do Cliente</h2>
-      <p class="login-sub" id="portal-login-sub">SD Vidros · Acompanhamento de Serviços</p>
+      <h2 class="login-title">Portal do Funcionário</h2>
+      <p class="login-sub" id="portal-login-sub">SD Vidros · Registro de Ponto & Acompanhamento de Obras</p>
 
-      <div class="field-box">
-        <label>WhatsApp / Telefone ou CPF</label>
-        <input id="l-identificador" placeholder="Ex: 85999999999 ou CPF" />
+      <!-- CARD OFICIAL DE ACESSO DO COLABORADOR / BATER PONTO -->
+      <div style="margin-top:16px;text-align:center;">
+        <button type="button" onclick="entrarComoColaboradorDireto()" style="width:100%;padding:15px 16px;background:rgba(14,165,233,0.14);border:1.5px solid #38bdf8;border-radius:14px;color:#fff;font-weight:800;font-size:14px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 22px rgba(14,165,233,0.22);transition:all 0.2s;">
+          <span style="font-size:20px;">👷</span> <span>Acessar como Colaborador / Bater Ponto</span>
+        </button>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px;">Acesso ao registro de ponto e acompanhamento de obras</div>
+      </div>
+
+      <!-- SELETOR DE COLABORADOR OU ACESSO COM SENHA -->
+      <div class="field-box" style="margin-top:18px;">
+        <label>Nome / Identificador do Colaborador</label>
+        <input id="l-identificador" value="Samuel David" placeholder="Ex: Samuel David ou WhatsApp" />
       </div>
 
       <div class="field-box">
-        <label>Sua Senha de Acesso</label>
-        <input id="l-senha" type="password" placeholder="Digite sua senha" />
+        <label>Senha do Colaborador</label>
+        <input id="l-senha" type="password" value="1234" placeholder="Sua senha" />
       </div>
-
-      <button class="btn-login-cliente" id="btn-entrar" onclick="loginCliente()">
-        🔑 Acessar Meu Serviço
-      </button>
 
       <!-- BOTÃO DE ACESSO POR BIOMETRIA -->
-      <div style="display:flex;align-items:center;margin:14px 0 10px;gap:10px;">
-        <div style="flex:1;height:1px;background:rgba(255,255,255,0.1);"></div>
-        <span style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:0.05em;">ou</span>
-        <div style="flex:1;height:1px;background:rgba(255,255,255,0.1);"></div>
-      </div>
-
-      <button type="button" class="btn-biometria" id="btn-biometria-login" onclick="autenticarPorBiometria()">
+      <button type="button" class="btn-biometria" id="btn-biometria-login" onclick="autenticarPorBiometria()" style="margin-top:10px;">
         <span class="bio-icon">👆</span>
-        <span id="btn-bio-txt">Entrar com Biometria / Face ID</span>
+        <span id="btn-bio-txt">Entrar com Biometria / Digital</span>
       </button>
-
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;">
-        <a href="javascript:void(0)" onclick="abrirModalEsqueciSenha()" style="color:var(--gold-light);text-decoration:none;font-weight:700;">
-          🔑 Esqueceu sua senha?
-        </a>
-        <span id="bio-status-badge" style="display:none;color:#4ade80;font-size:11px;font-weight:700;">
-          ✓ Biometria Ativa
-        </span>
-      </div>
 
       <div id="login-feedback" style="margin-top: 12px; font-size: 13px; font-weight: 700;"></div>
 
-      <div class="login-info-box">
-        💡 <strong>Primeiro acesso?</strong> Caso ainda não possua uma senha cadastrada, utilize os <strong>4 últimos dígitos do seu WhatsApp</strong> ou entre em contato pelo suporte: <strong style="color:var(--gold-light);" id="portal-support-tel">(85) 99611-9824</strong>.
+      <div style="margin-top:18px;text-align:center;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);">
+        <a href="cliente.html" style="font-size:12px;color:var(--gold-light);text-decoration:none;font-weight:600;">
+          👤 É Cliente? Ir para Área do Cliente ➔
+        </a>
       </div>
     </div>
 
@@ -2174,12 +2166,12 @@
     }
 
     function checarParametrosUrl() {
-      // Se o usuário acabou de clicar em "Sair", limpa parâmetros e NÃO auto-loga de jeito nenhum
+      // Se o colaborador acabou de clicar em "Sair"
       try {
         if (sessionStorage.getItem('sdv_usuario_deslogou') === 'true' || localStorage.getItem('sdv_usuario_deslogou') === 'true') {
           sessionStorage.removeItem('sdv_usuario_deslogou');
           localStorage.removeItem('sdv_usuario_deslogou');
-          try { window.history.replaceState(null, '', window.location.pathname || 'cliente.html'); } catch(_) {}
+          try { window.history.replaceState(null, '', 'funcionario.html'); } catch(_) {}
           const vPort = document.getElementById('view-portal');
           const vLog = document.getElementById('view-login');
           if (vPort) vPort.style.display = 'none';
@@ -2189,58 +2181,28 @@
       } catch(_) {}
 
       const urlParams = new URLSearchParams(window.location.search);
-      const paramPortal = (urlParams.get('portal') || urlParams.get('modo') || urlParams.get('tipo') || '').toLowerCase();
-      const paramOs = urlParams.get('os');
-      const paramTel = urlParams.get('tel');
-      const paramSenha = urlParams.get('senha') || urlParams.get('s');
       const paramNome = urlParams.get('nome');
-      const autoLogin = urlParams.get('auto') === '1' || urlParams.get('direct') === '1';
-      const isFuncParam = paramPortal === 'funcionario' || paramPortal === 'colaborador' || urlParams.get('func') === '1' || urlParams.get('funcionario') === '1';
+      const idColab = parseInt(urlParams.get('funcId') || urlParams.get('id') || 100);
+      const nomeColab = paramNome ? decodeURIComponent(paramNome) : 'Samuel David';
 
-      // Se aberto como Portal do Funcionário, redireciona para a página dedicada do colaborador
-      if (isFuncParam) {
-        window.location.replace('funcionario.html' + (window.location.search ? window.location.search : ''));
-        return;
-      }
+      const ordens = carregarOrdensDoStorage();
+      const ultOrdem = ordens.length ? ordens[ordens.length - 1] : { numero: '#0001', nome: 'Samuel David' };
 
-      // Auto-preenche se passado na URL
-      if (paramTel) {
-        document.getElementById('l-identificador').value = paramTel;
-      } else if (paramOs) {
-        document.getElementById('l-identificador').value = paramOs;
-      }
+      const sessaoFunc = {
+        id: idColab,
+        nome: nomeColab,
+        cargo: urlParams.get('cargo') ? decodeURIComponent(urlParams.get('cargo')) : 'Instalador / Técnico Líder',
+        os: ultOrdem.numero || '#0001',
+        isFuncionario: true,
+        ordem: ultOrdem
+      };
 
-      const telLimpo = (paramTel || '').replace(/\D/g, '');
-      const senhaPadrao = paramSenha || (telLimpo.length >= 4 ? telLimpo.slice(-4) : '1234');
-      if (senhaPadrao) {
-        document.getElementById('l-senha').value = senhaPadrao;
-      }
-
-      // Verifica se já estava logado
-      const salvo = localStorage.getItem('sdv_cliente_sessao');
-      if (salvo) {
-        try {
-          const c = JSON.parse(salvo);
-          // Se for sessão de funcionário (por flag ou pelo nome)
-          if (c.isFuncionario || (c.nome && (c.nome.toLowerCase().includes('instalador') || c.nome.toLowerCase().includes('técnico') || c.nome.toLowerCase().includes('tecnico')))) {
-            c.isFuncionario = true;
-          }
-          if (paramOs && c.os && !c.os.includes(paramOs)) {
-            c.os = paramOs.startsWith('#') ? paramOs : '#' + paramOs;
-            if (paramNome) c.nome = paramNome;
-            localStorage.setItem('sdv_cliente_sessao', JSON.stringify(c));
-          }
-          iniciarPortalCliente(c);
-          return;
-        } catch (_) {}
-      }
-
-      // Se tiver parâmetros na URL para login automático
-      if ((paramTel || paramOs) && (paramSenha || autoLogin)) {
-        setTimeout(() => {
-          loginCliente();
-        }, 120);
-      }
+      localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessaoFunc));
+      iniciarPortalCliente(sessaoFunc);
+      setTimeout(() => {
+        try { mudarAba('financeiro'); } catch(_) {}
+      }, 150);
+      return;
     }
 
     function loginCliente(ativarBioDireto = false) {
@@ -2351,9 +2313,9 @@
       if (vLog) vLog.style.display = 'block';
       window.scrollTo(0, 0);
 
-      // 5. Limpa a URL na barra de endereços (remove ?portal=funcionario, ?os=, etc.)
+      // 5. Limpa a URL na barra de endereços
       try {
-        const urlSemParametros = window.location.pathname || 'cliente.html';
+        const urlSemParametros = window.location.pathname || 'funcionario.html';
         window.history.replaceState(null, '', urlSemParametros);
       } catch(_) {}
 
