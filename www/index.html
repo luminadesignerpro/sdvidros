@@ -893,18 +893,74 @@
 
 <div class="app">
 
-  <!-- BANNER GRÁFICO LIMPO (ESTILO NEWBOX DA SD VIDROS - SEM TEXTO POR CIMA) -->
-  <div class="banner">
-    <img id="banner-img-main" src="banner.jpg" alt="SD Vidros – Alumínio e Vidraçaria">
+  <!-- BANNER GRÁFICO DINÂMICO DA EMPRESA -->
+  <div class="banner" id="banner-container-main" style="position:relative;overflow:hidden;border-radius:var(--r-lg);border:1px solid var(--border);box-shadow:0 10px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,168,76,0.2);background:#000;">
+    <img id="banner-img-main" src="banner.jpg" alt="SD Vidros – Alumínio e Vidraçaria" style="display:block;width:100%;height:auto;min-height:140px;object-fit:cover;">
+    
+    <!-- OVERLAY DE MARCA / LOGO PARA EMPRESAS CADASTRADAS -->
+    <div id="banner-custom-brand" style="display:none;position:absolute;inset:0;background:linear-gradient(90deg, rgba(7,7,11,0.92) 0%, rgba(7,7,11,0.78) 55%, rgba(7,7,11,0.3) 100%);align-items:center;padding:14px 20px;gap:16px;">
+      <div style="position:relative;width:76px;height:76px;min-width:76px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;background:#0d0d15;box-shadow:0 0 20px rgba(201,168,76,0.45);display:flex;align-items:center;justify-content:center;">
+        <img id="empresa-logo-overlay" src="logo.jpg" alt="Logo da Empresa" style="width:100%;height:100%;object-fit:cover;">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;overflow:hidden;">
+        <div id="empresa-nome-overlay" style="font-size:22px;font-weight:900;color:#fff;letter-spacing:0.5px;text-shadow:0 2px 8px rgba(0,0,0,0.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Nome da Empresa</div>
+        <div id="empresa-seg-overlay" style="font-size:13px;font-weight:600;color:var(--gold);text-shadow:0 1px 4px rgba(0,0,0,0.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Vidraçaria & Esquadrias</div>
+        <div id="empresa-contato-overlay" style="font-size:11.5px;color:#cbd5e1;display:flex;gap:8px;align-items:center;margin-top:2px;">
+          <span id="empresa-tel-overlay">📱 (85) 99611-9824</span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- BARRA DE CONTROLE SUPERIOR (USUÁRIO E SAIR - SEM MOSTRAR NOME DA EMPRESA) -->
-  <div class="top-nav-bar" style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:12px;padding:4px 2px;">
-    <div class="user-pill" style="background:#101018;border:1px solid rgba(255,255,255,0.12);padding:6px 14px;border-radius:20px;">
-      <span id="usuario-logado">👤 Admin</span>
+  <!-- BARRA DE CONTROLE SUPERIOR (EMPRESA ATIVA, USUÁRIO E SAIR) -->
+  <div class="top-nav-bar" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;padding:4px 2px;flex-wrap:wrap;">
+    <div class="empresa-pill" style="display:flex;align-items:center;gap:8px;background:#101018;border:1px solid rgba(201,168,76,0.3);padding:5px 14px;border-radius:20px;max-width:65%;overflow:hidden;">
+      <img id="empresa-logo-top" src="logo.jpg" alt="Logo" style="width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid var(--gold);background:#07070b;">
+      <span id="empresa-nome-top" style="font-size:12.5px;font-weight:800;color:var(--gold-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">SD Vidros</span>
     </div>
-    <button class="btn-sair" onclick="sair()" style="background:#181824;border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:6px 14px;border-radius:20px;cursor:pointer;">🚪 Sair</button>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="user-pill" style="background:#101018;border:1px solid rgba(255,255,255,0.12);padding:6px 14px;border-radius:20px;">
+        <span id="usuario-logado">👤 Admin</span>
+      </div>
+      <button class="btn-sair" onclick="sair()" style="background:#181824;border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:6px 14px;border-radius:20px;cursor:pointer;">🚪 Sair</button>
+    </div>
   </div>
+
+  <script>
+    (function() {
+      try {
+        const idAtivo = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+        const lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
+        const lic = lista.find(l => l.id === idAtivo);
+        if (lic) {
+          const bImg = document.getElementById('banner-img-main');
+          const cBrand = document.getElementById('banner-custom-brand');
+          const lOverlay = document.getElementById('empresa-logo-overlay');
+          const nOverlay = document.getElementById('empresa-nome-overlay');
+          const sOverlay = document.getElementById('empresa-seg-overlay');
+          const tOverlay = document.getElementById('empresa-tel-overlay');
+          const lTop = document.getElementById('empresa-logo-top');
+          const pNome = document.getElementById('empresa-nome-top');
+
+          if (lTop) lTop.src = lic.logo || 'logo.jpg';
+          if (pNome) pNome.textContent = lic.nome || 'SD Vidros';
+
+          if (lic.id !== 'sdvidros' || (lic.logo && lic.logo !== 'logo.jpg')) {
+            if (bImg) {
+              bImg.src = (!lic.banner || lic.banner === 'banner.jpg') ? ((lic.tipoContrato === 'moveis' || lic.id === 'sdmoveis') ? 'banner_ia_moveis.jpg' : 'banner_ia_vidros.jpg') : lic.banner;
+            }
+            if (cBrand) {
+              cBrand.style.display = 'flex';
+              if (lOverlay) lOverlay.src = lic.logo || 'logo.jpg';
+              if (nOverlay) nOverlay.textContent = lic.nome || 'Minha Empresa';
+              if (sOverlay) sOverlay.textContent = lic.segmento || 'Vidraçaria & Esquadrias';
+              if (tOverlay) tOverlay.textContent = '📱 ' + (lic.telefone || '(85) 99611-9824');
+            }
+          }
+        }
+      } catch(_) {}
+    })();
+  </script>
 
   <!-- TABS -->
   <div class="tabs">
@@ -2606,6 +2662,15 @@ function obterLicencas() {
     if (!Array.isArray(lista) || !lista.length) {
       lista = LICENCAS_PADRAO;
       localStorage.setItem('sdv_licencas', JSON.stringify(lista));
+    } else {
+      let mudou = false;
+      lista.forEach(l => {
+        if (l.id !== 'sdvidros' && (!l.banner || l.banner === 'banner.jpg')) {
+          l.banner = (l.tipoContrato === 'moveis' || l.id === 'sdmoveis') ? 'banner_ia_moveis.jpg' : 'banner_ia_vidros.jpg';
+          mudou = true;
+        }
+      });
+      if (mudou) localStorage.setItem('sdv_licencas', JSON.stringify(lista));
     }
     return lista;
   } catch(_) {
@@ -2626,17 +2691,49 @@ function obterLicencaAtiva() {
 function aplicarLicencaVisual(lic) {
   if (!lic) lic = obterLicencaAtiva();
 
-  // 1. Banner do topo
   const bannerImg = document.getElementById('banner-img-main');
-  if (bannerImg && lic.banner) {
-    bannerImg.src = lic.banner;
-    bannerImg.alt = `${lic.nome} – ${lic.segmento}`;
-  }
-
-  // 2. Pill do topo
+  const customBrand = document.getElementById('banner-custom-brand');
+  const logoOverlay = document.getElementById('empresa-logo-overlay');
+  const nomeOverlay = document.getElementById('empresa-nome-overlay');
+  const segOverlay = document.getElementById('empresa-seg-overlay');
+  const telOverlay = document.getElementById('empresa-tel-overlay');
+  const logoTop = document.getElementById('empresa-logo-top');
   const empresaPillNome = document.getElementById('empresa-nome-top');
+
+  // 1. Logo e Nome na barra superior
+  if (logoTop) {
+    logoTop.src = lic.logo || 'logo.jpg';
+  }
   if (empresaPillNome) {
     empresaPillNome.textContent = lic.nome || 'SD Vidros';
+  }
+
+  // 2. Banner principal e Marca
+  if (lic.id === 'sdvidros' && (!lic.logo || lic.logo === 'logo.jpg')) {
+    // Empresa original SD Vidros: exibe banner clássico com a marca embutida
+    if (bannerImg) {
+      bannerImg.src = lic.banner || 'banner.jpg';
+      bannerImg.alt = `${lic.nome} – ${lic.segmento}`;
+    }
+    if (customBrand) customBrand.style.display = 'none';
+  } else {
+    // Qualquer nova empresa cadastrada ou SD Móveis:
+    if (bannerImg) {
+      // Se não tiver banner ou estiver com o banner.jpg antigo (que tem SD Vidros gravado), usa showroom limpo neutro
+      if (!lic.banner || lic.banner === 'banner.jpg') {
+        bannerImg.src = (lic.tipoContrato === 'moveis' || lic.id === 'sdmoveis') ? 'banner_ia_moveis.jpg' : 'banner_ia_vidros.jpg';
+      } else {
+        bannerImg.src = lic.banner;
+      }
+      bannerImg.alt = `${lic.nome} – ${lic.segmento}`;
+    }
+    if (customBrand) {
+      customBrand.style.display = 'flex';
+      if (logoOverlay) logoOverlay.src = lic.logo || 'logo.jpg';
+      if (nomeOverlay) nomeOverlay.textContent = lic.nome || 'Minha Empresa';
+      if (segOverlay) segOverlay.textContent = lic.segmento || 'Vidraçaria & Esquadrias';
+      if (telOverlay) telOverlay.textContent = '📱 ' + (lic.telefone || '(85) 99611-9824');
+    }
   }
 
   // 3. Título da aba do navegador
@@ -2645,7 +2742,7 @@ function aplicarLicencaVisual(lic) {
   // 4. Rodapé
   const footerEl = document.getElementById('footer-credits-main');
   if (footerEl) {
-    footerEl.textContent = `${lic.nome || 'SD Vidros'} · ${lic.cidade || 'Itaitinga - CE'} · ${lic.telefone || '(85) 99611-9824'} · @${(lic.id === 'sdmoveis' ? 'sdmoveisprojetados' : 'sdvidros')}`;
+    footerEl.textContent = `${lic.nome || 'SD Vidros'} · ${lic.cidade || 'Itaitinga - CE'} · ${lic.telefone || '(85) 99611-9824'}`;
   }
 
   // 5. Badge no painel

@@ -1322,6 +1322,16 @@
       if (!Array.isArray(lista) || !lista.length) {
         lista = LICENCAS_PADRAO;
         localStorage.setItem('sdv_licencas', JSON.stringify(lista));
+      } else {
+        // Assegura que empresas customizadas não usem o banner que contém a arte SD Vidros impressa
+        let mudou = false;
+        lista.forEach(l => {
+          if (l.id !== 'sdvidros' && (!l.banner || l.banner === 'banner.jpg')) {
+            l.banner = (l.tipoContrato === 'moveis' || l.id === 'sdmoveis') ? 'banner_ia_moveis.jpg' : 'banner_ia_vidros.jpg';
+            mudou = true;
+          }
+        });
+        if (mudou) localStorage.setItem('sdv_licencas', JSON.stringify(lista));
       }
       return lista;
     } catch (_) {
@@ -1676,7 +1686,7 @@
       pix: pix || '',
       chaveLicenca: 'LIC-' + Date.now(),
       logo: _novaEmpresaLogoBase64 || 'logo.jpg',
-      banner: 'banner.jpg',
+      banner: 'banner_ia_vidros.jpg',
       tipoContrato: 'vidros'
     };
 
