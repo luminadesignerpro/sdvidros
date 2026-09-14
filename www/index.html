@@ -1623,11 +1623,16 @@
 
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);">
       <button type="button" class="btn btn-sec btn-sm" onclick="irParaTelaInicialLogin()" title="Ir para a página de login">
-        🚪 Ir para Página Inicial (Login)
+        🚪 Ir para Login
       </button>
-      <button type="button" class="btn btn-gold btn-sm" onclick="fecharModalTrocaEmpresaRapida();goTab('licenca');" title="Abrir painel completo de licenças">
-        ⚙️ Configurações da Marca
-      </button>
+      <div style="display:flex;gap:8px;">
+        <button type="button" class="btn btn-primary btn-sm" onclick="fecharModalTrocaEmpresaRapida();abrirModalNovaLicenca();" title="Cadastrar nova empresa">
+          ➕ Adicionar Empresa
+        </button>
+        <button type="button" class="btn btn-gold btn-sm" onclick="fecharModalTrocaEmpresaRapida();goTab('licenca');" title="Abrir painel completo de licenças">
+          ⚙️ Configurações
+        </button>
+      </div>
     </div>
   </div>
 </div>

@@ -548,6 +548,11 @@
         </div>
         <div style="font-size:10.5px;color:var(--muted);margin-top:6px;text-align:center;">Acesso ao registro de ponto e acompanhamento de obras</div>
       </a>
+
+      <!-- ADICIONAR NOVA EMPRESA AO SISTEMA -->
+      <button type="button" onclick="abrirModalCadastrarNovaEmpresa()" style="background:none;border:1px dashed rgba(201,168,76,0.35);border-radius:10px;padding:8px 14px;color:var(--gold-light);font-size:12px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;opacity:0.95;transition:all 0.2s;">
+        <span>🏢 ➕</span> <span>Adicionar Nova Empresa ao Sistema</span>
+      </button>
     </div>
 
     <div id="login-msg"></div>
@@ -565,17 +570,22 @@
       <p style="font-size:11.5px;color:var(--muted);margin-top:2px;">Mude a logo, escolha banner com IA ou cadastre novas empresas</p>
     </div>
 
+    <!-- BOTÃO PRINCIPAL DE DESTAQUE: ADICIONAR NOVA EMPRESA -->
+    <button type="button" id="btn-adicionar-empresa-top" onclick="abrirModalCadastrarNovaEmpresa()" style="width:100%;padding:14px 16px;background:linear-gradient(135deg,#e8d27a,#c9a84c);border:none;border-radius:14px;color:#000;font-weight:900;font-size:14px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 6px 20px rgba(201,168,76,0.38);margin-bottom:16px;transition:all 0.2s;">
+      <span style="font-size:19px;">➕</span> <span>Adicionar Nova Empresa</span>
+    </button>
+
     <!-- SELETOR DE QUAL EMPRESA MODIFICAR -->
     <div class="field">
-      <label>EMPRESA PARA MODIFICAR</label>
-      <div style="display:flex;gap:8px;">
-        <select id="gestao-empresa-select" onchange="selecionarEmpresaParaEditar(this.value)" style="flex:1;padding:12px 14px;background:#0a0a13;border:1.5px solid rgba(201,168,76,0.25);border-radius:12px;color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;">
-          <!-- Opções geradas via JS -->
-        </select>
-        <button type="button" class="btn btn-gold" onclick="prepararNovaEmpresa()" title="Cadastrar nova empresa" style="padding:0 14px;background:var(--gold);border:none;border-radius:12px;color:#000;font-weight:800;cursor:pointer;font-size:13px;white-space:nowrap;">
-          ➕ Nova
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <label style="margin-bottom:0;">EMPRESA PARA MODIFICAR</label>
+        <button type="button" onclick="abrirModalCadastrarNovaEmpresa()" style="background:none;border:none;color:var(--gold-light);font-size:11.5px;font-weight:800;cursor:pointer;text-decoration:underline;">
+          ➕ Adicionar Outra
         </button>
       </div>
+      <select id="gestao-empresa-select" onchange="if(this.value==='__NOVA__'){abrirModalCadastrarNovaEmpresa();}else{selecionarEmpresaParaEditar(this.value);}" style="width:100%;box-sizing:border-box;padding:12px 14px;background:#0a0a13;border:1.5px solid rgba(201,168,76,0.25);border-radius:12px;color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;">
+        <!-- Opções geradas via JS -->
+      </select>
     </div>
 
     <!-- UPLOAD DE LOGOTIPO -->
@@ -744,6 +754,11 @@
       <span id="txt-bio-cad">Acessar com Biometria / Digital</span>
     </button>
 
+    <!-- ADICIONAR NOVA EMPRESA PELO CADEADO -->
+    <button type="button" onclick="abrirModalCadastrarNovaEmpresa()" style="width:100%;padding:11px 12px;background:rgba(201,168,76,0.14);border:1.5px solid var(--gold);border-radius:12px;color:var(--gold-light);font-weight:800;font-size:12.5px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:12px;">
+      <span>➕</span> <span>Adicionar Nova Empresa</span>
+    </button>
+
     <!-- OPÇÕES INFERIORES -->
     <div style="border-top:1px dashed rgba(201,168,76,0.25);padding-top:14px;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
       <button type="button" onclick="abrirGestaoPeloCadeado()" style="background:none;border:none;color:var(--gold-light);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;">
@@ -907,6 +922,85 @@
       </button>
       <button type="button" onclick="verificarSenhaGestao()" style="flex:1.4;padding:13px;background:linear-gradient(135deg,var(--gold-light),var(--gold));border:none;border-radius:12px;color:#000;font-weight:900;cursor:pointer;font-family:var(--font);box-shadow:0 4px 14px rgba(201,168,76,0.3);">
         Desbloquear 🔓
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- MODAL: ADICIONAR NOVA EMPRESA AO SISTEMA -->
+<!-- ══════════════════════════════════════════════ -->
+<div id="modal-cadastrar-nova-empresa" class="modal-overlay" style="display:none;z-index:999999;" onclick="fecharModalCadastrarNovaEmpresa(event)">
+  <div class="modal-card" onclick="event.stopPropagation()" style="max-width:480px;text-align:left;border:1.5px solid var(--gold);box-shadow:0 0 35px rgba(201,168,76,0.35);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:28px;">🏢</span>
+        <div>
+          <h3 style="font-size:17px;font-weight:900;color:var(--gold-light);">Adicionar Nova Empresa</h3>
+          <p style="font-size:11.5px;color:var(--muted);margin-top:2px;">Cadastre uma nova filial ou empresa parceira no sistema</p>
+        </div>
+      </div>
+      <button type="button" onclick="fecharModalCadastrarNovaEmpresa()" style="background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;padding:4px;">✕</button>
+    </div>
+
+    <!-- NOME DA EMPRESA -->
+    <div class="field" style="margin-bottom:12px;">
+      <label>NOME DA EMPRESA *</label>
+      <div class="input-wrap">
+        <input id="nova-emp-nome" type="text" placeholder="Ex: SD Esquadrias & Vidros Nobres" autocomplete="off" />
+      </div>
+    </div>
+
+    <!-- SEGMENTO / RAMO -->
+    <div class="field" style="margin-bottom:12px;">
+      <label>SEGMENTO / RAMO DE ATUAÇÃO *</label>
+      <div class="input-wrap">
+        <input id="nova-emp-segmento" type="text" placeholder="Ex: Vidraçaria, Alumínio, Box, Espelhos" />
+      </div>
+    </div>
+
+    <!-- WHATSAPP / TELEFONE -->
+    <div class="field" style="margin-bottom:12px;">
+      <label>WHATSAPP / TELEFONE COMERCIAL *</label>
+      <div class="input-wrap">
+        <input id="nova-emp-tel" type="text" placeholder="(85) 99611-9824" />
+      </div>
+    </div>
+
+    <!-- CHAVE PIX -->
+    <div class="field" style="margin-bottom:14px;">
+      <label>CHAVE PIX (OPCIONAL)</label>
+      <div class="input-wrap">
+        <input id="nova-emp-pix" type="text" placeholder="Chave PIX da empresa para orçamentos" />
+      </div>
+    </div>
+
+    <!-- UPLOAD DE LOGO DA NOVA EMPRESA -->
+    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(201,168,76,0.22);border-radius:12px;padding:12px;margin-bottom:16px;">
+      <label style="font-size:11px;font-weight:800;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:8px;">
+        Logotipo da Nova Empresa
+      </label>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <img id="nova-emp-preview-logo" src="logo.jpg" style="width:58px;height:58px;border-radius:14px;border:1.5px solid var(--gold);object-fit:cover;background:#000;" alt="Logo">
+        <div style="flex:1;">
+          <input type="file" id="nova-emp-upload-logo" accept="image/*" style="display:none;" onchange="processarUploadNovaEmpresa(event)">
+          <button type="button" onclick="document.getElementById('nova-emp-upload-logo').click()" style="width:100%;padding:9px 12px;background:#181824;border:1px solid var(--gold);border-radius:10px;color:var(--gold-light);font-weight:700;font-size:11.5px;cursor:pointer;font-family:var(--font);">
+            📁 Escolher Logo
+          </button>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;">PNG, JPG ou WEBP (opcional)</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="nova-emp-msg" style="margin-bottom:12px;"></div>
+
+    <!-- BOTÕES DE SALVAR -->
+    <div style="display:flex;gap:10px;">
+      <button type="button" onclick="fecharModalCadastrarNovaEmpresa()" style="flex:1;padding:12px;background:#181824;border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:#cbd5e1;font-weight:700;cursor:pointer;font-family:var(--font);">
+        Cancelar
+      </button>
+      <button type="button" onclick="salvarNovaEmpresaModal()" style="flex:1.5;padding:12px;background:linear-gradient(135deg,var(--gold-light),var(--gold));border:none;border-radius:12px;color:#000;font-weight:900;cursor:pointer;font-family:var(--font);box-shadow:0 4px 14px rgba(201,168,76,0.35);font-size:13px;">
+        💾 Salvar e Ativar Empresa
       </button>
     </div>
   </div>
@@ -1322,6 +1416,106 @@
   // ══════════════════════════════════════════════
   //  PAINEL DE GESTÃO DE MARCAS, LOGO E EMPRESAS
   // ══════════════════════════════════════════════
+  let _novaEmpresaLogoBase64 = 'logo.jpg';
+
+  function abrirModalCadastrarNovaEmpresa() {
+    _novaEmpresaLogoBase64 = 'logo.jpg';
+    const inpNome = document.getElementById('nova-emp-nome');
+    const inpSeg = document.getElementById('nova-emp-segmento');
+    const inpTel = document.getElementById('nova-emp-tel');
+    const inpPix = document.getElementById('nova-emp-pix');
+    const prev = document.getElementById('nova-emp-preview-logo');
+    const msg = document.getElementById('nova-emp-msg');
+
+    if (inpNome) inpNome.value = '';
+    if (inpSeg) inpSeg.value = 'Vidraçaria, Alumínio, Box, Espelhos';
+    if (inpTel) inpTel.value = '(85) 99611-9824';
+    if (inpPix) inpPix.value = '';
+    if (prev) prev.src = 'logo.jpg';
+    if (msg) msg.innerHTML = '';
+
+    const m = document.getElementById('modal-cadastrar-nova-empresa');
+    if (m) {
+      m.style.display = 'flex';
+      setTimeout(() => { if (inpNome) inpNome.focus(); }, 150);
+    }
+  }
+
+  function fecharModalCadastrarNovaEmpresa(e) {
+    if (e && e.target && e.target !== document.getElementById('modal-cadastrar-nova-empresa')) return;
+    const m = document.getElementById('modal-cadastrar-nova-empresa');
+    if (m) m.style.display = 'none';
+  }
+
+  function processarUploadNovaEmpresa(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 4.5 * 1024 * 1024) {
+      alert('A imagem é muito grande. Escolha um arquivo de até 4MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      _novaEmpresaLogoBase64 = evt.target.result;
+      const prev = document.getElementById('nova-emp-preview-logo');
+      if (prev) prev.src = _novaEmpresaLogoBase64;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function salvarNovaEmpresaModal() {
+    const inpNome = document.getElementById('nova-emp-nome');
+    const inpSeg = document.getElementById('nova-emp-segmento');
+    const inpTel = document.getElementById('nova-emp-tel');
+    const inpPix = document.getElementById('nova-emp-pix');
+
+    const nome = (inpNome ? inpNome.value : '').trim();
+    const seg = (inpSeg ? inpSeg.value : '').trim();
+    const tel = (inpTel ? inpTel.value : '').trim();
+    const pix = (inpPix ? inpPix.value : '').trim();
+
+    if (!nome) {
+      alert('Por favor, informe o Nome da Empresa.');
+      if (inpNome) inpNome.focus();
+      return;
+    }
+
+    const novoId = 'emp_' + Date.now();
+    const nova = {
+      id: novoId,
+      nome: nome,
+      segmento: seg || 'Vidraçaria & Esquadrias',
+      slogan: seg || 'Qualidade e Pontualidade',
+      telefone: tel || '(85) 99611-9824',
+      cidade: 'Itaitinga - CE',
+      cnpj: '',
+      pix: pix || '',
+      chaveLicenca: 'LIC-' + Date.now(),
+      logo: _novaEmpresaLogoBase64 || 'logo.jpg',
+      banner: 'banner.jpg',
+      tipoContrato: 'vidros'
+    };
+
+    let lista = obterLicencasLogin();
+    lista.push(nova);
+    salvarLicencasLogin(lista);
+
+    // Define como empresa ativa
+    localStorage.setItem('sdv_licenca_ativa', novoId);
+    idEmpresaEditando = novoId;
+
+    fecharModalCadastrarNovaEmpresa();
+    carregarPainelGestao();
+    atualizarVisualEmpresaLogin(novoId);
+    if (typeof renderEmpresasLogin === 'function') renderEmpresasLogin();
+
+    const msg = document.getElementById('gestao-msg');
+    if (msg) {
+      msg.innerHTML = `<div style="background:rgba(34,197,94,0.15);border:1px solid #22c55e;color:#4ade80;padding:10px 14px;border-radius:10px;font-size:12.5px;font-weight:700;margin-top:12px;text-align:center;">✓ Empresa "${nome}" cadastrada e ativada com sucesso!</div>`;
+    }
+    alert(`✓ Empresa "${nome}" adicionada com sucesso!`);
+  }
+
   function carregarPainelGestao() {
     const sel = document.getElementById('gestao-empresa-select');
     if (!sel) return;
@@ -1329,14 +1523,17 @@
     const lista = obterLicencasLogin();
     const idAtivo = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
 
-    sel.innerHTML = lista.map(emp => `
+    let options = lista.map(emp => `
       <option value="${emp.id}" ${emp.id === idEmpresaEditando ? 'selected' : ''}>
         ${emp.nome} (${emp.segmento || 'Empresa'})
       </option>
     `).join('');
 
+    options += `<option value="__NOVA__" style="color:var(--gold-light);font-weight:900;">➕ + Adicionar Nova Empresa...</option>`;
+    sel.innerHTML = options;
+
     if (!lista.some(e => e.id === idEmpresaEditando)) {
-      idEmpresaEditando = lista[0].id;
+      idEmpresaEditando = lista[0] ? lista[0].id : 'sdvidros';
       sel.value = idEmpresaEditando;
     }
 
@@ -1344,6 +1541,10 @@
   }
 
   function selecionarEmpresaParaEditar(id) {
+    if (id === '__NOVA__') {
+      abrirModalCadastrarNovaEmpresa();
+      return;
+    }
     idEmpresaEditando = id;
     const lista = obterLicencasLogin();
     const emp = lista.find(e => e.id === id);
@@ -1380,43 +1581,7 @@
   }
 
   function prepararNovaEmpresa() {
-    const novoId = 'empresa_' + Date.now();
-    idEmpresaEditando = novoId;
-    logoEmEdicaoBase64 = 'logo.jpg';
-    bannerEmEdicaoBase64 = 'banner.jpg';
-
-    const prevLogo = document.getElementById('preview-logo-gestao');
-    if (prevLogo) prevLogo.src = logoEmEdicaoBase64;
-
-    const prevBanner = document.getElementById('preview-banner-gestao');
-    if (prevBanner) prevBanner.src = bannerEmEdicaoBase64;
-
-    const inpNome = document.getElementById('gestao-empresa-nome');
-    if (inpNome) { inpNome.value = 'Nova Empresa'; inpNome.focus(); }
-
-    const inpSeg = document.getElementById('gestao-empresa-segmento');
-    if (inpSeg) inpSeg.value = 'Serviços Especializados';
-
-    const inpTel = document.getElementById('gestao-empresa-tel');
-    if (inpTel) inpTel.value = '(85) 99999-9999';
-
-    const inpPix = document.getElementById('gestao-empresa-pix');
-    if (inpPix) inpPix.value = '';
-
-    const sel = document.getElementById('gestao-empresa-select');
-    if (sel) {
-      const opt = document.createElement('option');
-      opt.value = novoId;
-      opt.textContent = '➕ Cadastrando Nova Empresa...';
-      opt.selected = true;
-      sel.appendChild(opt);
-    }
-
-    const areaExcluir = document.getElementById('btn-excluir-empresa-area');
-    if (areaExcluir) areaExcluir.style.display = 'none';
-
-    const msg = document.getElementById('gestao-msg');
-    if (msg) msg.innerHTML = '<div class="msg info">Preencha os dados e clique em "Salvar Modificações" para cadastrar.</div>';
+    abrirModalCadastrarNovaEmpresa();
   }
 
   function processarUploadArquivo(e, tipo) {
