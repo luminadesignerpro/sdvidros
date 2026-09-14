@@ -1496,11 +1496,14 @@
         <div class="banner">
           <img id="portal-banner-img" src="banner.jpg" alt="Showroom e Projetos Sob Medida">
         </div>
-        <div class="banner-bottom-bar">
-          <div class="user-pill" style="width:100%; justify-content:center;">
+        <div class="banner-bottom-bar" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div class="user-pill" style="flex:1;justify-content:center;">
             <span>👤</span>
             <span id="lbl-cliente-nome">Samuel David</span>
           </div>
+          <button type="button" onclick="sairCliente()" style="background:rgba(239,68,68,0.22);border:1.5px solid #ef4444;color:#fca5a5;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:5px;flex-shrink:0;transition:all 0.2s;">
+            🚪 Sair
+          </button>
         </div>
       </div>
 
@@ -2179,6 +2182,20 @@
     }
 
     function checarParametrosUrl() {
+      // Se o usuário acabou de clicar em "Sair", limpa parâmetros e NÃO auto-loga de jeito nenhum
+      try {
+        if (sessionStorage.getItem('sdv_usuario_deslogou') === 'true' || localStorage.getItem('sdv_usuario_deslogou') === 'true') {
+          sessionStorage.removeItem('sdv_usuario_deslogou');
+          localStorage.removeItem('sdv_usuario_deslogou');
+          try { window.history.replaceState(null, '', window.location.pathname || 'cliente.html'); } catch(_) {}
+          const vPort = document.getElementById('view-portal');
+          const vLog = document.getElementById('view-login');
+          if (vPort) vPort.style.display = 'none';
+          if (vLog) vLog.style.display = 'block';
+          return;
+        }
+      } catch(_) {}
+
       const urlParams = new URLSearchParams(window.location.search);
       const paramPortal = (urlParams.get('portal') || urlParams.get('modo') || urlParams.get('tipo') || '').toLowerCase();
       const paramOs = urlParams.get('os');
@@ -2328,9 +2345,48 @@
     }
 
     function sairCliente() {
-      localStorage.removeItem('sdv_cliente_sessao');
+      // 1. Marca flag no sessionStorage e localStorage para não re-logar automaticamente
+      try { sessionStorage.setItem('sdv_usuario_deslogou', 'true'); } catch(_) {}
+      try { localStorage.setItem('sdv_usuario_deslogou', 'true'); } catch(_) {}
+
+      // 2. Remove todos os dados da sessão
+      try { localStorage.removeItem('sdv_cliente_sessao'); } catch(_) {}
+      try { sessionStorage.removeItem('sdv_cliente_sessao'); } catch(_) {}
+      clienteSessao = null;
+      dadosOsCliente = null;
+
       if (ssePortal) { try { ssePortal.close(); } catch(_) {} }
-      window.location.reload();
+
+      // 3. Limpa campos do formulário de login
+      const iden = document.getElementById('l-identificador');
+      const sen = document.getElementById('l-senha');
+      if (iden) iden.value = '';
+      if (sen) sen.value = '';
+      const fb = document.getElementById('login-feedback');
+      if (fb) { fb.textContent = ''; fb.style.display = 'none'; }
+
+      // 4. IMEDIATO: Oculta o portal e exibe a tela de login na hora!
+      const vPort = document.getElementById('view-portal');
+      const vLog = document.getElementById('view-login');
+      if (vPort) vPort.style.display = 'none';
+      if (vLog) vLog.style.display = 'block';
+      window.scrollTo(0, 0);
+
+      // 5. Limpa a URL na barra de endereços (remove ?portal=funcionario, ?os=, etc.)
+      try {
+        const urlSemParametros = window.location.pathname || 'cliente.html';
+        window.history.replaceState(null, '', urlSemParametros);
+      } catch(_) {}
+
+      // 6. Recarrega de forma limpa caso necessário
+      setTimeout(() => {
+        try {
+          const limpa = window.location.href.split('?')[0].split('#')[0];
+          if (window.location.search || window.location.hash) {
+            window.location.replace(limpa);
+          }
+        } catch(_) {}
+      }, 100);
     }
 
     function iniciarPortalCliente(sessao) {
