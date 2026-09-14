@@ -205,6 +205,41 @@ module.exports = async (req, res) => {
     return res.status(200).json({ success: true, alterado: true });
   }
 
+  // 6. Nova Ordem de Serviço Gerada (Apenas dados técnicos e nome do cliente, sem valores)
+  if (action === 'nova_os') {
+    const os = String(body.os || body.numero_os || '');
+    const clienteNome = String(body.cliente_nome || body.cliente || 'Cliente');
+    const data = String(body.data || '');
+    const local = String(body.local || '');
+    const itens = Array.isArray(body.itens) ? body.itens : [];
+
+    const payloadNovaOs = {
+      tipo: 'nova_os',
+      os: os,
+      cliente_nome: clienteNome,
+      data: data,
+      local: local,
+      itens: itens,
+      gerada_em: new Date().toISOString()
+    };
+
+    try {
+      await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+        method: 'POST',
+        headers: {
+          'Title': `📋 Nova O.S. Gerada: ${os} - ${clienteNome}`,
+          'Tags': 'clipboard,hammer_and_wrench',
+          'Priority': 'urgent'
+        },
+        body: JSON.stringify(payloadNovaOs)
+      });
+    } catch (e) {
+      console.warn('Erro ao despachar nova_os no ntfy:', e.message);
+    }
+
+    return res.status(200).json({ success: true, ordem: payloadNovaOs });
+  }
+
   // Endpoint de status / teste
   return res.status(200).json({
     status: 'online',

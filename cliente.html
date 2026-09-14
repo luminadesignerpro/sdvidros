@@ -1442,8 +1442,8 @@
       <div class="client-nav-card">
         <!-- Linha 1 e 2: Grid 2x2 Padronizado para Ações da Conta -->
         <div class="client-actions-bar">
-          <div class="client-action-item client-os-tag" id="lbl-cliente-os">
-            <span>📋</span> <span>O.S. #0001</span>
+          <div class="client-action-item client-os-tag" id="lbl-cliente-os" onclick="abrirSeletorTrocaOs()" style="cursor:pointer;" title="Clique para alternar entre as Ordens de Serviço geradas">
+            <span>📋</span> <span id="lbl-cliente-os-texto">O.S. #0001</span> ▾
           </div>
           <button type="button" class="client-action-item btn-client-action" onclick="abrirModalTrocarSenha()" title="Alterar sua senha de acesso">
             <span>🔑</span> <span>Trocar Senha</span>
@@ -1605,6 +1605,22 @@
             <a href="https://wa.me/5585996119824" target="_blank" style="background: rgba(37,211,102,0.15); border: 1px solid rgba(37,211,102,0.4); color: #25D366; text-decoration: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
               WhatsApp Direto
             </a>
+          </div>
+
+          <!-- Feed de Ordens de Serviço Geradas (Sem Valores, Apenas Cliente e Especificações Técnicas) -->
+          <div id="portal-mensagens-ordens-box" style="padding:14px;background:rgba(0,0,0,0.3);border-bottom:1px solid rgba(255,255,255,0.08);">
+            <div style="font-size:12px;font-weight:800;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+              <span style="display:flex;align-items:center;gap:6px;">
+                <span>📋</span>
+                <span>Ordens de Serviço Geradas</span>
+              </span>
+              <span id="badge-total-os-geradas" style="background:rgba(201,168,76,0.2);border:1px solid rgba(201,168,76,0.4);color:var(--gold-light);font-size:10.5px;padding:2px 8px;border-radius:999px;font-weight:800;">
+                0 O.S.
+              </span>
+            </div>
+            <div id="lista-os-mensagens-feed" style="display:flex;flex-direction:column;gap:10px;max-height:260px;overflow-y:auto;padding-right:4px;">
+              <!-- Cards das ordens de serviço geradas sem valores -->
+            </div>
           </div>
 
           <div class="chat-messages-area" id="chat-mensagens-area">
@@ -1997,11 +2013,27 @@
 
     function checarParametrosUrl() {
       const urlParams = new URLSearchParams(window.location.search);
+      const paramPortal = urlParams.get('portal') || urlParams.get('modo') || urlParams.get('tipo');
       const paramOs = urlParams.get('os');
       const paramTel = urlParams.get('tel');
       const paramSenha = urlParams.get('senha') || urlParams.get('s');
       const paramNome = urlParams.get('nome');
       const autoLogin = urlParams.get('auto') === '1' || urlParams.get('direct') === '1';
+
+      // Se aberto como Portal do Funcionário
+      if (paramPortal === 'funcionario') {
+        const ordens = carregarOrdensDoStorage();
+        const ultOrdem = ordens.length ? ordens[ordens.length - 1] : { numero: '#0001', nome: 'Samuel David' };
+        const sessaoFunc = {
+          nome: 'Samuel David (Instalador / Técnico)',
+          os: ultOrdem.numero || '#0001',
+          isFuncionario: true,
+          ordem: ultOrdem
+        };
+        localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessaoFunc));
+        iniciarPortalCliente(sessaoFunc);
+        return;
+      }
 
       // Auto-preenche se passado na URL
       if (paramTel) {
@@ -2131,11 +2163,17 @@
       document.getElementById('view-portal').style.display = 'block';
 
       document.getElementById('lbl-cliente-nome').textContent = sessao.nome || 'Cliente';
-      document.getElementById('lbl-cliente-os').textContent = '📋 O.S. ' + sessao.os;
+      const elOsTxt = document.getElementById('lbl-cliente-os-texto');
+      if (elOsTxt) elOsTxt.textContent = 'O.S. ' + sessao.os;
+      else {
+        const elOs = document.getElementById('lbl-cliente-os');
+        if (elOs) elOs.textContent = '📋 O.S. ' + sessao.os;
+      }
 
       carregarDadosStatus(sessao);
       carregarGaleriaFotos(sessao);
       carregarMensagensChat(sessao);
+      renderizarOrdensMensagens();
       carregarDadosFinanceiros(sessao);
       conectarRealtimePortal(sessao);
       atualizarBotaoHeaderBiometria();
@@ -2152,6 +2190,7 @@
       if (tab === 'mensagens') {
         const badge = document.getElementById('badge-msg-count');
         if (badge) badge.style.display = 'none';
+        renderizarOrdensMensagens();
         scrollChatFim();
       }
 
@@ -2401,6 +2440,123 @@
     }
 
     // ══════════════════════════════════════════════
+    //  FEED DE ORDENS DE SERVIÇO GERADAS (SEM VALORES)
+    // ══════════════════════════════════════════════
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function renderizarOrdensMensagens() {
+      const container = document.getElementById('lista-os-mensagens-feed');
+      const badge = document.getElementById('badge-total-os-geradas');
+      if (!container) return;
+
+      const ordens = carregarOrdensDoStorage();
+      if (badge) badge.textContent = ordens.length + (ordens.length === 1 ? ' O.S.' : ' O.S.');
+
+      if (!ordens.length) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:16px;color:var(--muted);font-size:12px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px dashed rgba(255,255,255,0.1);">
+            Nenhuma Ordem de Serviço gerada ainda no sistema.
+          </div>
+        `;
+        return;
+      }
+
+      // Ordena da mais recente para a mais antiga
+      const lista = [...ordens].reverse();
+
+      container.innerHTML = lista.map(o => {
+        const numOs = esc(o.numero || (o.dados && o.dados.numero) || '#0001');
+        const nomeCliente = esc(o.nome || (o.dados && o.dados.nome) || 'Cliente');
+        const dataOs = esc(o.data_orc || (o.dados && o.dados.data) || 'Data não informada');
+        const local = esc([o.dados && o.dados.end, o.dados && o.dados.bairro].filter(Boolean).join(' - ') || (o.dados && o.dados.cidade) || '');
+        const itens = (o.dados && Array.isArray(o.dados.itens)) ? o.dados.itens : [];
+
+        let itensHtml = '';
+        if (itens.length > 0) {
+          itensHtml = `
+            <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);font-size:11.5px;">
+              <strong style="color:var(--gold-light);display:block;margin-bottom:3px;">📋 Itens / Especificações (Sem Valores):</strong>
+              <ul style="margin:0;padding-left:16px;line-height:1.5;color:rgba(255,255,255,0.9);">
+                ${itens.map(it => {
+                  const medidas = (it.larg && it.alt) ? ` (${esc(it.larg)}m x ${esc(it.alt)}m)` : '';
+                  const qtd = it.qtd ? `${esc(it.qtd)}x ` : '';
+                  const cor = it.cor ? ` - Cor: ${esc(it.cor)}` : '';
+                  const bizt = it.bizt ? ` (${esc(it.bizt)})` : '';
+                  return `<li>${qtd}<strong>${esc(it.desc || 'Item sob medida')}</strong>${medidas}${cor}${bizt}</li>`;
+                }).join('')}
+              </ul>
+            </div>
+          `;
+        }
+
+        const isAtiva = (clienteSessao && String(clienteSessao.os).replace(/\D/g,'') === String(o.numero).replace(/\D/g,''));
+
+        return `
+          <div style="background:${isAtiva ? 'linear-gradient(135deg,rgba(201,168,76,0.15),rgba(20,20,32,0.95))' : 'rgba(255,255,255,0.03)'};border:1.5px solid ${isAtiva ? 'var(--gold)' : 'rgba(255,255,255,0.09)'};border-radius:10px;padding:12px;box-shadow:0 4px 14px rgba(0,0,0,0.3);position:relative;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:13.5px;font-weight:900;color:#fff;">${numOs}</span>
+                <span style="font-size:10px;background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.4);color:#4ade80;padding:1px 7px;border-radius:999px;font-weight:700;">O.S. Registrada</span>
+              </div>
+              <button type="button" onclick="selecionarOsNoPortal('${numOs}', '${nomeCliente}')" style="background:${isAtiva ? 'var(--gold)' : 'rgba(255,255,255,0.12)'};color:${isAtiva ? '#000' : '#fff'};border:none;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">
+                ${isAtiva ? '✓ Selecionada' : 'Visualizar O.S.'}
+              </button>
+            </div>
+            <div style="font-size:13.5px;font-weight:800;color:var(--gold-light);margin-bottom:4px;">
+              👤 Cliente: <span style="color:#fff;">${nomeCliente}</span>
+            </div>
+            <div style="font-size:11.5px;color:var(--text2);display:flex;gap:12px;flex-wrap:wrap;">
+              <span>📅 Emissão: ${dataOs}</span>
+              ${local ? `<span>📍 Obra: ${local}</span>` : ''}
+            </div>
+            ${itensHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selecionarOsNoPortal(numOs, nomeCliente) {
+      if (!clienteSessao) {
+        clienteSessao = { nome: nomeCliente, os: numOs };
+      } else {
+        clienteSessao.os = numOs;
+        if (nomeCliente && !clienteSessao.isFuncionario) clienteSessao.nome = nomeCliente;
+      }
+      localStorage.setItem('sdv_cliente_sessao', JSON.stringify(clienteSessao));
+      
+      const lblOs = document.getElementById('lbl-cliente-os-texto') || document.getElementById('lbl-cliente-os');
+      if (lblOs) lblOs.textContent = 'O.S. ' + numOs;
+
+      carregarDadosStatus(clienteSessao);
+      carregarGaleriaFotos(clienteSessao);
+      carregarMensagensChat(clienteSessao);
+      carregarDadosFinanceiros(clienteSessao);
+      renderizarOrdensMensagens();
+      mostrarToastNotificacao('O.S. Selecionada', `Visualizando agora ${numOs} - ${nomeCliente}`, '📋');
+    }
+
+    function abrirSeletorTrocaOs() {
+      const ordens = carregarOrdensDoStorage();
+      if (!ordens.length) {
+        alert('Nenhuma Ordem de Serviço cadastrada ainda.');
+        return;
+      }
+      const promptTxt = ordens.map((o, i) => `${i+1}. ${o.numero} - ${o.nome || 'Cliente'}`).join('\n');
+      const sel = prompt('Digite o número da O.S. que deseja visualizar (ex: #0001, #0002):\n\n' + promptTxt, clienteSessao ? clienteSessao.os : '#0001');
+      if (sel) {
+        const limpo = sel.trim().toLowerCase();
+        const encontrada = ordens.find(o => String(o.numero).toLowerCase().includes(limpo));
+        if (encontrada) {
+          selecionarOsNoPortal(encontrada.numero, encontrada.nome || 'Cliente');
+        } else {
+          alert('Ordem não encontrada.');
+        }
+      }
+    }
+
+    // ══════════════════════════════════════════════
     //  RECEPÇÃO REALTIME SSE (NTFY)
     // ══════════════════════════════════════════════
     function conectarRealtimePortal(sessao) {
@@ -2481,7 +2637,38 @@
         carregarDadosFinanceiros(clienteSessao);
         mostrarToastNotificacao('💰 Financeiro Atualizado', `Status de pagamento: ${ev.status_pagamento || 'Atualizado'}`, '💰');
       }
+
+      // 5. Nova Ordem de Serviço Gerada (sem valores, apenas cliente e dados técnicos)
+      if (ev.tipo === 'nova_os') {
+        renderizarOrdensMensagens();
+        tocarAlertaSonoro();
+        mostrarToastNotificacao(`📋 Nova O.S. Gerada: ${ev.os || ''}`, `Cliente: ${ev.cliente_nome || 'Cliente'}`, '📋');
+        const badge = document.getElementById('badge-msg-count');
+        if (badge) {
+          badge.textContent = 'Novo';
+          badge.style.display = 'inline-block';
+        }
+      }
     }
+
+    // Ouvinte para sincronização instantânea quando uma O.S. for gerada no sistema
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'sdv_evento_nova_os' || e.key === 'sdv_ordens') {
+        renderizarOrdensMensagens();
+        if (e.key === 'sdv_evento_nova_os' && e.newValue) {
+          try {
+            const d = JSON.parse(e.newValue);
+            tocarAlertaSonoro();
+            mostrarToastNotificacao(`📋 Nova O.S. Gerada: ${d.os}`, `Cliente: ${d.cliente_nome || 'Cliente'}`, '📋');
+            const badge = document.getElementById('badge-msg-count');
+            if (badge) {
+              badge.textContent = 'Novo';
+              badge.style.display = 'inline-block';
+            }
+          } catch(_) {}
+        }
+      }
+    });
 
     // ══════════════════════════════════════════════
     //  BIOMETRIA / WEBAUTHN / FACE ID

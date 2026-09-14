@@ -915,6 +915,7 @@
     <button id="tab-contratos" class="tab" data-tab="contratos" onclick="goTab('contratos')">📄 Contratos</button>
     <button id="tab-usuarios" class="tab" data-tab="usuarios" onclick="goTab('usuarios')">👥 Usuários</button>
     <button type="button" id="tab-portal-cliente" class="tab" onclick="window.open('cliente.html','_blank')" title="Acessar Portal do Cliente">🌐 Portal do Cliente</button>
+    <button type="button" id="tab-portal-funcionario" class="tab" onclick="abrirPortalFuncionario()" title="Acessar Portal do Funcionário">👷 Portal do Funcionário</button>
     <button type="button" id="btn-central-mensagens" class="tab" onclick="abrirModalCentralMensagens()" title="Central de Mensagens com Clientes">💬 Mensagens <span id="badge-msg-clientes" style="display:none;background:#ef4444;color:#fff;font-size:9.5px;padding:1px 6px;border-radius:999px;font-weight:900;margin-left:4px;">0</span></button>
   </div>
 
@@ -1170,9 +1171,14 @@
         </h2>
         <div style="font-size:12px;color:var(--muted);margin-top:2px;">Organize visitas técnicas, instalações de box, espelhos e vistorias</div>
       </div>
-      <button class="btn btn-primary btn-sm" onclick="abrirModalNovoCompromissoAgenda()" style="font-size:12px;padding:8px 14px;">
-        ➕ Novo Agendamento
-      </button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button type="button" id="btn-agenda-notificacoes-status" class="btn btn-sec btn-sm" onclick="solicitarPermissaoNotificacaoAgenda()" style="font-size:12px;padding:8px 12px;display:inline-flex;align-items:center;gap:6px;" title="Ativar ou testar alertas sonoros e no navegador">
+          🔔 Alertas Ativos
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="abrirModalNovoCompromissoAgenda()" style="font-size:12px;padding:8px 14px;">
+          ➕ Novo Agendamento
+        </button>
+      </div>
     </div>
 
     <!-- RESUMO RÁPIDO DA AGENDA -->
@@ -2137,8 +2143,8 @@
   <div class="modal-box" onclick="event.stopPropagation()" style="max-width:460px;">
     <div class="modal-title">
       <div style="display:flex;align-items:center;gap:8px;">
-        <span>📅</span>
-        <span>Novo Agendamento / Visita</span>
+        <span id="agenda-modal-icone">📅</span>
+        <span id="agenda-modal-titulo">Novo Agendamento / Visita</span>
       </div>
       <button class="modal-close" onclick="fecharModalNovoCompromissoAgenda()">✕</button>
     </div>
@@ -2185,6 +2191,23 @@
       </div>
     </div>
 
+    <div class="field" style="margin-bottom:12px;">
+      <label style="display:flex;align-items:center;justify-content:space-between;">
+        <span>⏰ Tempo para Notificação / Alerta</span>
+        <span style="font-size:10.5px;color:var(--gold);font-weight:normal;">Alerta sonoro e navegador</span>
+      </label>
+      <select id="agenda-novo-notificacao" style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);">
+        <option value="0">No horário exato do compromisso</option>
+        <option value="10">10 minutos antes</option>
+        <option value="15">15 minutos antes</option>
+        <option value="30" selected>30 minutos antes (Padrão recomendado)</option>
+        <option value="60">1 hora antes</option>
+        <option value="120">2 horas antes</option>
+        <option value="1440">1 dia antes (24 horas)</option>
+        <option value="-1">Não notificar</option>
+      </select>
+    </div>
+
     <div class="field" style="margin-bottom:16px;">
       <label>Observações / Itens a levar</label>
       <textarea id="agenda-novo-obs" rows="2" placeholder="Ex: Levar trena a laser, cliente só está em casa após às 14h..." style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);resize:vertical;"></textarea>
@@ -2192,7 +2215,7 @@
 
     <div style="display:flex;gap:10px;justify-content:flex-end;">
       <button type="button" class="btn btn-sec btn-sm" onclick="fecharModalNovoCompromissoAgenda()">Cancelar</button>
-      <button type="button" class="btn btn-primary btn-sm" onclick="salvarNovoCompromissoAgenda()">📅 Agendar Visita</button>
+      <button type="button" id="agenda-modal-btn-salvar" class="btn btn-primary btn-sm" onclick="salvarNovoCompromissoAgenda()">📅 Agendar Visita</button>
     </div>
   </div>
 </div>
@@ -3173,6 +3196,7 @@ function salvarOrdem() {
       };
       historico.push(ord);
       save(K.orders, historico);
+      notificarNovaOrdemGerada(ord);
       proxNumero++;
       save(K.nextNum, proxNumero);
       alert('✅ Ordem '+o.numero+' salva com sucesso!');
@@ -3200,6 +3224,43 @@ function cancelarEdicaoOs() {
   itemId = 0; addItem();
   selChip(document.querySelector('.chip'),'À vista');
   atualizarNumeroDisplay();
+}
+
+function abrirPortalFuncionario() {
+  window.open('cliente.html?portal=funcionario', '_blank');
+}
+
+function notificarNovaOrdemGerada(ord) {
+  try {
+    const numOs = ord.numero || (ord.dados && ord.dados.numero) || '#0001';
+    const nomeCliente = ord.nome || (ord.dados && ord.dados.nome) || 'Cliente';
+    const itensSemValor = (ord.dados && Array.isArray(ord.dados.itens)) ? ord.dados.itens.map(it => ({
+      desc: it.desc || '',
+      larg: it.larg || '',
+      alt: it.alt || '',
+      qtd: it.qtd || 1,
+      cor: it.cor || ''
+    })) : [];
+
+    const payload = {
+      action: 'nova_os',
+      tipo: 'nova_os',
+      os: numOs,
+      cliente_nome: nomeCliente,
+      data: ord.data_orc || (ord.dados && ord.dados.data) || new Date().toISOString().split('T')[0],
+      local: [ord.dados && ord.dados.end, ord.dados && ord.dados.bairro].filter(Boolean).join(' - ') || (ord.dados && ord.dados.cidade) || '',
+      itens: itensSemValor,
+      hora: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    };
+
+    fetch('/api/portal-cliente', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(() => {});
+
+    localStorage.setItem('sdv_evento_nova_os', JSON.stringify({ ...payload, ts: Date.now() }));
+  } catch (_) {}
 }
 
 function editarOs(id) {
@@ -5573,6 +5634,7 @@ async function enviarOrcamentoParaAssinaturaDigital() {
         }]
       };
       historico.push(ord);
+      notificarNovaOrdemGerada(ord);
       proxNumero++;
       save(K.nextNum, proxNumero);
       atualizarNumeroDisplay();
@@ -7523,6 +7585,16 @@ function excluirLancamentoFinanceiro(id) {
 //  MÓDULO AGENDA (VISITAS, MEDIÇÕES & INSTALAÇÕES)
 // ══════════════════════════════════════════════
 let agendaFiltroAtual = 'pendentes';
+let editandoAgendaId = null;
+
+function formatarTempoNotificacao(minutos) {
+  const m = (minutos !== undefined && minutos !== null && minutos !== '') ? Number(minutos) : 30;
+  if (m === -1) return 'Sem alerta';
+  if (m === 0) return 'No horário';
+  if (m < 60) return `${m}m antes`;
+  if (m < 1440) return `${Math.round(m / 60)}h antes`;
+  return `${Math.round(m / 1440)}d antes`;
+}
 
 function obterAgendaEventos() {
   try {
@@ -7536,7 +7608,140 @@ function salvarAgendaEventos(lista) {
   localStorage.setItem('sdv_agenda_eventos', JSON.stringify(lista));
 }
 
+function atualizarBotaoPermissaoAgenda() {
+  const btn = document.getElementById('btn-agenda-notificacoes-status');
+  if (!btn) return;
+  if ('Notification' in window && Notification.permission === 'granted') {
+    btn.innerHTML = '🔔 Alertas Ativos';
+    btn.style.borderColor = 'rgba(74,222,128,0.5)';
+    btn.style.color = '#4ade80';
+  } else {
+    btn.innerHTML = '🔔 Ativar Alertas';
+    btn.style.borderColor = 'rgba(255,255,255,0.15)';
+    btn.style.color = 'var(--text)';
+  }
+}
+
+function solicitarPermissaoNotificacaoAgenda() {
+  tocarAlertaPortal();
+  if (!('Notification' in window)) {
+    mostrarToastAgenda('Este navegador não suporta notificações de sistema, mas alertas sonoros estão ativos!');
+    return;
+  }
+  if (Notification.permission === 'granted') {
+    mostrarToastAgenda('✅ Alertas de agendamento já estão habilitados e ativos!');
+    try {
+      new Notification('SD Vidros - Agenda', {
+        body: '🔔 Notificações e lembretes da agenda ativos!',
+        icon: 'icon-192.png'
+      });
+    } catch(_) {}
+    atualizarBotaoPermissaoAgenda();
+    return;
+  }
+  Notification.requestPermission().then(permission => {
+    if (permission === 'granted') {
+      mostrarToastAgenda('✅ Permissão concedida! Você receberá alertas dos agendamentos.');
+      try {
+        new Notification('SD Vidros - Agenda', {
+          body: '🔔 Notificações ativadas com sucesso!',
+          icon: 'icon-192.png'
+        });
+      } catch(_) {}
+    } else {
+      mostrarToastAgenda('⚠️ Permissão de notificação não concedida. Alertas sonoros continuam ativos na tela.');
+    }
+    atualizarBotaoPermissaoAgenda();
+  });
+}
+
+function mostrarToastAgenda(htmlContent) {
+  let toast = document.getElementById('toast-agenda-notif');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast-agenda-notif';
+    toast.style.cssText = 'position:fixed;top:24px;right:24px;background:linear-gradient(135deg,#13112c,#1e1b4b);color:#fff;font-size:13px;padding:14px 18px;border-radius:12px;border:1.5px solid var(--gold);box-shadow:0 14px 35px rgba(0,0,0,0.65);z-index:99999;transition:all 0.3s cubic-bezier(0.16,1,0.3,1);display:flex;align-items:center;gap:12px;max-width:400px;opacity:0;transform:translateY(-15px);';
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = `<span style="font-size:24px;line-height:1;">⏰</span><div>${htmlContent}</div>`;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateY(0)';
+  setTimeout(() => {
+    if (toast) {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-15px)';
+    }
+  }, 7000);
+}
+
+function dispararNotificacaoCompromisso(ev, diffMinutos) {
+  tocarAlertaPortal();
+
+  let tempoMsg = '';
+  if (diffMinutos <= 0) {
+    tempoMsg = 'é agora!';
+  } else if (diffMinutos < 60) {
+    tempoMsg = `em ${diffMinutos} minuto(s)!`;
+  } else {
+    tempoMsg = `em cerca de ${Math.round(diffMinutos / 60)} hora(s)!`;
+  }
+
+  const clienteNome = ev.cliente || 'Cliente';
+  const tipoAtend = ev.tipo || 'Atendimento';
+  const horario = ev.hora ? ` às ${ev.hora}` : '';
+
+  mostrarToastAgenda(`<strong>${esc(tipoAtend)}</strong> com <strong>${esc(clienteNome)}</strong> ${tempoMsg}${horario ? ' (' + horario + ')' : ''}`);
+
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try {
+      new Notification(`⏰ Alerta de Agenda: ${tipoAtend}`, {
+        body: `${clienteNome} - ${tempoMsg}\nHorário: ${ev.hora || ''} | Local: ${ev.end || 'A combinar'}`,
+        icon: 'icon-192.png'
+      });
+    } catch(_) {}
+  }
+}
+
+function verificarNotificacoesAgenda() {
+  const eventos = obterAgendaEventos();
+  if (!eventos || !eventos.length) return;
+
+  const agora = new Date();
+  let atualizou = false;
+
+  eventos.forEach(ev => {
+    if (ev.concluido) return;
+    if (ev.notificado) return;
+    if (!ev.data) return;
+
+    const antecedencia = (ev.notificar_minutos !== undefined && ev.notificar_minutos !== null && ev.notificar_minutos !== '') ? Number(ev.notificar_minutos) : 30;
+    if (antecedencia === -1) return;
+
+    const horaStr = ev.hora || '09:00';
+    const partesData = ev.data.split('-').map(Number);
+    const partesHora = horaStr.split(':').map(Number);
+    if (partesData.length !== 3 || partesHora.length < 2) return;
+
+    const dataCompromisso = new Date(partesData[0], partesData[1] - 1, partesData[2], partesHora[0], partesHora[1], 0);
+    if (isNaN(dataCompromisso.getTime())) return;
+
+    const diffMinutos = (dataCompromisso.getTime() - agora.getTime()) / 60000;
+
+    if (diffMinutos <= antecedencia && diffMinutos >= -120) {
+      ev.notificado = true;
+      atualizou = true;
+      dispararNotificacaoCompromisso(ev, Math.round(diffMinutos));
+    }
+  });
+
+  if (atualizou) {
+    salvarAgendaEventos(eventos);
+    renderAgenda();
+  }
+}
+
 function renderAgenda() {
+  atualizarBotaoPermissaoAgenda();
   const eventos = obterAgendaEventos();
   const hojeStr = new Date().toISOString().split('T')[0];
 
@@ -7587,6 +7792,7 @@ function renderAgenda() {
     const zapClean = (ev.tel || '').replace(/\D/g, '');
     const zapMsg = encodeURIComponent(`Olá ${ev.cliente || ''}, confirmando o seu agendamento de *${ev.tipo || 'atendimento'}* para o dia *${ev.data ? ev.data.split('-').reverse().join('/') : ''}* às *${ev.hora || ''}* pela SD Vidros.`);
     const zapLink = zapClean ? `https://wa.me/55${zapClean}?text=${zapMsg}` : '';
+    const notifPill = formatarTempoNotificacao(ev.notificar_minutos);
 
     return `
       <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:12px;border-bottom:1px solid rgba(255,255,255,0.05);gap:12px;flex-wrap:wrap;background:${isHoje ? 'rgba(201,168,76,0.08)' : 'rgba(255,255,255,0.01)'};border-radius:8px;margin-bottom:6px;border:1px solid ${isHoje ? 'rgba(201,168,76,0.25)' : 'rgba(255,255,255,0.04)'};">
@@ -7598,6 +7804,8 @@ function renderAgenda() {
             <div style="font-weight:800;font-size:14px;color:#fff;text-decoration:${ev.concluido ? 'line-through' : 'none'};opacity:${ev.concluido ? '0.6' : '1'};display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               <span>${esc(ev.cliente)}</span>
               <span style="font-size:10.5px;padding:2px 8px;border-radius:999px;background:rgba(201,168,76,0.18);color:var(--gold-light);font-weight:700;">${esc(ev.tipo || 'Atendimento')}</span>
+              <span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#93c5fd;font-weight:700;" title="Tempo configurado para receber o alerta">⏰ ${notifPill}</span>
+              ${ev.notificado ? '<span style="font-size:10px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);color:#34d399;padding:1px 6px;border-radius:999px;font-weight:700;">🔔 Alerta enviado</span>' : ''}
               ${isHoje ? '<span style="font-size:10px;background:#ef4444;color:#fff;padding:1px 6px;border-radius:999px;font-weight:800;">HOJE</span>' : ''}
             </div>
             <div style="font-size:12px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
@@ -7610,6 +7818,7 @@ function renderAgenda() {
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
           ${zapLink ? `<a href="${zapLink}" target="_blank" class="btn btn-whats btn-xs" style="padding:4px 10px;font-size:11px;text-decoration:none;" title="Enviar lembrete pelo WhatsApp">💬 WhatsApp</a>` : ''}
+          <button onclick="abrirModalNovoCompromissoAgenda('${ev.id}')" title="Editar agendamento e lembrete" style="background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--gold-light);width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:11px;display:inline-flex;align-items:center;justify-content:center;">✏️</button>
           <button class="item-del" onclick="excluirCompromissoAgenda('${ev.id}')" title="Excluir agendamento" style="width:26px;height:26px;font-size:11px;">✕</button>
         </div>
       </div>
@@ -7631,6 +7840,7 @@ function alternarConcluidoAgenda(id) {
   const ev = eventos.find(x => x.id === id);
   if (ev) {
     ev.concluido = !ev.concluido;
+    if (!ev.concluido) ev.notificado = false;
     salvarAgendaEventos(eventos);
     renderAgenda();
   }
@@ -7644,7 +7854,47 @@ function excluirCompromissoAgenda(id) {
   renderAgenda();
 }
 
-function abrirModalNovoCompromissoAgenda() {
+function abrirModalNovoCompromissoAgenda(id = null) {
+  editandoAgendaId = id;
+  const iconeEl = document.getElementById('agenda-modal-icone');
+  const tituloEl = document.getElementById('agenda-modal-titulo');
+  const btnSalvar = document.getElementById('agenda-modal-btn-salvar');
+  const notifEl = document.getElementById('agenda-novo-notificacao');
+
+  // Atualizar datalist de clientes se disponível
+  const dl = document.getElementById('agenda-lista-sugestoes-clientes');
+  if (dl && typeof clientes !== 'undefined' && clientes && clientes.length) {
+    dl.innerHTML = clientes.map(c => `<option value="${esc(c.nome)}">${esc(c.tel || '')}</option>`).join('');
+  }
+
+  if (id) {
+    const eventos = obterAgendaEventos();
+    const ev = eventos.find(x => x.id === id);
+    if (ev) {
+      if (iconeEl) iconeEl.textContent = '✏️';
+      if (tituloEl) tituloEl.textContent = 'Editar Agendamento';
+      if (btnSalvar) btnSalvar.textContent = '💾 Salvar Alterações';
+
+      document.getElementById('agenda-novo-cliente').value = ev.cliente || '';
+      document.getElementById('agenda-novo-tel').value = ev.tel || '';
+      document.getElementById('agenda-novo-end').value = ev.end || '';
+      document.getElementById('agenda-novo-tipo').value = ev.tipo || 'Medição Técnica';
+      document.getElementById('agenda-novo-data').value = ev.data || '';
+      document.getElementById('agenda-novo-hora').value = ev.hora || '09:00';
+      document.getElementById('agenda-novo-obs').value = ev.obs || '';
+      if (notifEl) notifEl.value = (ev.notificar_minutos !== undefined && ev.notificar_minutos !== null) ? String(ev.notificar_minutos) : '30';
+
+      const m = document.getElementById('modal-agenda-novo');
+      if (m) m.style.display = 'flex';
+      return;
+    }
+  }
+
+  // Novo compromisso
+  if (iconeEl) iconeEl.textContent = '📅';
+  if (tituloEl) tituloEl.textContent = 'Novo Agendamento / Visita';
+  if (btnSalvar) btnSalvar.textContent = '📅 Agendar Visita';
+
   document.getElementById('agenda-novo-cliente').value = '';
   document.getElementById('agenda-novo-tel').value = '';
   document.getElementById('agenda-novo-end').value = '';
@@ -7652,12 +7902,7 @@ function abrirModalNovoCompromissoAgenda() {
   document.getElementById('agenda-novo-data').value = new Date().toISOString().split('T')[0];
   document.getElementById('agenda-novo-hora').value = '09:00';
   document.getElementById('agenda-novo-obs').value = '';
-  
-  // Atualizar datalist de clientes se disponível
-  const dl = document.getElementById('agenda-lista-sugestoes-clientes');
-  if (dl && clientes && clientes.length) {
-    dl.innerHTML = clientes.map(c => `<option value="${esc(c.nome)}">${esc(c.tel || '')}</option>`).join('');
-  }
+  if (notifEl) notifEl.value = '30';
 
   const m = document.getElementById('modal-agenda-novo');
   if (m) m.style.display = 'flex';
@@ -7665,7 +7910,7 @@ function abrirModalNovoCompromissoAgenda() {
 
 function aoSelecionarClienteAgenda() {
   const nome = document.getElementById('agenda-novo-cliente').value.trim();
-  if (!nome || !clientes) return;
+  if (!nome || typeof clientes === 'undefined' || !clientes) return;
   const c = clientes.find(x => x.nome.toLowerCase() === nome.toLowerCase());
   if (c) {
     if (c.tel) document.getElementById('agenda-novo-tel').value = c.tel;
@@ -7675,6 +7920,7 @@ function aoSelecionarClienteAgenda() {
 
 function fecharModalNovoCompromissoAgenda(e) {
   if (e && e.target !== e.currentTarget) return;
+  editandoAgendaId = null;
   const m = document.getElementById('modal-agenda-novo');
   if (m) m.style.display = 'none';
 }
@@ -7688,25 +7934,64 @@ function salvarNovoCompromissoAgenda() {
   const hora = document.getElementById('agenda-novo-hora').value;
   const obs = document.getElementById('agenda-novo-obs').value.trim();
 
+  const notifEl = document.getElementById('agenda-novo-notificacao');
+  const notificarMinRaw = notifEl ? parseInt(notifEl.value, 10) : 30;
+  const notificar_minutos = isNaN(notificarMinRaw) ? 30 : notificarMinRaw;
+
   if (!cliente) { alert('Informe o nome do cliente.'); return; }
   if (!data) { alert('Informe a data do agendamento.'); return; }
 
   const eventos = obterAgendaEventos();
-  eventos.push({
-    id: 'ag-' + Date.now(),
-    cliente,
-    tel,
-    end,
-    tipo,
-    data,
-    hora,
-    obs,
-    concluido: false
-  });
+
+  if (editandoAgendaId) {
+    const idx = eventos.findIndex(x => x.id === editandoAgendaId);
+    if (idx !== -1) {
+      eventos[idx] = {
+        ...eventos[idx],
+        cliente,
+        tel,
+        end,
+        tipo,
+        data,
+        hora,
+        obs,
+        notificar_minutos,
+        notificado: false
+      };
+    }
+    editandoAgendaId = null;
+  } else {
+    eventos.push({
+      id: 'ag-' + Date.now(),
+      cliente,
+      tel,
+      end,
+      tipo,
+      data,
+      hora,
+      obs,
+      notificar_minutos,
+      notificado: false,
+      concluido: false
+    });
+  }
+
   salvarAgendaEventos(eventos);
   fecharModalNovoCompromissoAgenda();
   renderAgenda();
+
+  if (notificar_minutos !== -1 && 'Notification' in window && Notification.permission === 'default') {
+    solicitarPermissaoNotificacaoAgenda();
+  }
+
+  verificarNotificacoesAgenda();
 }
+
+// Iniciar verificação automática das notificações a cada 30 segundos
+try {
+  setInterval(verificarNotificacoesAgenda, 30000);
+  setTimeout(verificarNotificacoesAgenda, 2000);
+} catch(_) {}
 </script>
 </body>
 </html>
