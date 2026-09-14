@@ -548,11 +548,6 @@
         </div>
         <div style="font-size:10.5px;color:var(--muted);margin-top:6px;text-align:center;">Acesso ao registro de ponto e acompanhamento de obras</div>
       </a>
-
-      <!-- ADICIONAR NOVA EMPRESA AO SISTEMA -->
-      <button type="button" onclick="abrirModalCadastrarNovaEmpresa()" style="background:none;border:1px dashed rgba(201,168,76,0.35);border-radius:10px;padding:8px 14px;color:var(--gold-light);font-size:12px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;opacity:0.95;transition:all 0.2s;">
-        <span>🏢 ➕</span> <span>Adicionar Nova Empresa ao Sistema</span>
-      </button>
     </div>
 
     <div id="login-msg"></div>
@@ -894,9 +889,14 @@
 <div id="modal-senha-gestao" class="modal-overlay">
   <div class="modal-card">
     <div style="text-align:center;margin-bottom:14px;">
-      <div style="font-size:36px;margin-bottom:6px;">🔒</div>
+      <div onclick="iniciarFluxoNovaSenhaWhatsApp()" title="Clique no cadeado para Cadastrar Nova Senha com autorização WhatsApp" style="width:62px;height:62px;margin:0 auto 6px;background:rgba(201,168,76,0.14);border:2px solid var(--gold);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;cursor:pointer;box-shadow:0 0 20px rgba(201,168,76,0.25);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+        🔒
+      </div>
+      <div style="font-size:11px;color:var(--gold-light);cursor:pointer;margin-bottom:8px;font-weight:800;" onclick="iniciarFluxoNovaSenhaWhatsApp()">
+        👆 Clique no cadeado para Cadastrar Nova Senha
+      </div>
       <h3 style="font-size:18px;font-weight:900;color:var(--gold-light);">Acesso Administrativo</h3>
-      <p style="font-size:12px;color:rgba(240,236,228,0.8);margin-top:6px;line-height:1.4;">
+      <p style="font-size:12px;color:rgba(240,236,228,0.8);margin-top:4px;line-height:1.4;">
         Digite a senha de administrador para entrar, mudar a logo, banner IA e marcas:
       </p>
     </div>
@@ -922,6 +922,74 @@
       </button>
       <button type="button" onclick="verificarSenhaGestao()" style="flex:1.4;padding:13px;background:linear-gradient(135deg,var(--gold-light),var(--gold));border:none;border-radius:12px;color:#000;font-weight:900;cursor:pointer;font-family:var(--font);box-shadow:0 4px 14px rgba(201,168,76,0.3);">
         Desbloquear 🔓
+      </button>
+    </div>
+
+    <!-- OPÇÃO CADASTRAR NOVA SENHA COM AUTORIZAÇÃO WHATSAPP -->
+    <div style="margin-top:14px;padding-top:12px;border-top:1px dashed rgba(201,168,76,0.25);text-align:center;">
+      <button type="button" onclick="iniciarFluxoNovaSenhaWhatsApp()" style="background:none;border:none;color:var(--gold-light);font-size:12.5px;font-weight:800;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:6px;text-decoration:underline;">
+        <span>🔑</span> <span>Cadastrar Nova Senha (com autorização WhatsApp)</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- MODAL: CADASTRAR NOVA SENHA COM AUTORIZAÇÃO WHATSAPP -->
+<!-- ══════════════════════════════════════════════ -->
+<div id="modal-nova-senha-whatsapp" class="modal-overlay" style="display:none;z-index:9999999;" onclick="fecharModalNovaSenhaWhatsApp(event)">
+  <div class="modal-card" onclick="event.stopPropagation()" style="max-width:440px;text-align:center;border:1.5px solid var(--gold);box-shadow:0 0 40px rgba(201,168,76,0.35);">
+    <div style="width:62px;height:62px;margin:0 auto 10px;background:rgba(37,211,102,0.14);border:2px solid #25D366;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 0 20px rgba(37,211,102,0.3);">
+      💬 🔑
+    </div>
+    <h3 style="font-size:18px;font-weight:900;color:var(--gold-light);margin-bottom:4px;">Autorização via WhatsApp</h3>
+    <p style="font-size:12px;color:rgba(240,236,228,0.8);margin-bottom:14px;line-height:1.4;">
+      Para segurança do sistema, o código de autorização é enviado para o WhatsApp do administrador: <strong>(85) 99611-9824</strong>.
+    </p>
+
+    <!-- BOTÃO PARA RECEBER/ABRIR CÓDIGO NO WHATSAPP -->
+    <div style="margin-bottom:14px;">
+      <a id="btn-abrir-zap-codigo" href="#" target="_blank" class="btn btn-whats" style="width:100%;box-sizing:border-box;padding:12px 14px;font-size:13px;font-weight:900;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;box-shadow:0 4px 16px rgba(37,211,102,0.35);background:linear-gradient(135deg,#16a34a,#15803d);border:1px solid #22c55e;color:#fff;">
+        <span>💬</span> <span>Abrir WhatsApp e Obter Código</span>
+      </a>
+      <div style="font-size:10.5px;color:var(--muted);margin-top:5px;">
+        Clique acima caso a mensagem do WhatsApp não abra automaticamente
+      </div>
+    </div>
+
+    <!-- CAMPO DO CÓDIGO RECEBIDO -->
+    <div class="field" style="text-align:left;margin-bottom:12px;">
+      <label>CÓDIGO DE 6 DÍGITOS (RECEBIDO NO WHATSAPP) *</label>
+      <div class="input-wrap">
+        <input id="zap-auth-codigo" type="text" maxlength="6" placeholder="Ex: 849201" style="font-size:18px;font-weight:900;letter-spacing:0.25em;text-align:center;" autocomplete="off" />
+      </div>
+    </div>
+
+    <!-- CAMPO NOVA SENHA -->
+    <div class="field" style="text-align:left;margin-bottom:12px;">
+      <label>NOVA SENHA DE ADMINISTRADOR *</label>
+      <div class="input-wrap">
+        <input id="zap-auth-nova-senha" type="password" placeholder="Digite a nova senha desejada" />
+      </div>
+    </div>
+
+    <!-- CAMPO CONFIRMAR NOVA SENHA -->
+    <div class="field" style="text-align:left;margin-bottom:14px;">
+      <label>CONFIRME A NOVA SENHA *</label>
+      <div class="input-wrap">
+        <input id="zap-auth-confirma-senha" type="password" placeholder="Repita a nova senha" onkeydown="if(event.key==='Enter') confirmarNovaSenhaWhatsApp();" />
+      </div>
+    </div>
+
+    <div id="zap-auth-msg" style="margin-bottom:12px;"></div>
+
+    <!-- BOTÕES DE CONFIRMAR OU CANCELAR -->
+    <div style="display:flex;gap:10px;">
+      <button type="button" onclick="fecharModalNovaSenhaWhatsApp()" style="flex:1;padding:12px;background:#181824;border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:#cbd5e1;font-weight:700;cursor:pointer;font-family:var(--font);">
+        Cancelar
+      </button>
+      <button type="button" onclick="confirmarNovaSenhaWhatsApp()" style="flex:1.6;padding:12px;background:linear-gradient(135deg,var(--gold-light),var(--gold));border:none;border-radius:12px;color:#000;font-weight:900;cursor:pointer;font-family:var(--font);box-shadow:0 4px 14px rgba(201,168,76,0.35);font-size:13px;">
+        💾 Salvar Nova Senha
       </button>
     </div>
   </div>
@@ -1329,6 +1397,129 @@
     if (modal) modal.style.display = 'none';
   }
 
+  // ══════════════════════════════════════════════
+  //  FLUXO DE CADASTRAR NOVA SENHA COM AUTORIZAÇÃO WHATSAPP
+  // ══════════════════════════════════════════════
+  let _codigoNovaSenhaGerado = null;
+  let _codigoNovaSenhaExpira = 0;
+
+  function iniciarFluxoNovaSenhaWhatsApp() {
+    // Gera código de 6 dígitos aleatório
+    _codigoNovaSenhaGerado = Math.floor(100000 + Math.random() * 900000).toString();
+    _codigoNovaSenhaExpira = Date.now() + 15 * 60 * 1000; // 15 minutos
+
+    const telLimpo = '5585996119824';
+    const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const data = new Date().toLocaleDateString('pt-BR');
+
+    const msgTexto = `🔐 *SD VIDROS - AUTORIZAÇÃO DE NOVA SENHA*\n\nFoi solicitada a criação de uma Nova Senha de Administrador no sistema.\n\n🔑 *CÓDIGO DE AUTORIZAÇÃO:*\n👉 *${_codigoNovaSenhaGerado}* 👈\n\n⏰ *Validade:* 15 minutos (Gerado em ${data} às ${hora})\n\n⚠️ Digite este código na tela para confirmar a criação da sua nova senha. Se você não fez esta solicitação, ignore esta mensagem.`;
+
+    const urlZap = `https://wa.me/${telLimpo}?text=${encodeURIComponent(msgTexto)}`;
+
+    const btnZap = document.getElementById('btn-abrir-zap-codigo');
+    if (btnZap) btnZap.href = urlZap;
+
+    const inpCod = document.getElementById('zap-auth-codigo');
+    const inpSenha = document.getElementById('zap-auth-nova-senha');
+    const inpConf = document.getElementById('zap-auth-confirma-senha');
+    const msg = document.getElementById('zap-auth-msg');
+
+    if (inpCod) inpCod.value = '';
+    if (inpSenha) inpSenha.value = '';
+    if (inpConf) inpConf.value = '';
+    if (msg) msg.innerHTML = '';
+
+    fecharModalSenhaGestao();
+
+    const modal = document.getElementById('modal-nova-senha-whatsapp');
+    if (modal) modal.style.display = 'flex';
+
+    // Tenta abrir o WhatsApp automaticamente
+    try {
+      const a = document.createElement('a');
+      a.href = urlZap;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch(_) {}
+  }
+
+  function fecharModalNovaSenhaWhatsApp(e) {
+    if (e && e.target && e.target !== document.getElementById('modal-nova-senha-whatsapp')) return;
+    const modal = document.getElementById('modal-nova-senha-whatsapp');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function confirmarNovaSenhaWhatsApp() {
+    const inpCod = document.getElementById('zap-auth-codigo');
+    const inpSenha = document.getElementById('zap-auth-nova-senha');
+    const inpConf = document.getElementById('zap-auth-confirma-senha');
+    const msg = document.getElementById('zap-auth-msg');
+
+    const codDigitado = (inpCod ? inpCod.value : '').replace(/\D/g, '').trim();
+    const novaSenha = (inpSenha ? inpSenha.value : '').trim();
+    const confSenha = (inpConf ? inpConf.value : '').trim();
+
+    const setErro = (txt) => {
+      if (msg) {
+        msg.innerHTML = `<div style="background:rgba(239,68,68,0.15);border:1px solid #ef4444;color:#fca5a5;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;">${txt}</div>`;
+      } else {
+        alert(txt);
+      }
+    };
+
+    if (!codDigitado) {
+      setErro('Digite o código de 6 dígitos recebido no WhatsApp.');
+      if (inpCod) inpCod.focus();
+      return;
+    }
+
+    if (Date.now() > _codigoNovaSenhaExpira) {
+      setErro('O código expirou (limite de 15 minutos). Solicite um novo código pelo WhatsApp.');
+      return;
+    }
+
+    if (codDigitado !== _codigoNovaSenhaGerado) {
+      setErro('❌ Código incorreto! Digite o código recebido no WhatsApp.');
+      if (inpCod) inpCod.focus();
+      return;
+    }
+
+    if (!novaSenha || novaSenha.length < 4) {
+      setErro('A nova senha deve ter no mínimo 4 caracteres.');
+      if (inpSenha) inpSenha.focus();
+      return;
+    }
+
+    if (novaSenha !== confSenha) {
+      setErro('A confirmação da senha não confere com a nova senha digitada.');
+      if (inpConf) inpConf.focus();
+      return;
+    }
+
+    // Salva a nova senha para o admin
+    let users = getUsers();
+    let adminUser = users.find(u => u.role === 'admin' || u.username === 'admin');
+    if (adminUser) {
+      adminUser.senha = novaSenha;
+    } else {
+      users.push({ id: 1, username: 'admin', nome: 'Administrador', senha: novaSenha, ativo: true, role: 'admin' });
+    }
+    localStorage.setItem('sdv_users', JSON.stringify(users));
+    localStorage.setItem('sdv_senha_admin_custom', novaSenha);
+
+    // Concede acesso autenticado
+    sessionStorage.setItem('sdv_gestao_autenticada', 'true');
+    _codigoNovaSenhaGerado = null;
+
+    fecharModalNovaSenhaWhatsApp();
+    alert('✅ SUCESSO!\n\nSua nova senha de administrador foi cadastrada com autorização via WhatsApp!\nUse-a para acessar o painel administrativo.');
+
+    mostrarAbaPrincipal('adicionar');
+  }
+
   function verificarSenhaGestao() {
     const inp = document.getElementById('pwd-gestao-input');
     const erro = document.getElementById('pwd-gestao-erro');
@@ -1336,16 +1527,17 @@
 
     const users = getUsers();
     const adminUser = users.find(u => (u.role === 'admin' || u.username === 'admin') && u.ativo);
-    const senhaCorreta = (adminUser && adminUser.senha) ? adminUser.senha : 'admin123';
+    const senhaCustom = localStorage.getItem('sdv_senha_admin_custom');
+    const senhaCorreta = senhaCustom || ((adminUser && adminUser.senha) ? adminUser.senha : 'admin123');
 
-    if (senhaDigitada === senhaCorreta || senhaDigitada === 'admin123' || users.some(u => u.senha === senhaDigitada && u.ativo)) {
+    if (senhaDigitada === senhaCorreta || (senhaDigitada === 'admin123' && !senhaCustom) || users.some(u => u.senha === senhaDigitada && u.ativo)) {
       sessionStorage.setItem('sdv_gestao_autenticada', 'true');
       fecharModalSenhaGestao();
       mostrarAbaPrincipal('adicionar');
     } else {
       if (erro) {
         erro.style.display = 'block';
-        erro.textContent = '❌ Senha incorreta! Digite a senha de administrador (padrão: admin123).';
+        erro.innerHTML = `❌ Senha incorreta!<br><a href="javascript:void(0)" onclick="iniciarFluxoNovaSenhaWhatsApp()" style="color:var(--gold-light);font-size:11.5px;font-weight:800;text-decoration:underline;display:inline-block;margin-top:4px;">Esqueceu? Cadastrar nova senha via WhatsApp</a>`;
       }
       if (inp) {
         inp.value = '';
