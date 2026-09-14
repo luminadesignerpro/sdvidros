@@ -92,24 +92,46 @@
     }
     .btn-sair:hover { background: rgba(224,68,68,0.6); border-color: rgba(224,68,68,0.8); }
 
-    /* ── TABS ── */
+    /* ── TABS NAVEGAÇÃO ── */
     .tabs {
-      display: flex; gap: 4px; margin-bottom: 14px;
-      background: var(--card); padding: 5px; border-radius: var(--r-md);
-      border: 1px solid var(--border-s); flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+      gap: 6px;
+      margin-bottom: 14px;
+      background: var(--card);
+      padding: 6px;
+      border-radius: var(--r-md);
+      border: 1px solid var(--border-s);
+      box-sizing: border-box;
     }
     .tab {
-      flex: 1; padding: 11px 6px; border-radius: 10px; border: none;
-      background: transparent; color: var(--muted); font-size: 11.5px; font-weight: 700;
-      cursor: pointer; text-align: center; transition: all 0.2s; font-family: var(--font);
-      display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 85px;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 6px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      font-family: var(--font);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
     }
     .tab.active {
-      background: linear-gradient(135deg, rgba(201,168,76,0.22), rgba(201,168,76,0.11));
-      color: var(--gold-light); border: 1px solid rgba(201,168,76,0.28);
-      box-shadow: 0 2px 14px rgba(201,168,76,0.12);
+      background: linear-gradient(135deg, rgba(201,168,76,0.24), rgba(201,168,76,0.12));
+      color: var(--gold-light);
+      border: 1px solid rgba(201,168,76,0.38);
+      box-shadow: 0 2px 14px rgba(201,168,76,0.15);
     }
-    .tab:not(.active):hover { background: rgba(255,255,255,0.04); color: var(--text2); }
+    .tab:not(.active):hover { background: rgba(255,255,255,0.05); color: #fff; }
 
     /* ── PANELS ── */
     .panel { display: none; }
@@ -333,10 +355,134 @@
     footer.credits { text-align: center; font-size: 11px; color: rgba(106,98,117,0.5); margin-top: 28px; padding-top: 14px; letter-spacing: 0.05em; }
 
     @media(max-width: 650px) {
-      .app { padding: 10px 10px 44px; }
-      .total-val { font-size: 22px; }
+      .app { padding: 8px 8px 44px; }
+      .card { padding: 14px 10px; }
+      .total-val { font-size: 20px; }
       .field-row { grid-template-columns: 1fr; gap: 9px; }
-      .tab { font-size: 10.5px; padding: 9px 4px; min-width: 65px; }
+
+      /* TABS RESPONSIVAS NO CELULAR */
+      .tabs {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 5px !important;
+        padding: 5px !important;
+      }
+      .tab {
+        min-width: 0 !important;
+        width: 100% !important;
+        font-size: 10.5px !important;
+        padding: 8px 3px !important;
+        min-height: 48px !important;
+        line-height: 1.25 !important;
+        border-radius: 8px !important;
+        text-align: center !important;
+        justify-content: center !important;
+      }
+
+      /* BOTÕES DO HISTÓRICO RESPONSIVOS (GRADE EQUILIBRADA DE 2 COLUNAS) */
+      .hist-card-actions {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 6px !important;
+        width: 100% !important;
+        margin-top: 10px !important;
+      }
+      .hist-card-actions .btn {
+        width: 100% !important;
+        padding: 8px 4px !important;
+        font-size: 11px !important;
+        justify-content: center !important;
+      }
+
+      /* BOTÕES DE CABEÇALHO DO FINANCEIRO E AGENDA */
+      .panel-header-actions {
+        width: 100% !important;
+        display: flex !important;
+        gap: 6px !important;
+      }
+      .panel-header-actions .btn {
+        flex: 1 !important;
+        min-width: 0 !important;
+        padding: 9px 6px !important;
+        font-size: 11px !important;
+        justify-content: center !important;
+      }
+
+      /* FILTROS RESPONSIVOS */
+      .fin-filters-wrap, .agenda-filters-wrap {
+        display: flex !important;
+        gap: 4px !important;
+        width: 100% !important;
+        flex-wrap: wrap !important;
+      }
+      .btn-filter-fin, .btn-filter-agenda {
+        flex: 1 1 auto !important;
+        padding: 6px 8px !important;
+        font-size: 10.5px !important;
+        text-align: center !important;
+        justify-content: center !important;
+      }
+
+      /* GRADE DE AÇÕES DO ORÇAMENTO */
+      .orc-actions-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+      }
+      .orc-actions-grid .btn {
+        width: 100% !important;
+        padding: 12px 6px !important;
+        font-size: 12.5px !important;
+      }
+
+      /* SELETOR DE STATUS NA EDIÇÃO */
+      .edicao-status-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 6px !important;
+      }
+      .btn-status-choice {
+        font-size: 10.5px !important;
+        padding: 8px 4px !important;
+        min-height: 38px !important;
+      }
+
+      /* MODAIS RESPONSIVOS */
+      .modal-box {
+        padding: 16px 12px !important;
+        border-radius: 14px !important;
+      }
+      .modal-footer-btns {
+        display: flex !important;
+        gap: 8px !important;
+        width: 100% !important;
+      }
+      .modal-footer-btns .btn {
+        flex: 1 !important;
+      }
+
+      /* BARRA DE OS SUPERIOR */
+      .os-bar {
+        padding: 10px 12px !important;
+      }
+      .os-bar button {
+        flex: 1 !important;
+        justify-content: center !important;
+      }
+    }
+
+    @media(max-width: 380px) {
+      .tabs {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      .tab {
+        font-size: 11px !important;
+        padding: 9px 4px !important;
+      }
+      .hist-card-actions {
+        grid-template-columns: 1fr !important;
+      }
+      .panel-header-actions {
+        flex-direction: column !important;
+      }
     }
 
     /* ── STATUS PILL ── */
@@ -1035,7 +1181,7 @@
         <label style="font-size:11.5px;font-weight:800;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;margin-bottom:8px;">
           <span>🔄</span> Status da O.S. após Modificações:
         </label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="edicao-status-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <button type="button" class="btn-status-choice selected" data-status="reajustar" id="btn-choice-reajustar" onclick="selecionarStatusEdicao('reajustar')">
             🟠 Reajustar Detalhes
           </button>
@@ -1054,7 +1200,7 @@
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
+      <div class="orc-actions-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
         <button type="button" class="btn btn-gold" onclick="enviarOuBaixarPdfOrcamento()" style="font-size:14px;padding:14px;" id="btn-pdf-orc">
           <span id="pdf-orc-spinner" class="spinner" style="display:none"></span>
           <span id="pdf-orc-btn-text">📄 Enviar PDF</span>
@@ -1102,7 +1248,7 @@
         </h2>
         <div style="font-size:12px;color:var(--muted);margin-top:2px;">Gestão de receitas, faturamento de O.S. e controle de despesas</div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div class="panel-header-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-primary btn-sm" onclick="abrirModalNovoLancamentoFinanceiro()" style="font-size:12px;padding:8px 14px;">
           ➕ Novo Lançamento
         </button>
@@ -1144,7 +1290,7 @@
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
         <div class="card-title" style="margin-bottom:0;">📋 Movimentações & Extrato Financeiro</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <div class="fin-filters-wrap" style="display:flex;gap:6px;flex-wrap:wrap;">
           <button type="button" class="btn-filter-fin active" id="btn-fin-filtro-todos" onclick="filtrarFinTipo('todos')">Todos</button>
           <button type="button" class="btn-filter-fin" id="btn-fin-filtro-receitas" onclick="filtrarFinTipo('receita')">Entradas</button>
           <button type="button" class="btn-filter-fin" id="btn-fin-filtro-despesas" onclick="filtrarFinTipo('despesa')">Saídas</button>
@@ -1170,9 +1316,11 @@
         </h2>
         <div style="font-size:12px;color:var(--muted);margin-top:2px;">Organize visitas técnicas, instalações de box, espelhos e vistorias</div>
       </div>
-      <button class="btn btn-primary btn-sm" onclick="abrirModalNovoCompromissoAgenda()" style="font-size:12px;padding:8px 14px;">
-        ➕ Novo Agendamento
-      </button>
+      <div class="panel-header-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="abrirModalNovoCompromissoAgenda()" style="font-size:12px;padding:8px 14px;">
+          ➕ Novo Agendamento
+        </button>
+      </div>
     </div>
 
     <!-- RESUMO RÁPIDO DA AGENDA -->
@@ -1195,7 +1343,7 @@
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
         <div class="card-title" style="margin-bottom:0;">🕒 Próximos Compromissos & Visitas</div>
-        <div style="display:flex;gap:6px;">
+        <div class="agenda-filters-wrap" style="display:flex;gap:6px;">
           <button type="button" class="btn-filter-agenda active" id="btn-agenda-filtro-pendentes" onclick="filtrarAgenda('pendentes')">Pendentes</button>
           <button type="button" class="btn-filter-agenda" id="btn-agenda-filtro-todos" onclick="filtrarAgenda('todos')">Todos</button>
           <button type="button" class="btn-filter-agenda" id="btn-agenda-filtro-concluidos" onclick="filtrarAgenda('concluidos')">Concluídos</button>
@@ -2125,7 +2273,7 @@
       </div>
     </div>
 
-    <div style="display:flex;gap:10px;justify-content:flex-end;">
+    <div class="modal-footer-btns" style="display:flex;gap:10px;justify-content:flex-end;">
       <button type="button" class="btn btn-sec btn-sm" onclick="fecharModalNovoLancamentoFinanceiro()">Cancelar</button>
       <button type="button" class="btn btn-primary btn-sm" onclick="salvarNovoLancamentoFinanceiro()">💾 Salvar Lançamento</button>
     </div>
@@ -2190,7 +2338,7 @@
       <textarea id="agenda-novo-obs" rows="2" placeholder="Ex: Levar trena a laser, cliente só está em casa após às 14h..." style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);resize:vertical;"></textarea>
     </div>
 
-    <div style="display:flex;gap:10px;justify-content:flex-end;">
+    <div class="modal-footer-btns" style="display:flex;gap:10px;justify-content:flex-end;">
       <button type="button" class="btn btn-sec btn-sm" onclick="fecharModalNovoCompromissoAgenda()">Cancelar</button>
       <button type="button" class="btn btn-primary btn-sm" onclick="salvarNovoCompromissoAgenda()">📅 Agendar Visita</button>
     </div>
@@ -4169,7 +4317,7 @@ function renderHist() {
       ${assinadoBadge}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px">
         <div class="hist-total">${esc(o.total || 'R$ 0,00')}</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <div class="hist-card-actions" style="display:flex;gap:6px;flex-wrap:wrap;">
           ${btnAcaoAprovacao}
           ${btnVerAssinatura}
           ${btnPdf}
