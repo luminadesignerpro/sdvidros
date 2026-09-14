@@ -2553,7 +2553,7 @@
 
 <script>
 // ══════════════════════════════════════════════
-//  STORAGE & KEYS
+//  STORAGE & MULTI-TENANT ISOLATION PER COMPANY
 // ══════════════════════════════════════════════
 const K = {
   users: 'sdv_users',
@@ -2564,9 +2564,52 @@ const K = {
   employees: 'sdv_funcionarios',
   timesheet: 'sdv_pontos'
 };
-function load(k, d=[]) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }
-function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+
+function getEmpresaStorageKey(baseKey) {
+  // Chaves globais que não são separadas por empresa
+  if (baseKey === K.users || baseKey === 'sdv_licencas' || baseKey === 'sdv_licenca_ativa' || 
+      baseKey === 'sdv_token' || baseKey === 'sdv_user' || baseKey === 'sdv_bio_user' || baseKey === 'sdv_bio_cred_id') {
+    return baseKey;
+  }
+  const empId = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+  return `${baseKey}_${empId}`;
+}
+
+function load(k, d=[]) {
+  try {
+    const key = getEmpresaStorageKey(k);
+    let val = localStorage.getItem(key);
+
+    // Migração para SD Vidros na primeira vez: recupera da chave legado sem prefixo
+    if (val === null && key.endsWith('_sdvidros')) {
+      const legacy = localStorage.getItem(k);
+      if (legacy !== null) {
+        val = legacy;
+        try { localStorage.setItem(key, legacy); } catch(_) {}
+      }
+    }
+
+    return val !== null ? (JSON.parse(val) ?? d) : d;
+  } catch {
+    return d;
+  }
+}
+
+function save(k, v) {
+  try {
+    const key = getEmpresaStorageKey(k);
+    localStorage.setItem(key, JSON.stringify(v));
+    // Sincroniza retroativamente caso seja a sdvidros
+    if (key.endsWith('_sdvidros')) {
+      try { localStorage.setItem(k, JSON.stringify(v)); } catch(_) {}
+    }
+  } catch (e) {
+    console.warn('Erro ao salvar no storage:', e);
+  }
+}
+
 function salvarHistorico() { save(K.orders, historico); }
+
 
 // ══════════════════════════════════════════════
 //  STATE
@@ -2752,6 +2795,83 @@ function aplicarLicencaVisual(lic) {
   }
 }
 
+function recarregarDadosEmpresaAtiva() {
+  const licAtiva = obterLicencaAtiva();
+
+  // 1. Produtos do catálogo da empresa
+  produtos = load(K.products);
+  if (!produtos || !produtos.length) {
+    produtos = (licAtiva.tipoContrato === 'moveis' || licAtiva.id === 'sdmoveis')
+      ? JSON.parse(JSON.stringify(PRODUTOS_PADRAO_MOVEIS))
+      : JSON.parse(JSON.stringify(PRODUTOS_PADRAO));
+    save(K.products, produtos);
+  }
+
+  // 2. Clientes da empresa
+  clientes = load(K.clients, []);
+
+  // 3. Orçamentos e Ordens de Serviço da empresa (Isolamento total por empresa)
+  historico = load(K.orders, []);
+
+  // Se estiver em 'sdvidros', garante que ordens criadas para outras empresas não apareçam aqui
+  if (licAtiva.id === 'sdvidros') {
+    const ordensOutras = historico.filter(o => o.empresaId && o.empresaId !== 'sdvidros');
+    if (ordensOutras.length) {
+      ordensOutras.forEach(outra => {
+        try {
+          const kOutra = `sdv_ordens_${outra.empresaId}`;
+          const listOutra = JSON.parse(localStorage.getItem(kOutra) || '[]');
+          if (!listOutra.some(x => String(x.id) === String(outra.id))) {
+            listOutra.push(outra);
+            localStorage.setItem(kOutra, JSON.stringify(listOutra));
+          }
+        } catch(_) {}
+      });
+      historico = historico.filter(o => !o.empresaId || o.empresaId === 'sdvidros');
+      save(K.orders, historico);
+    }
+  } else {
+    // Se for outra empresa, mantém estritamente as ordens desta empresa
+    historico = historico.filter(o => !o.empresaId || o.empresaId === licAtiva.id);
+  }
+
+  // 4. Numeração de OS da empresa
+  proxNumero = load(K.nextNum, 1);
+  if (typeof proxNumero !== 'number' || proxNumero < 1) proxNumero = 1;
+  if (historico.length) {
+    const last = Math.max(...historico.map(o => {
+      const n = parseInt((o.numero || '').replace('#', ''));
+      return isNaN(n) ? 0 : n;
+    }));
+    if (last >= proxNumero) proxNumero = last + 1;
+  }
+
+  // 5. Funcionários e Pontos da empresa
+  funcionariosLista = load(K.employees, []);
+  if (!funcionariosLista || !funcionariosLista.length) {
+    funcionariosLista = (licAtiva.id === 'sdvidros') ? JSON.parse(JSON.stringify(FUNCIONARIOS_PADRAO)) : [];
+    if (funcionariosLista.length) save(K.employees, funcionariosLista);
+  }
+
+  pontosLista = load(K.timesheet, []);
+  if (!pontosLista || !pontosLista.length) {
+    pontosLista = (licAtiva.id === 'sdvidros') ? JSON.parse(JSON.stringify(PONTOS_PADRAO)) : [];
+    if (pontosLista.length) save(K.timesheet, pontosLista);
+  }
+
+  // 6. Atualização visual de componentes e listas
+  atualizarNumeroDisplay();
+  updateDatalistProdutos();
+  renderHist();
+  renderProdutos();
+  renderCli();
+  renderFuncionarios();
+  renderEspelhoPonto();
+  atualizarSelectColaboradoresPonto();
+  renderSelectContratos();
+  if (typeof renderUsuarios === 'function') renderUsuarios();
+}
+
 function ativarLicenca(id, silencioso = false) {
   const lista = obterLicencas();
   const nova = lista.find(l => l.id === id);
@@ -2759,6 +2879,7 @@ function ativarLicenca(id, silencioso = false) {
 
   localStorage.setItem('sdv_licenca_ativa', id);
   aplicarLicencaVisual(nova);
+  recarregarDadosEmpresaAtiva();
   renderPainelLicenca();
 
   if (!silencioso) {
@@ -2808,6 +2929,10 @@ function renderPainelLicenca() {
 
             <button type="button" class="btn ${isAtiva ? 'btn-gold' : 'btn-sec'} btn-sm" style="margin-top:12px;width:100%;font-weight:800;" onclick="event.stopPropagation();ativarLicenca('${l.id}')">
               ${isAtiva ? '✓ Perfil Ativo no Momento' : '⚡ Mudar para Esta Empresa'}
+            </button>
+
+            <button type="button" class="btn btn-sm" style="margin-top:6px;width:100%;background:rgba(37,211,102,0.15);border:1px solid #22c55e;color:#4ade80;font-weight:800;" onclick="event.stopPropagation();compartilharLinkInstalacaoClienteIndex('${l.id}')">
+              📲 Link para Cliente Instalar App
             </button>
           </div>
         </div>
@@ -2913,6 +3038,26 @@ function processarUploadImagemLicenca(event, tipo) {
     alert(`✅ ${tipo === 'logo' ? 'Logotipo' : 'Banner'} da empresa atualizado com sucesso!`);
   };
   reader.readAsDataURL(file);
+}
+
+function compartilharLinkInstalacaoClienteIndex(id) {
+  const lista = obterLicencas();
+  const emp = lista.find(e => e.id === id) || lista[0];
+  const origin = window.location.origin;
+  const path = window.location.pathname.replace(/\/index\.html$/i, '').replace(/\/$/, '');
+  const urlInst = `${origin}${path}/cliente.html?empresa=${encodeURIComponent(emp.id)}&nome=${encodeURIComponent(emp.nome)}&instalar=1`;
+  const msg = `Olá! Acesse e instale o aplicativo oficial da *${emp.nome}* no seu celular para acompanhar seus orçamentos, aprovações e novidades:\n\n👉 ${urlInst}\n\nAbra o link e toque em "Instalar" ou "Adicionar à Tela Inicial"!`;
+
+  if (confirm(`📲 LINK DE INSTALAÇÃO DO APP PARA CLIENTES (${emp.nome}):\n\n${urlInst}\n\nDeseja abrir o WhatsApp agora para enviar aos clientes?`)) {
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+  } else {
+    try {
+      navigator.clipboard.writeText(urlInst);
+      alert('✓ Link copiado para a área de transferência!');
+    } catch (_) {
+      prompt('Copie o link de instalação abaixo:', urlInst);
+    }
+  }
 }
 
 function carregarCatalogoPadraoSegmento(segmento) {
@@ -3549,6 +3694,7 @@ function salvarOrdem() {
       alert('✅ Ordem ' + o.numero + ' atualizada com sucesso!\n🛡️ Histórico protegido: o PDF original assinado continua arquivado, e a nova versão com modificações foi gerada.');
       cancelarEdicaoOs();
     } else {
+      const licAtiva = obterLicencaAtiva();
       const ord = {
         id: Date.now(),
         numero: o.numero,
@@ -3557,6 +3703,8 @@ function salvarOrdem() {
         data_orc: o.data,
         dados: o,
         status: 'pendente',
+        empresaId: licAtiva.id,
+        empresaNome: licAtiva.nome,
         versoes_pdf: [{
           versao: 1,
           titulo: 'v1 (Original)',
@@ -7724,56 +7872,17 @@ window.addEventListener('DOMContentLoaded', function() {
   const users = load(K.users);
   if (!users.length) save(K.users,[{id:1,username:'admin',nome:'Administrador',senha:'admin123',ativo:true,role:'admin'}]);
 
-  // Inicializa Licença e Marca Ativa
+  // Inicializa Licença, Marca Ativa e Dados Isolados da Empresa
   const licAtiva = obterLicencaAtiva();
   aplicarLicencaVisual(licAtiva);
-
-  // Load catalog products or initialize defaults
-  produtos = load(K.products);
-  if (!produtos || !produtos.length) {
-    produtos = (licAtiva.tipoContrato === 'moveis' || licAtiva.id === 'sdmoveis') ? PRODUTOS_PADRAO_MOVEIS : PRODUTOS_PADRAO;
-    save(K.products, produtos);
-  }
-
-  clientes = load(K.clients);
-  historico = load(K.orders);
-  proxNumero = load(K.nextNum, 1);
-  if (typeof proxNumero !== 'number' || proxNumero < 1) proxNumero = 1;
-
-  if (historico.length) {
-    const last = Math.max(...historico.map(o=>{const n=parseInt((o.numero||'').replace('#',''));return isNaN(n)?0:n;}));
-    if (last >= proxNumero) proxNumero = last + 1;
-  }
-
-  updateDatalistProdutos();
+  recarregarDadosEmpresaAtiva();
 
   document.getElementById('itens-lista').innerHTML = '';
   itemId = 0; addItem();
   atualizarNumeroDisplay();
 
-  // Load funcionarios e pontos
-  funcionariosLista = load(K.employees);
-  if (!funcionariosLista || !funcionariosLista.length) {
-    funcionariosLista = FUNCIONARIOS_PADRAO;
-    save(K.employees, funcionariosLista);
-  }
-
-  pontosLista = load(K.timesheet);
-  if (!pontosLista || !pontosLista.length) {
-    pontosLista = PONTOS_PADRAO;
-    save(K.timesheet, pontosLista);
-  }
-
   iniciarRelogioPonto();
   atualizarSelectColaboradoresPonto();
-  renderFuncionarios();
-  renderEspelhoPonto();
-
-  renderHist();
-  renderProdutos();
-  renderCli();
-  renderSelectContratos();
-  renderUsuarios();
 
   sincronizarStatusContratos();
   conectarRealtimeAprovacoes();

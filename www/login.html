@@ -742,8 +742,13 @@
     </button>
 
     <!-- ADICIONAR NOVA EMPRESA PELO CADEADO -->
-    <button type="button" onclick="abrirModalCadastrarNovaEmpresa()" style="width:100%;padding:11px 12px;background:rgba(201,168,76,0.14);border:1.5px solid var(--gold);border-radius:12px;color:var(--gold-light);font-weight:800;font-size:12.5px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:12px;">
+    <button type="button" onclick="abrirModalCadastrarNovaEmpresa()" style="width:100%;padding:11px 12px;background:rgba(201,168,76,0.14);border:1.5px solid var(--gold);border-radius:12px;color:var(--gold-light);font-weight:800;font-size:12.5px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:10px;">
       <span>➕</span> <span>Adicionar Nova Empresa</span>
+    </button>
+
+    <!-- LINK PARA CLIENTE INSTALAR APP -->
+    <button type="button" onclick="abrirModalLinkInstalacaoCliente()" style="width:100%;padding:11px 12px;background:rgba(37,211,102,0.14);border:1.5px solid #22c55e;border-radius:12px;color:#4ade80;font-weight:800;font-size:12.5px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:12px;box-shadow:0 3px 12px rgba(34,197,94,0.2);">
+      <span>📲</span> <span>Link para Cliente Instalar App</span>
     </button>
 
     <!-- OPÇÕES INFERIORES -->
@@ -1063,6 +1068,48 @@
         💾 Salvar e Ativar Empresa
       </button>
     </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- MODAL: LINK PARA CLIENTE INSTALAR O APP -->
+<!-- ══════════════════════════════════════════════ -->
+<div id="modal-link-instalacao-cliente" class="modal-overlay" style="display:none;z-index:9999999;" onclick="fecharModalLinkInstalacaoCliente(event)">
+  <div class="modal-card" onclick="event.stopPropagation()" style="max-width:480px;text-align:center;border:1.5px solid #22c55e;box-shadow:0 0 40px rgba(34,197,94,0.35);">
+    <div style="width:66px;height:66px;margin:0 auto 12px;background:rgba(37,211,102,0.15);border:2px solid #22c55e;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 0 20px rgba(34,197,94,0.35);">
+      📲
+    </div>
+
+    <h3 id="modal-link-inst-titulo" style="font-size:18px;font-weight:900;color:#4ade80;margin-bottom:4px;">Link para o Cliente Instalar o App</h3>
+    <p id="modal-link-inst-sub" style="font-size:12px;color:rgba(240,236,228,0.85);margin-bottom:16px;line-height:1.4;">
+      Envie este link para seus clientes no WhatsApp. Ao tocar no link, eles instalam o aplicativo da sua empresa direto na tela inicial do celular!
+    </p>
+
+    <!-- Visual da Empresa no Card -->
+    <div style="background:#101018;border:1px solid rgba(201,168,76,0.3);border-radius:14px;padding:12px;margin-bottom:16px;display:flex;align-items:center;gap:12px;text-align:left;">
+      <img id="modal-link-inst-logo" src="logo.jpg" style="width:48px;height:48px;border-radius:12px;border:1px solid var(--gold);object-fit:cover;background:#000;" alt="Logo">
+      <div style="flex:1;overflow:hidden;">
+        <div id="modal-link-inst-nome" style="font-size:14.5px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">SD Vidros</div>
+        <div id="modal-link-inst-seg" style="font-size:11.5px;color:var(--gold-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Alumínio, Vidros & Esquadrias</div>
+      </div>
+    </div>
+
+    <!-- Campo de URL com Botão Copiar -->
+    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+      <input id="modal-link-inst-url" type="text" readonly style="flex:1;background:transparent;border:none;color:#38bdf8;font-size:12px;font-weight:700;font-family:monospace;outline:none;" />
+      <button type="button" id="btn-copiar-link-inst" onclick="copiarLinkInstalacaoCliente()" style="background:#1e293b;border:1px solid #38bdf8;color:#38bdf8;padding:6px 12px;border-radius:8px;font-size:11.5px;font-weight:800;cursor:pointer;white-space:nowrap;">
+        📋 Copiar
+      </button>
+    </div>
+
+    <!-- Botão Principal: Enviar via WhatsApp -->
+    <a id="btn-whats-link-inst" href="#" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;padding:13px;background:linear-gradient(135deg,#16a34a,#15803d);border:1px solid #22c55e;color:#fff;font-weight:900;font-size:13.5px;border-radius:12px;text-decoration:none;box-shadow:0 4px 18px rgba(34,197,94,0.35);margin-bottom:12px;cursor:pointer;">
+      <span>🟢</span> <span>Enviar no WhatsApp para Cliente</span>
+    </a>
+
+    <button type="button" onclick="fecharModalLinkInstalacaoCliente()" style="width:100%;padding:11px;background:#181824;border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:#cbd5e1;font-weight:700;font-size:12px;cursor:pointer;">
+      Fechar
+    </button>
   </div>
 </div>
 
@@ -1707,7 +1754,74 @@
     if (msg) {
       msg.innerHTML = `<div style="background:rgba(34,197,94,0.15);border:1px solid #22c55e;color:#4ade80;padding:10px 14px;border-radius:10px;font-size:12.5px;font-weight:700;margin-top:12px;text-align:center;">✓ Empresa "${nome}" cadastrada e ativada com sucesso!</div>`;
     }
-    alert(`✓ Empresa "${nome}" adicionada com sucesso!`);
+    
+    // Abre imediatamente o modal com o link para o cliente instalar o aplicativo
+    abrirModalLinkInstalacaoCliente(novoId);
+  }
+
+  function abrirModalLinkInstalacaoCliente(empId) {
+    if (!empId) {
+      empId = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+    }
+    const lista = obterLicencasLogin();
+    const emp = lista.find(e => e.id === empId) || lista[0] || LICENCAS_PADRAO[0];
+
+    const baseOrigin = window.location.origin;
+    const basePath = window.location.pathname.replace(/\/login\.html$/i, '').replace(/\/$/, '');
+    const urlInst = `${baseOrigin}${basePath}/cliente.html?empresa=${encodeURIComponent(emp.id)}&nome=${encodeURIComponent(emp.nome)}&instalar=1`;
+
+    const titEl = document.getElementById('modal-link-inst-titulo');
+    const nomeEl = document.getElementById('modal-link-inst-nome');
+    const segEl = document.getElementById('modal-link-inst-seg');
+    const logoEl = document.getElementById('modal-link-inst-logo');
+    const urlInp = document.getElementById('modal-link-inst-url');
+    const btnZap = document.getElementById('btn-whats-link-inst');
+
+    if (titEl) titEl.textContent = `Link para Clientes: ${emp.nome}`;
+    if (nomeEl) nomeEl.textContent = emp.nome;
+    if (segEl) segEl.textContent = emp.segmento || 'Área Exclusiva do Cliente';
+    if (logoEl) logoEl.src = emp.logo || 'logo.jpg';
+    if (urlInp) urlInp.value = urlInst;
+
+    if (btnZap) {
+      const msg = `Olá! Acesse e instale o aplicativo oficial da *${emp.nome}* no seu celular para acompanhar orçamentos, aprovações e novidades:\n\n👉 ${urlInst}\n\nAbra o link e toque em "Instalar" ou "Adicionar à Tela Inicial"!`;
+      btnZap.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+    }
+
+    const modal = document.getElementById('modal-link-instalacao-cliente');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  function fecharModalLinkInstalacaoCliente(e) {
+    if (e && e.target && e.target !== document.getElementById('modal-link-instalacao-cliente')) return;
+    const modal = document.getElementById('modal-link-instalacao-cliente');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function copiarLinkInstalacaoCliente() {
+    const inp = document.getElementById('modal-link-inst-url');
+    const btn = document.getElementById('btn-copiar-link-inst');
+    if (!inp) return;
+
+    inp.focus();
+    inp.select();
+    try {
+      navigator.clipboard.writeText(inp.value);
+    } catch (_) {
+      document.execCommand('copy');
+    }
+
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✓ Copiado!';
+      btn.style.background = '#10b981';
+      btn.style.color = '#fff';
+      setTimeout(() => {
+        btn.innerHTML = orig;
+        btn.style.background = '#1e293b';
+        btn.style.color = '#38bdf8';
+      }, 2000);
+    }
   }
 
   function carregarPainelGestao() {
