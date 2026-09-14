@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0f0f0f">
   <title>SD Vidros – Sistema de Gestão & Orçamentos</title>
@@ -2191,21 +2194,41 @@
       </div>
     </div>
 
-    <div class="field" style="margin-bottom:12px;">
-      <label style="display:flex;align-items:center;justify-content:space-between;">
-        <span>⏰ Tempo para Notificação / Alerta</span>
-        <span style="font-size:10.5px;color:var(--gold);font-weight:normal;">Alerta sonoro e navegador</span>
+    <div class="field" style="margin-bottom:14px;background:rgba(201,168,76,0.08);border:1.5px solid rgba(201,168,76,0.4);padding:12px;border-radius:10px;">
+      <label style="display:flex;align-items:center;justify-content:space-between;color:var(--gold-light);font-weight:800;font-size:12.5px;margin-bottom:6px;">
+        <span style="display:flex;align-items:center;gap:6px;">
+          <span>⏰</span> <span>DEFINIR ALARME / AVISAR ANTES</span>
+        </span>
+        <span style="font-size:11px;color:#4ade80;font-weight:bold;">Alarme Sonoro Ativo 🔔</span>
       </label>
-      <select id="agenda-novo-notificacao" style="width:100%;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:var(--font);">
-        <option value="0">No horário exato do compromisso</option>
-        <option value="10">10 minutos antes</option>
-        <option value="15">15 minutos antes</option>
-        <option value="30" selected>30 minutos antes (Padrão recomendado)</option>
-        <option value="60">1 hora antes</option>
-        <option value="120">2 horas antes</option>
-        <option value="1440">1 dia antes (24 horas)</option>
-        <option value="-1">Não notificar</option>
-      </select>
+      
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <select id="agenda-novo-notificacao" onchange="aoMudarOpcaoAlarmeAgenda()" style="flex:1;min-width:180px;padding:10px;border-radius:8px;background:#080811;border:1px solid rgba(201,168,76,0.4);color:#fff;font-family:var(--font);font-size:13px;font-weight:700;">
+          <option value="5">⏰ 5 minutos antes</option>
+          <option value="10">⏰ 10 minutos antes</option>
+          <option value="15">⏰ 15 minutos antes</option>
+          <option value="30" selected>⏰ 30 minutos antes (Padrão recomendado)</option>
+          <option value="45">⏰ 45 minutos antes</option>
+          <option value="60">⏰ 1 hora antes (60 minutos)</option>
+          <option value="120">⏰ 2 horas antes</option>
+          <option value="180">⏰ 3 horas antes</option>
+          <option value="1440">⏰ 1 dia antes (24 horas)</option>
+          <option value="0">⏰ No exato horário agendado</option>
+          <option value="custom">✏️ Digitar tempo personalizado (em minutos)...</option>
+          <option value="-1">🚫 Sem alarme</option>
+        </select>
+        <button type="button" onclick="testarSomAlarmeAgenda()" class="btn btn-sec btn-sm" style="padding:9px 12px;font-size:11.5px;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;" title="Testar som do alarme">
+          🔊 Testar Som
+        </button>
+      </div>
+
+      <div id="agenda-tempo-custom-box" style="display:none;margin-top:10px;padding:8px 10px;background:rgba(0,0,0,0.4);border-radius:8px;border:1px dashed rgba(201,168,76,0.3);">
+        <label style="font-size:11.5px;color:var(--text2);display:block;margin-bottom:4px;">Definir tempo de antecedência:</label>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input type="number" id="agenda-novo-minutos-custom" min="1" max="10000" placeholder="Ex: 20" style="width:90px;padding:8px;border-radius:6px;background:#080811;border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:14px;font-weight:800;" />
+          <span style="font-size:12px;color:#fff;font-weight:700;">minutos antes do agendamento</span>
+        </div>
+      </div>
     </div>
 
     <div class="field" style="margin-bottom:16px;">
@@ -2216,6 +2239,55 @@
     <div style="display:flex;gap:10px;justify-content:flex-end;">
       <button type="button" class="btn btn-sec btn-sm" onclick="fecharModalNovoCompromissoAgenda()">Cancelar</button>
       <button type="button" id="agenda-modal-btn-salvar" class="btn btn-primary btn-sm" onclick="salvarNovoCompromissoAgenda()">📅 Agendar Visita</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL ALARME DISPARADO DA AGENDA ══ -->
+<div id="modal-alarme-disparado" class="modal-overlay" style="display:none;z-index:999999;background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:420px;text-align:center;border:2px solid var(--gold);box-shadow:0 0 50px rgba(201,168,76,0.7);padding:24px 20px;">
+    <div style="font-size:52px;line-height:1;margin-bottom:10px;">
+      ⏰
+    </div>
+    <div style="font-size:13px;font-weight:900;color:var(--gold);letter-spacing:0.12em;text-transform:uppercase;">
+      Alarme de Agendamento
+    </div>
+    <h2 id="alarme-cliente-nome" style="font-size:21px;font-weight:900;color:#fff;margin:8px 0 4px 0;">
+      Nome do Cliente
+    </h2>
+    <div id="alarme-tipo-badge" style="display:inline-block;font-size:12px;padding:3px 12px;border-radius:999px;background:rgba(201,168,76,0.2);color:var(--gold-light);font-weight:800;margin-bottom:12px;">
+      Medição Técnica
+    </div>
+
+    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;margin-bottom:16px;text-align:left;font-size:12.5px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="color:var(--muted);">Horário Agendado:</span>
+        <strong id="alarme-horario-texto" style="color:#fff;font-size:14px;">09:00</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="color:var(--muted);">Tempo Restante:</span>
+        <strong id="alarme-tempo-restante" style="color:#4ade80;font-size:13px;">Faltam 30 minutos!</strong>
+      </div>
+      <div id="alarme-local-box" style="color:var(--text2);margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06);">
+        📍 <span id="alarme-local-texto">Endereço da obra</span>
+      </div>
+      <div id="alarme-obs-box" style="color:var(--gold-light);margin-top:4px;font-style:italic;">
+        📝 <span id="alarme-obs-texto">Observações</span>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button type="button" class="btn btn-primary" onclick="pararAlarmeAgenda()" style="width:100%;padding:12px;font-size:14px;font-weight:900;background:linear-gradient(135deg,#e11d48,#be123c);border-color:#fb7185;box-shadow:0 6px 20px rgba(225,29,72,0.4);">
+        🔕 Parar Alarme
+      </button>
+      <div style="display:flex;gap:8px;">
+        <button type="button" class="btn btn-sec" onclick="adiarAlarmeAgenda(5)" style="flex:1;padding:10px;font-size:12px;font-weight:700;" title="Tocar novamente daqui a 5 minutos">
+          ⏰ Soneca (+5 min)
+        </button>
+        <a id="alarme-btn-zap" href="#" target="_blank" class="btn btn-whats" style="flex:1;padding:10px;font-size:12px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:4px;">
+          💬 WhatsApp
+        </a>
+      </div>
     </div>
   </div>
 </div>
@@ -7674,8 +7746,139 @@ function mostrarToastAgenda(htmlContent) {
   }, 7000);
 }
 
+let alarmeAudioInterval = null;
+let alarmeAtivoEvento = null;
+
+function tocarSomAlarmeSiren() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const agora = audioCtx.currentTime;
+
+    [
+      { freq: 880, start: 0, dur: 0.14 },
+      { freq: 1174.66, start: 0.18, dur: 0.14 },
+      { freq: 880, start: 0.36, dur: 0.14 },
+      { freq: 1174.66, start: 0.54, dur: 0.22 }
+    ].forEach(note => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(note.freq, agora + note.start);
+      gain.gain.setValueAtTime(0.35, agora + note.start);
+      gain.gain.exponentialRampToValueAtTime(0.01, agora + note.start + note.dur);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(agora + note.start);
+      osc.stop(agora + note.start + note.dur);
+    });
+
+    if ('vibrate' in navigator) {
+      navigator.vibrate([200, 100, 200, 100, 350]);
+    }
+  } catch (_) {}
+}
+
+function iniciarLoopAlarme(ev, diffMinutos) {
+  pararAlarmeAgenda();
+  alarmeAtivoEvento = ev;
+
+  const elNome = document.getElementById('alarme-cliente-nome');
+  if (elNome) elNome.textContent = ev.cliente || 'Cliente';
+
+  const elTipo = document.getElementById('alarme-tipo-badge');
+  if (elTipo) elTipo.textContent = ev.tipo || 'Medição / Instalação';
+
+  const elHora = document.getElementById('alarme-horario-texto');
+  if (elHora) elHora.textContent = ev.hora ? (ev.hora + (ev.data ? ' (' + ev.data.split('-').reverse().join('/') + ')' : '')) : 'Hoje';
+
+  let msgTempo = '';
+  if (diffMinutos <= 0) {
+    msgTempo = 'É AGORA NO HORÁRIO!';
+  } else if (diffMinutos < 60) {
+    msgTempo = `Faltam ${diffMinutos} minuto(s)!`;
+  } else {
+    msgTempo = `Falta aprox. ${Math.round(diffMinutos / 60)} hora(s)!`;
+  }
+  const elTempo = document.getElementById('alarme-tempo-restante');
+  if (elTempo) elTempo.textContent = msgTempo;
+
+  const elLocal = document.getElementById('alarme-local-texto');
+  const boxLocal = document.getElementById('alarme-local-box');
+  if (elLocal && boxLocal) {
+    elLocal.textContent = ev.end || 'Endereço a combinar';
+    boxLocal.style.display = ev.end ? 'block' : 'none';
+  }
+
+  const elObs = document.getElementById('alarme-obs-texto');
+  const boxObs = document.getElementById('alarme-obs-box');
+  if (elObs && boxObs) {
+    elObs.textContent = ev.obs || '';
+    boxObs.style.display = ev.obs ? 'block' : 'none';
+  }
+
+  const btnZap = document.getElementById('alarme-btn-zap');
+  if (btnZap) {
+    const zapClean = (ev.tel || '').replace(/\D/g, '');
+    if (zapClean) {
+      const msg = encodeURIComponent(`Olá ${ev.cliente || ''}, confirmando o seu agendamento de ${ev.tipo || 'atendimento'} às ${ev.hora || ''} pela SD Vidros.`);
+      btnZap.href = `https://wa.me/55${zapClean}?text=${msg}`;
+      btnZap.style.display = 'inline-flex';
+    } else {
+      btnZap.style.display = 'none';
+    }
+  }
+
+  const modal = document.getElementById('modal-alarme-disparado');
+  if (modal) modal.style.display = 'flex';
+
+  tocarSomAlarmeSiren();
+  alarmeAudioInterval = setInterval(tocarSomAlarmeSiren, 1800);
+}
+
+function pararAlarmeAgenda() {
+  if (alarmeAudioInterval) {
+    clearInterval(alarmeAudioInterval);
+    alarmeAudioInterval = null;
+  }
+  const modal = document.getElementById('modal-alarme-disparado');
+  if (modal) modal.style.display = 'none';
+}
+
+function adiarAlarmeAgenda(minutos = 5) {
+  pararAlarmeAgenda();
+  if (alarmeAtivoEvento) {
+    const eventos = obterAgendaEventos();
+    const ev = eventos.find(x => x.id === alarmeAtivoEvento.id);
+    if (ev) {
+      ev.notificado = false;
+      ev.adiado_ate = Date.now() + (minutos * 60 * 1000);
+      salvarAgendaEventos(eventos);
+      renderAgenda();
+      mostrarToastAgenda(`⏰ Alarme adiado por ${minutos} minutos (Soneca).`);
+    }
+  }
+}
+
+function testarSomAlarmeAgenda() {
+  tocarSomAlarmeSiren();
+  mostrarToastAgenda('🔊 Teste do alarme sonoro executado!');
+}
+
+function aoMudarOpcaoAlarmeAgenda() {
+  const sel = document.getElementById('agenda-novo-notificacao');
+  const boxCustom = document.getElementById('agenda-tempo-custom-box');
+  if (!sel || !boxCustom) return;
+  if (sel.value === 'custom') {
+    boxCustom.style.display = 'block';
+    const inp = document.getElementById('agenda-novo-minutos-custom');
+    if (inp) inp.focus();
+  } else {
+    boxCustom.style.display = 'none';
+  }
+}
+
 function dispararNotificacaoCompromisso(ev, diffMinutos) {
-  tocarAlertaPortal();
+  iniciarLoopAlarme(ev, diffMinutos);
 
   let tempoMsg = '';
   if (diffMinutos <= 0) {
@@ -7694,7 +7897,7 @@ function dispararNotificacaoCompromisso(ev, diffMinutos) {
 
   if ('Notification' in window && Notification.permission === 'granted') {
     try {
-      new Notification(`⏰ Alerta de Agenda: ${tipoAtend}`, {
+      new Notification(`⏰ Alarme de Agenda: ${tipoAtend}`, {
         body: `${clienteNome} - ${tempoMsg}\nHorário: ${ev.hora || ''} | Local: ${ev.end || 'A combinar'}`,
         icon: 'icon-192.png'
       });
@@ -7713,6 +7916,8 @@ function verificarNotificacoesAgenda() {
     if (ev.concluido) return;
     if (ev.notificado) return;
     if (!ev.data) return;
+
+    if (ev.adiado_ate && Date.now() < ev.adiado_ate) return;
 
     const antecedencia = (ev.notificar_minutos !== undefined && ev.notificar_minutos !== null && ev.notificar_minutos !== '') ? Number(ev.notificar_minutos) : 30;
     if (antecedencia === -1) return;
@@ -7772,7 +7977,6 @@ function renderAgenda() {
     filtrados = filtrados.filter(x => x.concluido);
   }
 
-  // Ordenar: por data e horário asc
   filtrados.sort((a,b) => {
     const dA = a.data ? (a.data + ' ' + (a.hora || '00:00')) : '';
     const dB = b.data ? (b.data + ' ' + (b.hora || '00:00')) : '';
@@ -7804,8 +8008,8 @@ function renderAgenda() {
             <div style="font-weight:800;font-size:14px;color:#fff;text-decoration:${ev.concluido ? 'line-through' : 'none'};opacity:${ev.concluido ? '0.6' : '1'};display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               <span>${esc(ev.cliente)}</span>
               <span style="font-size:10.5px;padding:2px 8px;border-radius:999px;background:rgba(201,168,76,0.18);color:var(--gold-light);font-weight:700;">${esc(ev.tipo || 'Atendimento')}</span>
-              <span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#93c5fd;font-weight:700;" title="Tempo configurado para receber o alerta">⏰ ${notifPill}</span>
-              ${ev.notificado ? '<span style="font-size:10px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);color:#34d399;padding:1px 6px;border-radius:999px;font-weight:700;">🔔 Alerta enviado</span>' : ''}
+              <span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#93c5fd;font-weight:700;" title="Tempo de alarme configurado">⏰ ${notifPill}</span>
+              ${ev.notificado ? '<span style="font-size:10px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);color:#34d399;padding:1px 6px;border-radius:999px;font-weight:700;">🔔 Alarme tocado</span>' : ''}
               ${isHoje ? '<span style="font-size:10px;background:#ef4444;color:#fff;padding:1px 6px;border-radius:999px;font-weight:800;">HOJE</span>' : ''}
             </div>
             <div style="font-size:12px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
@@ -7818,7 +8022,7 @@ function renderAgenda() {
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
           ${zapLink ? `<a href="${zapLink}" target="_blank" class="btn btn-whats btn-xs" style="padding:4px 10px;font-size:11px;text-decoration:none;" title="Enviar lembrete pelo WhatsApp">💬 WhatsApp</a>` : ''}
-          <button onclick="abrirModalNovoCompromissoAgenda('${ev.id}')" title="Editar agendamento e lembrete" style="background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--gold-light);width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:11px;display:inline-flex;align-items:center;justify-content:center;">✏️</button>
+          <button onclick="abrirModalNovoCompromissoAgenda('${ev.id}')" title="Editar agendamento e alarme" style="background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--gold-light);width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:11px;display:inline-flex;align-items:center;justify-content:center;">✏️</button>
           <button class="item-del" onclick="excluirCompromissoAgenda('${ev.id}')" title="Excluir agendamento" style="width:26px;height:26px;font-size:11px;">✕</button>
         </div>
       </div>
@@ -7840,7 +8044,10 @@ function alternarConcluidoAgenda(id) {
   const ev = eventos.find(x => x.id === id);
   if (ev) {
     ev.concluido = !ev.concluido;
-    if (!ev.concluido) ev.notificado = false;
+    if (!ev.concluido) {
+      ev.notificado = false;
+      delete ev.adiado_ate;
+    }
     salvarAgendaEventos(eventos);
     renderAgenda();
   }
@@ -7860,8 +8067,10 @@ function abrirModalNovoCompromissoAgenda(id = null) {
   const tituloEl = document.getElementById('agenda-modal-titulo');
   const btnSalvar = document.getElementById('agenda-modal-btn-salvar');
   const notifEl = document.getElementById('agenda-novo-notificacao');
+  const boxCustom = document.getElementById('agenda-tempo-custom-box');
+  const inpCustom = document.getElementById('agenda-novo-minutos-custom');
+  if (boxCustom) boxCustom.style.display = 'none';
 
-  // Atualizar datalist de clientes se disponível
   const dl = document.getElementById('agenda-lista-sugestoes-clientes');
   if (dl && typeof clientes !== 'undefined' && clientes && clientes.length) {
     dl.innerHTML = clientes.map(c => `<option value="${esc(c.nome)}">${esc(c.tel || '')}</option>`).join('');
@@ -7882,7 +8091,18 @@ function abrirModalNovoCompromissoAgenda(id = null) {
       document.getElementById('agenda-novo-data').value = ev.data || '';
       document.getElementById('agenda-novo-hora').value = ev.hora || '09:00';
       document.getElementById('agenda-novo-obs').value = ev.obs || '';
-      if (notifEl) notifEl.value = (ev.notificar_minutos !== undefined && ev.notificar_minutos !== null) ? String(ev.notificar_minutos) : '30';
+      
+      const minutos = (ev.notificar_minutos !== undefined && ev.notificar_minutos !== null) ? Number(ev.notificar_minutos) : 30;
+      const opcoesPadrao = [0, 5, 10, 15, 30, 45, 60, 120, 180, 1440, -1];
+      if (notifEl) {
+        if (opcoesPadrao.includes(minutos)) {
+          notifEl.value = String(minutos);
+        } else {
+          notifEl.value = 'custom';
+          if (boxCustom) boxCustom.style.display = 'block';
+          if (inpCustom) inpCustom.value = minutos;
+        }
+      }
 
       const m = document.getElementById('modal-agenda-novo');
       if (m) m.style.display = 'flex';
@@ -7903,6 +8123,7 @@ function abrirModalNovoCompromissoAgenda(id = null) {
   document.getElementById('agenda-novo-hora').value = '09:00';
   document.getElementById('agenda-novo-obs').value = '';
   if (notifEl) notifEl.value = '30';
+  if (inpCustom) inpCustom.value = '30';
 
   const m = document.getElementById('modal-agenda-novo');
   if (m) m.style.display = 'flex';
@@ -7935,8 +8156,17 @@ function salvarNovoCompromissoAgenda() {
   const obs = document.getElementById('agenda-novo-obs').value.trim();
 
   const notifEl = document.getElementById('agenda-novo-notificacao');
-  const notificarMinRaw = notifEl ? parseInt(notifEl.value, 10) : 30;
-  const notificar_minutos = isNaN(notificarMinRaw) ? 30 : notificarMinRaw;
+  let notificar_minutos = 30;
+  if (notifEl) {
+    if (notifEl.value === 'custom') {
+      const inp = document.getElementById('agenda-novo-minutos-custom');
+      const val = inp ? parseInt(inp.value, 10) : 30;
+      notificar_minutos = (!isNaN(val) && val > 0) ? val : 30;
+    } else {
+      const val = parseInt(notifEl.value, 10);
+      notificar_minutos = isNaN(val) ? 30 : val;
+    }
+  }
 
   if (!cliente) { alert('Informe o nome do cliente.'); return; }
   if (!data) { alert('Informe a data do agendamento.'); return; }
@@ -7958,6 +8188,7 @@ function salvarNovoCompromissoAgenda() {
         notificar_minutos,
         notificado: false
       };
+      delete eventos[idx].adiado_ate;
     }
     editandoAgendaId = null;
   } else {
@@ -7987,9 +8218,9 @@ function salvarNovoCompromissoAgenda() {
   verificarNotificacoesAgenda();
 }
 
-// Iniciar verificação automática das notificações a cada 30 segundos
+// Iniciar verificação automática do alarme a cada 20 segundos
 try {
-  setInterval(verificarNotificacoesAgenda, 30000);
+  setInterval(verificarNotificacoesAgenda, 20000);
   setTimeout(verificarNotificacoesAgenda, 2000);
 } catch(_) {}
 </script>
