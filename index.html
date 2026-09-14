@@ -3362,17 +3362,48 @@ function renderizarModalLinksFuncionarios(filtro = '') {
   const cont = document.getElementById('portal-func-lista-cards');
   if (!cont) return;
 
-  let lista = Array.isArray(funcionariosLista) && funcionariosLista.length ? [...funcionariosLista] : [];
-  
-  // Se a lista estiver vazia ou não tiver Samuel David, adicionar para pronta utilização
+  // Garante inicialização correta com persistência
+  if (!Array.isArray(funcionariosLista) || !funcionariosLista.length) {
+    const salvos = load(K.employees, null);
+    if (salvos && salvos.length) {
+      funcionariosLista = salvos;
+    } else {
+      funcionariosLista = [
+        {
+          id: 100,
+          nome: 'Samuel David',
+          cargo: 'Instalador / Técnico Líder',
+          whatsapp: '(85) 99611-9824',
+          departamento: 'Operações',
+          jornada: '44h/sem',
+          salario: 4500,
+          valorHora: 22.50,
+          status: 'Presente'
+        },
+        ...FUNCIONARIOS_PADRAO
+      ];
+      save(K.employees, funcionariosLista);
+    }
+  }
+
+  let lista = [...funcionariosLista];
+
+  // Se Samuel David não estiver na lista, garante inserção
   if (!lista.some(f => (f.nome || '').toLowerCase().includes('samuel david'))) {
-    lista.unshift({
+    const s = {
       id: 100,
       nome: 'Samuel David',
       cargo: 'Instalador / Técnico Líder',
       whatsapp: '(85) 99611-9824',
-      departamento: 'Operações'
-    });
+      departamento: 'Operações',
+      jornada: '44h/sem',
+      salario: 4500,
+      valorHora: 22.50,
+      status: 'Presente'
+    };
+    funcionariosLista.unshift(s);
+    save(K.employees, funcionariosLista);
+    lista.unshift(s);
   }
 
   if (filtro) {
@@ -3405,7 +3436,7 @@ function renderizarModalLinksFuncionarios(filtro = '') {
 
     return `
       <div style="background:rgba(255,255,255,0.03);border:1.5px solid rgba(201,168,76,0.25);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
           <div>
             <div style="font-weight:800;font-size:14px;color:#fff;display:flex;align-items:center;gap:6px;">
               <span>👤</span> <span>${esc(f.nome)}</span>
@@ -3414,9 +3445,17 @@ function renderizarModalLinksFuncionarios(filtro = '') {
               ${esc(f.cargo || 'Colaborador')} ${f.whatsapp ? '· ' + esc(f.whatsapp) : ''}
             </div>
           </div>
-          <button type="button" class="btn btn-sec btn-xs" onclick="abrirLinkPortalFuncionario('${linkPortal}')" style="padding:4px 9px;font-size:11px;" title="Abrir portal como este funcionário">
-            🚀 Abrir Portal
-          </button>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <button type="button" class="btn btn-sec btn-xs" onclick="editarFuncionarioPeloModalLinks(${f.id})" style="padding:4px 9px;font-size:11px;display:inline-flex;align-items:center;gap:4px;border-color:rgba(201,168,76,0.4);color:var(--gold-light);" title="Editar dados deste funcionário">
+              ✏️ Editar
+            </button>
+            <button type="button" class="btn btn-danger btn-xs" onclick="excluirFuncionarioPeloModalLinks(${f.id})" style="padding:4px 9px;font-size:11px;display:inline-flex;align-items:center;gap:4px;" title="Excluir este funcionário">
+              🗑️ Excluir
+            </button>
+            <button type="button" class="btn btn-sec btn-xs" onclick="abrirLinkPortalFuncionario('${linkPortal}')" style="padding:4px 9px;font-size:11px;display:inline-flex;align-items:center;gap:4px;" title="Abrir portal como este funcionário">
+              🚀 Abrir Portal
+            </button>
+          </div>
         </div>
 
         <div style="display:flex;gap:6px;align-items:center;">
@@ -3431,6 +3470,30 @@ function renderizarModalLinksFuncionarios(filtro = '') {
       </div>
     `;
   }).join('');
+}
+
+function editarFuncionarioPeloModalLinks(id) {
+  let f = funcionariosLista.find(x => x.id === id);
+  if (!f) {
+    renderizarModalLinksFuncionarios();
+    f = funcionariosLista.find(x => x.id === id);
+  }
+  if (f) {
+    abrirModalFuncionario(f.id);
+  }
+}
+
+function excluirFuncionarioPeloModalLinks(id) {
+  let f = funcionariosLista.find(x => x.id === id);
+  const nome = f ? f.nome : 'este colaborador';
+  if (!confirm(`Deseja realmente excluir o colaborador "${nome}"?`)) return;
+
+  funcionariosLista = funcionariosLista.filter(x => x.id !== id);
+  save(K.employees, funcionariosLista);
+  atualizarSelectColaboradoresPonto();
+  renderFuncionarios();
+  renderizarModalLinksFuncionarios();
+  mostrarMsgPonto(`Colaborador "${nome}" removido.`, true);
 }
 
 function abrirLinkPortalFuncionario(link) {
@@ -5366,6 +5429,7 @@ function salvarFuncionarioModal() {
   save(K.employees, funcionariosLista);
   atualizarSelectColaboradoresPonto();
   renderFuncionarios();
+  renderizarModalLinksFuncionarios();
   document.getElementById('modal-funcionario').style.display = 'none';
   mostrarMsgPonto(`✅ Funcionário "${nome}" salvo com sucesso!`, true);
 }
@@ -5378,6 +5442,7 @@ function excluirFuncionario(id) {
   save(K.employees, funcionariosLista);
   atualizarSelectColaboradoresPonto();
   renderFuncionarios();
+  renderizarModalLinksFuncionarios();
   mostrarMsgPonto('Colaborador removido.', true);
 }
 
