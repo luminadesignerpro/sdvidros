@@ -563,16 +563,31 @@
     </button>
 
     <!-- SELETOR DE QUAL EMPRESA MODIFICAR -->
-    <div class="field">
+    <div class="field" style="margin-bottom:12px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
         <label style="margin-bottom:0;">EMPRESA PARA MODIFICAR</label>
         <button type="button" onclick="abrirModalCadastrarNovaEmpresa()" style="background:none;border:none;color:var(--gold-light);font-size:11.5px;font-weight:800;cursor:pointer;text-decoration:underline;">
           ➕ Adicionar Outra
         </button>
       </div>
-      <select id="gestao-empresa-select" onchange="if(this.value==='__NOVA__'){abrirModalCadastrarNovaEmpresa();}else{selecionarEmpresaParaEditar(this.value);}" style="width:100%;box-sizing:border-box;padding:12px 14px;background:#0a0a13;border:1.5px solid rgba(201,168,76,0.25);border-radius:12px;color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;">
+      <select id="gestao-empresa-select" onchange="if(this.value==='__NOVA__'){abrirModalCadastrarNovaEmpresa();}else{selecionarEmpresaParaEditar(this.value,true);}" style="width:100%;box-sizing:border-box;padding:12px 14px;background:#0a0a13;border:1.5px solid rgba(201,168,76,0.35);border-radius:12px;color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;">
         <!-- Opções geradas via JS -->
       </select>
+    </div>
+
+    <!-- LISTA VISUAL DE EMPRESAS CADASTRADAS E SALVAS -->
+    <div style="margin-bottom:16px;background:rgba(255,255,255,0.02);border:1px solid rgba(201,168,76,0.22);border-radius:14px;padding:12px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:11px;font-weight:900;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.06em;">
+          🏢 TODAS AS EMPRESAS SALVAS (<span id="gestao-total-empresas">0</span>)
+        </span>
+        <button type="button" onclick="abrirModalCadastrarNovaEmpresa()" style="background:rgba(201,168,76,0.15);border:1px solid var(--gold);color:var(--gold-light);font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:8px;cursor:pointer;">
+          ➕ Nova
+        </button>
+      </div>
+      <div id="gestao-empresas-lista-cards" style="display:flex;flex-direction:column;gap:8px;">
+        <!-- Cards gerados via JS -->
+      </div>
     </div>
 
     <!-- UPLOAD DE LOGOTIPO -->
@@ -652,13 +667,23 @@
     <div id="gestao-msg"></div>
 
     <!-- BOTÕES DE AÇÃO -->
-    <div style="display:flex;gap:10px;margin-top:18px;">
-      <button type="button" onclick="salvarModificacoesEmpresa()" style="flex:1.4;padding:14px;background:linear-gradient(135deg,var(--gold-light),var(--gold));border:none;border-radius:12px;color:#000;font-weight:900;font-size:13.5px;cursor:pointer;font-family:var(--font);box-shadow:0 4px 16px rgba(201,168,76,0.35);">
-        💾 Salvar Modificações
-      </button>
-      <button type="button" onclick="mostrarAbaPrincipal('login')" style="flex:1;padding:14px;background:#181824;border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:#cbd5e1;font-weight:700;font-size:13px;cursor:pointer;font-family:var(--font);">
-        ↩️ Voltar
-      </button>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px;">
+      <div style="display:flex;gap:10px;">
+        <button type="button" onclick="salvarModificacoesEmpresa()" style="flex:1.2;padding:13px 10px;background:linear-gradient(135deg,var(--gold-light),var(--gold));border:none;border-radius:12px;color:#000;font-weight:900;font-size:13px;cursor:pointer;font-family:var(--font);box-shadow:0 4px 16px rgba(201,168,76,0.35);">
+          💾 Salvar Alterações
+        </button>
+        <button type="button" onclick="salvarComoNovaEmpresaDireto()" style="flex:1.2;padding:13px 10px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:12px;color:#fff;font-weight:900;font-size:12.5px;cursor:pointer;font-family:var(--font);box-shadow:0 4px 16px rgba(34,197,94,0.3);">
+          ➕ Salvar como Nova
+        </button>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button type="button" onclick="entrarDiretoComEmpresaSelecionada()" style="flex:1.4;padding:12px;background:rgba(201,168,76,0.14);border:1.5px solid var(--gold);border-radius:12px;color:var(--gold-light);font-weight:800;font-size:12.5px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px;">
+          <span>🚀 Entrar no Sistema com Esta</span>
+        </button>
+        <button type="button" onclick="mostrarAbaPrincipal('login')" style="flex:0.7;padding:12px;background:#181824;border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:#cbd5e1;font-weight:700;font-size:12.5px;cursor:pointer;font-family:var(--font);">
+          ↩️ Voltar
+        </button>
+      </div>
     </div>
     <div id="btn-excluir-empresa-area" style="text-align:center;margin-top:14px;display:none;">
       <button type="button" onclick="excluirEmpresaSelecionada()" style="background:none;border:none;color:#ef4444;font-size:11.5px;cursor:pointer;text-decoration:underline;">
@@ -1814,7 +1839,7 @@
     idEmpresaEditando = novoId;
 
     fecharModalCadastrarNovaEmpresa();
-    carregarPainelGestao();
+    carregarPainelGestao(novoId);
     atualizarVisualEmpresaLogin(novoId);
     if (typeof renderEmpresasLogin === 'function') renderEmpresasLogin();
 
@@ -1892,36 +1917,135 @@
     }
   }
 
-  function carregarPainelGestao() {
+  function carregarPainelGestao(forcarId = null) {
     const sel = document.getElementById('gestao-empresa-select');
     if (!sel) return;
 
     const lista = obterLicencasLogin();
-    const idAtivo = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+    const idAtivo = localStorage.getItem('sdv_licenca_ativa') || (lista[0] ? lista[0].id : 'sdvidros');
 
-    let options = lista.map(emp => `
-      <option value="${emp.id}" ${emp.id === idEmpresaEditando ? 'selected' : ''}>
-        ${emp.nome} (${emp.segmento || 'Empresa'})
-      </option>
-    `).join('');
-
-    options += `<option value="__NOVA__" style="color:var(--gold-light);font-weight:900;">➕ + Adicionar Nova Empresa...</option>`;
-    sel.innerHTML = options;
-
-    if (!lista.some(e => e.id === idEmpresaEditando)) {
-      idEmpresaEditando = lista[0] ? lista[0].id : 'sdvidros';
-      sel.value = idEmpresaEditando;
+    // Se forcarId foi passado, usa ele; senão, se idEmpresaEditando não existe na lista ou não foi definido, usa a empresa ativa atual
+    if (forcarId && lista.some(e => e.id === forcarId)) {
+      idEmpresaEditando = forcarId;
+    } else if (!idEmpresaEditando || !lista.some(e => e.id === idEmpresaEditando)) {
+      idEmpresaEditando = idAtivo;
     }
 
-    selecionarEmpresaParaEditar(sel.value);
+    // Preenche o contador de empresas cadastradas
+    const totalEl = document.getElementById('gestao-total-empresas');
+    if (totalEl) totalEl.textContent = `${lista.length} salvas`;
+
+    // 1. Gera opções do select dropdown
+    let options = lista.map(emp => {
+      const isEdit = emp.id === idEmpresaEditando;
+      const isAtiva = emp.id === idAtivo;
+      const tag = isAtiva ? ' ⭐ [ATIVA]' : '';
+      return `<option value="${emp.id}" ${isEdit ? 'selected' : ''}>${emp.nome} (${emp.segmento || 'Empresa'})${tag}</option>`;
+    }).join('');
+
+    options += `<option value="__NOVA__" style="color:var(--gold-light);font-weight:900;">➕ + Cadastrar Nova Empresa...</option>`;
+    sel.innerHTML = options;
+    sel.value = idEmpresaEditando;
+
+    // 2. Renderiza os cards visuais de todas as empresas salvas no sistema
+    renderCardsEmpresasGestao(lista, idEmpresaEditando, idAtivo);
+
+    // 3. Carrega os dados da empresa selecionada nos inputs
+    selecionarEmpresaParaEditar(idEmpresaEditando, false);
   }
 
-  function selecionarEmpresaParaEditar(id) {
+  function renderCardsEmpresasGestao(lista, idEditando, idAtivo) {
+    const container = document.getElementById('gestao-empresas-lista-cards');
+    if (!container) return;
+
+    if (!lista || !lista.length) {
+      container.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:10px;">Nenhuma empresa cadastrada.</div>';
+      return;
+    }
+
+    container.innerHTML = lista.map(emp => {
+      const isEdit = emp.id === idEditando;
+      const isAtiva = emp.id === idAtivo;
+      const podeExcluir = (emp.id !== 'sdvidros' && emp.id !== 'sdmoveis');
+
+      return `
+        <div style="background:${isEdit ? 'rgba(201,168,76,0.08)' : '#0e0e17'};border:1.5px solid ${isEdit ? 'var(--gold)' : 'rgba(255,255,255,0.08)'};border-radius:12px;padding:10px 12px;transition:all 0.2s;box-shadow:${isEdit ? '0 0 16px rgba(201,168,76,0.22)' : 'none'};">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <img src="${emp.logo || 'logo.jpg'}" style="width:44px;height:44px;border-radius:10px;border:1.5px solid ${isEdit ? 'var(--gold)' : 'rgba(201,168,76,0.35)'};object-fit:cover;background:#000;flex-shrink:0;" alt="${emp.nome}">
+            
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span style="font-size:13.5px;font-weight:900;color:${isEdit ? 'var(--gold-light)' : '#fff'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  ${emp.nome}
+                </span>
+                ${isAtiva ? '<span style="background:rgba(34,197,94,0.2);border:1px solid #22c55e;color:#4ade80;font-size:9.5px;padding:1px 6px;border-radius:12px;font-weight:800;">✓ ATIVA</span>' : ''}
+                ${isEdit ? '<span style="background:rgba(201,168,76,0.25);border:1px solid var(--gold);color:var(--gold-light);font-size:9.5px;padding:1px 6px;border-radius:12px;font-weight:800;">✏️ EM EDIÇÃO</span>' : ''}
+              </div>
+              <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;">
+                ${emp.segmento || 'Vidros & Esquadrias'}
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTÕES RÁPIDOS DE CADA EMPRESA SALVA -->
+          <div style="display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;">
+            <button type="button" onclick="selecionarEmpresaParaEditar('${emp.id}', false)" style="padding:5px 9px;background:${isEdit ? 'var(--gold)' : '#181824'};color:${isEdit ? '#000' : 'var(--gold-light)'};border:1px solid ${isEdit ? 'var(--gold)' : 'rgba(201,168,76,0.35)'};border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;">
+              ${isEdit ? '✓ Editando Agora' : '✏️ Editar / Ver Dados'}
+            </button>
+            
+            ${!isAtiva ? `
+              <button type="button" onclick="ativarEmpresaPeloPainel('${emp.id}')" style="padding:5px 9px;background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid #22c55e;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;">
+                ⚡ Ativar no Sistema
+              </button>
+            ` : ''}
+
+            <button type="button" onclick="abrirModalLinkInstalacaoCliente('${emp.id}')" style="padding:5px 9px;background:rgba(56,189,248,0.12);color:#38bdf8;border:1px solid #0284c7;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;" title="Enviar link do app aos clientes desta empresa">
+              📲 Link App
+            </button>
+
+            ${podeExcluir ? `
+              <button type="button" onclick="excluirEmpresaPorId('${emp.id}')" style="margin-left:auto;padding:5px 8px;background:none;color:#ef4444;border:none;font-size:11px;cursor:pointer;opacity:0.8;" title="Excluir empresa">
+                🗑️
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function ativarEmpresaPeloPainel(id) {
+    localStorage.setItem('sdv_licenca_ativa', id);
+    idEmpresaEditando = id;
+    atualizarVisualEmpresaLogin(id);
+    if (typeof renderEmpresasLogin === 'function') renderEmpresasLogin();
+    carregarPainelGestao(id);
+
+    const lista = obterLicencasLogin();
+    const emp = lista.find(e => e.id === id);
+    const msg = document.getElementById('gestao-msg');
+    if (msg) {
+      msg.innerHTML = `<div class="msg suc">⚡ Empresa "${emp ? emp.nome : id}" agora é a empresa ATIVA no sistema!</div>`;
+      setTimeout(() => { if (msg) msg.innerHTML = ''; }, 3500);
+    }
+  }
+
+  function selecionarEmpresaParaEditar(id, ativarNoSistema = false) {
     if (id === '__NOVA__') {
       abrirModalCadastrarNovaEmpresa();
       return;
     }
     idEmpresaEditando = id;
+
+    const sel = document.getElementById('gestao-empresa-select');
+    if (sel && sel.value !== id) sel.value = id;
+
+    if (ativarNoSistema) {
+      localStorage.setItem('sdv_licenca_ativa', id);
+      atualizarVisualEmpresaLogin(id);
+      if (typeof renderEmpresasLogin === 'function') renderEmpresasLogin();
+    }
+
     const lista = obterLicencasLogin();
     const emp = lista.find(e => e.id === id);
     if (!emp) return;
@@ -1952,8 +2076,11 @@
       areaExcluir.style.display = (emp.id !== 'sdvidros' && emp.id !== 'sdmoveis') ? 'block' : 'none';
     }
 
+    const idAtivo = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+    renderCardsEmpresasGestao(lista, idEmpresaEditando, idAtivo);
+
     const msg = document.getElementById('gestao-msg');
-    if (msg) msg.innerHTML = '';
+    if (msg && !ativarNoSistema) msg.innerHTML = '';
   }
 
   function prepararNovaEmpresa() {
@@ -2003,6 +2130,7 @@
       // Atualiza existente
       lista[idx].nome = nome;
       lista[idx].segmento = segmento;
+      lista[idx].slogan = segmento;
       lista[idx].telefone = telefone;
       lista[idx].pix = pix;
       if (logoEmEdicaoBase64) lista[idx].logo = logoEmEdicaoBase64;
@@ -2028,35 +2156,109 @@
     }
 
     salvarLicencasLogin(lista);
-    carregarPainelGestao();
+    carregarPainelGestao(idEmpresaEditando);
     renderEmpresasLogin();
     atualizarVisualEmpresaLogin(localStorage.getItem('sdv_licenca_ativa'));
 
     const msg = document.getElementById('gestao-msg');
     if (msg) {
-      msg.innerHTML = '<div class="msg suc">✅ Modificações e logotipo salvos com sucesso!</div>';
-      setTimeout(() => { if (msg) msg.innerHTML = ''; }, 3500);
+      msg.innerHTML = `<div class="msg suc">✅ Alterações da empresa "${nome}" salvas com sucesso aqui no sistema!</div>`;
+      setTimeout(() => { if (msg) msg.innerHTML = ''; }, 4000);
     }
   }
 
-  function excluirEmpresaSelecionada() {
-    if (idEmpresaEditando === 'sdvidros' || idEmpresaEditando === 'sdmoveis') {
+  function salvarComoNovaEmpresaDireto() {
+    const nome = (document.getElementById('gestao-empresa-nome').value || '').trim();
+    const segmento = (document.getElementById('gestao-empresa-segmento').value || '').trim();
+    const telefone = (document.getElementById('gestao-empresa-tel').value || '').trim();
+    const pix = (document.getElementById('gestao-empresa-pix').value || '').trim();
+
+    if (!nome) {
+      alert('Por favor, informe o Nome da nova empresa.');
+      const inp = document.getElementById('gestao-empresa-nome');
+      if (inp) inp.focus();
+      return;
+    }
+
+    const novoId = 'emp_' + Date.now();
+    const nova = {
+      id: novoId,
+      nome: nome,
+      segmento: segmento || 'Vidraçaria & Esquadrias',
+      slogan: segmento || 'Qualidade e Pontualidade',
+      telefone: telefone || '(85) 99611-9824',
+      cidade: 'Itaitinga - CE',
+      cnpj: '',
+      pix: pix || '',
+      chaveLicenca: 'LIC-' + Date.now(),
+      logo: logoEmEdicaoBase64 || 'logo.jpg',
+      banner: bannerEmEdicaoBase64 || 'banner_ia_vidros.jpg',
+      tipoContrato: 'vidros'
+    };
+
+    let lista = obterLicencasLogin();
+    lista.push(nova);
+    salvarLicencasLogin(lista);
+
+    localStorage.setItem('sdv_licenca_ativa', novoId);
+    idEmpresaEditando = novoId;
+
+    carregarPainelGestao(novoId);
+    renderEmpresasLogin();
+    atualizarVisualEmpresaLogin(novoId);
+
+    const msg = document.getElementById('gestao-msg');
+    if (msg) {
+      msg.innerHTML = `<div class="msg suc">✅ Nova empresa "${nome}" salva e ativada com sucesso aqui no sistema!</div>`;
+      setTimeout(() => { if (msg) msg.innerHTML = ''; }, 4500);
+    }
+  }
+
+  function entrarDiretoComEmpresaSelecionada() {
+    const ativaId = idEmpresaEditando || localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+    localStorage.setItem('sdv_licenca_ativa', ativaId);
+    atualizarVisualEmpresaLogin(ativaId);
+
+    const users = getUsers();
+    const adminUser = users.find(u => (u.role === 'admin' || u.username === 'admin') && u.ativo) || users[0];
+    if (adminUser) {
+      concluirLogin(adminUser, false);
+    } else {
+      mostrarAbaPrincipal('login');
+    }
+  }
+
+  function excluirEmpresaPorId(id) {
+    if (id === 'sdvidros' || id === 'sdmoveis') {
       alert('As empresas padrão SD Vidros e SD Móveis não podem ser excluídas.');
       return;
     }
 
-    if (!confirm('Tem certeza que deseja excluir esta empresa?')) return;
+    const lista = obterLicencasLogin();
+    const emp = lista.find(e => e.id === id);
+    if (!confirm(`Tem certeza que deseja excluir a empresa "${emp ? emp.nome : id}" do sistema?`)) return;
 
-    let lista = obterLicencasLogin();
-    lista = lista.filter(e => e.id !== idEmpresaEditando);
-    salvarLicencasLogin(lista);
+    const novaLista = lista.filter(e => e.id !== id);
+    salvarLicencasLogin(novaLista);
 
-    localStorage.setItem('sdv_licenca_ativa', 'sdvidros');
+    if (localStorage.getItem('sdv_licenca_ativa') === id) {
+      localStorage.setItem('sdv_licenca_ativa', 'sdvidros');
+    }
     idEmpresaEditando = 'sdvidros';
 
-    carregarPainelGestao();
+    carregarPainelGestao('sdvidros');
     renderEmpresasLogin();
     atualizarVisualEmpresaLogin('sdvidros');
+
+    const msg = document.getElementById('gestao-msg');
+    if (msg) {
+      msg.innerHTML = '<div class="msg suc">Empresa excluída com sucesso.</div>';
+      setTimeout(() => { if (msg) msg.innerHTML = ''; }, 3000);
+    }
+  }
+
+  function excluirEmpresaSelecionada() {
+    excluirEmpresaPorId(idEmpresaEditando);
   }
 
   // ══════════════════════════════════════════════
