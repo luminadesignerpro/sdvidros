@@ -1614,8 +1614,11 @@
             <img id="lic-preview-logo" src="logo.jpg" class="licenca-upload-preview" alt="Logo">
             <div style="flex:1;">
               <input type="file" id="lic-upload-logo" accept="image/*" style="display:none" onchange="processarUploadImagemLicenca(event, 'logo')">
-              <button type="button" class="btn btn-sec btn-sm" onclick="document.getElementById('lic-upload-logo').click()">📁 Escolher Nova Logo</button>
-              <div style="font-size:10.5px;color:var(--muted);margin-top:4px;">JPG, PNG ou WebP</div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <button type="button" class="btn btn-gold btn-sm" onclick="abrirSeletorArteLicenca('logo')" style="font-weight:800;font-size:11px;">✨ Escolher com IA (Nova Logo)</button>
+                <button type="button" class="btn btn-sec btn-sm" onclick="document.getElementById('lic-upload-logo').click()">📁 Escolher do Celular/PC</button>
+              </div>
+              <div style="font-size:10px;color:var(--muted);margin-top:4px;">JPG, PNG, WebP ou IA</div>
             </div>
           </div>
         </div>
@@ -1627,8 +1630,11 @@
             <img id="lic-preview-banner" src="banner.jpg" style="width:100px;height:50px;border-radius:8px;border:1.5px solid var(--gold);object-fit:cover;background:#000;" alt="Banner">
             <div style="flex:1;">
               <input type="file" id="lic-upload-banner" accept="image/*" style="display:none" onchange="processarUploadImagemLicenca(event, 'banner')">
-              <button type="button" class="btn btn-sec btn-sm" onclick="document.getElementById('lic-upload-banner').click()">📁 Escolher Novo Banner</button>
-              <div style="font-size:10.5px;color:var(--muted);margin-top:4px;">Panorâmico (16:9)</div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <button type="button" class="btn btn-gold btn-sm" onclick="abrirSeletorArteLicenca('banner')" style="font-weight:800;font-size:11px;">✨ Escolher com IA (Novo Banner)</button>
+                <button type="button" class="btn btn-sec btn-sm" onclick="document.getElementById('lic-upload-banner').click()">📁 Escolher do Celular/PC</button>
+              </div>
+              <div style="font-size:10px;color:var(--muted);margin-top:4px;">Panorâmico (16:9) ou IA</div>
             </div>
           </div>
         </div>
@@ -3058,6 +3064,63 @@ function compartilharLinkInstalacaoClienteIndex(id) {
       prompt('Copie o link de instalação abaixo:', urlInst);
     }
   }
+}
+
+function abrirSeletorArteLicenca(tipoAlvo = 'banner') {
+  const opcoes = [
+    { nome: 'Showroom Vidros & Penthouse (IA)', arquivo: 'banner_ia_vidros.jpg' },
+    { nome: 'Showroom Alta Marcenaria & Móveis Planejados (IA)', arquivo: 'banner_ia_moveis.jpg' },
+    { nome: 'Logotipo Selo Nobre Dourado (IA)', arquivo: 'logo.jpg' },
+    { nome: 'Logotipo Móveis Projetados & Design (IA)', arquivo: 'logo_moveis.jpg' },
+    { nome: 'Showroom SD Vidros Original', arquivo: 'banner.jpg' },
+    { nome: 'Showroom SD Móveis Original', arquivo: 'banner_moveis.jpg' }
+  ];
+
+  let menuTxt = `✨ ESCOLHER ARTE COM IA\n\n`;
+  menuTxt += `Selecione o número da imagem desejada:\n\n`;
+  opcoes.forEach((op, idx) => {
+    menuTxt += `${idx + 1}. ${op.nome}\n`;
+  });
+  menuTxt += `\nDigite o número (1 a ${opcoes.length}):`;
+
+  const escolha = prompt(menuTxt, tipoAlvo === 'logo' ? '3' : '1');
+  if (!escolha) return;
+
+  const num = parseInt(escolha.trim(), 10);
+  if (isNaN(num) || num < 1 || num > opcoes.length) {
+    alert('Opção inválida.');
+    return;
+  }
+
+  const selecionada = opcoes[num - 1];
+  const aplicarTambemNaLogo = (tipoAlvo === 'banner') 
+    ? confirm(`Deseja colocar esta arte "${selecionada.nome}" também como LOGOTIPO da empresa?`)
+    : true;
+
+  const lista = obterLicencas();
+  const ativaId = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+  const idx = lista.findIndex(l => l.id === ativaId);
+
+  if (tipoAlvo === 'banner') {
+    licencaBannerEmEdicao = selecionada.arquivo;
+    const prevB = document.getElementById('lic-preview-banner');
+    if (prevB) prevB.src = selecionada.arquivo;
+    if (idx >= 0) lista[idx].banner = selecionada.arquivo;
+  }
+
+  if (tipoAlvo === 'logo' || aplicarTambemNaLogo) {
+    licencaLogoEmEdicao = selecionada.arquivo;
+    const prevL = document.getElementById('lic-preview-logo');
+    if (prevL) prevL.src = selecionada.arquivo;
+    if (idx >= 0) lista[idx].logo = selecionada.arquivo;
+  }
+
+  if (idx >= 0) {
+    salvarLicencas(lista);
+    aplicarLicencaVisual(lista[idx]);
+  }
+
+  alert(`✨ Imagem "${selecionada.nome}" aplicada com sucesso!`);
 }
 
 function carregarCatalogoPadraoSegmento(segmento) {
