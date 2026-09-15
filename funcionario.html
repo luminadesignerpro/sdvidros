@@ -2353,21 +2353,95 @@
         </div>
       </div>
 
-      <!-- ── ABA 6: JOGOS & ENTRETENIMENTO ── -->
+      <!-- ── ABA 6: JOGOS & ENTRETENIMENTO PRO ── -->
       <div id="pane-jogos" class="tab-pane">
-        <div class="portal-card" style="border:1.5px solid rgba(14,165,233,0.35);box-shadow:0 12px 35px rgba(0,0,0,0.45);">
-          <!-- Header dos Jogos -->
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+        <!-- Botão Flutuante de Sair da Tela Cheia -->
+        <button type="button" class="btn-fullscreen-exit-float" onclick="alternarTelaCheiaJogos(false)">
+          <span>✕</span> <span>Sair da Tela Cheia</span>
+        </button>
+
+        <div class="portal-card jogos-fullscreen-container" id="card-central-jogos" style="position:relative;border:1.5px solid rgba(14,165,233,0.35);box-shadow:0 12px 35px rgba(0,0,0,0.45);">
+          
+          <!-- Overlay de Bloqueio por Horário -->
+          <div id="overlay-jogos-bloqueado" class="overlay-jogos-bloqueio">
+            <div style="font-size:48px;margin-bottom:8px;">🔒</div>
+            <h2 style="font-size:20px;font-weight:900;color:#f87171;margin:0 0 6px 0;">Jogos Bloqueados no Momento</h2>
+            <p id="txt-bloqueio-motivo" style="font-size:13px;color:#cbd5e1;max-width:320px;line-height:1.45;margin:0 0 14px 0;">
+              O horário de expediente está em andamento. Os jogos estão liberados apenas nos intervalos permitidos.
+            </p>
+            <div style="background:rgba(255,255,255,0.06);padding:8px 16px;border-radius:20px;font-size:12px;color:var(--gold-light);font-weight:800;margin-bottom:18px;">
+              ⏰ Próxima Liberação: <span id="lbl-proxima-liberacao">12:00</span>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+              <button type="button" onclick="notificarGerenciaTentativaJogo()" style="padding:10px 18px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:12.5px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 15px rgba(34,197,94,0.4);">
+                <span>📲</span> <span>Notificar Gerência (WhatsApp)</span>
+              </button>
+              <button type="button" onclick="mudarAba('status')" style="padding:10px 16px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:#fff;font-weight:800;font-size:12px;cursor:pointer;">
+                Voltar ao Portal
+              </button>
+            </div>
+          </div>
+
+          <!-- Header dos Jogos com Ação de Tela Cheia -->
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
             <div style="display:flex;align-items:center;gap:10px;">
               <span style="font-size:28px;">🎮</span>
               <div>
-                <div style="font-size:18px;font-weight:900;color:#fff;">Central de Jogos & Lazer</div>
-                <div style="font-size:12px;color:#38bdf8;font-weight:700;">Divirta-se jogando diretamente no seu celular ou computador!</div>
+                <div style="font-size:18px;font-weight:900;color:#fff;">Central de Jogos PRO</div>
+                <div style="font-size:12px;color:#38bdf8;font-weight:700;">Experiência completa com IA, Física e Tela Cheia!</div>
               </div>
             </div>
-            <span style="background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.35);color:#38bdf8;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;">
-              4 Jogos Oficiais + Sugestões
-            </span>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <button type="button" class="btn-fullscreen-toggle" onclick="alternarTelaCheiaJogos()" title="Jogar em tela inteira sem bordas">
+                <span>⛶</span> <span id="txt-btn-fullscreen">Tela Cheia</span>
+              </button>
+              <span style="background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.35);color:#38bdf8;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;">
+                4 Jogos Oficiais + Sugestões
+              </span>
+            </div>
+          </div>
+
+          <!-- ── CARD DE CONTROLE DE HORÁRIO DE JOGOS (2ª ABA) ── -->
+          <div class="card-horarios-jogos">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:20px;">⏰</span>
+                <div>
+                  <div style="font-size:13px;font-weight:900;color:#fff;">Horário de Liberação dos Jogos</div>
+                  <div style="font-size:11px;color:var(--text2);">Configure os horários em que o acesso e as partidas são liberados</div>
+                </div>
+              </div>
+              <div id="badge-status-horario-jogos" class="badge-status-horario liberado">
+                🟢 Jogos Liberados Agora
+              </div>
+            </div>
+
+            <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;font-size:12px;font-weight:700;color:#cbd5e1;">
+              <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;">
+                <input type="radio" name="modo_horario_jogos" value="livre" id="modo-horario-livre" onchange="alterarModoHorarioJogos('livre')">
+                <span>🔓 Livre (Sempre Liberado)</span>
+              </label>
+              <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;">
+                <input type="radio" name="modo_horario_jogos" value="almoco_pos" id="modo-horario-almoco" checked onchange="alterarModoHorarioJogos('almoco_pos')">
+                <span>🥪 Almoço (12h-13h30) e Após 18h</span>
+              </label>
+              <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;">
+                <input type="radio" name="modo_horario_jogos" value="personalizado" id="modo-horario-pers" onchange="alterarModoHorarioJogos('personalizado')">
+                <span>⚙️ Personalizado</span>
+              </label>
+            </div>
+
+            <div id="box-horario-personalizado" style="display:none;margin-top:10px;padding:8px 12px;background:rgba(0,0,0,0.3);border-radius:8px;align-items:center;gap:8px;flex-wrap:wrap;font-size:11.5px;border:1px solid rgba(255,255,255,0.08);">
+              <span style="color:var(--gold-light);font-weight:700;">Horário Permitido:</span>
+              <span>Início:</span>
+              <input type="time" id="jogos-hora-inicio" value="12:00" onchange="salvarConfigHorariosJogos()" style="padding:4px 8px;border-radius:6px;background:#1e293b;border:1px solid #475569;color:#fff;font-family:inherit;">
+              <span>até Fim:</span>
+              <input type="time" id="jogos-hora-fim" value="13:30" onchange="salvarConfigHorariosJogos()" style="padding:4px 8px;border-radius:6px;background:#1e293b;border:1px solid #475569;color:#fff;font-family:inherit;">
+            </div>
+
+            <div style="font-size:10.5px;color:var(--text2);margin-top:8px;line-height:1.35;">
+              💡 <em>Caso ultrapasse o horário limite enquanto joga, a partida é pausada na hora e uma notificação de alerta é enviada na aba <strong>💬 Mensagens</strong> e para o <strong>WhatsApp</strong> da gerência.</em>
+            </div>
           </div>
 
           <!-- SELETOR COM OPÇÃO DE ESCOLHER O JOGO -->
@@ -2399,42 +2473,70 @@
             </div>
           </div>
 
-          <!-- ── JOGO 1: CORRIDA (TURBO RACER) ── -->
+          <!-- ── JOGO 1: CORRIDA (TURBO RACER 3D ARCADE PRO) ── -->
           <div id="view-jogo-corrida" class="jogo-view-container">
             <div style="background:#08080f;border:1.5px solid rgba(255,255,255,0.1);border-radius:16px;padding:14px;text-align:center;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;font-weight:800;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;font-weight:800;flex-wrap:wrap;gap:8px;">
                 <span style="color:#fbbf24;">🏆 Pontos: <strong id="corrida-score" style="color:#fff;">0</strong></span>
                 <span style="color:#38bdf8;">🔥 Velocidade: <strong id="corrida-speed" style="color:#fff;">100 km/h</strong></span>
                 <span style="color:#4ade80;">🥇 Recorde: <strong id="corrida-recorde" style="color:#fff;">0</strong></span>
+                <button type="button" class="btn-fullscreen-toggle" onclick="alternarTelaCheiaJogos(true)">⛶ Tela Cheia</button>
               </div>
-              <div style="position:relative;display:inline-block;border:2px solid #334155;border-radius:12px;overflow:hidden;background:#1e293b;box-shadow:0 8px 30px rgba(0,0,0,0.7);max-width:100%;">
-                <canvas id="canvas-corrida" width="320" height="420" style="display:block;background:#1e293b;touch-action:none;"></canvas>
-                <div id="corrida-overlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(4px);flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;">
-                  <div style="font-size:32px;">💥 Bateu!</div>
-                  <div style="font-size:18px;font-weight:900;color:#fff;">Pontuação Final: <span id="corrida-final-score" style="color:#fbbf24;">0</span></div>
-                  <button type="button" onclick="iniciarJogoCorrida()" style="padding:12px 24px;background:linear-gradient(135deg,#38bdf8,#0ea5e9);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 18px rgba(14,165,233,0.5);">
+
+              <!-- Barra de Nitro N2O -->
+              <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:11px;font-weight:800;">
+                <span style="color:#f59e0b;">⚡ NITRO N2O:</span>
+                <div style="width:160px;height:9px;background:#1e293b;border-radius:10px;overflow:hidden;border:1px solid #475569;">
+                  <div id="corrida-nitro-bar" style="width:100%;height:100%;background:linear-gradient(90deg,#f59e0b,#ef4444);transition:width 0.1s;"></div>
+                </div>
+              </div>
+
+              <div style="position:relative;display:inline-block;border:2px solid #334155;border-radius:12px;overflow:hidden;background:#090a14;box-shadow:0 8px 30px rgba(0,0,0,0.8);max-width:100%;">
+                <canvas id="canvas-corrida" width="360" height="480" style="display:block;touch-action:none;"></canvas>
+                <div id="corrida-overlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(5px);flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;">
+                  <div style="font-size:36px;">💥 Bateu!</div>
+                  <div style="font-size:19px;font-weight:900;color:#fff;">Pontuação Final: <span id="corrida-final-score" style="color:#fbbf24;">0</span></div>
+                  <button type="button" onclick="iniciarJogoCorrida()" style="padding:12px 26px;background:linear-gradient(135deg,#38bdf8,#0ea5e9);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 18px rgba(14,165,233,0.5);">
                     🔄 Jogar Novamente
                   </button>
                 </div>
               </div>
+
               <!-- Controles de Toque para Celular -->
-              <div style="display:flex;justify-content:center;gap:16px;margin-top:14px;">
-                <button type="button" class="btn-ctrl-jogo" id="btn-corrida-esq" onmousedown="moverCarroCorrida(-1)" ontouchstart="moverCarroCorrida(-1);event.preventDefault();">
-                  ◀ ESQUERDA
+              <div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap;">
+                <button type="button" class="btn-ctrl-jogo" id="btn-corrida-esq" onmousedown="iniciarGiroCarro(-1)" onmouseup="pararGiroCarro()" ontouchstart="iniciarGiroCarro(-1);event.preventDefault();" ontouchend="pararGiroCarro()">
+                  ◀ ESQ
                 </button>
-                <button type="button" class="btn-ctrl-jogo" id="btn-corrida-dir" onmousedown="moverCarroCorrida(1)" ontouchstart="moverCarroCorrida(1);event.preventDefault();">
-                  DIREITA ▶
+                <button type="button" class="btn-corrida-nitro" onmousedown="ativarNitroCorrida(true)" onmouseup="ativarNitroCorrida(false)" ontouchstart="ativarNitroCorrida(true);event.preventDefault();" ontouchend="ativarNitroCorrida(false)">
+                  🚀 NITRO N2O
+                </button>
+                <button type="button" class="btn-ctrl-jogo" id="btn-corrida-dir" onmousedown="iniciarGiroCarro(1)" onmouseup="pararGiroCarro()" ontouchstart="iniciarGiroCarro(1);event.preventDefault();" ontouchend="pararGiroCarro()">
+                  DIR ▶
                 </button>
               </div>
-              <div style="font-size:11.5px;color:var(--text2);margin-top:8px;">(Você também pode usar as setas ⬅️ ➡️ do teclado!)</div>
+              <div style="font-size:11.5px;color:var(--text2);margin-top:8px;">(No computador use as teclas ⬅️ ➡️ ou A/D para virar e ESPAÇO para Nitro!)</div>
             </div>
           </div>
 
-          <!-- ── JOGO 2: DAMAS (CHECKERS) ── -->
+          <!-- ── JOGO 2: DAMAS (CHECKERS MASTER PRO) ── -->
           <div id="view-jogo-damas" class="jogo-view-container" style="display:none;">
             <div style="background:#08080f;border:1.5px solid rgba(255,255,255,0.1);border-radius:16px;padding:14px;text-align:center;">
+              
+              <!-- Seletor de Modo: Contra Robô ou 2 Jogadores -->
+              <div style="display:flex;justify-content:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                <button type="button" class="modo-jogo-pill active" id="btn-damas-modo-bot" onclick="mudarModoDamas('bot')">
+                  🤖 Jogar vs Robô (IA)
+                </button>
+                <button type="button" class="modo-jogo-pill" id="btn-damas-modo-2p" onclick="mudarModoDamas('2p')">
+                  👥 2 Jogadores (Local)
+                </button>
+                <button type="button" class="btn-fullscreen-toggle" onclick="alternarTelaCheiaJogos(true)">
+                  ⛶ Tela Cheia
+                </button>
+              </div>
+
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-                <span id="damas-vez-rotulo" style="font-size:13.5px;font-weight:900;color:#38bdf8;">Vez: ⚪ Brancas</span>
+                <span id="damas-vez-rotulo" style="font-size:13.5px;font-weight:900;color:#38bdf8;">Vez: ⚪ Suas Peças</span>
                 <div style="display:flex;gap:12px;font-size:12.5px;font-weight:800;">
                   <span style="color:#fff;">⚪ Capturadas: <strong id="damas-cap-brancas">0</strong></span>
                   <span style="color:#f87171;">🔴 Capturadas: <strong id="damas-cap-pretas">0</strong></span>
@@ -2443,54 +2545,100 @@
                   🔄 Reiniciar
                 </button>
               </div>
-              <!-- Tabuleiro 8x8 de Damas -->
+
+              <!-- Tabuleiro 8x8 Luxo de Damas -->
               <div style="display:flex;justify-content:center;">
-                <div id="damas-board" style="display:grid;grid-template-columns:repeat(8,1fr);width:min(90vw,360px);height:min(90vw,360px);border:3px solid #78350f;border-radius:10px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.7);background:#b45309;">
+                <div class="tabuleiro-frame-luxo">
+                  <div id="damas-board" class="board-grid-8x8"></div>
                 </div>
               </div>
-              <div style="font-size:11.5px;color:var(--text2);margin-top:10px;">Toque na sua peça para selecioná-la e depois toque na casa livre para mover ou capturar!</div>
+              <div style="font-size:11.5px;color:var(--text2);margin-top:10px;">Toque na sua peça para selecioná-la. Círculos verdes indicam movimentos legais e capturas automáticas!</div>
             </div>
           </div>
 
-          <!-- ── JOGO 3: XADREZ (CHESS) ── -->
+          <!-- ── JOGO 3: XADREZ (CHESS GRANDMASTER PRO) ── -->
           <div id="view-jogo-xadrez" class="jogo-view-container" style="display:none;">
             <div style="background:#08080f;border:1.5px solid rgba(255,255,255,0.1);border-radius:16px;padding:14px;text-align:center;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-                <span id="xadrez-vez-rotulo" style="font-size:13.5px;font-weight:900;color:var(--gold-light);">Vez: ♔ Brancas</span>
-                <button type="button" onclick="reiniciarJogoXadrez()" style="padding:6px 12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-size:11.5px;font-weight:800;cursor:pointer;">
-                  🔄 Reiniciar Partida
+              
+              <!-- Seletor de Modo: Contra Robô ou 2 Jogadores -->
+              <div style="display:flex;justify-content:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                <button type="button" class="modo-jogo-pill active" id="btn-xadrez-modo-bot" onclick="mudarModoXadrez('bot')">
+                  🤖 Jogar vs Robô (IA)
+                </button>
+                <button type="button" class="modo-jogo-pill" id="btn-xadrez-modo-2p" onclick="mudarModoXadrez('2p')">
+                  👥 2 Jogadores (Local)
+                </button>
+                <button type="button" class="btn-fullscreen-toggle" onclick="alternarTelaCheiaJogos(true)">
+                  ⛶ Tela Cheia
                 </button>
               </div>
-              <!-- Tabuleiro 8x8 de Xadrez -->
-              <div style="display:flex;justify-content:center;">
-                <div id="xadrez-board" style="display:grid;grid-template-columns:repeat(8,1fr);width:min(90vw,360px);height:min(90vw,360px);border:3px solid #1e293b;border-radius:10px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.7);background:#334155;">
-                </div>
-              </div>
-              <div style="font-size:11.5px;color:var(--text2);margin-top:10px;">Clique na peça para escolher e toque na casa para mover. Jogue com um amigo ou treine suas jogadas!</div>
-            </div>
-          </div>
 
-          <!-- ── JOGO 4: JOGO DE TIRO AO ALVO (TARGET SHOOTER) ── -->
-          <div id="view-jogo-tiro" class="jogo-view-container" style="display:none;">
-            <div style="background:#08080f;border:1.5px solid rgba(255,255,255,0.1);border-radius:16px;padding:14px;text-align:center;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;font-weight:800;">
-                <span style="color:#ef4444;">🎯 Pontos: <strong id="tiro-score" style="color:#fff;">0</strong></span>
-                <span style="color:#fbbf24;">⏱️ Tempo: <strong id="tiro-tempo" style="color:#fff;">30s</strong></span>
-                <span style="color:#4ade80;">🥇 Recorde: <strong id="tiro-recorde" style="color:#fff;">0</strong></span>
-              </div>
-              <!-- Arena de Tiro -->
-              <div id="tiro-arena" style="position:relative;width:100%;height:320px;background:radial-gradient(circle at center, #1e1b4b 0%, #030712 100%);border:2px dashed rgba(239,68,68,0.4);border-radius:14px;overflow:hidden;cursor:crosshair;box-shadow:inset 0 0 40px rgba(0,0,0,0.8);touch-action:manipulation;">
-                <!-- Overlay Inicial -->
-                <div id="tiro-start-overlay" style="position:absolute;inset:0;background:rgba(0,0,0,0.8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
-                  <div style="font-size:36px;">🎯</div>
-                  <div style="font-size:17px;font-weight:900;color:#fff;">Desafio de Tiro ao Alvo!</div>
-                  <div style="font-size:12px;color:var(--text2);max-width:260px;line-height:1.4;">Acerte o máximo de alvos antes do tempo acabar!</div>
-                  <button type="button" onclick="iniciarJogoTiro()" style="padding:12px 28px;background:linear-gradient(135deg,#ef4444,#dc2626);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 18px rgba(239,68,68,0.5);">
-                    🚀 Começar Jogo (30s)
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span id="xadrez-vez-rotulo" style="font-size:14px;font-weight:900;color:var(--gold-light);">Vez: ♔ Brancas (Você)</span>
+                  <span id="xadrez-xeque-badge" style="display:none;background:#ef4444;color:#fff;font-size:10px;font-weight:900;padding:2px 8px;border-radius:999px;animation:pulseMoveDest 0.8s infinite alternate;">⚠️ XEQUE!</span>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                  <button type="button" onclick="reiniciarJogoXadrez()" style="padding:6px 12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-size:11.5px;font-weight:800;cursor:pointer;">
+                    🔄 Reiniciar
                   </button>
                 </div>
               </div>
-              <div style="font-size:11.5px;color:var(--text2);margin-top:10px;">Toque rápido nos alvos assim que aparecerem na tela para acumular pontos!</div>
+
+              <!-- Tabuleiro 8x8 Luxo de Xadrez com Coordenadas -->
+              <div style="display:flex;justify-content:center;">
+                <div class="tabuleiro-frame-luxo" style="border-color:#1e293b;background:#0f172a;">
+                  <div id="xadrez-board" class="board-grid-8x8" style="border-color:#334155;"></div>
+                </div>
+              </div>
+
+              <!-- Peças Capturadas -->
+              <div style="margin-top:10px;display:flex;justify-content:space-around;font-size:12px;color:var(--text2);flex-wrap:wrap;gap:8px;">
+                <div>⚪ Capturadas pelo Branco: <span id="xadrez-cap-brancas" style="color:#fbbf24;font-size:14px;"></span></div>
+                <div>⚫ Capturadas pelo Preto: <span id="xadrez-cap-pretas" style="color:#f87171;font-size:14px;"></span></div>
+              </div>
+              <div style="font-size:11.5px;color:var(--text2);margin-top:8px;">Toque na peça para ver os pontos verdes de movimento e vermelhos de captura!</div>
+            </div>
+          </div>
+
+          <!-- ── JOGO 4: JOGO DE TIRO (SNIPER RANGE 3D PRO) ── -->
+          <div id="view-jogo-tiro" class="jogo-view-container" style="display:none;">
+            <div style="background:#08080f;border:1.5px solid rgba(255,255,255,0.1);border-radius:16px;padding:14px;text-align:center;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;font-weight:800;flex-wrap:wrap;gap:8px;">
+                <span style="color:#ef4444;">🎯 Pontos: <strong id="tiro-score" style="color:#fff;">0</strong></span>
+                <span style="color:#fbbf24;">⏱️ Tempo: <strong id="tiro-tempo" style="color:#fff;">30s</strong></span>
+                <span style="color:#4ade80;">🥇 Recorde: <strong id="tiro-recorde" style="color:#fff;">0</strong></span>
+                <button type="button" class="btn-fullscreen-toggle" onclick="alternarTelaCheiaJogos(true)">⛶ Tela Cheia</button>
+              </div>
+
+              <!-- Munição e Recarga -->
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;background:rgba(255,255,255,0.03);padding:6px 12px;border-radius:8px;">
+                <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#fcd34d;font-weight:800;">
+                  <span>MUNIÇÃO:</span>
+                  <span id="tiro-municao-icons" style="letter-spacing:2px;">🟡🟡🟡🟡🟡🟡</span>
+                </div>
+                <button type="button" onclick="recarregarTiro()" style="padding:4px 10px;border-radius:6px;background:rgba(239,68,68,0.2);border:1px solid #ef4444;color:#fff;font-size:11px;font-weight:800;cursor:pointer;">
+                  🔄 Recarregar
+                </button>
+              </div>
+
+              <!-- Arena de Tiro -->
+              <div id="tiro-arena" class="sniper-arena">
+                <!-- Overlay Inicial -->
+                <div id="tiro-start-overlay" style="position:absolute;inset:0;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:10;">
+                  <div style="font-size:42px;">🎯</div>
+                  <div style="font-size:18px;font-weight:900;color:#fff;">Sniper Range 3D Pro</div>
+                  <div style="font-size:12.5px;color:var(--text2);max-width:280px;line-height:1.4;">
+                    Acerte o centro do alvo (+100), águias douradas (+200 +3s) e evite caveiras (-50)!
+                  </div>
+                  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+                    <button type="button" onclick="iniciarJogoTiro()" style="padding:12px 28px;background:linear-gradient(135deg,#ef4444,#dc2626);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 18px rgba(239,68,68,0.5);">
+                      🚀 Iniciar Partida (30s)
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div style="font-size:11.5px;color:var(--text2);margin-top:10px;">Toque na tela para atirar! Quando as balas acabarem, aperte em Recarregar ou toque rápido!</div>
             </div>
           </div>
 
@@ -2506,11 +2654,11 @@
               </div>
               <div style="margin-bottom:14px;">
                 <label style="display:block;font-size:11.5px;font-weight:800;color:#fbbf24;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Nome do Jogo Sugerido</label>
-                <input type="text" id="sugestao-jogo-nome" placeholder="Ex: Tetris, Jogo da Velha, Sinuca, Pac-Man, Dominó..." style="width:100%;box-sizing:border-box;padding:12px;background:#0c0d16;border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:13.5px;outline:none;">
+                <input type="text" id="sugestao-jogo-nome" placeholder="Ex: Tetris, Sinuca, Dominó, Pac-Man, Pinball..." style="width:100%;box-sizing:border-box;padding:12px;background:#0c0d16;border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:13.5px;outline:none;">
               </div>
               <div style="margin-bottom:16px;">
                 <label style="display:block;font-size:11.5px;font-weight:800;color:#fbbf24;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Por que você gostaria deste jogo? (Opcional)</label>
-                <textarea id="sugestao-jogo-obs" rows="2" placeholder="Ex: Para jogar em dupla enquanto espero a instalação..." style="width:100%;box-sizing:border-box;padding:10px 12px;background:#0c0d16;border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:13px;outline:none;resize:none;font-family:inherit;"></textarea>
+                <textarea id="sugestao-jogo-obs" rows="2" placeholder="Ex: Para jogar em dupla enquanto aguardo..." style="width:100%;box-sizing:border-box;padding:10px 12px;background:#0c0d16;border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:13px;outline:none;resize:none;font-family:inherit;"></textarea>
               </div>
               <button type="button" onclick="enviarSugestaoJogo()" style="width:100%;padding:13px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:10px;color:#000;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 18px rgba(245,158,11,0.35);">
                 🚀 Enviar Sugestão de Jogo
@@ -2527,6 +2675,8 @@
 
         </div>
       </div>
+
+
 
     </div>
   </div>
@@ -3086,9 +3236,12 @@
       }
 
       if (tab === 'jogos') {
+        atualizarUIHorarioJogos();
+        verificarStatusHorarioJogos();
         selecionarJogo(jogoAtivoId || 'corrida');
       } else {
         pararJogoCorrida();
+        if (typeof tiroRodando !== 'undefined' && tiroRodando) fimJogoTiro();
       }
     }
 
@@ -3195,12 +3348,450 @@
     }
 
     // ══════════════════════════════════════════════
-    //  MÓDULO: CENTRAL DE JOGOS
+    //  MÓDULO: CENTRAL DE JOGOS PRO & CONTROLE DE HORÁRIOS
     // ══════════════════════════════════════════════
-    let jogoAtivoId = 'corrida';
-    let jogoCorridaRodando = false;
 
+    let jogoAtivoId = 'corrida';
+    let jogosTelaCheiaAtiva = false;
+    let timerMonitorHorarioJogos = null;
+
+    // ── 0. SISTEMA DE ÁUDIO SINTETIZADO (WEB AUDIO API) ──
+    const GameAudio = {
+      ctx: null,
+      getCtx() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+        return this.ctx;
+      },
+      playEngine(speedRatio) {
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          const freq = 65 + Math.min(180, speedRatio * 130);
+          osc.frequency.setValueAtTime(freq, ctx.currentTime);
+          gain.gain.setValueAtTime(0.04, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.1);
+        } catch (_) {}
+      },
+      playNitro() {
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(220, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(580, ctx.currentTime + 0.25);
+          gain.gain.setValueAtTime(0.12, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.25);
+        } catch (_) {}
+      },
+      playCoin() {
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(987, ctx.currentTime);
+          osc.frequency.setValueAtTime(1318, ctx.currentTime + 0.08);
+          gain.gain.setValueAtTime(0.15, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.28);
+        } catch (_) {}
+      },
+      playCrash() {
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(120, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.4);
+          gain.gain.setValueAtTime(0.35, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.4);
+        } catch (_) {}
+      },
+      playGunshot() {
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(380, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.15);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.18);
+        } catch (_) {}
+      },
+      playTargetHit() {
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1600, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.12);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.14);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.14);
+        } catch (_) {}
+      },
+      playReload() {
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(450, ctx.currentTime);
+          osc.frequency.setValueAtTime(750, ctx.currentTime + 0.08);
+          gain.gain.setValueAtTime(0.12, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.18);
+        } catch (_) {}
+      },
+      playMovePiece() {
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(220, ctx.currentTime);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.08);
+        } catch (_) {}
+      },
+      playCapturePiece() {
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(400, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + 0.15);
+          gain.gain.setValueAtTime(0.25, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.15);
+        } catch (_) {}
+      },
+      playCheckAlert() {
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(520, ctx.currentTime);
+          osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.35);
+        } catch (_) {}
+      },
+      playFanfare() {
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          const notes = [523, 659, 784, 1046];
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.1);
+            gain.gain.setValueAtTime(0.18, ctx.currentTime + idx * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.1 + 0.3);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(ctx.currentTime + idx * 0.1);
+            osc.stop(ctx.currentTime + idx * 0.1 + 0.3);
+          });
+        } catch (_) {}
+      }
+    };
+
+    // ── 1. MODO TELA CHEIA (FULLSCREEN) ──
+    function alternarTelaCheiaJogos(forcar) {
+      const pane = document.getElementById('pane-jogos');
+      const card = document.getElementById('card-central-jogos');
+      const txtBtn = document.getElementById('txt-btn-fullscreen');
+      if (!pane || !card) return;
+
+      if (typeof forcar === 'boolean') {
+        jogosTelaCheiaAtiva = forcar;
+      } else {
+        jogosTelaCheiaAtiva = !jogosTelaCheiaAtiva;
+      }
+
+      if (jogosTelaCheiaAtiva) {
+        pane.classList.add('jogos-fullscreen-active');
+        card.classList.add('jogos-fullscreen-active');
+        if (txtBtn) txtBtn.textContent = 'Sair da Tela Cheia';
+
+        try {
+          const el = document.documentElement;
+          if (el.requestFullscreen) el.requestFullscreen();
+          else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        } catch (_) {}
+      } else {
+        pane.classList.remove('jogos-fullscreen-active');
+        card.classList.remove('jogos-fullscreen-active');
+        if (txtBtn) txtBtn.textContent = 'Tela Cheia';
+
+        try {
+          if (document.fullscreenElement || document.webkitFullscreenElement) {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+          }
+        } catch (_) {}
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && jogosTelaCheiaAtiva) {
+        alternarTelaCheiaJogos(false);
+      }
+    });
+
+    // ── 2. CONTROLE DE HORÁRIO PARA LIBERAR JOGOS & NOTIFICAÇÕES ──
+    function carregarConfigHorariosJogos() {
+      try {
+        const salvos = JSON.parse(localStorage.getItem('sdv_config_horarios_jogos') || '{}');
+        return Object.assign({
+          modo: 'almoco_pos', // 'livre', 'almoco_pos', 'personalizado'
+          inicioPers: '12:00',
+          fimPers: '13:30'
+        }, salvos);
+      } catch (_) {
+        return { modo: 'almoco_pos', inicioPers: '12:00', fimPers: '13:30' };
+      }
+    }
+
+    function salvarConfigHorariosJogos() {
+      const modoEl = document.querySelector('input[name="modo_horario_jogos"]:checked');
+      const modo = modoEl ? modoEl.value : 'almoco_pos';
+      const iniEl = document.getElementById('jogos-hora-inicio');
+      const fimEl = document.getElementById('jogos-hora-fim');
+
+      const config = {
+        modo: modo,
+        inicioPers: iniEl ? iniEl.value : '12:00',
+        fimPers: fimEl ? fimEl.value : '13:30'
+      };
+
+      localStorage.setItem('sdv_config_horarios_jogos', JSON.stringify(config));
+      atualizarUIHorarioJogos();
+      verificarStatusHorarioJogos(true);
+    }
+
+    function alterarModoHorarioJogos(modo) {
+      const boxPers = document.getElementById('box-horario-personalizado');
+      if (boxPers) {
+        boxPers.style.display = modo === 'personalizado' ? 'flex' : 'none';
+      }
+      salvarConfigHorariosJogos();
+    }
+
+    function obterDescricaoHorarioPermitido() {
+      const cfg = carregarConfigHorariosJogos();
+      if (cfg.modo === 'livre') return 'Livre (24 horas)';
+      if (cfg.modo === 'almoco_pos') return 'Almoço (12:00 às 13:30) e Pós-Expediente (após 18:00)';
+      if (cfg.modo === 'personalizado') return `${cfg.inicioPers} às ${cfg.fimPers}`;
+      return 'Horário restrito';
+    }
+
+    function verificarStatusHorarioJogos(silencioso = false) {
+      const cfg = carregarConfigHorariosJogos();
+      const agora = new Date();
+      const horaMin = String(agora.getHours()).padStart(2, '0') + ':' + String(agora.getMinutes()).padStart(2, '0');
+      let liberado = false;
+      let proxima = '12:00';
+
+      if (cfg.modo === 'livre') {
+        liberado = true;
+      } else if (cfg.modo === 'almoco_pos') {
+        // Almoço: 12:00 às 13:30 | Noite: 18:00 às 23:59 | Fim de semana liberado
+        const diaSem = agora.getDay();
+        if (diaSem === 0 || diaSem === 6) {
+          liberado = true;
+        } else {
+          if ((horaMin >= '12:00' && horaMin <= '13:30') || (horaMin >= '18:00' && horaMin <= '23:59')) {
+            liberado = true;
+          } else if (horaMin < '12:00') {
+            proxima = '12:00';
+          } else if (horaMin > '13:30' && horaMin < '18:00') {
+            proxima = '18:00';
+          }
+        }
+      } else if (cfg.modo === 'personalizado') {
+        const ini = cfg.inicioPers || '12:00';
+        const fim = cfg.fimPers || '13:30';
+        if (horaMin >= ini && horaMin <= fim) {
+          liberado = true;
+        } else {
+          proxima = ini;
+        }
+      }
+
+      // Atualiza Badge
+      const badge = document.getElementById('badge-status-horario-jogos');
+      if (badge) {
+        if (liberado) {
+          badge.className = 'badge-status-horario liberado';
+          badge.textContent = `🟢 Jogos Liberados Agora (${horaMin})`;
+        } else {
+          badge.className = 'badge-status-horario bloqueado';
+          badge.textContent = `🔴 Bloqueado (Libera às ${proxima})`;
+        }
+      }
+
+      // Atualiza Overlay
+      const overlay = document.getElementById('overlay-jogos-bloqueado');
+      const lblProx = document.getElementById('lbl-proxima-liberacao');
+      if (lblProx) lblProx.textContent = proxima;
+
+      if (!liberado) {
+        if (overlay) overlay.style.display = 'flex';
+        // Se estava jogando qualquer jogo, pausa e avisa!
+        if (jogoCorridaRodando || tiroRodando) {
+          pararJogoCorrida();
+          if (tiroRodando) fimJogoTiro();
+          if (!silencioso) dispararNotificacaoHorarioJogos('Horário Permitido Excedido!');
+        }
+      } else {
+        if (overlay) overlay.style.display = 'none';
+      }
+
+      return { liberado, proxima, horaMin };
+    }
+
+    function atualizarUIHorarioJogos() {
+      const cfg = carregarConfigHorariosJogos();
+      const rLivre = document.getElementById('modo-horario-livre');
+      const rAlmoco = document.getElementById('modo-horario-almoco');
+      const rPers = document.getElementById('modo-horario-pers');
+      const boxPers = document.getElementById('box-horario-personalizado');
+      const inIni = document.getElementById('jogos-hora-inicio');
+      const inFim = document.getElementById('jogos-hora-fim');
+
+      if (rLivre) rLivre.checked = (cfg.modo === 'livre');
+      if (rAlmoco) rAlmoco.checked = (cfg.modo === 'almoco_pos');
+      if (rPers) rPers.checked = (cfg.modo === 'personalizado');
+      if (boxPers) boxPers.style.display = (cfg.modo === 'personalizado' ? 'flex' : 'none');
+      if (inIni && cfg.inicioPers) inIni.value = cfg.inicioPers;
+      if (inFim && cfg.fimPers) inFim.value = cfg.fimPers;
+    }
+
+    // ── NOTIFICAÇÃO NA 3ª ABA (MENSAGENS) & WHATSAPP ──
+    let ultimaNotificacaoJogosTs = 0;
+
+    function dispararNotificacaoHorarioJogos(motivo = 'Tentativa de Acesso Fora do Horário') {
+      const agora = new Date();
+      if (Date.now() - ultimaNotificacaoJogosTs < 20000) return; // Evita duplicações em sequência
+      ultimaNotificacaoJogosTs = Date.now();
+
+      const usuario = (clienteSessao && clienteSessao.nome) || 'Samuel David';
+      const horaFormatada = String(agora.getHours()).padStart(2, '0') + ':' + String(agora.getMinutes()).padStart(2, '0') + ':' + String(agora.getSeconds()).padStart(2, '0');
+      const descHorario = obterDescricaoHorarioPermitido();
+      const textoAlerta = `🚨 ALERTA DE HORÁRIO DE JOGOS: O colaborador ${usuario} tentou acessar ou excedeu o limite da Central de Jogos às ${horaFormatada}. Horário permitido: ${descHorario}. (${motivo})`;
+
+      // 1. Injeta a notificação na 3ª Aba ("💬 Mensagens")
+      const chatArea = document.getElementById('chat-mensagens-area');
+      if (chatArea) {
+        const msgCard = document.createElement('div');
+        msgCard.className = 'chat-bubble bubble-sd';
+        msgCard.style.background = 'linear-gradient(135deg, rgba(239,68,68,0.22), rgba(185,28,28,0.3))';
+        msgCard.style.border = '1.5px solid #ef4444';
+        msgCard.style.boxShadow = '0 4px 18px rgba(239,68,68,0.25)';
+        msgCard.innerHTML = `
+          <div style="font-weight:900;color:#fca5a5;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+            <span>🚨</span> <span>NOTIFICAÇÃO DO SISTEMA · CONTROLE DE JOGOS</span>
+          </div>
+          <div style="color:#fff;font-size:12.5px;line-height:1.45;">${esc(textoAlerta)}</div>
+          <div style="font-size:10.5px;color:#fca5a5;margin-top:6px;text-align:right;">${horaFormatada}</div>
+        `;
+        chatArea.appendChild(msgCard);
+        chatArea.scrollTop = chatArea.scrollHeight;
+      }
+
+      // 2. Incrementa badge da aba Mensagens (3ª Aba)
+      const badgeMsg = document.getElementById('badge-msg-count');
+      if (badgeMsg) {
+        const atual = parseInt(badgeMsg.textContent || '0') + 1;
+        badgeMsg.textContent = atual;
+        badgeMsg.style.display = 'inline-block';
+      }
+
+      // 3. Toca som de alerta
+      GameAudio.playCheckAlert();
+
+      // 4. Exibe Toast de Notificação
+      mostrarToastNotificacao('Alerta de Jogos', `Horário limite excedido às ${horaFormatada}! Notificação registrada na aba Mensagens e gerência.`, '⏰');
+    }
+
+    function notificarGerenciaTentativaJogo() {
+      const usuario = (clienteSessao && clienteSessao.nome) || 'Samuel David';
+      const agora = new Date();
+      const horaStr = String(agora.getHours()).padStart(2, '0') + ':' + String(agora.getMinutes()).padStart(2, '0');
+      const msg = encodeURIComponent(`🚨 ALERTA SD VIDROS:\nO colaborador ${usuario} tentou acessar a Central de Jogos fora do horário permitido às ${horaStr}.\nHorário configurado: ${obterDescricaoHorarioPermitido()}.`);
+      window.open(`https://wa.me/5585996119824?text=${msg}`, '_blank');
+    }
+
+    // ── 3. SELETOR DE JOGOS ──
     function selecionarJogo(jogo) {
+      const statusHorario = verificarStatusHorarioJogos();
+      if (!statusHorario.liberado && jogo !== 'sugestao') {
+        dispararNotificacaoHorarioJogos('Tentativa de Acesso ao Jogo ' + jogo.toUpperCase());
+      }
+
       jogoAtivoId = jogo;
       ['corrida', 'damas', 'xadrez', 'tiro', 'sugestao'].forEach(j => {
         const v = document.getElementById('view-jogo-' + j);
@@ -3210,7 +3801,7 @@
       });
 
       if (jogo === 'corrida') {
-        if (!jogoCorridaRodando) iniciarJogoCorrida();
+        if (!jogoCorridaRodando && statusHorario.liberado) iniciarJogoCorrida();
       } else {
         pararJogoCorrida();
       }
@@ -3228,14 +3819,23 @@
       }
     }
 
-    // ── 1. JOGO DE CORRIDA (TURBO RACER) ──
+    // ══════════════════════════════════════════════
+    //  JOGO 1: CORRIDA TURBO RACER 3D ARCADE PRO
+    // ══════════════════════════════════════════════
     let corridaCanvas, corridaCtx, corridaAnimId;
-    let carX = 140, carY = 320;
+    let carX = 160, carY = 370;
+    let carTilt = 0;
     let corridaObstaculos = [];
+    let corridaMoedas = [];
+    let corridaParticulas = [];
     let corridaScore = 0;
-    let corridaVel = 4;
+    let corridaVel = 6;
+    let corridaNitro = 100;
+    let corridaNitroAtivo = false;
     let corridaOver = false;
+    let jogoCorridaRodando = false;
     let faixaOffset = 0;
+    let giroCarroDir = 0;
 
     function iniciarJogoCorrida() {
       corridaCanvas = document.getElementById('canvas-corrida');
@@ -3243,11 +3843,16 @@
       corridaCtx = corridaCanvas.getContext('2d');
       pararJogoCorrida();
 
-      carX = 140;
-      carY = 320;
+      carX = 160;
+      carY = 370;
+      carTilt = 0;
       corridaObstaculos = [];
+      corridaMoedas = [];
+      corridaParticulas = [];
       corridaScore = 0;
-      corridaVel = 4;
+      corridaVel = 6;
+      corridaNitro = 100;
+      corridaNitroAtivo = false;
       corridaOver = false;
       jogoCorridaRodando = true;
 
@@ -3258,8 +3863,10 @@
       const recEl = document.getElementById('corrida-recorde');
       if (recEl) recEl.textContent = rec;
 
-      window.removeEventListener('keydown', lidarTeclasCorrida);
-      window.addEventListener('keydown', lidarTeclasCorrida);
+      window.removeEventListener('keydown', lidarTeclasCorridaDown);
+      window.removeEventListener('keyup', lidarTeclasCorridaUp);
+      window.addEventListener('keydown', lidarTeclasCorridaDown);
+      window.addEventListener('keyup', lidarTeclasCorridaUp);
 
       loopCorrida();
     }
@@ -3267,111 +3874,291 @@
     function pararJogoCorrida() {
       if (corridaAnimId) cancelAnimationFrame(corridaAnimId);
       jogoCorridaRodando = false;
-      window.removeEventListener('keydown', lidarTeclasCorrida);
+      window.removeEventListener('keydown', lidarTeclasCorridaDown);
+      window.removeEventListener('keyup', lidarTeclasCorridaUp);
     }
 
-    function moverCarroCorrida(dir) {
-      if (corridaOver || !corridaCanvas) return;
-      carX += dir * 28;
-      if (carX < 45) carX = 45;
-      if (carX > 235) carX = 235;
+    function iniciarGiroCarro(dir) {
+      giroCarroDir = dir;
+      carTilt = dir * 0.15;
     }
 
-    function lidarTeclasCorrida(e) {
-      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') moverCarroCorrida(-1);
-      else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') moverCarroCorrida(1);
+    function pararGiroCarro() {
+      giroCarroDir = 0;
+      carTilt = 0;
+    }
+
+    function ativarNitroCorrida(ativo) {
+      corridaNitroAtivo = ativo && corridaNitro > 5;
+      if (corridaNitroAtivo) GameAudio.playNitro();
+    }
+
+    function lidarTeclasCorridaDown(e) {
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') iniciarGiroCarro(-1);
+      else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') iniciarGiroCarro(1);
+      else if (e.key === ' ' || e.key === 'Shift') ativarNitroCorrida(true);
+    }
+
+    function lidarTeclasCorridaUp(e) {
+      if (['ArrowLeft', 'ArrowRight', 'a', 'A', 'd', 'D'].includes(e.key)) pararGiroCarro();
+      else if (e.key === ' ' || e.key === 'Shift') ativarNitroCorrida(false);
     }
 
     function loopCorrida() {
       if (!jogoCorridaRodando) return;
       corridaAnimId = requestAnimationFrame(loopCorrida);
 
-      // Pista
-      corridaCtx.fillStyle = '#1e293b';
-      corridaCtx.fillRect(0, 0, 320, 420);
-
-      // Grama / Laterais
-      corridaCtx.fillStyle = '#065f46';
-      corridaCtx.fillRect(0, 0, 35, 420);
-      corridaCtx.fillRect(285, 0, 35, 420);
-
-      // Linhas da pista
-      corridaCtx.strokeStyle = '#cbd5e1';
-      corridaCtx.lineWidth = 4;
-      corridaCtx.beginPath();
-      corridaCtx.moveTo(35, 0); corridaCtx.lineTo(35, 420);
-      corridaCtx.moveTo(285, 0); corridaCtx.lineTo(285, 420);
-      corridaCtx.stroke();
-
-      // Faixas centrais animadas
-      faixaOffset = (faixaOffset + corridaVel) % 40;
-      corridaCtx.fillStyle = '#fbbf24';
-      for (let y = -40 + faixaOffset; y < 420; y += 40) {
-        corridaCtx.fillRect(115, y, 6, 22);
-        corridaCtx.fillRect(195, y, 6, 22);
+      // Atualiza velocidade base e nitro
+      let velEfetiva = corridaVel;
+      if (corridaNitroAtivo && corridaNitro > 0) {
+        velEfetiva = corridaVel * 1.6;
+        corridaNitro = Math.max(0, corridaNitro - 0.7);
+        if (corridaNitro <= 0) corridaNitroAtivo = false;
+      } else {
+        corridaNitro = Math.min(100, corridaNitro + 0.15);
       }
 
-      // Desenhar carro do jogador (Azul Neon)
-      corridaCtx.fillStyle = '#38bdf8';
+      // Atualiza barra de Nitro
+      const nBar = document.getElementById('corrida-nitro-bar');
+      if (nBar) nBar.style.width = `${Math.floor(corridaNitro)}%`;
+
+      // Atualiza movimento horizontal
+      if (giroCarroDir !== 0) {
+        carX += giroCarroDir * (velEfetiva * 0.85);
+        if (carX < 40) carX = 40;
+        if (carX > 280) carX = 280;
+      }
+
+      // Áudio do motor
+      if (Math.random() < 0.12) {
+        GameAudio.playEngine(velEfetiva / 12);
+      }
+
+      // ── DESENHA PISTA E PERSPECTIVA ──
+      const W = corridaCanvas.width;
+      const H = corridaCanvas.height;
+
+      // Céu noturno com gradiente
+      const skyGrad = corridaCtx.createLinearGradient(0, 0, 0, 180);
+      skyGrad.addColorStop(0, '#020617');
+      skyGrad.addColorStop(1, '#1e1b4b');
+      corridaCtx.fillStyle = skyGrad;
+      corridaCtx.fillRect(0, 0, W, 180);
+
+      // Pista de asfalto
+      const roadGrad = corridaCtx.createLinearGradient(0, 180, 0, H);
+      roadGrad.addColorStop(0, '#0f172a');
+      roadGrad.addColorStop(1, '#1e293b');
+      corridaCtx.fillStyle = roadGrad;
       corridaCtx.beginPath();
-      corridaCtx.roundRect(carX, carY, 40, 65, 8);
+      corridaCtx.moveTo(70, 180);
+      corridaCtx.lineTo(290, 180);
+      corridaCtx.lineTo(W, H);
+      corridaCtx.lineTo(0, H);
+      corridaCtx.closePath();
       corridaCtx.fill();
-      corridaCtx.fillStyle = '#0284c7';
-      corridaCtx.fillRect(carX + 6, carY + 16, 28, 26);
-      corridaCtx.fillStyle = '#f59e0b';
-      corridaCtx.fillRect(carX + 2, carY + 4, 8, 8);
-      corridaCtx.fillRect(carX + 30, carY + 4, 8, 8);
 
-      // Spawn obstáculos
-      if (Math.random() < 0.035 && corridaObstaculos.length < 4) {
-        const lanes = [55, 135, 215];
-        const lx = lanes[Math.floor(Math.random() * lanes.length)];
-        const cores = ['#ef4444', '#a855f7', '#f97316', '#e11d48'];
-        const cor = cores[Math.floor(Math.random() * cores.length)];
-        corridaObstaculos.push({ x: lx, y: -70, w: 40, h: 65, cor });
+      // Laterais zebradas (Curbs)
+      faixaOffset = (faixaOffset + velEfetiva) % 60;
+      for (let y = 180; y < H; y += 30) {
+        const segIdx = Math.floor((y + faixaOffset) / 30);
+        const corZebra = segIdx % 2 === 0 ? '#ef4444' : '#ffffff';
+        const prog = (y - 180) / (H - 180);
+        const leftX = 70 * (1 - prog);
+        const rightX = 290 + (W - 290) * prog;
+        const curW = 12 + prog * 18;
+
+        corridaCtx.fillStyle = corZebra;
+        corridaCtx.fillRect(leftX, y, curW, 26);
+        corridaCtx.fillRect(rightX - curW, y, curW, 26);
       }
 
-      // Mover e desenhar obstáculos
+      // Faixas brancas centrais animadas
+      corridaCtx.fillStyle = '#f8fafc';
+      for (let y = 180; y < H; y += 45) {
+        const curY = y + (faixaOffset % 45);
+        if (curY > 180 && curY < H) {
+          const prog = (curY - 180) / (H - 180);
+          const wF = 4 + prog * 5;
+          const hF = 16 + prog * 18;
+          const l1 = 140 - 25 * prog;
+          const l2 = 220 + 25 * prog;
+          corridaCtx.fillRect(l1, curY, wF, hF);
+          corridaCtx.fillRect(l2, curY, wF, hF);
+        }
+      }
+
+      // ── SPAWN DE TRÁFEGO E MOEDAS ──
+      if (Math.random() < 0.035 && corridaObstaculos.length < 4) {
+        const faixas = [65, 145, 230];
+        const fx = faixas[Math.floor(Math.random() * faixas.length)];
+        const tipos = [
+          { cor: '#ef4444', modelo: 'ferrari', w: 42, h: 72 },
+          { cor: '#10b981', modelo: 'truck', w: 48, h: 88 },
+          { cor: '#38bdf8', modelo: 'police', w: 44, h: 72 },
+          { cor: '#f59e0b', modelo: 'taxi', w: 42, h: 70 }
+        ];
+        const modelo = tipos[Math.floor(Math.random() * tipos.length)];
+        corridaObstaculos.push({
+          x: fx,
+          y: 120,
+          w: modelo.w,
+          h: modelo.h,
+          cor: modelo.cor,
+          tipo: modelo.modelo,
+          velRel: (Math.random() * 2 - 1)
+        });
+      }
+
+      if (Math.random() < 0.02 && corridaMoedas.length < 3) {
+        corridaMoedas.push({
+          x: 70 + Math.random() * 220,
+          y: 130,
+          r: 12
+        });
+      }
+
+      // ── DESENHA E MOVE MOEDAS ──
+      for (let i = corridaMoedas.length - 1; i >= 0; i--) {
+        const m = corridaMoedas[i];
+        m.y += velEfetiva * 0.9;
+        corridaCtx.fillStyle = '#fbbf24';
+        corridaCtx.beginPath();
+        corridaCtx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+        corridaCtx.fill();
+        corridaCtx.strokeStyle = '#d97706';
+        corridaCtx.lineWidth = 2.5;
+        corridaCtx.stroke();
+        corridaCtx.fillStyle = '#78350f';
+        corridaCtx.font = 'bold 11px sans-serif';
+        corridaCtx.fillText('★', m.x - 4, m.y + 4);
+
+        // Coleta de moeda
+        if (Math.hypot(carX + 20 - m.x, carY + 30 - m.y) < 32) {
+          corridaMoedas.splice(i, 1);
+          corridaScore += 50;
+          GameAudio.playCoin();
+        } else if (m.y > H + 20) {
+          corridaMoedas.splice(i, 1);
+        }
+      }
+
+      // ── DESENHA E MOVE VEÍCULOS ADVERSÁRIOS ──
       for (let i = corridaObstaculos.length - 1; i >= 0; i--) {
         const obs = corridaObstaculos[i];
-        obs.y += corridaVel;
+        obs.y += velEfetiva * 0.75 + obs.velRel;
 
+        // Desenho detalhado do carro adversário
+        corridaCtx.save();
         corridaCtx.fillStyle = obs.cor;
         corridaCtx.beginPath();
         corridaCtx.roundRect(obs.x, obs.y, obs.w, obs.h, 8);
         corridaCtx.fill();
-        corridaCtx.fillStyle = '#1e1b4b';
-        corridaCtx.fillRect(obs.x + 6, obs.y + 20, 28, 24);
 
-        // Colisão
+        // Vidros
+        corridaCtx.fillStyle = '#0f172a';
+        corridaCtx.fillRect(obs.x + 6, obs.y + 18, obs.w - 12, 24);
+
+        // Luzes traseiras / Giroflex de polícia
+        if (obs.tipo === 'police') {
+          const blink = Math.floor(Date.now() / 150) % 2 === 0;
+          corridaCtx.fillStyle = blink ? '#ef4444' : '#3b82f6';
+          corridaCtx.fillRect(obs.x + 12, obs.y + 4, obs.w - 24, 7);
+        } else {
+          corridaCtx.fillStyle = '#f87171';
+          corridaCtx.fillRect(obs.x + 4, obs.y + obs.h - 6, 8, 4);
+          corridaCtx.fillRect(obs.x + obs.w - 12, obs.y + obs.h - 6, 8, 4);
+        }
+        corridaCtx.restore();
+
+        // Colisão com carro do jogador
         if (
-          carX < obs.x + obs.w - 4 &&
-          carX + 40 > obs.x + 4 &&
-          carY < obs.y + obs.h - 4 &&
-          carY + 65 > obs.y + 4
+          carX < obs.x + obs.w - 6 &&
+          carX + 42 > obs.x + 6 &&
+          carY < obs.y + obs.h - 8 &&
+          carY + 70 > obs.y + 8
         ) {
           fimDeJogoCorrida();
           return;
         }
 
-        // Passou da tela
-        if (obs.y > 420) {
+        if (obs.y > H + 90) {
           corridaObstaculos.splice(i, 1);
-          corridaScore += 10;
-          if (corridaScore % 50 === 0) corridaVel += 0.5;
+          corridaScore += 15;
+          if (corridaScore % 80 === 0) corridaVel = Math.min(13, corridaVel + 0.5);
         }
       }
 
-      // Atualiza placar
+      // ── DESENHA CARRO DO JOGADOR COM FARÓIS E NITRO ──
+      corridaCtx.save();
+      corridaCtx.translate(carX + 21, carY + 35);
+      corridaCtx.rotate(carTilt);
+
+      // Feixe de faróis projetado no asfalto
+      const fGrad = corridaCtx.createLinearGradient(0, 0, 0, -180);
+      fGrad.addColorStop(0, 'rgba(254, 240, 138, 0.4)');
+      fGrad.addColorStop(1, 'rgba(254, 240, 138, 0)');
+      corridaCtx.fillStyle = fGrad;
+      corridaCtx.beginPath();
+      corridaCtx.moveTo(-15, -30);
+      corridaCtx.lineTo(-45, -180);
+      corridaCtx.lineTo(45, -180);
+      corridaCtx.lineTo(15, -30);
+      corridaCtx.closePath();
+      corridaCtx.fill();
+
+      // Chamas de Nitro
+      if (corridaNitroAtivo) {
+        corridaCtx.fillStyle = '#38bdf8';
+        corridaCtx.beginPath();
+        corridaCtx.moveTo(-12, 35);
+        corridaCtx.lineTo(0, 55 + Math.random() * 15);
+        corridaCtx.lineTo(12, 35);
+        corridaCtx.fill();
+      }
+
+      // Corpo do carro de corrida (Cyber Neon Azul)
+      corridaCtx.fillStyle = '#0284c7';
+      corridaCtx.beginPath();
+      corridaCtx.roundRect(-21, -35, 42, 70, 8);
+      corridaCtx.fill();
+
+      // Faixas esportivas amarelas
+      corridaCtx.fillStyle = '#fbbf24';
+      corridaCtx.fillRect(-4, -35, 8, 70);
+
+      // Para-brisa escuro
+      corridaCtx.fillStyle = '#030712';
+      corridaCtx.beginPath();
+      corridaCtx.roundRect(-15, -16, 30, 24, 4);
+      corridaCtx.fill();
+
+      // Faróis dianteiros acesos
+      corridaCtx.fillStyle = '#fef08a';
+      corridaCtx.fillRect(-18, -34, 7, 5);
+      corridaCtx.fillRect(11, -34, 7, 5);
+
+      // Rodas esportivas
+      corridaCtx.fillStyle = '#000';
+      corridaCtx.fillRect(-24, -26, 4, 16);
+      corridaCtx.fillRect(20, -26, 4, 16);
+      corridaCtx.fillRect(-24, 12, 4, 16);
+      corridaCtx.fillRect(20, 12, 4, 16);
+
+      corridaCtx.restore();
+
+      // Atualiza placar do HUD
       const scEl = document.getElementById('corrida-score');
       if (scEl) scEl.textContent = corridaScore;
       const spEl = document.getElementById('corrida-speed');
-      if (spEl) spEl.textContent = `${Math.floor(90 + corridaVel * 12)} km/h`;
+      if (spEl) spEl.textContent = `${Math.floor(80 + velEfetiva * 14)} km/h`;
     }
 
     function fimDeJogoCorrida() {
       corridaOver = true;
       pararJogoCorrida();
+      GameAudio.playCrash();
+
       const overEl = document.getElementById('corrida-overlay');
       const finEl = document.getElementById('corrida-final-score');
       if (finEl) finEl.textContent = corridaScore;
@@ -3385,13 +4172,26 @@
       }
     }
 
-    // ── 2. JOGO DE DAMAS (CHECKERS) ──
+    // ══════════════════════════════════════════════
+    //  JOGO 2: DAMAS MASTER PRO (VS IA OU 2 JOGADORES)
+    // ══════════════════════════════════════════════
     let damasBoard = [];
     let damasVez = 'branca';
     let damasSelecionada = null;
+    let damasMovimentosValidos = [];
     let damasCapBrancas = 0;
     let damasCapPretas = 0;
     let damasIniciadas = false;
+    let damasModoJogo = 'bot'; // 'bot' ou '2p'
+
+    function mudarModoDamas(modo) {
+      damasModoJogo = modo;
+      const bBot = document.getElementById('btn-damas-modo-bot');
+      const b2p = document.getElementById('btn-damas-modo-2p');
+      if (bBot) bBot.classList.toggle('active', modo === 'bot');
+      if (b2p) b2p.classList.toggle('active', modo === '2p');
+      reiniciarJogoDamas();
+    }
 
     function iniciarJogoDamas() {
       damasIniciadas = true;
@@ -3401,6 +4201,7 @@
     function reiniciarJogoDamas() {
       damasVez = 'branca';
       damasSelecionada = null;
+      damasMovimentosValidos = [];
       damasCapBrancas = 0;
       damasCapPretas = 0;
       damasBoard = Array(8).fill(null).map(() => Array(8).fill(null));
@@ -3429,18 +4230,24 @@
         for (let c = 0; c < 8; c++) {
           const sq = document.createElement('div');
           const isDark = (r + c) % 2 === 1;
-          sq.className = `damas-sq ${isDark ? 'dark' : 'light'}`;
+          sq.className = `damas-sq-pro ${isDark ? 'dark' : 'light'}`;
 
           const peca = damasBoard[r][c];
           if (peca) {
             const pEl = document.createElement('div');
-            pEl.className = `damas-peca ${peca.cor}`;
-            if (peca.dama) pEl.textContent = '👑';
+            pEl.className = `peca-dama-3d ${peca.cor}`;
+            pEl.textContent = peca.dama ? '👑' : '';
             sq.appendChild(pEl);
           }
 
           if (damasSelecionada && damasSelecionada.r === r && damasSelecionada.c === c) {
             sq.classList.add('selected');
+          }
+
+          // Destino válido
+          const ehDestino = damasMovimentosValidos.some(m => m.r === r && m.c === c);
+          if (ehDestino) {
+            sq.classList.add('move-dest');
           }
 
           sq.onclick = () => clicarCasaDamas(r, c);
@@ -3449,58 +4256,118 @@
       }
     }
 
+    function calcularMovimentosDamas(r, c) {
+      const peca = damasBoard[r][c];
+      if (!peca) return [];
+      const moves = [];
+      const dirs = peca.dama ? [[-1, -1], [-1, 1], [1, -1], [1, 1]] : (peca.cor === 'branca' ? [[-1, -1], [-1, 1]] : [[1, -1], [1, 1]]);
+
+      // Movimentos simples
+      dirs.forEach(([dr, dc]) => {
+        const nr = r + dr;
+        const nc = c + dc;
+        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !damasBoard[nr][nc]) {
+          moves.push({ r: nr, c: nc, ehCaptura: false });
+        }
+      });
+
+      // Capturas (pulo)
+      [[-1, -1], [-1, 1], [1, -1], [1, 1]].forEach(([dr, dc]) => {
+        const midR = r + dr;
+        const midC = c + dc;
+        const endR = r + dr * 2;
+        const endC = c + dc * 2;
+        if (endR >= 0 && endR < 8 && endC >= 0 && endC < 8) {
+          const midPeca = damasBoard[midR][midC];
+          if (midPeca && midPeca.cor !== peca.cor && !damasBoard[endR][endC]) {
+            moves.push({ r: endR, c: endC, ehCaptura: true, midR, midC });
+          }
+        }
+      });
+
+      return moves;
+    }
+
     function clicarCasaDamas(r, c) {
+      if (damasModoJogo === 'bot' && damasVez === 'preta') return; // Aguardando IA
+
       const peca = damasBoard[r][c];
 
       if (peca && peca.cor === damasVez) {
         damasSelecionada = { r, c };
+        damasMovimentosValidos = calcularMovimentosDamas(r, c);
+        GameAudio.playMovePiece();
         renderizarTabuleiroDamas();
         return;
       }
 
       if (damasSelecionada) {
-        const sr = damasSelecionada.r;
-        const sc = damasSelecionada.c;
-        const pSel = damasBoard[sr][sc];
-        if (!pSel) return;
-
-        const dir = pSel.cor === 'branca' ? -1 : 1;
-        const diffR = r - sr;
-        const diffC = Math.abs(c - sc);
-
-        // Movimento simples
-        if (!peca && (pSel.dama || diffR === dir) && diffC === 1 && Math.abs(diffR) === 1) {
-          damasBoard[r][c] = pSel;
-          damasBoard[sr][sc] = null;
-          if ((pSel.cor === 'branca' && r === 0) || (pSel.cor === 'preta' && r === 7)) pSel.dama = true;
-          trocarVezDamas();
-          return;
-        }
-
-        // Captura
-        if (!peca && Math.abs(diffR) === 2 && diffC === 2) {
-          const midR = (sr + r) / 2;
-          const midC = (sc + c) / 2;
-          const midPeca = damasBoard[midR][midC];
-          if (midPeca && midPeca.cor !== pSel.cor) {
-            damasBoard[r][c] = pSel;
-            damasBoard[sr][sc] = null;
-            damasBoard[midR][midC] = null;
-            if (pSel.cor === 'branca') damasCapPretas++;
-            else damasCapBrancas++;
-            if ((pSel.cor === 'branca' && r === 0) || (pSel.cor === 'preta' && r === 7)) pSel.dama = true;
-            trocarVezDamas();
-            return;
-          }
+        const mv = damasMovimentosValidos.find(m => m.r === r && m.c === c);
+        if (mv) {
+          executarMovimentoDamas(damasSelecionada.r, damasSelecionada.c, r, c, mv);
         }
       }
     }
 
-    function trocarVezDamas() {
+    function executarMovimentoDamas(sr, sc, dr, dc, mv) {
+      const p = damasBoard[sr][sc];
+      damasBoard[dr][dc] = p;
+      damasBoard[sr][sc] = null;
+
+      if (mv.ehCaptura) {
+        damasBoard[mv.midR][mv.midC] = null;
+        if (p.cor === 'branca') damasCapBrancas++;
+        else damasCapPretas++;
+        GameAudio.playCapturePiece();
+      } else {
+        GameAudio.playMovePiece();
+      }
+
+      // Promoção a Dama
+      if ((p.cor === 'branca' && dr === 0) || (p.cor === 'preta' && dr === 7)) {
+        if (!p.dama) {
+          p.dama = true;
+          GameAudio.playFanfare();
+        }
+      }
+
       damasSelecionada = null;
-      damasVez = damasVez === 'branca' ? 'preta' : 'branca';
+      damasMovimentosValidos = [];
+      damasVez = (damasVez === 'branca' ? 'preta' : 'branca');
       renderizarTabuleiroDamas();
       atualizarStatusDamas();
+
+      // Se for contra robô e for a vez das pretas:
+      if (damasModoJogo === 'bot' && damasVez === 'preta') {
+        setTimeout(jogadaRoboDamas, 550);
+      }
+    }
+
+    function jogadaRoboDamas() {
+      if (damasVez !== 'preta') return;
+      const todasJogadas = [];
+
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = damasBoard[r][c];
+          if (p && p.cor === 'preta') {
+            const mvs = calcularMovimentosDamas(r, c);
+            mvs.forEach(m => todasJogadas.push({ sr: r, sc: c, mv: m }));
+          }
+        }
+      }
+
+      if (todasJogadas.length === 0) {
+        alert('🏆 Parabéns! Você venceu as Damas contra o Robô!');
+        GameAudio.playFanfare();
+        return;
+      }
+
+      // Prioriza capturas
+      const capturas = todasJogadas.filter(j => j.mv.ehCaptura);
+      const escolhida = capturas.length > 0 ? capturas[Math.floor(Math.random() * capturas.length)] : todasJogadas[Math.floor(Math.random() * todasJogadas.length)];
+
+      executarMovimentoDamas(escolhida.sr, escolhida.sc, escolhida.mv.r, escolhida.mv.c, escolhida.mv);
     }
 
     function atualizarStatusDamas() {
@@ -3508,23 +4375,42 @@
       const bEl = document.getElementById('damas-cap-brancas');
       const pEl = document.getElementById('damas-cap-pretas');
       if (rot) {
-        rot.textContent = damasVez === 'branca' ? 'Vez: ⚪ Brancas' : 'Vez: 🔴 Pretas';
+        if (damasModoJogo === 'bot') {
+          rot.textContent = damasVez === 'branca' ? 'Vez: ⚪ Suas Peças' : 'Vez: 🔴 Robô Pensando...';
+        } else {
+          rot.textContent = damasVez === 'branca' ? 'Vez: ⚪ Brancas' : 'Vez: 🔴 Pretas';
+        }
         rot.style.color = damasVez === 'branca' ? '#38bdf8' : '#f87171';
       }
       if (bEl) bEl.textContent = damasCapBrancas;
       if (pEl) pEl.textContent = damasCapPretas;
     }
 
-    // ── 3. JOGO DE XADREZ (CHESS) ──
+    // ══════════════════════════════════════════════
+    //  JOGO 3: XADREZ GRANDMASTER PRO (VS IA OU 2 JOGADORES)
+    // ══════════════════════════════════════════════
     let xadrezBoard = [];
     let xadrezVez = 'branca';
     let xadrezSelecionado = null;
+    let xadrezMovimentosValidos = [];
     let xadrezIniciado = false;
+    let xadrezModoJogo = 'bot';
+    let xadrezCapBrancasLista = [];
+    let xadrezCapPretasLista = [];
 
-    const PECAS_XADREZ = {
+    const PECAS_XADREZ_GLYPHS = {
       'p_peao': '♟', 'p_torre': '♜', 'p_cavalo': '♞', 'p_bispo': '♝', 'p_rainha': '♛', 'p_rei': '♚',
       'b_peao': '♙', 'b_torre': '♖', 'b_cavalo': '♘', 'b_bispo': '♗', 'b_rainha': '♕', 'b_rei': '♔'
     };
+
+    function mudarModoXadrez(modo) {
+      xadrezModoJogo = modo;
+      const bBot = document.getElementById('btn-xadrez-modo-bot');
+      const b2p = document.getElementById('btn-xadrez-modo-2p');
+      if (bBot) bBot.classList.toggle('active', modo === 'bot');
+      if (b2p) b2p.classList.toggle('active', modo === '2p');
+      reiniciarJogoXadrez();
+    }
 
     function iniciarJogoXadrez() {
       xadrezIniciado = true;
@@ -3534,6 +4420,9 @@
     function reiniciarJogoXadrez() {
       xadrezVez = 'branca';
       xadrezSelecionado = null;
+      xadrezMovimentosValidos = [];
+      xadrezCapBrancasLista = [];
+      xadrezCapPretasLista = [];
       xadrezBoard = [
         ['p_torre','p_cavalo','p_bispo','p_rainha','p_rei','p_bispo','p_cavalo','p_torre'],
         ['p_peao','p_peao','p_peao','p_peao','p_peao','p_peao','p_peao','p_peao'],
@@ -3557,17 +4446,25 @@
         for (let c = 0; c < 8; c++) {
           const sq = document.createElement('div');
           const isDark = (r + c) % 2 === 1;
-          sq.className = `xadrez-sq ${isDark ? 'dark' : 'light'}`;
+          sq.className = `xadrez-sq-pro ${isDark ? 'dark' : 'light'}`;
 
           const peca = xadrezBoard[r][c];
           if (peca) {
-            sq.textContent = PECAS_XADREZ[peca] || '';
-            sq.style.color = peca.startsWith('b_') ? '#f8fafc' : '#0f172a';
-            sq.style.textShadow = peca.startsWith('b_') ? '0 1px 3px rgba(0,0,0,0.8)' : 'none';
+            sq.textContent = PECAS_XADREZ_GLYPHS[peca] || '';
+            const ehBranca = peca.startsWith('b_');
+            sq.style.color = ehBranca ? '#f8fafc' : '#0f172a';
+            sq.style.textShadow = ehBranca ? '0 2px 5px rgba(0,0,0,0.8), 0 0 8px rgba(255,255,255,0.4)' : '0 1px 3px rgba(255,255,255,0.3)';
           }
 
           if (xadrezSelecionado && xadrezSelecionado.r === r && xadrezSelecionado.c === c) {
             sq.classList.add('selected');
+          }
+
+          // Indicador de movimento válido ou captura
+          const mv = xadrezMovimentosValidos.find(m => m.r === r && m.c === c);
+          if (mv) {
+            if (mv.ehCaptura) sq.classList.add('move-capture');
+            else sq.classList.add('move-dest');
           }
 
           sq.onclick = () => clicarCasaXadrez(r, c);
@@ -3576,39 +4473,180 @@
       }
     }
 
-    function clicarCasaXadrez(r, c) {
+    function calcularMovimentosXadrez(r, c) {
       const peca = xadrezBoard[r][c];
-      const prefixoVez = xadrezVez === 'branca' ? 'b_' : 'p_';
+      if (!peca) return [];
+      const ehBranca = peca.startsWith('b_');
+      const tipo = peca.slice(2);
+      const moves = [];
 
-      if (peca && peca.startsWith(prefixoVez)) {
+      function addMove(nr, nc) {
+        if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) return false;
+        const dest = xadrezBoard[nr][nc];
+        if (!dest) {
+          moves.push({ r: nr, c: nc, ehCaptura: false });
+          return true; // Continua linha
+        }
+        if (dest.startsWith(ehBranca ? 'p_' : 'b_')) {
+          moves.push({ r: nr, c: nc, ehCaptura: true });
+        }
+        return false; // Bloqueado
+      }
+
+      // 1. PEÃO
+      if (tipo === 'peao') {
+        const dir = ehBranca ? -1 : 1;
+        const rIni = ehBranca ? 6 : 1;
+        if (!xadrezBoard[r + dir]?.[c]) {
+          moves.push({ r: r + dir, c: c, ehCaptura: false });
+          if (r === rIni && !xadrezBoard[r + dir * 2]?.[c]) {
+            moves.push({ r: r + dir * 2, c: c, ehCaptura: false });
+          }
+        }
+        // Capturas diagonais
+        [-1, 1].forEach(dc => {
+          const cap = xadrezBoard[r + dir]?.[c + dc];
+          if (cap && cap.startsWith(ehBranca ? 'p_' : 'b_')) {
+            moves.push({ r: r + dir, c: c + dc, ehCaptura: true });
+          }
+        });
+      }
+
+      // 2. CAVALO
+      if (tipo === 'cavalo') {
+        [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr, dc]) => {
+          addMove(r + dr, c + dc);
+        });
+      }
+
+      // 3. BISPO & RAINHA (Diagonais)
+      if (tipo === 'bispo' || tipo === 'rainha') {
+        [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([dr, dc]) => {
+          let step = 1;
+          while (addMove(r + dr * step, c + dc * step)) step++;
+        });
+      }
+
+      // 4. TORRE & RAINHA (Retas)
+      if (tipo === 'torre' || tipo === 'rainha') {
+        [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr, dc]) => {
+          let step = 1;
+          while (addMove(r + dr * step, c + dc * step)) step++;
+        });
+      }
+
+      // 5. REI
+      if (tipo === 'rei') {
+        [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(([dr, dc]) => {
+          addMove(r + dr, c + dc);
+        });
+      }
+
+      return moves;
+    }
+
+    function clicarCasaXadrez(r, c) {
+      if (xadrezModoJogo === 'bot' && xadrezVez === 'preta') return;
+
+      const peca = xadrezBoard[r][c];
+      const prefixo = xadrezVez === 'branca' ? 'b_' : 'p_';
+
+      if (peca && peca.startsWith(prefixo)) {
         xadrezSelecionado = { r, c, peca };
+        xadrezMovimentosValidos = calcularMovimentosXadrez(r, c);
+        GameAudio.playMovePiece();
         renderizarTabuleiroXadrez();
         return;
       }
 
       if (xadrezSelecionado) {
-        const sr = xadrezSelecionado.r;
-        const sc = xadrezSelecionado.c;
-        xadrezBoard[r][c] = xadrezSelecionado.peca;
-        xadrezBoard[sr][sc] = null;
-        xadrezSelecionado = null;
-        xadrezVez = xadrezVez === 'branca' ? 'preta' : 'branca';
-        renderizarTabuleiroXadrez();
-        atualizarStatusXadrez();
+        const mv = xadrezMovimentosValidos.find(m => m.r === r && m.c === c);
+        if (mv) {
+          executarMovimentoXadrez(xadrezSelecionado.r, xadrezSelecionado.c, r, c, mv);
+        }
       }
+    }
+
+    function executarMovimentoXadrez(sr, sc, dr, dc, mv) {
+      const peca = xadrezBoard[sr][sc];
+      const destPeca = xadrezBoard[dr][dc];
+
+      if (destPeca) {
+        if (destPeca.startsWith('p_')) xadrezCapBrancasLista.push(PECAS_XADREZ_GLYPHS[destPeca]);
+        else xadrezCapPretasLista.push(PECAS_XADREZ_GLYPHS[destPeca]);
+        GameAudio.playCapturePiece();
+      } else {
+        GameAudio.playMovePiece();
+      }
+
+      xadrezBoard[dr][dc] = peca;
+      xadrezBoard[sr][sc] = null;
+
+      // Promoção simples do peão para Dama
+      if (peca === 'b_peao' && dr === 0) xadrezBoard[dr][dc] = 'b_rainha';
+      if (peca === 'p_peao' && dr === 7) xadrezBoard[dr][dc] = 'p_rainha';
+
+      xadrezSelecionado = null;
+      xadrezMovimentosValidos = [];
+      xadrezVez = (xadrezVez === 'branca' ? 'preta' : 'branca');
+      renderizarTabuleiroXadrez();
+      atualizarStatusXadrez();
+
+      // Se for vez do bot
+      if (xadrezModoJogo === 'bot' && xadrezVez === 'preta') {
+        setTimeout(jogadaRoboXadrez, 600);
+      }
+    }
+
+    function jogadaRoboXadrez() {
+      if (xadrezVez !== 'preta') return;
+      const todasJogadas = [];
+
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = xadrezBoard[r][c];
+          if (p && p.startsWith('p_')) {
+            const mvs = calcularMovimentosXadrez(r, c);
+            mvs.forEach(m => todasJogadas.push({ sr: r, sc: c, mv: m }));
+          }
+        }
+      }
+
+      if (todasJogadas.length === 0) {
+        alert('🏆 XEQUE-MATE! Você venceu no Xadrez contra o Computador!');
+        GameAudio.playFanfare();
+        return;
+      }
+
+      // Prioriza capturas
+      const capturas = todasJogadas.filter(j => j.mv.ehCaptura);
+      const escolhida = capturas.length > 0 ? capturas[Math.floor(Math.random() * capturas.length)] : todasJogadas[Math.floor(Math.random() * todasJogadas.length)];
+
+      executarMovimentoXadrez(escolhida.sr, escolhida.sc, escolhida.mv.r, escolhida.mv.c, escolhida.mv);
     }
 
     function atualizarStatusXadrez() {
       const rot = document.getElementById('xadrez-vez-rotulo');
       if (rot) {
-        rot.textContent = xadrezVez === 'branca' ? 'Vez: ♔ Brancas' : 'Vez: ♚ Pretas';
+        if (xadrezModoJogo === 'bot') {
+          rot.textContent = xadrezVez === 'branca' ? 'Vez: ♔ Brancas (Você)' : 'Vez: ♚ Robô IA Pensando...';
+        } else {
+          rot.textContent = xadrezVez === 'branca' ? 'Vez: ♔ Brancas' : 'Vez: ♚ Pretas';
+        }
         rot.style.color = xadrezVez === 'branca' ? 'var(--gold-light)' : '#f87171';
       }
+      const bCap = document.getElementById('xadrez-cap-brancas');
+      const pCap = document.getElementById('xadrez-cap-pretas');
+      if (bCap) bCap.textContent = xadrezCapBrancasLista.join(' ');
+      if (pCap) pCap.textContent = xadrezCapPretasLista.join(' ');
     }
 
-    // ── 4. JOGO DE TIRO AO ALVO (TARGET SHOOTER) ──
+    // ══════════════════════════════════════════════
+    //  JOGO 4: SNIPER RANGE 3D PRO (TIRO AO ALVO)
+    // ══════════════════════════════════════════════
     let tiroScore = 0;
     let tiroTempo = 30;
+    let tiroMunicao = 6;
     let tiroTimerId = null;
     let tiroSpawnId = null;
     let tiroRodando = false;
@@ -3616,6 +4654,7 @@
     function iniciarJogoTiro() {
       tiroScore = 0;
       tiroTempo = 30;
+      tiroMunicao = 6;
       tiroRodando = true;
 
       const overEl = document.getElementById('tiro-start-overlay');
@@ -3625,6 +4664,7 @@
       const tmEl = document.getElementById('tiro-tempo');
       if (scEl) scEl.textContent = '0';
       if (tmEl) tmEl.textContent = '30s';
+      atualizarMunicaoTiroUI();
 
       const rec = parseInt(localStorage.getItem('sdv_tiro_rec') || '0');
       const recEl = document.getElementById('tiro-recorde');
@@ -3641,14 +4681,46 @@
         if (tiroTempo <= 0) fimJogoTiro();
       }, 1000);
 
-      tiroSpawnId = setInterval(spawnAlvoTiro, 750);
+      tiroSpawnId = setInterval(spawnAlvoTiro, 650);
       spawnAlvoTiro();
+
+      // Configura clique de tiro na arena
+      const arena = document.getElementById('tiro-arena');
+      if (arena) {
+        arena.onmousedown = (e) => dispararTiroArena(e);
+        arena.ontouchstart = (e) => { dispararTiroArena(e.touches[0]); e.preventDefault(); };
+      }
+    }
+
+    function dispararTiroArena(e) {
+      if (!tiroRodando) return;
+      if (tiroMunicao <= 0) {
+        GameAudio.playReload();
+        mostrarToastNotificacao('Sem Balas!', 'Aperte em Recarregar!', '🔄');
+        return;
+      }
+      tiroMunicao--;
+      atualizarMunicaoTiroUI();
+      GameAudio.playGunshot();
+    }
+
+    function recarregarTiro() {
+      if (tiroMunicao >= 6) return;
+      tiroMunicao = 6;
+      atualizarMunicaoTiroUI();
+      GameAudio.playReload();
+    }
+
+    function atualizarMunicaoTiroUI() {
+      const el = document.getElementById('tiro-municao-icons');
+      if (!el) return;
+      el.textContent = '🟡'.repeat(tiroMunicao) + '⚪'.repeat(6 - tiroMunicao);
     }
 
     function limparAlvosTiro() {
       const arena = document.getElementById('tiro-arena');
       if (!arena) return;
-      arena.querySelectorAll('.tiro-alvo-anim').forEach(a => a.remove());
+      arena.querySelectorAll('.sniper-target-pro').forEach(a => a.remove());
     }
 
     function spawnAlvoTiro() {
@@ -3657,20 +4729,20 @@
       if (!arena) return;
 
       const tipos = [
-        { icon: '🎯', pts: 10 },
-        { icon: '🎯', pts: 10 },
-        { icon: '🛸', pts: 20 },
-        { icon: '💎', pts: 50 },
-        { icon: '💣', pts: -15 }
+        { icon: '🎯', pts: 50, size: 54 },
+        { icon: '🎯', pts: 100, size: 42 }, // Alvo menor vale mais
+        { icon: '🦅', pts: 200, size: 48, bonusTempo: 3 }, // Águia dourada
+        { icon: '💀', pts: -50, size: 48 } // Perigo
       ];
       const tipo = tipos[Math.floor(Math.random() * tipos.length)];
 
       const alvo = document.createElement('div');
-      alvo.className = 'tiro-alvo-anim';
+      alvo.className = 'sniper-target-pro';
+      alvo.style.fontSize = `${tipo.size}px`;
       alvo.textContent = tipo.icon;
 
-      const maxW = arena.clientWidth - 60;
-      const maxH = arena.clientHeight - 60;
+      const maxW = arena.clientWidth - 70;
+      const maxH = arena.clientHeight - 70;
       const x = Math.max(10, Math.floor(Math.random() * maxW));
       const y = Math.max(10, Math.floor(Math.random() * maxH));
       alvo.style.left = `${x}px`;
@@ -3678,15 +4750,39 @@
 
       alvo.onclick = (e) => {
         e.stopPropagation();
+        if (tiroMunicao <= 0) {
+          recarregarTiro();
+          return;
+        }
+        tiroMunicao--;
+        atualizarMunicaoTiroUI();
+        GameAudio.playGunshot();
+        GameAudio.playTargetHit();
+
         tiroScore = Math.max(0, tiroScore + tipo.pts);
+        if (tipo.bonusTempo) {
+          tiroTempo += tipo.bonusTempo;
+          mostrarToastNotificacao('+3 Segundos!', 'Bônus de tempo coletado!', '⏱️');
+        }
+
         const scEl = document.getElementById('tiro-score');
         if (scEl) scEl.textContent = tiroScore;
-        if (typeof tocarAlertaSonoro === 'function') tocarAlertaSonoro();
+
+        // Animação de texto flutuante
+        const floatPts = document.createElement('div');
+        floatPts.className = 'floating-pts-anim';
+        floatPts.textContent = tipo.pts > 0 ? `+${tipo.pts}` : `${tipo.pts}`;
+        floatPts.style.left = `${x + 10}px`;
+        floatPts.style.top = `${y}px`;
+        floatPts.style.color = tipo.pts > 0 ? '#fbbf24' : '#ef4444';
+        arena.appendChild(floatPts);
+        setTimeout(() => floatPts.remove(), 700);
+
         alvo.remove();
       };
 
       arena.appendChild(alvo);
-      setTimeout(() => { if (alvo.parentNode) alvo.remove(); }, 1400);
+      setTimeout(() => { if (alvo.parentNode) alvo.remove(); }, 1300);
     }
 
     function fimJogoTiro() {
@@ -3705,8 +4801,8 @@
       const overEl = document.getElementById('tiro-start-overlay');
       if (overEl) {
         overEl.innerHTML = `
-          <div style="font-size:36px;">🏆</div>
-          <div style="font-size:18px;font-weight:900;color:#fff;">Tempo Esgotado!</div>
+          <div style="font-size:42px;">🏆</div>
+          <div style="font-size:19px;font-weight:900;color:#fff;">Tempo Esgotado!</div>
           <div style="font-size:15px;color:#fbbf24;font-weight:800;">Sua Pontuação: ${tiroScore} pontos</div>
           <button type="button" onclick="iniciarJogoTiro()" style="padding:12px 28px;background:linear-gradient(135deg,#ef4444,#dc2626);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 18px rgba(239,68,68,0.5);">
             🔄 Jogar Novamente
@@ -3726,7 +4822,7 @@
       if (!el) return;
       const sugestoes = carregarSugestoesJogosDoStorage();
       if (!sugestoes.length) {
-        el.innerHTML = `<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px;">Nenhuma sugestão enviada ainda. Seja o primeiro a sugerir!</div>`;
+        el.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px;">Nenhuma sugestão enviada ainda. Seja o primeiro a sugerir!</div>';
         return;
       }
       el.innerHTML = sugestoes.slice(0, 8).map(s => `
@@ -3751,21 +4847,29 @@
         return;
       }
 
-      const sugestoes = carregarSugestoesJogosDoStorage();
-      sugestoes.unshift({
+      const agora = new Date();
+      const novaSugestao = {
         id: Date.now(),
         nome: nome,
         obs: obs,
-        autor: (clienteSessao && clienteSessao.nome) || 'Cliente',
-        data: new Date().toLocaleDateString('pt-BR')
-      });
-      localStorage.setItem('sdv_sugestoes_jogos', JSON.stringify(sugestoes));
+        data: agora.toLocaleDateString('pt-BR')
+      };
+
+      const lista = carregarSugestoesJogosDoStorage();
+      lista.unshift(novaSugestao);
+      localStorage.setItem('sdv_sugestoes_jogos', JSON.stringify(lista));
 
       if (nomeEl) nomeEl.value = '';
       if (obsEl) obsEl.value = '';
-
       renderizarSugestoesJogos();
-      mostrarToastNotificacao('Sugestão Recebida!', `Sua sugestão de "${nome}" foi enviada com sucesso para nossa equipe!`, '🎮');
+      mostrarToastNotificacao('Sugestão Recebida!', `Sua sugestão para o jogo "${nome}" foi enviada com sucesso!`, '💡');
+    }
+
+    // Monitoramento contínuo de horários a cada 8 segundos
+    if (!timerMonitorHorarioJogos) {
+      timerMonitorHorarioJogos = setInterval(() => {
+        verificarStatusHorarioJogos();
+      }, 8000);
     }
 
     // ══════════════════════════════════════════════
@@ -5216,7 +6320,341 @@
               .no-print { display: none !important; }
               body { margin: 15mm; }
             }
-          </style>
+          
+/* ══════════════════════════════════════════════════════════════ */
+/*   JOGOS PRO: TELA CHEIA, CONTROLE DE HORÁRIOS & MOTORES PRO   */
+/* ══════════════════════════════════════════════════════════════ */
+
+.jogos-fullscreen-container {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.jogos-fullscreen-active {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  z-index: 9999999 !important;
+  background: radial-gradient(circle at 50% 20%, #111827 0%, #030712 100%) !important;
+  overflow-y: auto !important;
+  padding: 14px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+}
+
+.btn-fullscreen-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1.5px solid #38bdf8;
+  color: #38bdf8;
+  transition: all 0.2s;
+}
+
+.btn-fullscreen-toggle:hover {
+  background: #38bdf8;
+  color: #000;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+}
+
+.btn-fullscreen-exit-float {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 10000001;
+  background: rgba(239, 68, 68, 0.95);
+  border: 1.5px solid #fca5a5;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 25px rgba(0,0,0,0.85);
+  display: none;
+}
+
+.jogos-fullscreen-active .btn-fullscreen-exit-float {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* CARD CONTROLE DE HORÁRIO DE JOGOS */
+.card-horarios-jogos {
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(8, 8, 17, 0.95));
+  border: 1.5px solid rgba(201, 168, 76, 0.35);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.badge-status-horario {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.badge-status-horario.liberado {
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid #10b981;
+  color: #34d399;
+}
+
+.badge-status-horario.bloqueado {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+}
+
+/* OVERLAY QUANDO JOGOS ESTÃO BLOQUEADOS POR HORÁRIO */
+.overlay-jogos-bloqueio {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  border-radius: 16px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+
+/* ESTILOS DE CORRIDA 3D ARCADE PRO */
+#canvas-corrida {
+  display: block;
+  background: #090a14;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  touch-action: none;
+  max-width: 100%;
+}
+
+.btn-corrida-nitro {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  border: 2px solid #fcd34d;
+  color: #fff;
+  font-weight: 900;
+  padding: 12px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 13px;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.btn-corrida-nitro:active {
+  transform: scale(0.95);
+  filter: brightness(1.2);
+}
+
+/* TABULEIROS LUXO (DAMAS E XADREZ) */
+.tabuleiro-frame-luxo {
+  border: 4px solid #451a03;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.85), inset 0 0 15px rgba(0,0,0,0.6);
+  border-radius: 12px;
+  position: relative;
+  background: #271406;
+  padding: 8px;
+  display: inline-block;
+}
+
+.board-grid-8x8 {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: min(88vw, 360px);
+  height: min(88vw, 360px);
+  border: 2px solid #78350f;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.7);
+}
+
+.damas-sq-pro, .xadrez-sq-pro {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  font-size: clamp(22px, 6vw, 34px);
+  transition: background 0.15s ease;
+}
+
+.damas-sq-pro.dark {
+  background: linear-gradient(135deg, #582410 0%, #3e1809 100%);
+}
+
+.damas-sq-pro.light {
+  background: linear-gradient(135deg, #fed7aa 0%, #fde68a 100%);
+}
+
+.damas-sq-pro.selected, .xadrez-sq-pro.selected {
+  background: #d97706 !important;
+  box-shadow: inset 0 0 14px #fbbf24;
+}
+
+.damas-sq-pro.move-dest::after, .xadrez-sq-pro.move-dest::after {
+  content: '';
+  position: absolute;
+  width: 34%;
+  height: 34%;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 10px #34d399;
+  animation: pulseMoveDest 1s infinite alternate;
+  pointer-events: none;
+}
+
+.xadrez-sq-pro.move-capture::after {
+  content: '';
+  position: absolute;
+  width: 78%;
+  height: 78%;
+  border-radius: 50%;
+  border: 3px solid #ef4444;
+  box-shadow: 0 0 12px #f87171;
+  animation: pulseMoveDest 1s infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes pulseMoveDest {
+  0% { transform: scale(0.85); opacity: 0.7; }
+  100% { transform: scale(1.15); opacity: 1; }
+}
+
+/* PEÇAS 3D DE DAMAS */
+.peca-dama-3d {
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 900;
+  position: relative;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.peca-dama-3d.branca {
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #e2e8f0 55%, #94a3b8 100%);
+  border: 2px solid #cbd5e1;
+  box-shadow: 0 5px 8px rgba(0,0,0,0.6), inset 0 2px 3px rgba(255,255,255,0.8), inset 0 -2px 4px rgba(0,0,0,0.3);
+  color: #0f172a;
+}
+
+.peca-dama-3d.preta {
+  background: radial-gradient(circle at 35% 30%, #ef4444 0%, #b91c1c 55%, #450a0a 100%);
+  border: 2px solid #7f1d1d;
+  box-shadow: 0 5px 8px rgba(0,0,0,0.8), inset 0 2px 3px rgba(254,202,202,0.5), inset 0 -2px 4px rgba(0,0,0,0.5);
+  color: #fff;
+}
+
+/* XADREZ PRO TILES */
+.xadrez-sq-pro.dark {
+  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+}
+
+.xadrez-sq-pro.light {
+  background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+}
+
+.xadrez-sq-pro.em-xeque {
+  background: #b91c1c !important;
+  box-shadow: inset 0 0 16px #ef4444;
+  animation: flashXeque 0.8s infinite alternate;
+}
+
+@keyframes flashXeque {
+  0% { filter: brightness(1); }
+  100% { filter: brightness(1.4); }
+}
+
+/* SNIPER RANGE 3D PRO */
+.sniper-arena {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  background: radial-gradient(circle at center, #1e1b4b 0%, #030712 100%);
+  border: 2px solid rgba(239, 68, 68, 0.4);
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: crosshair;
+  box-shadow: inset 0 0 50px rgba(0,0,0,0.85);
+  touch-action: none;
+}
+
+.sniper-target-pro {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: crosshair;
+  user-select: none;
+  transition: transform 0.1s ease;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.7));
+}
+
+.floating-pts-anim {
+  position: absolute;
+  color: #fbbf24;
+  font-weight: 900;
+  font-size: 18px;
+  pointer-events: none;
+  animation: floatUpFade 0.7s forwards ease-out;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+  z-index: 100;
+}
+
+@keyframes floatUpFade {
+  0% { transform: translateY(0) scale(0.8); opacity: 1; }
+  100% { transform: translateY(-40px) scale(1.3); opacity: 0; }
+}
+
+.modo-jogo-pill {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 800;
+  cursor: pointer;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--text2);
+  transition: all 0.2s;
+}
+
+.modo-jogo-pill.active {
+  background: rgba(14,165,233,0.2);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56,189,248,0.3);
+}
+
+</style>
         </head>
         <body>
           <div class="no-print" style="margin-bottom: 20px; text-align: right;">
