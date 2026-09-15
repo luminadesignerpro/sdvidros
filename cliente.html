@@ -4749,16 +4749,14 @@ function mudarAba(tab) {
                 { src: pngDataUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }
               ]
             };
-            const blob = new Blob([JSON.stringify(dynamicManifest)], { type: 'application/manifest+json' });
-            const manifestUrl = URL.createObjectURL(blob);
-            let manLink = document.getElementById('dynamic-manifest') || document.querySelector('link[rel="manifest"]');
-            if (!manLink) {
-              manLink = document.createElement('link');
-              manLink.id = 'dynamic-manifest';
-              manLink.rel = 'manifest';
-              document.head.appendChild(manLink);
+            let targetManifestUrl = 'manifest.json';
+            const isMoveis = (nomeEmpresa && nomeEmpresa.toLowerCase().includes('móveis')) || (typeof empId !== 'undefined' && empId === 'sdmoveis');
+            if (isMoveis) {
+              targetManifestUrl = 'manifest-moveis.json';
+            } else if (nomeEmpresa && nomeEmpresa !== 'SD Vidros') {
+              targetManifestUrl = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(dynamicManifest));
             }
-            manLink.href = manifestUrl;
+            manLink.href = targetManifestUrl;
           } catch (_) {}
         };
         img.src = logoUrl;
