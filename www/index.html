@@ -1386,13 +1386,17 @@
           <span class="ponto-act-icon">[➔</span>
           <span class="ponto-act-label">Saída Final</span>
         </button>
-        <button type="button" class="ponto-btn-action ponto-act-falta" onclick="registrarBatidaPonto('falta')">
-          <span class="ponto-act-icon">👤✕</span>
-          <span class="ponto-act-label">Falta</span>
+        <button type="button" class="ponto-btn-action ponto-act-he-ini" onclick="registrarBatidaPonto('horaExtraInicial')">
+          <span class="ponto-act-icon">⏱️➔</span>
+          <span class="ponto-act-label">H. Extra Inicial</span>
         </button>
-        <button type="button" class="ponto-btn-action ponto-act-doente" onclick="registrarBatidaPonto('faltaDoente')">
-          <span class="ponto-act-icon">⚡</span>
-          <span class="ponto-act-label">Falta Doente</span>
+        <button type="button" class="ponto-btn-action ponto-act-he-fim" onclick="registrarBatidaPonto('horaExtraFinal')">
+          <span class="ponto-act-icon">⏱️🏁</span>
+          <span class="ponto-act-label">H. Extra Final</span>
+        </button>
+        <button type="button" class="ponto-btn-action ponto-act-falta" onclick="registrarBatidaPontoComJustificativa()">
+          <span class="ponto-act-icon">👤📝</span>
+          <span class="ponto-act-label">Falta (Justificar)</span>
         </button>
       </div>
       <div id="ponto-feedback-msg" style="margin-top:14px;font-size:13.5px;font-weight:700;"></div>
@@ -6132,17 +6136,23 @@ function registrarBatidaPonto(tipo) {
     labelTipo = 'Volta Almoço';
   } else if (tipo === 'saidaFinal') {
     p.saidaFinal = horaStr;
-    colab.status = 'Folga';
-    p.status = 'Folga';
+    colab.status = 'Finalizado';
+    p.status = 'Finalizado';
     labelTipo = 'Saída Final';
+  } else if (tipo === 'horaExtraInicial') {
+    p.horaExtraInicial = horaStr;
+    colab.status = 'Em Hora Extra';
+    p.status = 'Em Hora Extra';
+    labelTipo = 'Hora Extra Inicial';
+  } else if (tipo === 'horaExtraFinal') {
+    p.horaExtraFinal = horaStr;
+    colab.status = 'H.E. Finalizada';
+    p.status = 'H.E. Finalizada';
+    labelTipo = 'Hora Extra Final';
   } else if (tipo === 'falta') {
-    p.status = 'Ausente';
-    colab.status = 'Ausente';
+    p.status = 'Falta Justificada';
+    colab.status = 'Falta Justificada';
     labelTipo = 'Falta Registrada';
-  } else if (tipo === 'faltaDoente') {
-    p.status = 'Atestado/Médico';
-    colab.status = 'Atestado';
-    labelTipo = 'Falta Médica Registrada';
   }
 
   recalcularHorasPonto(p, colab);
@@ -6154,6 +6164,51 @@ function registrarBatidaPonto(tipo) {
   renderEspelhoPonto();
 
   mostrarMsgPonto(`✅ ${labelTipo} registrada com sucesso para ${colab.nome} às ${horaStr}!`, true);
+}
+
+function registrarBatidaPontoComJustificativa() {
+  const selColab = document.getElementById('ponto-sel-colaborador');
+  const idColab = selColab && selColab.value ? parseInt(selColab.value) : null;
+  if (!idColab) {
+    mostrarMsgPonto('Selecione um funcionário primeiro para justificar a falta.', false);
+    return;
+  }
+  const colab = funcionariosLista.find(f => f.id === idColab);
+  const motivo = prompt(`Informe o motivo / justificativa da falta para ${colab ? colab.nome : 'o funcionário'}:`, 'Atestado Médico / Consulta');
+  if (motivo === null) return;
+
+  const dataHoje = getHojeFormatado();
+  let p = pontosLista.find(x => x.colaboradorId === idColab && x.data === dataHoje);
+  if (!p) {
+    p = {
+      id: Date.now(),
+      colaboradorId: colab.id,
+      colaboradorNome: colab.nome,
+      data: dataHoje,
+      entrada1: '',
+      saidaAlmoco: '',
+      voltaAlmoco: '',
+      saidaFinal: '',
+      horaExtraInicial: '',
+      horaExtraFinal: '',
+      tempoTrabalhado: '00h 00m',
+      valorSalario: 'R$ 0,00',
+      status: 'Falta Justificada'
+    };
+    pontosLista.unshift(p);
+  }
+
+  p.status = 'Falta Justificada';
+  p.justificativa = motivo || 'Falta Justificada';
+  if (colab) colab.status = 'Falta Justificada';
+
+  save(K.employees, funcionariosLista);
+  save(K.timesheet, pontosLista);
+
+  renderFuncionarios();
+  renderEspelhoPonto();
+
+  mostrarMsgPonto(`✅ Falta registrada com justificativa para ${colab.nome} (${motivo})!`, true);
 }
 
 function recalcularHorasPonto(p, colab) {
@@ -6169,6 +6224,8 @@ function recalcularHorasPonto(p, colab) {
   const mAlmocoSai = parseMin(p.saidaAlmoco);
   const mAlmocoVolta = parseMin(p.voltaAlmoco);
   const mSaida = parseMin(p.saidaFinal);
+  const mHEIni = parseMin(p.horaExtraInicial);
+  const mHEFim = parseMin(p.horaExtraFinal);
 
   // Turno da manhã
   if (mEntrada !== null && mAlmocoSai !== null && mAlmocoSai > mEntrada) {
@@ -6194,6 +6251,11 @@ function recalcularHorasPonto(p, colab) {
     if (minAgora > mEntrada) {
       totalMin = (minAgora - mEntrada);
     }
+  }
+
+  // Horas Extras
+  if (mHEIni !== null && mHEFim !== null && mHEFim >= mHEIni) {
+    totalMin += (mHEFim - mHEIni);
   }
 
   const hTot = Math.floor(totalMin / 60);
