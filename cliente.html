@@ -7,6 +7,10 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Instalar Aplicativo Oficial – Área do Cliente</title>
+    <link id="dynamic-favicon" rel="icon" type="image/png" href="logo.jpg">
+  <link id="dynamic-apple-icon" rel="apple-touch-icon" sizes="192x192" href="logo.jpg">
+  <link id="dynamic-apple-icon-512" rel="apple-touch-icon" sizes="512x512" href="logo.jpg">
+  <link id="dynamic-manifest" rel="manifest" href="manifest.json">
   <meta name="description" content="Toque para instalar o aplicativo oficial no celular e acessar seu portal de orçamentos e serviços.">
   <meta property="og:title" content="📲 Instalar Aplicativo Oficial – Área do Cliente">
   <meta property="og:description" content="Toque para instalar o aplicativo oficial no celular e acessar seu portal de orçamentos e serviços.">
@@ -2525,10 +2529,13 @@
               <!-- Seletor de Modo: Contra Robô ou 2 Jogadores -->
               <div style="display:flex;justify-content:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
                 <button type="button" class="modo-jogo-pill active" id="btn-damas-modo-bot" onclick="mudarModoDamas('bot')">
-                  🤖 Jogar vs Robô (IA)
+                  🤖 Jogar vs Robô
+                </button>
+                <button type="button" class="modo-jogo-pill" id="btn-damas-modo-colab" onclick="abrirModalColaboradorJogo('damas')" style="background:rgba(16,185,129,0.15);border-color:#10b981;color:#34d399;">
+                  👷 Jogar com Colaborador
                 </button>
                 <button type="button" class="modo-jogo-pill" id="btn-damas-modo-2p" onclick="mudarModoDamas('2p')">
-                  👥 2 Jogadores (Local)
+                  👥 2 Jogadores
                 </button>
                 <button type="button" class="btn-fullscreen-toggle" onclick="alternarTelaCheiaJogos(true)">
                   ⛶ Tela Cheia
@@ -2563,10 +2570,13 @@
               <!-- Seletor de Modo: Contra Robô ou 2 Jogadores -->
               <div style="display:flex;justify-content:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
                 <button type="button" class="modo-jogo-pill active" id="btn-xadrez-modo-bot" onclick="mudarModoXadrez('bot')">
-                  🤖 Jogar vs Robô (IA)
+                  🤖 Jogar vs Robô
+                </button>
+                <button type="button" class="modo-jogo-pill" id="btn-xadrez-modo-colab" onclick="abrirModalColaboradorJogo('xadrez')" style="background:rgba(16,185,129,0.15);border-color:#10b981;color:#34d399;">
+                  👷 Jogar com Colaborador
                 </button>
                 <button type="button" class="modo-jogo-pill" id="btn-xadrez-modo-2p" onclick="mudarModoXadrez('2p')">
-                  👥 2 Jogadores (Local)
+                  👥 2 Jogadores
                 </button>
                 <button type="button" class="btn-fullscreen-toggle" onclick="alternarTelaCheiaJogos(true)">
                   ⛶ Tela Cheia
@@ -2680,6 +2690,37 @@
 
     </div>
   </div>
+
+  
+  <!-- ══ MODAL ESCOLHER COLABORADOR CADASTRADO PARA JOGAR ══ -->
+  <div id="modal-escolher-colaborador-jogo" class="modal-overlay" style="display:none;z-index:10000050;background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);position:fixed;inset:0;align-items:center;justify-content:center;padding:16px;">
+    <div style="background:linear-gradient(145deg,#0c0e1a,#111827);border:1.5px solid rgba(201,168,76,0.4);border-radius:18px;max-width:440px;width:100%;box-shadow:0 15px 45px rgba(0,0,0,0.8);padding:20px;box-sizing:border-box;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:24px;">👷</span>
+          <div>
+            <div style="font-size:16px;font-weight:900;color:#fff;">Jogar com Colaborador</div>
+            <div style="font-size:11px;color:#38bdf8;font-weight:700;">Somente colaboradores cadastrados no sistema</div>
+          </div>
+        </div>
+        <button type="button" onclick="fecharModalColaboradorJogo()" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">✕</button>
+      </div>
+      
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.4;">
+        Escolha abaixo o colega de equipe cadastrado para disputar a partida oficial:
+      </div>
+
+      <!-- Lista de Colaboradores Cadastrados -->
+      <div id="lista-colaboradores-jogos" style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;padding-right:4px;margin-bottom:14px;">
+        <!-- Injetado dinamicamente -->
+      </div>
+
+      <button type="button" onclick="fecharModalColaboradorJogo()" style="width:100%;padding:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:#fff;font-weight:800;font-size:12px;cursor:pointer;">
+        Cancelar
+      </button>
+    </div>
+  </div>
+
 
   <script>
     // ══════════════════════════════════════════════
@@ -2923,6 +2964,44 @@
       } catch(_) {}
 
       const urlParams = new URLSearchParams(window.location.search);
+      // PRIORIDADE: Se veio de "Abrir" ou "Instalar" com nome de colaborador na URL
+      const paramNomeUrl = urlParams.get('nome');
+      const paramFuncIdUrl = urlParams.get('funcId') || urlParams.get('colabId') || urlParams.get('id');
+      const paramCargoUrl = urlParams.get('cargo') || 'Colaborador';
+      const paramInstalarUrl = urlParams.get('instalar') === '1';
+
+      if (paramNomeUrl || paramFuncIdUrl) {
+        const nomeFinal = paramNomeUrl || 'Colaborador';
+        const colabIdFinal = paramFuncIdUrl || 101;
+        const sessaoColab = {
+          id: colabIdFinal,
+          nome: nomeFinal,
+          cargo: paramCargoUrl,
+          isFuncionario: true,
+          os: urlParams.get('os') || '#0001',
+          dataLogin: new Date().toISOString()
+        };
+        localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessaoColab));
+        localStorage.setItem('sdv_colaborador_sessao', JSON.stringify(sessaoColab));
+
+        if (paramInstalarUrl) {
+          const lic = (typeof obterLicencaAtivaCliente === 'function' ? obterLicencaAtivaCliente() : {});
+          configurarIconeEManifestDinamico(lic.nome || 'Empresa', lic.logo || 'logo.jpg');
+          const mConf = document.getElementById('modal-confirmar-acesso-direto');
+          const logoConf = document.getElementById('conf-direto-logo');
+          const nomeConf = document.getElementById('conf-direto-nome');
+          const segConf = document.getElementById('conf-direto-seg');
+          if (logoConf && lic.logo) logoConf.src = lic.logo;
+          if (nomeConf) nomeConf.textContent = nomeFinal;
+          if (segConf) segConf.textContent = paramCargoUrl + ' · Pronto para Acessar';
+          if (mConf) mConf.style.display = 'flex';
+          return;
+        }
+
+        iniciarPortalCliente(sessaoColab);
+        return;
+      }
+
       const paramPortal = (urlParams.get('portal') || urlParams.get('modo') || urlParams.get('tipo') || '').toLowerCase();
       const paramOs = urlParams.get('os');
       const paramTel = urlParams.get('tel');
@@ -3005,7 +3084,7 @@
       }
 
       const urlParams = new URLSearchParams(window.location.search);
-      const urlNome = urlParams.get('nome') || ('Cliente ' + (lic.nome || ''));
+      const urlNome = urlParams.get('nome') || (clienteSessao && clienteSessao.nome) || ('Colaborador');
       const urlOs = urlParams.get('os') || '#0001';
       const urlTel = urlParams.get('tel') || lic.telefone || '(85) 99611-9824';
 
@@ -3602,6 +3681,150 @@
     });
 
     // ── 2. CONTROLE DE HORÁRIO PARA LIBERAR JOGOS & NOTIFICAÇÕES ──
+    
+    // ══════════════════════════════════════════════════════════════
+    //  SISTEMA PWA: ÍCONE E MANIFEST COM A LOGO DA EMPRESA CADASTRADA
+    // ══════════════════════════════════════════════════════════════
+    function configurarIconeEManifestDinamico(nomeEmpresa, logoUrl) {
+      if (!nomeEmpresa) nomeEmpresa = 'SD Vidros';
+      if (!logoUrl) logoUrl = 'logo.jpg';
+
+      document.title = nomeEmpresa + ' – Área Oficial';
+
+      const fav = document.getElementById('dynamic-favicon') || document.querySelector('link[rel="icon"]');
+      const apple1 = document.getElementById('dynamic-apple-icon');
+      const apple2 = document.getElementById('dynamic-apple-icon-512');
+      if (fav) fav.href = logoUrl;
+      if (apple1) apple1.href = logoUrl;
+      if (apple2) apple2.href = logoUrl;
+
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 192;
+        canvas.height = 192;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#080811';
+        ctx.fillRect(0, 0, 192, 192);
+
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function() {
+          ctx.drawImage(img, 12, 12, 168, 168);
+          try {
+            const pngDataUrl = canvas.toDataURL('image/png');
+            if (fav) fav.href = pngDataUrl;
+            if (apple1) apple1.href = pngDataUrl;
+            if (apple2) apple2.href = pngDataUrl;
+
+            const dynamicManifest = {
+              name: nomeEmpresa,
+              short_name: nomeEmpresa,
+              start_url: window.location.href,
+              display: "standalone",
+              background_color: "#080811",
+              theme_color: "#080811",
+              icons: [
+                { src: pngDataUrl, sizes: "192x192", type: "image/png", purpose: "any maskable" },
+                { src: pngDataUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }
+              ]
+            };
+            const blob = new Blob([JSON.stringify(dynamicManifest)], { type: 'application/manifest+json' });
+            const manifestUrl = URL.createObjectURL(blob);
+            let manLink = document.getElementById('dynamic-manifest') || document.querySelector('link[rel="manifest"]');
+            if (!manLink) {
+              manLink = document.createElement('link');
+              manLink.id = 'dynamic-manifest';
+              manLink.rel = 'manifest';
+              document.head.appendChild(manLink);
+            }
+            manLink.href = manifestUrl;
+          } catch (_) {}
+        };
+        img.src = logoUrl;
+      } catch (_) {}
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  JOGAR COM COLABORADOR CADASTRADO (SOMENTE COLABORADORES)
+    // ══════════════════════════════════════════════════════════════
+    let colabDesafiadoDamas = null;
+    let colabDesafiadoXadrez = null;
+    let jogoColabAlvo = 'damas';
+
+    function abrirModalColaboradorJogo(jogo) {
+      jogoColabAlvo = jogo || 'damas';
+      const m = document.getElementById('modal-escolher-colaborador-jogo');
+      const listaEl = document.getElementById('lista-colaboradores-jogos');
+      if (!m || !listaEl) return;
+
+      const colaboradores = carregarFuncionariosDoStorage();
+      const usuarioLogadoNome = (clienteSessao && clienteSessao.nome) || 'Samuel David';
+
+      listaEl.innerHTML = colaboradores.map(c => {
+        const ehProprio = c.nome && c.nome.toLowerCase() === usuarioLogadoNome.toLowerCase();
+        return `
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:22px;">👤</span>
+              <div>
+                <div style="font-weight:900;color:#fff;font-size:13.5px;">
+                  ${esc(c.nome)} ${ehProprio ? '<span style="font-size:10.5px;color:var(--gold-light);">(Você)</span>' : ''}
+                </div>
+                <div style="font-size:11px;color:#38bdf8;">${esc(c.cargo || 'Colaborador')} · ${c.status || 'Ativo'}</div>
+              </div>
+            </div>
+            ${!ehProprio ? `
+              <button type="button" onclick="selecionarColaboradorParaPartida(${c.id})" style="padding:6px 14px;background:linear-gradient(135deg,#10b981,#059669);border:none;border-radius:8px;color:#fff;font-weight:900;font-size:11.5px;cursor:pointer;box-shadow:0 3px 10px rgba(16,185,129,0.35);">
+                ⚔️ Desafiar
+              </button>
+            ` : `
+              <span style="font-size:11px;color:var(--muted);font-weight:700;">Seu Perfil</span>
+            `}
+          </div>
+        `;
+      }).join('');
+
+      m.style.display = 'flex';
+    }
+
+    function fecharModalColaboradorJogo() {
+      const m = document.getElementById('modal-escolher-colaborador-jogo');
+      if (m) m.style.display = 'none';
+    }
+
+    function selecionarColaboradorParaPartida(colabId) {
+      const colaboradores = carregarFuncionariosDoStorage();
+      const colab = colaboradores.find(c => c.id === colabId);
+      if (!colab) return;
+
+      fecharModalColaboradorJogo();
+
+      if (jogoColabAlvo === 'damas') {
+        colabDesafiadoDamas = colab;
+        damasModoJogo = 'colab';
+        const bBot = document.getElementById('btn-damas-modo-bot');
+        const bColab = document.getElementById('btn-damas-modo-colab');
+        const b2p = document.getElementById('btn-damas-modo-2p');
+        if (bBot) bBot.classList.remove('active');
+        if (b2p) b2p.classList.remove('active');
+        if (bColab) bColab.classList.add('active');
+        reiniciarJogoDamas();
+        mostrarToastNotificacao('Partida Iniciada!', 'Jogando Damas contra ' + colab.nome + '!', '⚔️');
+      } else if (jogoColabAlvo === 'xadrez') {
+        colabDesafiadoXadrez = colab;
+        xadrezModoJogo = 'colab';
+        const bBot = document.getElementById('btn-xadrez-modo-bot');
+        const bColab = document.getElementById('btn-xadrez-modo-colab');
+        const b2p = document.getElementById('btn-xadrez-modo-2p');
+        if (bBot) bBot.classList.remove('active');
+        if (b2p) b2p.classList.remove('active');
+        if (bColab) bColab.classList.add('active');
+        reiniciarJogoXadrez();
+        mostrarToastNotificacao('Partida Iniciada!', 'Jogando Xadrez contra ' + colab.nome + '!', '⚔️');
+      }
+    }
+
+
     function carregarConfigHorariosJogos() {
       try {
         const salvos = JSON.parse(localStorage.getItem('sdv_config_horarios_jogos') || '{}');
@@ -4376,7 +4599,12 @@
       const pEl = document.getElementById('damas-cap-pretas');
       if (rot) {
         if (damasModoJogo === 'bot') {
+          if (damasModoJogo === 'colab' && colabDesafiadoDamas) {
+          const meuNome = (clienteSessao && clienteSessao.nome) || 'Samuel David';
+          rot.textContent = damasVez === 'branca' ? 'Vez: ⚪ ' + meuNome : 'Vez: 🔴 ' + colabDesafiadoDamas.nome;
+        } else {
           rot.textContent = damasVez === 'branca' ? 'Vez: ⚪ Suas Peças' : 'Vez: 🔴 Robô Pensando...';
+        }
         } else {
           rot.textContent = damasVez === 'branca' ? 'Vez: ⚪ Brancas' : 'Vez: 🔴 Pretas';
         }
@@ -4629,7 +4857,12 @@
       const rot = document.getElementById('xadrez-vez-rotulo');
       if (rot) {
         if (xadrezModoJogo === 'bot') {
+          if (xadrezModoJogo === 'colab' && colabDesafiadoXadrez) {
+          const meuNome = (clienteSessao && clienteSessao.nome) || 'Samuel David';
+          rot.textContent = xadrezVez === 'branca' ? 'Vez: ♔ ' + meuNome : 'Vez: ♚ ' + colabDesafiadoXadrez.nome;
+        } else {
           rot.textContent = xadrezVez === 'branca' ? 'Vez: ♔ Brancas (Você)' : 'Vez: ♚ Robô IA Pensando...';
+        }
         } else {
           rot.textContent = xadrezVez === 'branca' ? 'Vez: ♔ Brancas' : 'Vez: ♚ Pretas';
         }

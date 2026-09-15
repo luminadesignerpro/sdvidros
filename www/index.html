@@ -3986,6 +3986,11 @@ function renderizarModalLinksFuncionarios(filtro = '') {
           </button>
         </div>
 
+        <!-- BOTÃO OFICIAL: ENVIAR ACESSO PARA INSTALAR APP -->
+        <button type="button" class="btn btn-sm" onclick="enviarAcessoInstalarColaborador(${f.id})" style="width:100%;padding:9px 10px;font-size:11.5px;font-weight:900;background:linear-gradient(135deg,#10b981,#059669);border:1px solid #34d399;color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 3px 12px rgba(16,185,129,0.3);cursor:pointer;" title="Enviar convite de instalação que já entra pronto para acessar com o nome do colaborador">
+          <span>📲</span> <span>Enviar Acesso para Instalar App</span>
+        </button>
+
         <!-- AÇÕES SECUNDÁRIAS: EDITAR E EXCLUIR -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.06);">
           <button type="button" class="btn btn-sec btn-xs" onclick="editarFuncionarioPeloModalLinks(${f.id})" style="padding:5px 8px;font-size:11px;display:flex;align-items:center;justify-content:center;gap:4px;border-color:rgba(201,168,76,0.35);color:var(--gold-light);" title="Editar informações do colaborador">
@@ -4042,6 +4047,26 @@ function excluirFuncionarioPeloModalLinks(id) {
   renderFuncionarios();
   renderizarModalLinksFuncionarios();
   mostrarMsgPonto(`Colaborador "${nome}" removido.`, true);
+}
+
+function enviarAcessoInstalarColaborador(id) {
+  let f = (funcionariosLista || []).find(x => x.id === id);
+  if (!f) return;
+  const baseOrigin = window.location.origin;
+  const basePath = window.location.pathname.replace(/\/index\.html$/i, '').replace(/\/$/, '');
+  const idParam = f.id || String(f.nome).replace(/\s+/g, '_');
+  const nomeParam = encodeURIComponent(f.nome);
+  const cargoParam = encodeURIComponent(f.cargo || 'Colaborador');
+  const empAtiva = (typeof obterEmpresaAtivaGlobal === 'function' ? obterEmpresaAtivaGlobal() : null) || {};
+  const empIdParam = empAtiva.id ? '&empresa=' + encodeURIComponent(empAtiva.id) : '';
+  const linkInstalar = `${baseOrigin}${basePath}/funcionario.html?instalar=1&auto=1&funcId=${idParam}&nome=${nomeParam}&cargo=${cargoParam}${empIdParam}`;
+  const telLimpo = (f.whatsapp || f.tel || '').replace(/\D/g, '');
+  const nomeEmpresa = empAtiva.nome || 'SD Vidros';
+
+  const msgZap = `Olá ${f.nome}! 👋\nAcesse e instale o aplicativo oficial de colaborador da *${nomeEmpresa}* no seu celular para bater ponto e acompanhar obras:\n\n👉 ${linkInstalar}\n\nAo abrir o link, basta clicar em *Confirmar* para instalar e o seu acesso já estará 100% pronto para usar!`;
+  const urlZap = telLimpo ? `https://wa.me/55${telLimpo}?text=${encodeURIComponent(msgZap)}` : `https://wa.me/?text=${encodeURIComponent(msgZap)}`;
+
+  window.open(urlZap, '_blank');
 }
 
 function abrirLinkPortalFuncionario(link) {
