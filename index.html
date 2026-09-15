@@ -1076,8 +1076,8 @@
             </label>
             <input type="text" id="o-val-produtos" inputmode="decimal" placeholder="0,00" value="0,00"
               onfocus="this.select()"
-              oninput="aoModificarValoresResumoFinanceiro(true)"
-              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro()"
+              oninput="aoModificarValoresResumoFinanceiro('produtos')"
+              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro('produtos')"
               style="font-weight:800;color:#fff;background:#0d0d15;border:1px solid rgba(255,255,255,0.12);padding:9px 10px;font-size:13px;border-radius:8px;">
           </div>
 
@@ -1088,8 +1088,8 @@
             </label>
             <input type="text" id="o-val-servico" inputmode="decimal" placeholder="0,00" value="0,00"
               onfocus="this.select()"
-              oninput="aoModificarValoresResumoFinanceiro(true)"
-              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro()"
+              oninput="aoModificarValoresResumoFinanceiro('servico')"
+              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro('servico')"
               style="font-weight:800;color:#fff;background:#0d0d15;border:1px solid rgba(255,255,255,0.12);padding:9px 10px;font-size:13px;border-radius:8px;">
           </div>
 
@@ -1104,13 +1104,13 @@
             <div style="display:flex;align-items:center;gap:4px;margin-top:4px;">
               <input type="text" id="o-taxa-acrescimo" inputmode="decimal" placeholder="0,00" value="0,00"
                 onfocus="this.select()"
-                oninput="aoModificarValoresResumoFinanceiro(true)"
-                onblur="formatarCampoTaxa(this);aoModificarValoresResumoFinanceiro()"
+                oninput="aoModificarValoresResumoFinanceiro('taxa')"
+                onblur="formatarCampoTaxa(this);aoModificarValoresResumoFinanceiro('taxa')"
                 style="font-weight:800;color:var(--gold-light);background:#0d0d15;border:1px solid rgba(201,168,76,0.4);text-align:right;padding:7px 8px;font-size:13px;border-radius:6px;width:100%;">
               <span style="font-size:13px;font-weight:800;color:var(--gold-light);">%</span>
             </div>
             <div id="o-taxa-acrescimo-calc" style="font-size:10px;color:var(--gold-light);margin-top:4px;text-align:right;font-weight:700;">
-              + R$ 0,00 sobre serviço
+              = R$ 0,00 em serviço
             </div>
             <div style="font-size:9px;color:var(--muted);margin-top:2px;line-height:1.2;">
               🚫 Oculto ao cliente no PDF
@@ -1124,8 +1124,8 @@
             </label>
             <input type="text" id="o-val-frete" inputmode="decimal" placeholder="0,00" value="0,00"
               onfocus="this.select()"
-              oninput="aoModificarValoresResumoFinanceiro(true)"
-              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro()"
+              oninput="aoModificarValoresResumoFinanceiro('frete')"
+              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro('frete')"
               style="font-weight:800;color:#fff;background:#0d0d15;border:1px solid rgba(255,255,255,0.12);padding:9px 10px;font-size:13px;border-radius:8px;">
           </div>
 
@@ -1136,8 +1136,8 @@
             </label>
             <input type="text" id="o-val-desconto" inputmode="decimal" placeholder="0,00" value="0,00"
               onfocus="this.select()"
-              oninput="aoModificarValoresResumoFinanceiro(true)"
-              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro()"
+              oninput="aoModificarValoresResumoFinanceiro('desconto')"
+              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro('desconto')"
               style="font-weight:800;color:#ff7878;background:#0d0d15;border:1px solid rgba(239,68,68,0.25);padding:9px 10px;font-size:13px;border-radius:8px;">
           </div>
         </div>
@@ -3691,39 +3691,63 @@ function calcItem(id) {
 
 let valoresResumoEditadosManualmente = false;
 
-function aoModificarValoresResumoFinanceiro(manual = false) {
-  if (manual) valoresResumoEditadosManualmente = true;
-  recalcularTotaisGerais();
+function aoModificarValoresResumoFinanceiro(campoOrigem = '') {
+  valoresResumoEditadosManualmente = true;
+  recalcularTotaisGerais(campoOrigem);
 }
 
-function recalcularTotaisGerais() {
+function recalcularTotaisGerais(campoOrigem = '') {
   const elProd = document.getElementById('o-val-produtos');
   const elServ = document.getElementById('o-val-servico');
   const elTaxa = document.getElementById('o-taxa-acrescimo');
   const elFrete = document.getElementById('o-val-frete');
   const elDesc = document.getElementById('o-val-desconto');
 
-  const valProd = parseNum(elProd ? elProd.value : 0);
-  const valServ = parseNum(elServ ? elServ.value : 0);
-  const taxaPercent = parseNum(elTaxa ? elTaxa.value : 0);
+  let valProd = parseNum(elProd ? elProd.value : 0);
+  let valServ = parseNum(elServ ? elServ.value : 0);
+  let taxaPercent = parseNum(elTaxa ? elTaxa.value : 0);
   const valFrete = parseNum(elFrete ? elFrete.value : 0);
   const valDesc = parseNum(elDesc ? elDesc.value : 0);
 
-  // Cálculo da taxa de acréscimo sobre o valor do serviço
-  const valAcrescimo = valServ > 0 ? (valServ * (taxaPercent / 100)) : 0;
-
-  const elAcrescimoCalc = document.getElementById('o-taxa-acrescimo-calc');
-  if (elAcrescimoCalc) {
-    if (taxaPercent > 0 && valServ > 0) {
-      elAcrescimoCalc.innerHTML = `+ R$ <strong>${formatarValorPtBr(valAcrescimo)}</strong> (${taxaPercent}% s/ serviço)`;
-    } else if (taxaPercent > 0 && valServ === 0) {
-      elAcrescimoCalc.innerHTML = `<span style="color:var(--muted)">Informe o valor do serviço</span>`;
-    } else {
-      elAcrescimoCalc.innerHTML = `+ R$ 0,00 sobre serviço`;
+  // 💡 REGRA DO NEGÓCIO:
+  // "O VALOR DO SERVIÇO É O VALOR PRODUTOS MAIS A TAXA DE ACRESCIMO, EXEMPLO 1.671,40 + 70% = 1.169,98 QUE ESSE É O VALOR DO SERVIÇO"
+  // Valor Serviço = Valor Produtos * (Taxa Acréscimo / 100)
+  if (campoOrigem === 'taxa') {
+    valServ = valProd > 0 ? (valProd * (taxaPercent / 100)) : 0;
+    if (elServ) elServ.value = formatarValorPtBr(valServ);
+  } else if (campoOrigem === 'servico') {
+    if (valProd > 0) {
+      taxaPercent = (valServ / valProd) * 100;
+      if (elTaxa) elTaxa.value = formatarCampoTaxa({ value: taxaPercent });
+    }
+  } else if (campoOrigem === 'produtos') {
+    if (taxaPercent > 0) {
+      valServ = valProd * (taxaPercent / 100);
+      if (elServ) elServ.value = formatarValorPtBr(valServ);
+    }
+  } else {
+    // Sincronização geral (ao recalcular itens ou carregar)
+    if (taxaPercent > 0 && valProd > 0) {
+      valServ = valProd * (taxaPercent / 100);
+      if (elServ) elServ.value = formatarValorPtBr(valServ);
     }
   }
 
-  const totalFinal = Math.max(0, valProd + valServ + valAcrescimo + valFrete - valDesc);
+  const elAcrescimoCalc = document.getElementById('o-taxa-acrescimo-calc');
+  if (elAcrescimoCalc) {
+    if (taxaPercent > 0 && valProd > 0) {
+      elAcrescimoCalc.innerHTML = `= R$ <strong>${formatarValorPtBr(valServ)}</strong> (${taxaPercent.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}% s/ produtos)`;
+    } else if (taxaPercent > 0 && valProd === 0) {
+      elAcrescimoCalc.innerHTML = `<span style="color:var(--muted)">Adicione produtos primeiro</span>`;
+    } else if (valServ > 0) {
+      elAcrescimoCalc.innerHTML = `= R$ <strong>${formatarValorPtBr(valServ)}</strong> em serviço`;
+    } else {
+      elAcrescimoCalc.innerHTML = `= R$ 0,00 em serviço`;
+    }
+  }
+
+  // Total do Orçamento = Produtos + Serviço (Mão de Obra) + Frete - Desconto
+  const totalFinal = Math.max(0, valProd + valServ + valFrete - valDesc);
   const elTotal = document.getElementById('total');
   if (elTotal) {
     elTotal.textContent = 'R$ ' + formatarValorPtBr(totalFinal);
@@ -3767,16 +3791,22 @@ function calcTotal() {
 
   const elProd = document.getElementById('o-val-produtos');
   const elServ = document.getElementById('o-val-servico');
+  const elTaxa = document.getElementById('o-taxa-acrescimo');
 
   // Atualiza campos de resumo se existirem
   if (elProd) {
     elProd.value = formatarValorPtBr(somaProdutosTabela);
   }
-  if (elServ && somaServicosTabela > 0) {
+
+  const taxaPercent = parseNum(elTaxa ? elTaxa.value : 0);
+  if (taxaPercent > 0 && somaProdutosTabela > 0) {
+    const valServicoCalculado = somaProdutosTabela * (taxaPercent / 100);
+    if (elServ) elServ.value = formatarValorPtBr(valServicoCalculado);
+  } else if (somaServicosTabela > 0 && elServ) {
     elServ.value = formatarValorPtBr(somaServicosTabela);
   }
 
-  return recalcularTotaisGerais();
+  return recalcularTotaisGerais('itens');
 }
 
 function getItens() {
@@ -3811,11 +3841,14 @@ function getOrc() {
   const elDesc = document.getElementById('o-val-desconto');
 
   const valProdutos = parseNum(elProd ? elProd.value : 0);
-  const valServico = parseNum(elServ ? elServ.value : 0);
   const taxaAcrescimo = parseNum(elTaxa ? elTaxa.value : 0);
+  let valServico = parseNum(elServ ? elServ.value : 0);
+  if (valServico === 0 && taxaAcrescimo > 0 && valProdutos > 0) {
+    valServico = valProdutos * (taxaAcrescimo / 100);
+  }
   const valFrete = parseNum(elFrete ? elFrete.value : 0);
   const valDesconto = parseNum(elDesc ? elDesc.value : 0);
-  const valAcrescimo = valServico > 0 ? (valServico * (taxaAcrescimo / 100)) : 0;
+  const valAcrescimo = valServico;
 
   return {
     numero: document.getElementById('orc-numero-display').textContent,
@@ -4065,7 +4098,7 @@ function cancelarEdicaoOs() {
   ['o-val-produtos','o-val-servico','o-taxa-acrescimo','o-val-frete','o-val-desconto']
     .forEach(id => { const el=document.getElementById(id); if(el) el.value='0,00'; });
   const elAcrescimoCalc = document.getElementById('o-taxa-acrescimo-calc');
-  if (elAcrescimoCalc) elAcrescimoCalc.innerHTML = '+ R$ 0,00 sobre serviço';
+  if (elAcrescimoCalc) elAcrescimoCalc.innerHTML = '= R$ 0,00 em serviço';
   document.getElementById('itens-lista').innerHTML = '';
   itemId = 0; addItem();
   selChip(document.querySelector('.chip'),'À vista');
@@ -4751,11 +4784,15 @@ function editarOs(id) {
   const elDesc = document.getElementById('o-val-desconto');
 
   if (elProd && d.valProdutos != null) elProd.value = formatarValorPtBr(d.valProdutos);
-  if (elServ && d.valServico != null) elServ.value = formatarValorPtBr(d.valServico);
   if (elTaxa && d.taxaAcrescimo != null) elTaxa.value = formatarCampoTaxa({ value: d.taxaAcrescimo });
+  if (elServ && d.valServico != null) {
+    elServ.value = formatarValorPtBr(d.valServico);
+  } else if (elTaxa && d.taxaAcrescimo && elProd && d.valProdutos) {
+    elServ.value = formatarValorPtBr(parseNum(d.valProdutos) * (parseNum(d.taxaAcrescimo) / 100));
+  }
   if (elFrete && d.valFrete != null) elFrete.value = formatarValorPtBr(d.valFrete);
   if (elDesc && d.valDesconto != null) elDesc.value = formatarValorPtBr(d.valDesconto);
-  recalcularTotaisGerais();
+  recalcularTotaisGerais('edicao');
 
   // Configurações do modo de edição de O.S. com modificações
   const foiAprovadoOuReajuste = o.status === 'aprovado' || o.status === 'modificacao_aprovada' || o.status === 'reajustar' || !!o.assinado_por;
@@ -7992,8 +8029,8 @@ async function gerarPdfOrcamentoDoc(dados) {
   const valFreteNum = parseNum(dados.valFrete);
   const valDescNum = parseNum(dados.valDesconto);
 
-  // O valor final do serviço apresentado no PDF já absorve o acréscimo sem exibir percentual de margem/taxa
-  const valServicoFinal = valServNum + valAcrescimoNum;
+  // O valor final do serviço apresentado no PDF já reflete a taxa/mão de obra sem exibir margem ao cliente
+  const valServicoFinal = valServNum > 0 ? valServNum : valAcrescimoNum;
 
   const txtValProdutos = valProdNum > 0 ? ('R$ ' + formatarValorPtBr(valProdNum)) : ('R$ ' + valorTotalLimpo);
   page.drawText('Valor dos Produtos / Materiais:', { x: rightCardX + 10, y: totY, size: 6.8, font: fontRegular, color: GRAY });
