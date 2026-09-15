@@ -2596,7 +2596,27 @@
           <div class="ponto-clock-card" id="card-relogio-batedor-ponto">
             <div class="ponto-date-display" id="cliente-ponto-data-atual">SEGUNDA-FEIRA, 14 DE SETEMBRO DE 2026</div>
             <div class="ponto-clock-display" id="cliente-ponto-hora-atual">00:00:00</div>
-            <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:16px;">
+            
+            <!-- BANNER DE ALARME DE PONTO EM SEGUNDO PLANO -->
+            <div style="background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(5,150,105,0.22));border:1.5px solid #10b981;border-radius:12px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:24px;">🔔</span>
+                <div>
+                  <div style="font-size:12.5px;font-weight:900;color:#34d399;">Alarme de Ponto no Celular (5 min antes)</div>
+                  <div style="font-size:11px;color:#cbd5e1;">Toca mesmo com o aplicativo fechado ou celular bloqueado.</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button type="button" onclick="ativarAlarmePontoCelularSegundoPlano()" style="padding:7px 12px;background:#10b981;border:none;border-radius:8px;color:#000;font-size:11px;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 10px rgba(16,185,129,0.4);">
+                  <span>⏰</span> <span>Ativar no Celular</span>
+                </button>
+                <button type="button" onclick="baixarSincronizacaoAlarmeCalendario()" style="padding:7px 10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-size:11px;font-weight:700;cursor:pointer;" title="Adicionar alarmes ao despertador nativo do celular">
+                  <span>📅</span> <span>Despertador (.ics)</span>
+                </button>
+              </div>
+            </div>
+  
+<div style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:16px;">
               Toque no botão correspondente para registrar seu horário oficial:
             </div>
 
@@ -3735,8 +3755,34 @@
     function obterLicencaAtivaCliente() {
       try {
         const params = new URLSearchParams(window.location.search);
-        const empUrl = params.get('empresa');
-        const nomeUrl = params.get('nome');
+        let empUrl = params.get('empresa') || params.get('emp');
+        const nomeUrl = params.get('nome') || params.get('empNome');
+
+        // Se veio SD Móveis pelo nome na URL mas sem ID específico
+        if (!empUrl && nomeUrl && nomeUrl.toLowerCase().includes('móveis')) {
+          empUrl = 'sdmoveis';
+        }
+
+        if (empUrl) {
+          localStorage.setItem('sdv_licenca_ativa', empUrl);
+          let lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
+          let enc = lista.find(l => l.id === empUrl);
+          if (!enc) {
+            enc = {
+              id: empUrl,
+              nome: nomeUrl || (empUrl === 'sdmoveis' ? 'SD Móveis Projetados' : 'Empresa'),
+              segmento: empUrl === 'sdmoveis' ? 'Móveis Planejados & Ambientes Sob Medida' : (params.get('seg') || 'Vidraçaria & Esquadrias'),
+              telefone: params.get('tel') || '(85) 99611-9824',
+              slogan: empUrl === 'sdmoveis' ? 'Ambientes Sob Medida' : 'Acompanhamento de Serviços',
+              logo: empUrl === 'sdmoveis' ? 'logo_moveis.jpg' : (params.get('logo') || 'logo.jpg'),
+              banner: empUrl === 'sdmoveis' ? 'banner_moveis.jpg' : 'banner.jpg'
+            };
+            lista.push(enc);
+            localStorage.setItem('sdv_licencas', JSON.stringify(lista));
+            return enc;
+          }
+          return enc;
+        }
         if (empUrl) {
           localStorage.setItem('sdv_licenca_ativa', empUrl);
           let lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
@@ -4211,13 +4257,59 @@
       atualizarBotaoHeaderBiometria();
     }
 
-    function mudarAba(tab) {
+    function inicializarFinanceiroPessoal() {}
+function abrirModalLancamentoPessoal() {}
+function fecharModalLancamentoPessoal() {}
+function salvarLancamentoFinPessoal() {}
+function alternarVerSenhaInput() {}
+function salvarCriacaoSenhaFinanceiroPessoal() {}
+function desbloquearCofrePessoalComSenha() {}
+function abrirModalRedefinirSenhaFin() {}
+function alternarOcultarValoresFinPessoal() {}
+function bloquearCofrePessoal() {}
+function filtrarLancamentosFinPessoal() {}
+function fecharModalCodigoFin() {}
+function enviarCodigoWhatsAppParaEmpresa() {}
+function copiarCodigoFinGerado() {}
+function validarCodigoLiberadoManual() {}
+function checarLiberacaoEmpresaAutomatica() {}
+
+function mudarAba(tab) {
       ['status', 'galeria', 'mensagens', 'financeiro', 'opiniao', 'jogos', 'financeiro-pessoal'].forEach(t => {
         const pane = document.getElementById('pane-' + t);
         const btn = document.getElementById('btn-tab-' + t);
         if (pane) pane.classList.toggle('active', t === tab);
         if (btn) btn.classList.toggle('active', t === tab);
       });
+
+      try {
+        if (tab === 'mensagens') {
+          const badge = document.getElementById('badge-msg-count');
+          if (badge) badge.style.display = 'none';
+          if (typeof renderizarOrdensMensagens === 'function') renderizarOrdensMensagens();
+          if (typeof scrollChatFim === 'function') scrollChatFim();
+        } else if (tab === 'financeiro') {
+          if (clienteSessao && clienteSessao.isFuncionario) {
+            if (typeof renderizarResumoPontoCliente === 'function') renderizarResumoPontoCliente();
+          } else {
+            if (typeof carregarDadosFinanceiros === 'function') carregarDadosFinanceiros(clienteSessao);
+          }
+        } else if (tab === 'opiniao') {
+          if (typeof renderizarListaOpinioes === 'function') renderizarListaOpinioes();
+        } else if (tab === 'financeiro-pessoal') {
+          if (typeof inicializarFinanceiroPessoal === 'function') inicializarFinanceiroPessoal();
+        } else if (tab === 'jogos') {
+          if (typeof atualizarMenuJogosVisiveis === 'function') atualizarMenuJogosVisiveis();
+          if (typeof atualizarUIHorarioJogos === 'function') atualizarUIHorarioJogos();
+          if (typeof verificarStatusHorarioJogos === 'function') verificarStatusHorarioJogos();
+          if (typeof selecionarJogo === 'function') selecionarJogo(jogoAtivoId || 'corrida');
+        } else {
+          if (typeof pararJogoCorrida === 'function') pararJogoCorrida();
+          if (typeof tiroRodando !== 'undefined' && tiroRodando && typeof fimJogoTiro === 'function') fimJogoTiro();
+        }
+      } catch (err) {
+        console.warn('Aviso ao navegar na aba ' + tab + ':', err);
+      }
 
       if (tab === 'mensagens') {
         const badge = document.getElementById('badge-msg-count');
@@ -4852,15 +4944,14 @@
 
       if (!liberado) {
         if (overlay) overlay.style.display = 'flex';
-        // Se estava jogando qualquer jogo, pausa e avisa!
-        if (jogoCorridaRodando || tiroRodando) {
+        if (jogoCorridaRodando || (typeof tiroRodando !== 'undefined' && tiroRodando)) {
           pararJogoCorrida();
-          if (tiroRodando) fimJogoTiro();
-          if (!silencioso) dispararNotificacaoHorarioJogos('Horário Permitido Excedido!');
+          if (typeof tiroRodando !== 'undefined' && tiroRodando && typeof fimJogoTiro === 'function') fimJogoTiro();
         }
       } else {
         if (overlay) overlay.style.display = 'none';
       }
+      return { liberado, proxima };
 
       return { liberado, proxima, horaMin };
     }
@@ -7933,7 +8024,111 @@
               Contratante (Autorizado Digitalmente)
             </div>
           </div>
-        </body>
+        <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+  }
+</script>
+
+<script>
+function ativarAlarmePontoCelularSegundoPlano() {
+  if (!('Notification' in window)) {
+    alert('Seu navegador não possui suporte à Notificação do Ponto.');
+    return;
+  }
+  Notification.requestPermission().then(permission => {
+    if (permission === 'granted') {
+      const turnos = [
+        { hora: '08:00', label: 'Entrada' },
+        { hora: '12:00', label: 'Saída para Almoço' },
+        { hora: '13:00', label: 'Retorno do Almoço' },
+        { hora: '17:00', label: 'Saída Final' }
+      ];
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          action: 'configurarAlarmesPonto',
+          alarmes: turnos,
+          nome: (typeof clienteSessao !== 'undefined' && clienteSessao ? clienteSessao.nome : 'Colaborador'),
+          testar: true
+        });
+      }
+      alert('🔔 Alarme de Ponto ativado no celular com sucesso! Você receberá aviso 5 minutos antes de cada turno mesmo com o app fechado.');
+    } else {
+      alert('Por favor, permita as notificações no navegador para receber os alarmes de ponto no celular.');
+    }
+  });
+}
+
+function baixarSincronizacaoAlarmeCalendario() {
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//SD Vidros e Moveis//Alarme Ponto//PT-BR',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Entrada (08:00)',
+    'DESCRIPTION:Alarme oficial de ponto eletrônico SD Vidros / SD Móveis Projetados.',
+    'DTSTART;TZID=America/Fortaleza:20260101T080000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para a Entrada do Ponto!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Almoço (12:00)',
+    'DESCRIPTION:Alarme oficial de ponto - Almoço.',
+    'DTSTART;TZID=America/Fortaleza:20260101T120000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para o Almoço!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Retorno Almoço (13:00)',
+    'DESCRIPTION:Alarme oficial de ponto - Retorno do Almoço.',
+    'DTSTART;TZID=America/Fortaleza:20260101T130000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para o Retorno do Almoço!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Saída (17:00)',
+    'DESCRIPTION:Alarme oficial de ponto - Saída Final.',
+    'DTSTART;TZID=America/Fortaleza:20260101T170000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para o Fim do Expediente!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'alarmes-ponto-sdvidros.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert('📅 Arquivo de calendário baixado! Toque nele para importar os alarmes no despertador do celular.');
+}
+</script>
+
+</body>
         </html>
       `);
       janela.document.close();
@@ -7965,10 +8160,28 @@
 
     // Funções auxiliares de Storage
     function carregarOrdensDoStorage() {
-      try { return JSON.parse(localStorage.getItem('sdv_ordens') || '[]'); } catch { return []; }
+      try {
+        const lic = (typeof obterLicencaAtivaCliente === 'function' ? obterLicencaAtivaCliente() : { id: 'sdvidros' });
+        const empId = lic.id || 'sdvidros';
+        const key = 'sdv_ordens_' + empId;
+        let v = localStorage.getItem(key);
+        if (!v && (empId === 'sdvidros' || !v)) {
+          v = localStorage.getItem('sdv_ordens');
+        }
+        return v ? JSON.parse(v) : [];
+      } catch { return []; }
     }
     function carregarClientesDoStorage() {
-      try { return JSON.parse(localStorage.getItem('sdv_clientes') || '[]'); } catch { return []; }
+      try {
+        const lic = (typeof obterLicencaAtivaCliente === 'function' ? obterLicencaAtivaCliente() : { id: 'sdvidros' });
+        const empId = lic.id || 'sdvidros';
+        const key = 'sdv_clientes_' + empId;
+        let v = localStorage.getItem(key);
+        if (!v && (empId === 'sdvidros' || !v)) {
+          v = localStorage.getItem('sdv_clientes');
+        }
+        return v ? JSON.parse(v) : [];
+      } catch { return []; }
     }
 
     // ══════════════════════════════════════════════════════════════════════════════

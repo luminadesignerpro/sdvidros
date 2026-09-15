@@ -2,6 +2,8 @@
   "version": 2,
   "rewrites": [
     { "source": "/", "destination": "/login.html" },
-    { "source": "/cliente", "destination": "/cliente.html" }
+    { "source": "/cliente", "destination": "/cliente.html" },
+    { "source": "/funcionario", "destination": "/funcionario.html" },
+    { "source": "/manifest.json", "destination": "/api/manifest" }
   ]
 }

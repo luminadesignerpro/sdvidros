@@ -4165,7 +4165,8 @@ function renderizarModalLinksFuncionarios(filtro = '') {
   cont.innerHTML = lista.map(f => {
     const idParam = f.id || String(f.nome || 'colaborador').replace(/\s+/g, '_');
     const nomeParam = encodeURIComponent(f.nome || 'Colaborador');
-    const linkPortal = `${baseOrigin}${basePath}/funcionario.html?funcId=${idParam}&nome=${nomeParam}`;
+    const licAtivaLink = (typeof obterLicencaAtiva === 'function' ? obterLicencaAtiva() : { id: 'sdvidros', nome: 'SD Vidros' });
+  const linkPortal = `${baseOrigin}${basePath}/funcionario.html?funcId=${idParam}&nome=${nomeParam}&empresa=${encodeURIComponent(licAtivaLink.id)}&empNome=${encodeURIComponent(licAtivaLink.nome)}`;
     const telLimpo = (f.whatsapp || f.tel || '').replace(/\D/g, '');
     const msgZap = `Olá ${f.nome}! Segue seu link oficial do Portal do Funcionário SD Vidros (registro de ponto eletrônico e acompanhamento de obras):\n\n${linkPortal}\n\nSalve nos favoritos do seu celular!`;
     const urlZap = telLimpo ? `https://wa.me/55${telLimpo}?text=${encodeURIComponent(msgZap)}` : `https://wa.me/?text=${encodeURIComponent(msgZap)}`;
@@ -4722,10 +4723,10 @@ function notificarNovaOrdemGerada(ord) {
 }
 
 function editarOs(id) {
-  const o = historico.find(x => x.id===id);
-  if (!o || !o.dados) return;
+  const o = historico.find(x => String(x.id) === String(id) || String(x.numero) === String(id));
+  if (!o) return;
   editandoOsId = id;
-  const d = o.dados;
+  const d = o.dados || o;
   document.getElementById('orc-numero-display').textContent = d.numero;
   [['o-nome','nome'],['o-cnpj','cnpj'],['o-tel','tel'],['o-bairro','bairro'],
    ['o-end','end'],['o-num','num'],['o-apto','apto'],['o-resp','resp'],
@@ -5086,7 +5087,7 @@ async function abrirVisualizadorPdfParaDados(dadosRaw, tituloModal, fileName) {
 }
 
 async function visualizarPdfOs(id, versaoNum = null) {
-  const o = historico.find(x => x.id === id);
+  const o = historico.find(x => String(x.id) === String(id) || String(x.numero) === String(id));
   if (!o) return;
 
   let dadosRaw = o.dados || o;
@@ -5632,8 +5633,9 @@ function baixarPdfOs(id) {
 
 function enviarWhatsOs(id) {
   const os = historico.find(x => String(x.id) === String(id) || String(x.numero) === String(id));
-  if (!os || !os.dados) return;
-  enviarWhatsComAprovacao(os.dados);
+  if (!os) return;
+  const d = os.dados || os;
+  enviarWhatsComAprovacao(d);
 }
 
 // ══════════════════════════════════════════════
@@ -6856,7 +6858,133 @@ function imprimirFolhaPonto() {
           Diretoria / RH
         </div>
       </div>
-    </body>
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+  }
+</script>
+<script>
+
+function ativarAlarmePontoCelularSegundoPlano() {
+  if (!('Notification' in window)) {
+    alert('Este dispositivo/navegador não suporta notificações em segundo plano.');
+    return;
+  }
+
+  Notification.requestPermission().then(permission => {
+    if (permission === 'granted') {
+      const cfg = carregarConfigAlarmePonto();
+      const turnos = [
+        { hora: cfg.ent || '08:00', label: 'Entrada' },
+        { hora: cfg.alm || '12:00', label: 'Saída Almoço' },
+        { hora: cfg.vol || '13:00', label: 'Retorno Almoço' },
+        { hora: cfg.sai || '17:00', label: 'Saída Final' }
+      ];
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(reg => {
+          reg.active && reg.active.postMessage({
+            action: 'configurarAlarmesPonto',
+            alarmes: turnos,
+            nome: 'Colaborador',
+            testar: true
+          });
+        }).catch(() => {});
+      }
+
+      const badge = document.getElementById('badge-alarme-status');
+      if (badge) {
+        badge.textContent = 'ATIVO (App Fechado)';
+        badge.style.background = '#059669';
+      }
+
+      mostrarToastAprovacao('🔔 Alarme ativado no celular! Notificará 5 min antes mesmo com o app fechado.');
+    } else {
+      alert('Permissão de notificações não concedida. Habilite as notificações nas configurações do seu navegador/celular para o alarme tocar em segundo plano.');
+    }
+  });
+}
+
+function baixarSincronizacaoAlarmeCalendario() {
+  const cfg = carregarConfigAlarmePonto();
+  const ent = (cfg.ent || '08:00').replace(':', '');
+  const alm = (cfg.alm || '12:00').replace(':', '');
+  const vol = (cfg.vol || '13:00').replace(':', '');
+  const sai = (cfg.sai || '17:00').replace(':', '');
+
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//SD Vidros e Moveis//Alarme Ponto//PT-BR',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    // Evento 1: Entrada
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Entrada (08:00)',
+    'DESCRIPTION:Alarme oficial de ponto eletrônico SD Vidros / SD Móveis Projetados. Registre seu ponto agora!',
+    'DTSTART;TZID=America/Fortaleza:20260101T080000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para o Ponto de Entrada!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    // Evento 2: Almoço
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Saída Almoço (12:00)',
+    'DESCRIPTION:Alarme oficial de ponto - Horário de Almoço.',
+    'DTSTART;TZID=America/Fortaleza:20260101T120000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para a Saída do Almoço!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    // Evento 3: Retorno Almoço
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Retorno Almoço (13:00)',
+    'DESCRIPTION:Alarme oficial de ponto - Retorno do Almoço.',
+    'DTSTART;TZID=America/Fortaleza:20260101T130000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para o Retorno do Almoço!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    // Evento 4: Saída
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Saída Final (17:00)',
+    'DESCRIPTION:Alarme oficial de ponto - Saída Final do Expediente.',
+    'DTSTART;TZID=America/Fortaleza:20260101T170000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para a Saída Final!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'alarmes-ponto-sdvidros.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  mostrarToastAprovacao('📅 Calendário baixado! Toque nele para adicionar os 4 alarmes no despertador do celular.');
+}
+
+</script>
+</body>
     </html>
   `;
 
@@ -8370,7 +8498,7 @@ function getChatKey(os) {
 
 // Abre o modal de gestão do Portal para uma OS específica
 function abrirModalPortalOs(id) {
-  const os = historico.find(x => x.id === id);
+  const os = historico.find(x => String(x.id) === String(id) || String(x.numero) === String(id));
   if (!os) return;
   osPortalAtual = os;
 
@@ -8565,7 +8693,8 @@ function enviarAcessoZapModal() {
   const senha = senhaDigitada || (cli && cli.senha) || (telOs.length >= 4 ? telOs.slice(-4) : '****');
 
   const baseUrl = window.location.origin + window.location.pathname.replace('index.html','');
-  const linkPortal = `${baseUrl}cliente.html?tel=${telOs}&s=${senha}`;
+  const licAtivaLinkCli = (typeof obterLicencaAtiva === 'function' ? obterLicencaAtiva() : { id: 'sdvidros', nome: 'SD Vidros' });
+  const linkPortal = `${baseUrl}cliente.html?tel=${telOs}&s=${senha}&empresa=${encodeURIComponent(licAtivaLinkCli.id)}&nome=${encodeURIComponent(licAtivaLinkCli.nome)}`;
 
   const msg = encodeURIComponent(
     `Olá, ${nomeCliente}! 👋\n\n` +
