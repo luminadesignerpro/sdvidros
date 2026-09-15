@@ -1321,6 +1321,141 @@
       box-shadow: 0 0 16px rgba(255,255,255,0.08), inset 0 0 0 2px currentColor;
       position: relative;
     }
+
+    /* ── ESTILOS MINHA OPINIÃO & JOGOS ── */
+    .star-item {
+      color: #475569;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .star-item.active {
+      color: #fbbf24;
+      text-shadow: 0 0 16px rgba(251,191,36,0.6);
+      transform: scale(1.15);
+    }
+    .tipo-opiniao-btn {
+      background: rgba(255,255,255,0.03);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      color: var(--text2);
+      border-radius: 10px;
+      padding: 9px 8px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .tipo-opiniao-btn:hover {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+    .tipo-opiniao-btn.active {
+      background: rgba(201,168,76,0.22);
+      border-color: var(--gold);
+      color: var(--gold-light);
+      box-shadow: 0 0 14px var(--gold-glow);
+    }
+
+    .btn-jogo-opcao {
+      background: rgba(255,255,255,0.03);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 10px 6px;
+      color: var(--text2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-jogo-opcao:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+    .btn-jogo-opcao.active {
+      background: rgba(14,165,233,0.18);
+      border-color: #38bdf8;
+      color: #38bdf8;
+      box-shadow: 0 4px 16px rgba(14,165,233,0.3);
+    }
+
+    .btn-ctrl-jogo {
+      flex: 1;
+      max-width: 140px;
+      padding: 12px;
+      background: rgba(56,189,248,0.15);
+      border: 1.5px solid #38bdf8;
+      border-radius: 10px;
+      color: #38bdf8;
+      font-weight: 900;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .btn-ctrl-jogo:active {
+      transform: scale(0.95);
+      background: #38bdf8;
+      color: #000;
+    }
+
+    .damas-sq, .xadrez-sq {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      font-size: clamp(20px, 6vw, 32px);
+      position: relative;
+    }
+    .damas-sq.dark { background: #78350f; }
+    .damas-sq.light { background: #fed7aa; }
+    .damas-sq.highlight { background: #059669 !important; box-shadow: inset 0 0 10px #34d399; }
+    .damas-sq.selected { background: #d97706 !important; }
+    .damas-peca {
+      width: 78%;
+      height: 78%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+      font-size: 14px;
+      font-weight: 900;
+    }
+    .damas-peca.branca {
+      background: radial-gradient(circle at 35% 35%, #ffffff, #cbd5e1);
+      border: 2px solid #94a3b8;
+      color: #000;
+    }
+    .damas-peca.preta {
+      background: radial-gradient(circle at 35% 35%, #ef4444, #991b1b);
+      border: 2px solid #7f1d1d;
+      color: #fff;
+    }
+
+    .xadrez-sq.dark { background: #334155; }
+    .xadrez-sq.light { background: #cbd5e1; color: #000; }
+    .xadrez-sq.selected { background: #d97706 !important; box-shadow: inset 0 0 12px rgba(251,191,36,0.8); }
+    .xadrez-sq.destaque { background: #059669 !important; }
+
+    .tiro-alvo-anim {
+      position: absolute;
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.1s;
+      animation: popIn 0.2s ease-out;
+    }
+    .tiro-alvo-anim:active {
+      transform: scale(1.3);
+    }
   </style>
 </head>
 <body>
@@ -1629,7 +1764,7 @@
           <span>Abas do Portal</span>
         </div>
 
-        <!-- Abas do Portal (Grid 2x2 Uniforme com Caixa Padronizada) -->
+        <!-- Abas do Portal (Grid 2x3 Uniforme com Caixa Padronizada) -->
         <div class="portal-tabs">
           <button type="button" class="portal-tab active" id="btn-tab-status" onclick="mudarAba('status')">
             <span>📊</span> <span>Status do Serviço</span>
@@ -1642,6 +1777,12 @@
           </button>
           <button type="button" class="portal-tab" id="btn-tab-financeiro" onclick="mudarAba('financeiro')">
             <span id="tab-fin-icone">💳</span> <span id="tab-fin-rotulo">Setor Financeiro</span>
+          </button>
+          <button type="button" class="portal-tab" id="btn-tab-opiniao" onclick="mudarAba('opiniao')">
+            <span>💡</span> <span>Minha Opinião</span>
+          </button>
+          <button type="button" class="portal-tab" id="btn-tab-jogos" onclick="mudarAba('jogos')">
+            <span>🎮</span> <span>Jogos</span>
           </button>
         </div>
       </div>
@@ -2144,6 +2285,246 @@
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- ── ABA 5: MINHA OPINIÃO ── -->
+      <div id="pane-opiniao" class="tab-pane">
+        <div class="portal-card" style="border:1.5px solid rgba(201,168,76,0.35);box-shadow:0 12px 35px rgba(0,0,0,0.4);">
+          <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:24px;">💡</span>
+              <div>
+                <div style="font-size:17px;font-weight:900;color:#fff;">Minha Opinião & Avaliação</div>
+                <div style="font-size:12px;color:var(--text2);font-weight:500;">Sua voz é essencial para o aprimoramento contínuo dos nossos serviços</div>
+              </div>
+            </div>
+            <span class="badge-gold">Canal Direto</span>
+          </div>
+
+          <!-- Card de Avaliação por Estrelas -->
+          <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px;text-align:center;margin-bottom:18px;">
+            <div style="font-size:12px;font-weight:800;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Como você avalia nossa empresa até agora?</div>
+            <div id="star-rating-box" style="font-size:32px;display:flex;justify-content:center;gap:8px;cursor:pointer;user-select:none;">
+              <span class="star-item" onclick="setOpiniaoRating(1)" data-val="1">★</span>
+              <span class="star-item" onclick="setOpiniaoRating(2)" data-val="2">★</span>
+              <span class="star-item" onclick="setOpiniaoRating(3)" data-val="3">★</span>
+              <span class="star-item" onclick="setOpiniaoRating(4)" data-val="4">★</span>
+              <span class="star-item active" onclick="setOpiniaoRating(5)" data-val="5">★</span>
+            </div>
+            <div id="star-rating-label" style="font-size:13px;font-weight:800;color:#4ade80;margin-top:6px;">⭐⭐⭐⭐⭐ Excelente! Muito satisfeito</div>
+          </div>
+
+          <!-- Tipo de Feedback -->
+          <div style="margin-bottom:14px;">
+            <label style="display:block;font-size:11.5px;font-weight:800;color:var(--gold-light);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Tipo de Opinião</label>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;">
+              <button type="button" class="tipo-opiniao-btn active" onclick="setTipoOpiniao(this, 'Elogio')">🌟 Elogio</button>
+              <button type="button" class="tipo-opiniao-btn" onclick="setTipoOpiniao(this, 'Sugestão')">💡 Sugestão</button>
+              <button type="button" class="tipo-opiniao-btn" onclick="setTipoOpiniao(this, 'Ideia Nova')">🚀 Ideia Nova</button>
+              <button type="button" class="tipo-opiniao-btn" onclick="setTipoOpiniao(this, 'Crítica Construtiva')">⚠️ Crítica</button>
+            </div>
+          </div>
+
+          <!-- Campo de Mensagem -->
+          <div style="margin-bottom:16px;">
+            <label style="display:block;font-size:11.5px;font-weight:800;color:var(--gold-light);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Escreva sua Mensagem / Sugestão</label>
+            <textarea id="opiniao-texto" rows="4" placeholder="Conte-nos o que achou dos prazos, acabamento, atendimento ou dê uma sugestão para novidades..." style="width:100%;box-sizing:border-box;padding:12px;background:#0c0d16;border:1.5px solid rgba(255,255,255,0.12);border-radius:12px;color:#fff;font-size:13.5px;outline:none;font-family:inherit;line-height:1.5;resize:vertical;"></textarea>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="button" onclick="enviarMinhaOpiniao()" style="flex:1;min-width:180px;padding:14px;background:linear-gradient(135deg,var(--gold-light),var(--gold));border:none;border-radius:12px;color:#000;font-weight:900;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(201,168,76,0.35);">
+              <span>📤</span> <span>Enviar Minha Opinião</span>
+            </button>
+            <button type="button" onclick="enviarOpiniaoWhatsApp()" style="padding:14px 18px;background:rgba(37,211,102,0.15);border:1.5px solid #25D366;border-radius:12px;color:#25D366;font-weight:800;font-size:13.5px;cursor:pointer;display:flex;align-items:center;gap:6px;">
+              <span>📱</span> <span>WhatsApp</span>
+            </button>
+          </div>
+
+          <!-- Histórico de Opiniões Registradas -->
+          <div style="margin-top:24px;border-top:1px solid rgba(255,255,255,0.08);padding-top:18px;">
+            <div style="font-size:13px;font-weight:900;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+              <span>💬</span> <span>Minhas Avaliações e Opiniões Enviadas</span>
+            </div>
+            <div id="lista-opinioes-enviadas" style="display:flex;flex-direction:column;gap:10px;">
+              <!-- Inseridas dinamicamente -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ABA 6: JOGOS & ENTRETENIMENTO ── -->
+      <div id="pane-jogos" class="tab-pane">
+        <div class="portal-card" style="border:1.5px solid rgba(14,165,233,0.35);box-shadow:0 12px 35px rgba(0,0,0,0.45);">
+          <!-- Header dos Jogos -->
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:28px;">🎮</span>
+              <div>
+                <div style="font-size:18px;font-weight:900;color:#fff;">Central de Jogos & Lazer</div>
+                <div style="font-size:12px;color:#38bdf8;font-weight:700;">Divirta-se jogando diretamente no seu celular ou computador!</div>
+              </div>
+            </div>
+            <span style="background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.35);color:#38bdf8;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;">
+              4 Jogos Oficiais + Sugestões
+            </span>
+          </div>
+
+          <!-- SELETOR COM OPÇÃO DE ESCOLHER O JOGO -->
+          <div style="margin-bottom:18px;">
+            <div style="font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">
+              Escolha seu Jogo:
+            </div>
+            <div class="jogos-menu-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:8px;">
+              <button type="button" class="btn-jogo-opcao active" id="btn-jogo-corrida" onclick="selecionarJogo('corrida')">
+                <span style="font-size:22px;">🏎️</span>
+                <span style="font-size:12px;font-weight:800;">Corrida</span>
+              </button>
+              <button type="button" class="btn-jogo-opcao" id="btn-jogo-damas" onclick="selecionarJogo('damas')">
+                <span style="font-size:22px;">⚪⚫</span>
+                <span style="font-size:12px;font-weight:800;">Damas</span>
+              </button>
+              <button type="button" class="btn-jogo-opcao" id="btn-jogo-xadrez" onclick="selecionarJogo('xadrez')">
+                <span style="font-size:22px;">♟️</span>
+                <span style="font-size:12px;font-weight:800;">Xadrez</span>
+              </button>
+              <button type="button" class="btn-jogo-opcao" id="btn-jogo-tiro" onclick="selecionarJogo('tiro')">
+                <span style="font-size:22px;">🎯</span>
+                <span style="font-size:12px;font-weight:800;">Tiro</span>
+              </button>
+              <button type="button" class="btn-jogo-opcao" id="btn-jogo-sugestao" onclick="selecionarJogo('sugestao')" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:#fbbf24;">
+                <span style="font-size:22px;">💡</span>
+                <span style="font-size:12px;font-weight:800;">Sugerir Novo</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ── JOGO 1: CORRIDA (TURBO RACER) ── -->
+          <div id="view-jogo-corrida" class="jogo-view-container">
+            <div style="background:#08080f;border:1.5px solid rgba(255,255,255,0.1);border-radius:16px;padding:14px;text-align:center;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;font-weight:800;">
+                <span style="color:#fbbf24;">🏆 Pontos: <strong id="corrida-score" style="color:#fff;">0</strong></span>
+                <span style="color:#38bdf8;">🔥 Velocidade: <strong id="corrida-speed" style="color:#fff;">100 km/h</strong></span>
+                <span style="color:#4ade80;">🥇 Recorde: <strong id="corrida-recorde" style="color:#fff;">0</strong></span>
+              </div>
+              <div style="position:relative;display:inline-block;border:2px solid #334155;border-radius:12px;overflow:hidden;background:#1e293b;box-shadow:0 8px 30px rgba(0,0,0,0.7);max-width:100%;">
+                <canvas id="canvas-corrida" width="320" height="420" style="display:block;background:#1e293b;touch-action:none;"></canvas>
+                <div id="corrida-overlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(4px);flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;">
+                  <div style="font-size:32px;">💥 Bateu!</div>
+                  <div style="font-size:18px;font-weight:900;color:#fff;">Pontuação Final: <span id="corrida-final-score" style="color:#fbbf24;">0</span></div>
+                  <button type="button" onclick="iniciarJogoCorrida()" style="padding:12px 24px;background:linear-gradient(135deg,#38bdf8,#0ea5e9);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 18px rgba(14,165,233,0.5);">
+                    🔄 Jogar Novamente
+                  </button>
+                </div>
+              </div>
+              <!-- Controles de Toque para Celular -->
+              <div style="display:flex;justify-content:center;gap:16px;margin-top:14px;">
+                <button type="button" class="btn-ctrl-jogo" id="btn-corrida-esq" onmousedown="moverCarroCorrida(-1)" ontouchstart="moverCarroCorrida(-1);event.preventDefault();">
+                  ◀ ESQUERDA
+                </button>
+                <button type="button" class="btn-ctrl-jogo" id="btn-corrida-dir" onmousedown="moverCarroCorrida(1)" ontouchstart="moverCarroCorrida(1);event.preventDefault();">
+                  DIREITA ▶
+                </button>
+              </div>
+              <div style="font-size:11.5px;color:var(--text2);margin-top:8px;">(Você também pode usar as setas ⬅️ ➡️ do teclado!)</div>
+            </div>
+          </div>
+
+          <!-- ── JOGO 2: DAMAS (CHECKERS) ── -->
+          <div id="view-jogo-damas" class="jogo-view-container" style="display:none;">
+            <div style="background:#08080f;border:1.5px solid rgba(255,255,255,0.1);border-radius:16px;padding:14px;text-align:center;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                <span id="damas-vez-rotulo" style="font-size:13.5px;font-weight:900;color:#38bdf8;">Vez: ⚪ Brancas</span>
+                <div style="display:flex;gap:12px;font-size:12.5px;font-weight:800;">
+                  <span style="color:#fff;">⚪ Capturadas: <strong id="damas-cap-brancas">0</strong></span>
+                  <span style="color:#f87171;">🔴 Capturadas: <strong id="damas-cap-pretas">0</strong></span>
+                </div>
+                <button type="button" onclick="reiniciarJogoDamas()" style="padding:6px 12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-size:11.5px;font-weight:800;cursor:pointer;">
+                  🔄 Reiniciar
+                </button>
+              </div>
+              <!-- Tabuleiro 8x8 de Damas -->
+              <div style="display:flex;justify-content:center;">
+                <div id="damas-board" style="display:grid;grid-template-columns:repeat(8,1fr);width:min(90vw,360px);height:min(90vw,360px);border:3px solid #78350f;border-radius:10px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.7);background:#b45309;">
+                </div>
+              </div>
+              <div style="font-size:11.5px;color:var(--text2);margin-top:10px;">Toque na sua peça para selecioná-la e depois toque na casa livre para mover ou capturar!</div>
+            </div>
+          </div>
+
+          <!-- ── JOGO 3: XADREZ (CHESS) ── -->
+          <div id="view-jogo-xadrez" class="jogo-view-container" style="display:none;">
+            <div style="background:#08080f;border:1.5px solid rgba(255,255,255,0.1);border-radius:16px;padding:14px;text-align:center;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                <span id="xadrez-vez-rotulo" style="font-size:13.5px;font-weight:900;color:var(--gold-light);">Vez: ♔ Brancas</span>
+                <button type="button" onclick="reiniciarJogoXadrez()" style="padding:6px 12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-size:11.5px;font-weight:800;cursor:pointer;">
+                  🔄 Reiniciar Partida
+                </button>
+              </div>
+              <!-- Tabuleiro 8x8 de Xadrez -->
+              <div style="display:flex;justify-content:center;">
+                <div id="xadrez-board" style="display:grid;grid-template-columns:repeat(8,1fr);width:min(90vw,360px);height:min(90vw,360px);border:3px solid #1e293b;border-radius:10px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.7);background:#334155;">
+                </div>
+              </div>
+              <div style="font-size:11.5px;color:var(--text2);margin-top:10px;">Clique na peça para escolher e toque na casa para mover. Jogue com um amigo ou treine suas jogadas!</div>
+            </div>
+          </div>
+
+          <!-- ── JOGO 4: JOGO DE TIRO AO ALVO (TARGET SHOOTER) ── -->
+          <div id="view-jogo-tiro" class="jogo-view-container" style="display:none;">
+            <div style="background:#08080f;border:1.5px solid rgba(255,255,255,0.1);border-radius:16px;padding:14px;text-align:center;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;font-weight:800;">
+                <span style="color:#ef4444;">🎯 Pontos: <strong id="tiro-score" style="color:#fff;">0</strong></span>
+                <span style="color:#fbbf24;">⏱️ Tempo: <strong id="tiro-tempo" style="color:#fff;">30s</strong></span>
+                <span style="color:#4ade80;">🥇 Recorde: <strong id="tiro-recorde" style="color:#fff;">0</strong></span>
+              </div>
+              <!-- Arena de Tiro -->
+              <div id="tiro-arena" style="position:relative;width:100%;height:320px;background:radial-gradient(circle at center, #1e1b4b 0%, #030712 100%);border:2px dashed rgba(239,68,68,0.4);border-radius:14px;overflow:hidden;cursor:crosshair;box-shadow:inset 0 0 40px rgba(0,0,0,0.8);touch-action:manipulation;">
+                <!-- Overlay Inicial -->
+                <div id="tiro-start-overlay" style="position:absolute;inset:0;background:rgba(0,0,0,0.8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
+                  <div style="font-size:36px;">🎯</div>
+                  <div style="font-size:17px;font-weight:900;color:#fff;">Desafio de Tiro ao Alvo!</div>
+                  <div style="font-size:12px;color:var(--text2);max-width:260px;line-height:1.4;">Acerte o máximo de alvos antes do tempo acabar!</div>
+                  <button type="button" onclick="iniciarJogoTiro()" style="padding:12px 28px;background:linear-gradient(135deg,#ef4444,#dc2626);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 18px rgba(239,68,68,0.5);">
+                    🚀 Começar Jogo (30s)
+                  </button>
+                </div>
+              </div>
+              <div style="font-size:11.5px;color:var(--text2);margin-top:10px;">Toque rápido nos alvos assim que aparecerem na tela para acumular pontos!</div>
+            </div>
+          </div>
+
+          <!-- ── OPÇÃO: SUGESTÃO DE NOVO JOGO ── -->
+          <div id="view-jogo-sugestao" class="jogo-view-container" style="display:none;">
+            <div style="background:rgba(245,158,11,0.06);border:1.5px solid rgba(245,158,11,0.35);border-radius:16px;padding:20px;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                <div style="font-size:30px;">💡</div>
+                <div>
+                  <h3 style="margin:0;font-size:16.5px;font-weight:900;color:#fbbf24;">Sugerir um Novo Jogo</h3>
+                  <p style="margin:2px 0 0;font-size:12px;color:var(--text2);">Qual outro jogo você gostaria de ver disponível aqui?</p>
+                </div>
+              </div>
+              <div style="margin-bottom:14px;">
+                <label style="display:block;font-size:11.5px;font-weight:800;color:#fbbf24;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Nome do Jogo Sugerido</label>
+                <input type="text" id="sugestao-jogo-nome" placeholder="Ex: Tetris, Jogo da Velha, Sinuca, Pac-Man, Dominó..." style="width:100%;box-sizing:border-box;padding:12px;background:#0c0d16;border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:13.5px;outline:none;">
+              </div>
+              <div style="margin-bottom:16px;">
+                <label style="display:block;font-size:11.5px;font-weight:800;color:#fbbf24;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Por que você gostaria deste jogo? (Opcional)</label>
+                <textarea id="sugestao-jogo-obs" rows="2" placeholder="Ex: Para jogar em dupla enquanto espero a instalação..." style="width:100%;box-sizing:border-box;padding:10px 12px;background:#0c0d16;border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:13px;outline:none;resize:none;font-family:inherit;"></textarea>
+              </div>
+              <button type="button" onclick="enviarSugestaoJogo()" style="width:100%;padding:13px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:10px;color:#000;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 18px rgba(245,158,11,0.35);">
+                🚀 Enviar Sugestão de Jogo
+              </button>
+              <!-- Lista de sugestões enviadas -->
+              <div style="margin-top:20px;border-top:1px solid rgba(255,255,255,0.08);padding-top:14px;">
+                <div style="font-size:12px;font-weight:800;color:var(--text);margin-bottom:10px;">📋 Sugestões Recebidas:</div>
+                <div id="lista-sugestoes-jogos" style="display:flex;flex-direction:column;gap:8px;">
+                  <!-- Dinâmico -->
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -2678,7 +3059,7 @@
     }
 
     function mudarAba(tab) {
-      ['status', 'galeria', 'mensagens', 'financeiro'].forEach(t => {
+      ['status', 'galeria', 'mensagens', 'financeiro', 'opiniao', 'jogos'].forEach(t => {
         const pane = document.getElementById('pane-' + t);
         const btn = document.getElementById('btn-tab-' + t);
         if (pane) pane.classList.toggle('active', t === tab);
@@ -2699,6 +3080,692 @@
           carregarDadosFinanceiros(clienteSessao);
         }
       }
+
+      if (tab === 'opiniao') {
+        renderizarListaOpinioes();
+      }
+
+      if (tab === 'jogos') {
+        selecionarJogo(jogoAtivoId || 'corrida');
+      } else {
+        pararJogoCorrida();
+      }
+    }
+
+    // ══════════════════════════════════════════════
+    //  MÓDULO: MINHA OPINIÃO
+    // ══════════════════════════════════════════════
+    let opiniaoRatingAtual = 5;
+    let tipoOpiniaoAtual = 'Elogio';
+
+    const LABELS_RATING = {
+      1: '⭐ Ponto a melhorar',
+      2: '⭐⭐ Regular / Precisa de atenção',
+      3: '⭐⭐⭐ Bom, dentro do esperado',
+      4: '⭐⭐⭐⭐ Muito Bom! Recomendo',
+      5: '⭐⭐⭐⭐⭐ Excelente! Muito satisfeito'
+    };
+
+    function setOpiniaoRating(n) {
+      opiniaoRatingAtual = n;
+      const stars = document.querySelectorAll('#star-rating-box .star-item');
+      stars.forEach((s, idx) => {
+        s.classList.toggle('active', idx < n);
+      });
+      const lbl = document.getElementById('star-rating-label');
+      if (lbl) {
+        lbl.textContent = LABELS_RATING[n] || `${n} estrelas`;
+        if (n <= 2) lbl.style.color = '#f87171';
+        else if (n === 3) lbl.style.color = '#fbbf24';
+        else lbl.style.color = '#4ade80';
+      }
+    }
+
+    function setTipoOpiniao(btn, tipo) {
+      tipoOpiniaoAtual = tipo;
+      document.querySelectorAll('.tipo-opiniao-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    }
+
+    function carregarOpinioesDoStorage() {
+      try { return JSON.parse(localStorage.getItem('sdv_opinioes') || '[]'); } catch(_) { return []; }
+    }
+
+    function renderizarListaOpinioes() {
+      const container = document.getElementById('lista-opinioes-enviadas');
+      if (!container) return;
+      const opinioes = carregarOpinioesDoStorage();
+      if (!opinioes.length) {
+        container.innerHTML = `<div style="font-size:12px;color:var(--muted);text-align:center;padding:12px;background:rgba(255,255,255,0.02);border-radius:10px;">Nenhuma opinião enviada ainda. Deixe sua primeira avaliação acima!</div>`;
+        return;
+      }
+      container.innerHTML = opinioes.slice(0, 10).map(op => `
+        <div style="background:#0c0d16;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="color:#fbbf24;font-size:13px;">${'★'.repeat(op.rating || 5)}</span>
+              <span style="font-size:11.5px;font-weight:800;background:rgba(201,168,76,0.18);color:var(--gold-light);padding:2px 8px;border-radius:6px;">${esc(op.tipo || 'Opinião')}</span>
+            </div>
+            <span style="font-size:11px;color:var(--muted);">${esc(op.dataHora || '')}</span>
+          </div>
+          <div style="font-size:13px;color:#e2e8f0;line-height:1.45;margin-bottom:6px;">${esc(op.texto || '')}</div>
+          <div style="font-size:11px;color:#38bdf8;font-weight:700;">✓ Registrado na Central</div>
+        </div>
+      `).join('');
+    }
+
+    function enviarMinhaOpiniao() {
+      const txtEl = document.getElementById('opiniao-texto');
+      const texto = txtEl ? txtEl.value.trim() : '';
+      if (!texto) {
+        alert('Por favor, digite sua mensagem ou sugestão antes de enviar.');
+        return;
+      }
+      const nomeAutor = (clienteSessao && clienteSessao.nome) || 'Cliente';
+      const osAutor = (clienteSessao && clienteSessao.os) || '';
+      const agora = new Date();
+      const dataHoraStr = agora.toLocaleDateString('pt-BR') + ' às ' + String(agora.getHours()).padStart(2,'0') + ':' + String(agora.getMinutes()).padStart(2,'0');
+
+      const novaOpiniao = {
+        id: Date.now(),
+        autor: nomeAutor,
+        os: osAutor,
+        rating: opiniaoRatingAtual,
+        tipo: tipoOpiniaoAtual,
+        texto: texto,
+        dataHora: dataHoraStr
+      };
+
+      const opinioes = carregarOpinioesDoStorage();
+      opinioes.unshift(novaOpiniao);
+      localStorage.setItem('sdv_opinioes', JSON.stringify(opinioes));
+
+      if (txtEl) txtEl.value = '';
+      renderizarListaOpinioes();
+      mostrarToastNotificacao('Opinião Enviada!', 'Muito obrigado pelo seu feedback! Ele já foi registrado com sucesso.', '💡');
+    }
+
+    function enviarOpiniaoWhatsApp() {
+      const txtEl = document.getElementById('opiniao-texto');
+      const texto = txtEl ? txtEl.value.trim() : '';
+      const nomeAutor = (clienteSessao && clienteSessao.nome) || 'Cliente';
+      const estrelas = '⭐'.repeat(opiniaoRatingAtual);
+      const msg = encodeURIComponent(`Olá! 👋 Aqui é ${nomeAutor}.\nGostaria de deixar minha opinião sobre os serviços:\n\n⭐ Avaliação: ${estrelas}\n📌 Tipo: ${tipoOpiniaoAtual}\n💬 Mensagem: ${texto || '(Sem mensagem detalhada)'}`);
+      window.open(`https://wa.me/5585996119824?text=${msg}`, '_blank');
+    }
+
+    // ══════════════════════════════════════════════
+    //  MÓDULO: CENTRAL DE JOGOS
+    // ══════════════════════════════════════════════
+    let jogoAtivoId = 'corrida';
+    let jogoCorridaRodando = false;
+
+    function selecionarJogo(jogo) {
+      jogoAtivoId = jogo;
+      ['corrida', 'damas', 'xadrez', 'tiro', 'sugestao'].forEach(j => {
+        const v = document.getElementById('view-jogo-' + j);
+        const b = document.getElementById('btn-jogo-' + j);
+        if (v) v.style.display = (j === jogo ? 'block' : 'none');
+        if (b) b.classList.toggle('active', j === jogo);
+      });
+
+      if (jogo === 'corrida') {
+        if (!jogoCorridaRodando) iniciarJogoCorrida();
+      } else {
+        pararJogoCorrida();
+      }
+
+      if (jogo === 'damas') {
+        if (!damasIniciadas) iniciarJogoDamas();
+      }
+
+      if (jogo === 'xadrez') {
+        if (!xadrezIniciado) iniciarJogoXadrez();
+      }
+
+      if (jogo === 'sugestao') {
+        renderizarSugestoesJogos();
+      }
+    }
+
+    // ── 1. JOGO DE CORRIDA (TURBO RACER) ──
+    let corridaCanvas, corridaCtx, corridaAnimId;
+    let carX = 140, carY = 320;
+    let corridaObstaculos = [];
+    let corridaScore = 0;
+    let corridaVel = 4;
+    let corridaOver = false;
+    let faixaOffset = 0;
+
+    function iniciarJogoCorrida() {
+      corridaCanvas = document.getElementById('canvas-corrida');
+      if (!corridaCanvas) return;
+      corridaCtx = corridaCanvas.getContext('2d');
+      pararJogoCorrida();
+
+      carX = 140;
+      carY = 320;
+      corridaObstaculos = [];
+      corridaScore = 0;
+      corridaVel = 4;
+      corridaOver = false;
+      jogoCorridaRodando = true;
+
+      const overEl = document.getElementById('corrida-overlay');
+      if (overEl) overEl.style.display = 'none';
+
+      const rec = parseInt(localStorage.getItem('sdv_corrida_rec') || '0');
+      const recEl = document.getElementById('corrida-recorde');
+      if (recEl) recEl.textContent = rec;
+
+      window.removeEventListener('keydown', lidarTeclasCorrida);
+      window.addEventListener('keydown', lidarTeclasCorrida);
+
+      loopCorrida();
+    }
+
+    function pararJogoCorrida() {
+      if (corridaAnimId) cancelAnimationFrame(corridaAnimId);
+      jogoCorridaRodando = false;
+      window.removeEventListener('keydown', lidarTeclasCorrida);
+    }
+
+    function moverCarroCorrida(dir) {
+      if (corridaOver || !corridaCanvas) return;
+      carX += dir * 28;
+      if (carX < 45) carX = 45;
+      if (carX > 235) carX = 235;
+    }
+
+    function lidarTeclasCorrida(e) {
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') moverCarroCorrida(-1);
+      else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') moverCarroCorrida(1);
+    }
+
+    function loopCorrida() {
+      if (!jogoCorridaRodando) return;
+      corridaAnimId = requestAnimationFrame(loopCorrida);
+
+      // Pista
+      corridaCtx.fillStyle = '#1e293b';
+      corridaCtx.fillRect(0, 0, 320, 420);
+
+      // Grama / Laterais
+      corridaCtx.fillStyle = '#065f46';
+      corridaCtx.fillRect(0, 0, 35, 420);
+      corridaCtx.fillRect(285, 0, 35, 420);
+
+      // Linhas da pista
+      corridaCtx.strokeStyle = '#cbd5e1';
+      corridaCtx.lineWidth = 4;
+      corridaCtx.beginPath();
+      corridaCtx.moveTo(35, 0); corridaCtx.lineTo(35, 420);
+      corridaCtx.moveTo(285, 0); corridaCtx.lineTo(285, 420);
+      corridaCtx.stroke();
+
+      // Faixas centrais animadas
+      faixaOffset = (faixaOffset + corridaVel) % 40;
+      corridaCtx.fillStyle = '#fbbf24';
+      for (let y = -40 + faixaOffset; y < 420; y += 40) {
+        corridaCtx.fillRect(115, y, 6, 22);
+        corridaCtx.fillRect(195, y, 6, 22);
+      }
+
+      // Desenhar carro do jogador (Azul Neon)
+      corridaCtx.fillStyle = '#38bdf8';
+      corridaCtx.beginPath();
+      corridaCtx.roundRect(carX, carY, 40, 65, 8);
+      corridaCtx.fill();
+      corridaCtx.fillStyle = '#0284c7';
+      corridaCtx.fillRect(carX + 6, carY + 16, 28, 26);
+      corridaCtx.fillStyle = '#f59e0b';
+      corridaCtx.fillRect(carX + 2, carY + 4, 8, 8);
+      corridaCtx.fillRect(carX + 30, carY + 4, 8, 8);
+
+      // Spawn obstáculos
+      if (Math.random() < 0.035 && corridaObstaculos.length < 4) {
+        const lanes = [55, 135, 215];
+        const lx = lanes[Math.floor(Math.random() * lanes.length)];
+        const cores = ['#ef4444', '#a855f7', '#f97316', '#e11d48'];
+        const cor = cores[Math.floor(Math.random() * cores.length)];
+        corridaObstaculos.push({ x: lx, y: -70, w: 40, h: 65, cor });
+      }
+
+      // Mover e desenhar obstáculos
+      for (let i = corridaObstaculos.length - 1; i >= 0; i--) {
+        const obs = corridaObstaculos[i];
+        obs.y += corridaVel;
+
+        corridaCtx.fillStyle = obs.cor;
+        corridaCtx.beginPath();
+        corridaCtx.roundRect(obs.x, obs.y, obs.w, obs.h, 8);
+        corridaCtx.fill();
+        corridaCtx.fillStyle = '#1e1b4b';
+        corridaCtx.fillRect(obs.x + 6, obs.y + 20, 28, 24);
+
+        // Colisão
+        if (
+          carX < obs.x + obs.w - 4 &&
+          carX + 40 > obs.x + 4 &&
+          carY < obs.y + obs.h - 4 &&
+          carY + 65 > obs.y + 4
+        ) {
+          fimDeJogoCorrida();
+          return;
+        }
+
+        // Passou da tela
+        if (obs.y > 420) {
+          corridaObstaculos.splice(i, 1);
+          corridaScore += 10;
+          if (corridaScore % 50 === 0) corridaVel += 0.5;
+        }
+      }
+
+      // Atualiza placar
+      const scEl = document.getElementById('corrida-score');
+      if (scEl) scEl.textContent = corridaScore;
+      const spEl = document.getElementById('corrida-speed');
+      if (spEl) spEl.textContent = `${Math.floor(90 + corridaVel * 12)} km/h`;
+    }
+
+    function fimDeJogoCorrida() {
+      corridaOver = true;
+      pararJogoCorrida();
+      const overEl = document.getElementById('corrida-overlay');
+      const finEl = document.getElementById('corrida-final-score');
+      if (finEl) finEl.textContent = corridaScore;
+      if (overEl) overEl.style.display = 'flex';
+
+      const rec = parseInt(localStorage.getItem('sdv_corrida_rec') || '0');
+      if (corridaScore > rec) {
+        localStorage.setItem('sdv_corrida_rec', String(corridaScore));
+        const recEl = document.getElementById('corrida-recorde');
+        if (recEl) recEl.textContent = corridaScore;
+      }
+    }
+
+    // ── 2. JOGO DE DAMAS (CHECKERS) ──
+    let damasBoard = [];
+    let damasVez = 'branca';
+    let damasSelecionada = null;
+    let damasCapBrancas = 0;
+    let damasCapPretas = 0;
+    let damasIniciadas = false;
+
+    function iniciarJogoDamas() {
+      damasIniciadas = true;
+      reiniciarJogoDamas();
+    }
+
+    function reiniciarJogoDamas() {
+      damasVez = 'branca';
+      damasSelecionada = null;
+      damasCapBrancas = 0;
+      damasCapPretas = 0;
+      damasBoard = Array(8).fill(null).map(() => Array(8).fill(null));
+
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 8; c++) {
+          if ((r + c) % 2 === 1) damasBoard[r][c] = { cor: 'preta', dama: false };
+        }
+      }
+      for (let r = 5; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          if ((r + c) % 2 === 1) damasBoard[r][c] = { cor: 'branca', dama: false };
+        }
+      }
+
+      renderizarTabuleiroDamas();
+      atualizarStatusDamas();
+    }
+
+    function renderizarTabuleiroDamas() {
+      const el = document.getElementById('damas-board');
+      if (!el) return;
+      el.innerHTML = '';
+
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const sq = document.createElement('div');
+          const isDark = (r + c) % 2 === 1;
+          sq.className = `damas-sq ${isDark ? 'dark' : 'light'}`;
+
+          const peca = damasBoard[r][c];
+          if (peca) {
+            const pEl = document.createElement('div');
+            pEl.className = `damas-peca ${peca.cor}`;
+            if (peca.dama) pEl.textContent = '👑';
+            sq.appendChild(pEl);
+          }
+
+          if (damasSelecionada && damasSelecionada.r === r && damasSelecionada.c === c) {
+            sq.classList.add('selected');
+          }
+
+          sq.onclick = () => clicarCasaDamas(r, c);
+          el.appendChild(sq);
+        }
+      }
+    }
+
+    function clicarCasaDamas(r, c) {
+      const peca = damasBoard[r][c];
+
+      if (peca && peca.cor === damasVez) {
+        damasSelecionada = { r, c };
+        renderizarTabuleiroDamas();
+        return;
+      }
+
+      if (damasSelecionada) {
+        const sr = damasSelecionada.r;
+        const sc = damasSelecionada.c;
+        const pSel = damasBoard[sr][sc];
+        if (!pSel) return;
+
+        const dir = pSel.cor === 'branca' ? -1 : 1;
+        const diffR = r - sr;
+        const diffC = Math.abs(c - sc);
+
+        // Movimento simples
+        if (!peca && (pSel.dama || diffR === dir) && diffC === 1 && Math.abs(diffR) === 1) {
+          damasBoard[r][c] = pSel;
+          damasBoard[sr][sc] = null;
+          if ((pSel.cor === 'branca' && r === 0) || (pSel.cor === 'preta' && r === 7)) pSel.dama = true;
+          trocarVezDamas();
+          return;
+        }
+
+        // Captura
+        if (!peca && Math.abs(diffR) === 2 && diffC === 2) {
+          const midR = (sr + r) / 2;
+          const midC = (sc + c) / 2;
+          const midPeca = damasBoard[midR][midC];
+          if (midPeca && midPeca.cor !== pSel.cor) {
+            damasBoard[r][c] = pSel;
+            damasBoard[sr][sc] = null;
+            damasBoard[midR][midC] = null;
+            if (pSel.cor === 'branca') damasCapPretas++;
+            else damasCapBrancas++;
+            if ((pSel.cor === 'branca' && r === 0) || (pSel.cor === 'preta' && r === 7)) pSel.dama = true;
+            trocarVezDamas();
+            return;
+          }
+        }
+      }
+    }
+
+    function trocarVezDamas() {
+      damasSelecionada = null;
+      damasVez = damasVez === 'branca' ? 'preta' : 'branca';
+      renderizarTabuleiroDamas();
+      atualizarStatusDamas();
+    }
+
+    function atualizarStatusDamas() {
+      const rot = document.getElementById('damas-vez-rotulo');
+      const bEl = document.getElementById('damas-cap-brancas');
+      const pEl = document.getElementById('damas-cap-pretas');
+      if (rot) {
+        rot.textContent = damasVez === 'branca' ? 'Vez: ⚪ Brancas' : 'Vez: 🔴 Pretas';
+        rot.style.color = damasVez === 'branca' ? '#38bdf8' : '#f87171';
+      }
+      if (bEl) bEl.textContent = damasCapBrancas;
+      if (pEl) pEl.textContent = damasCapPretas;
+    }
+
+    // ── 3. JOGO DE XADREZ (CHESS) ──
+    let xadrezBoard = [];
+    let xadrezVez = 'branca';
+    let xadrezSelecionado = null;
+    let xadrezIniciado = false;
+
+    const PECAS_XADREZ = {
+      'p_peao': '♟', 'p_torre': '♜', 'p_cavalo': '♞', 'p_bispo': '♝', 'p_rainha': '♛', 'p_rei': '♚',
+      'b_peao': '♙', 'b_torre': '♖', 'b_cavalo': '♘', 'b_bispo': '♗', 'b_rainha': '♕', 'b_rei': '♔'
+    };
+
+    function iniciarJogoXadrez() {
+      xadrezIniciado = true;
+      reiniciarJogoXadrez();
+    }
+
+    function reiniciarJogoXadrez() {
+      xadrezVez = 'branca';
+      xadrezSelecionado = null;
+      xadrezBoard = [
+        ['p_torre','p_cavalo','p_bispo','p_rainha','p_rei','p_bispo','p_cavalo','p_torre'],
+        ['p_peao','p_peao','p_peao','p_peao','p_peao','p_peao','p_peao','p_peao'],
+        [null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null],
+        ['b_peao','b_peao','b_peao','b_peao','b_peao','b_peao','b_peao','b_peao'],
+        ['b_torre','b_cavalo','b_bispo','b_rainha','b_rei','b_bispo','b_cavalo','b_torre']
+      ];
+      renderizarTabuleiroXadrez();
+      atualizarStatusXadrez();
+    }
+
+    function renderizarTabuleiroXadrez() {
+      const el = document.getElementById('xadrez-board');
+      if (!el) return;
+      el.innerHTML = '';
+
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const sq = document.createElement('div');
+          const isDark = (r + c) % 2 === 1;
+          sq.className = `xadrez-sq ${isDark ? 'dark' : 'light'}`;
+
+          const peca = xadrezBoard[r][c];
+          if (peca) {
+            sq.textContent = PECAS_XADREZ[peca] || '';
+            sq.style.color = peca.startsWith('b_') ? '#f8fafc' : '#0f172a';
+            sq.style.textShadow = peca.startsWith('b_') ? '0 1px 3px rgba(0,0,0,0.8)' : 'none';
+          }
+
+          if (xadrezSelecionado && xadrezSelecionado.r === r && xadrezSelecionado.c === c) {
+            sq.classList.add('selected');
+          }
+
+          sq.onclick = () => clicarCasaXadrez(r, c);
+          el.appendChild(sq);
+        }
+      }
+    }
+
+    function clicarCasaXadrez(r, c) {
+      const peca = xadrezBoard[r][c];
+      const prefixoVez = xadrezVez === 'branca' ? 'b_' : 'p_';
+
+      if (peca && peca.startsWith(prefixoVez)) {
+        xadrezSelecionado = { r, c, peca };
+        renderizarTabuleiroXadrez();
+        return;
+      }
+
+      if (xadrezSelecionado) {
+        const sr = xadrezSelecionado.r;
+        const sc = xadrezSelecionado.c;
+        xadrezBoard[r][c] = xadrezSelecionado.peca;
+        xadrezBoard[sr][sc] = null;
+        xadrezSelecionado = null;
+        xadrezVez = xadrezVez === 'branca' ? 'preta' : 'branca';
+        renderizarTabuleiroXadrez();
+        atualizarStatusXadrez();
+      }
+    }
+
+    function atualizarStatusXadrez() {
+      const rot = document.getElementById('xadrez-vez-rotulo');
+      if (rot) {
+        rot.textContent = xadrezVez === 'branca' ? 'Vez: ♔ Brancas' : 'Vez: ♚ Pretas';
+        rot.style.color = xadrezVez === 'branca' ? 'var(--gold-light)' : '#f87171';
+      }
+    }
+
+    // ── 4. JOGO DE TIRO AO ALVO (TARGET SHOOTER) ──
+    let tiroScore = 0;
+    let tiroTempo = 30;
+    let tiroTimerId = null;
+    let tiroSpawnId = null;
+    let tiroRodando = false;
+
+    function iniciarJogoTiro() {
+      tiroScore = 0;
+      tiroTempo = 30;
+      tiroRodando = true;
+
+      const overEl = document.getElementById('tiro-start-overlay');
+      if (overEl) overEl.style.display = 'none';
+
+      const scEl = document.getElementById('tiro-score');
+      const tmEl = document.getElementById('tiro-tempo');
+      if (scEl) scEl.textContent = '0';
+      if (tmEl) tmEl.textContent = '30s';
+
+      const rec = parseInt(localStorage.getItem('sdv_tiro_rec') || '0');
+      const recEl = document.getElementById('tiro-recorde');
+      if (recEl) recEl.textContent = rec;
+
+      limparAlvosTiro();
+
+      if (tiroTimerId) clearInterval(tiroTimerId);
+      if (tiroSpawnId) clearInterval(tiroSpawnId);
+
+      tiroTimerId = setInterval(() => {
+        tiroTempo--;
+        if (tmEl) tmEl.textContent = `${tiroTempo}s`;
+        if (tiroTempo <= 0) fimJogoTiro();
+      }, 1000);
+
+      tiroSpawnId = setInterval(spawnAlvoTiro, 750);
+      spawnAlvoTiro();
+    }
+
+    function limparAlvosTiro() {
+      const arena = document.getElementById('tiro-arena');
+      if (!arena) return;
+      arena.querySelectorAll('.tiro-alvo-anim').forEach(a => a.remove());
+    }
+
+    function spawnAlvoTiro() {
+      if (!tiroRodando) return;
+      const arena = document.getElementById('tiro-arena');
+      if (!arena) return;
+
+      const tipos = [
+        { icon: '🎯', pts: 10 },
+        { icon: '🎯', pts: 10 },
+        { icon: '🛸', pts: 20 },
+        { icon: '💎', pts: 50 },
+        { icon: '💣', pts: -15 }
+      ];
+      const tipo = tipos[Math.floor(Math.random() * tipos.length)];
+
+      const alvo = document.createElement('div');
+      alvo.className = 'tiro-alvo-anim';
+      alvo.textContent = tipo.icon;
+
+      const maxW = arena.clientWidth - 60;
+      const maxH = arena.clientHeight - 60;
+      const x = Math.max(10, Math.floor(Math.random() * maxW));
+      const y = Math.max(10, Math.floor(Math.random() * maxH));
+      alvo.style.left = `${x}px`;
+      alvo.style.top = `${y}px`;
+
+      alvo.onclick = (e) => {
+        e.stopPropagation();
+        tiroScore = Math.max(0, tiroScore + tipo.pts);
+        const scEl = document.getElementById('tiro-score');
+        if (scEl) scEl.textContent = tiroScore;
+        if (typeof tocarAlertaSonoro === 'function') tocarAlertaSonoro();
+        alvo.remove();
+      };
+
+      arena.appendChild(alvo);
+      setTimeout(() => { if (alvo.parentNode) alvo.remove(); }, 1400);
+    }
+
+    function fimJogoTiro() {
+      tiroRodando = false;
+      clearInterval(tiroTimerId);
+      clearInterval(tiroSpawnId);
+      limparAlvosTiro();
+
+      const rec = parseInt(localStorage.getItem('sdv_tiro_rec') || '0');
+      if (tiroScore > rec) {
+        localStorage.setItem('sdv_tiro_rec', String(tiroScore));
+        const recEl = document.getElementById('tiro-recorde');
+        if (recEl) recEl.textContent = tiroScore;
+      }
+
+      const overEl = document.getElementById('tiro-start-overlay');
+      if (overEl) {
+        overEl.innerHTML = `
+          <div style="font-size:36px;">🏆</div>
+          <div style="font-size:18px;font-weight:900;color:#fff;">Tempo Esgotado!</div>
+          <div style="font-size:15px;color:#fbbf24;font-weight:800;">Sua Pontuação: ${tiroScore} pontos</div>
+          <button type="button" onclick="iniciarJogoTiro()" style="padding:12px 28px;background:linear-gradient(135deg,#ef4444,#dc2626);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 18px rgba(239,68,68,0.5);">
+            🔄 Jogar Novamente
+          </button>
+        `;
+        overEl.style.display = 'flex';
+      }
+    }
+
+    // ── 5. SUGESTÃO DE NOVO JOGO ──
+    function carregarSugestoesJogosDoStorage() {
+      try { return JSON.parse(localStorage.getItem('sdv_sugestoes_jogos') || '[]'); } catch(_) { return []; }
+    }
+
+    function renderizarSugestoesJogos() {
+      const el = document.getElementById('lista-sugestoes-jogos');
+      if (!el) return;
+      const sugestoes = carregarSugestoesJogosDoStorage();
+      if (!sugestoes.length) {
+        el.innerHTML = `<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px;">Nenhuma sugestão enviada ainda. Seja o primeiro a sugerir!</div>`;
+        return;
+      }
+      el.innerHTML = sugestoes.slice(0, 8).map(s => `
+        <div style="background:#0c0d16;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:13.5px;font-weight:900;color:#fbbf24;">🎮 ${esc(s.nome)}</div>
+            ${s.obs ? `<div style="font-size:11.5px;color:var(--text2);margin-top:2px;">${esc(s.obs)}</div>` : ''}
+          </div>
+          <span style="font-size:11px;color:var(--muted);">${esc(s.data || '')}</span>
+        </div>
+      `).join('');
+    }
+
+    function enviarSugestaoJogo() {
+      const nomeEl = document.getElementById('sugestao-jogo-nome');
+      const obsEl = document.getElementById('sugestao-jogo-obs');
+      const nome = nomeEl ? nomeEl.value.trim() : '';
+      const obs = obsEl ? obsEl.value.trim() : '';
+
+      if (!nome) {
+        alert('Por favor, informe o nome do jogo sugerido.');
+        return;
+      }
+
+      const sugestoes = carregarSugestoesJogosDoStorage();
+      sugestoes.unshift({
+        id: Date.now(),
+        nome: nome,
+        obs: obs,
+        autor: (clienteSessao && clienteSessao.nome) || 'Cliente',
+        data: new Date().toLocaleDateString('pt-BR')
+      });
+      localStorage.setItem('sdv_sugestoes_jogos', JSON.stringify(sugestoes));
+
+      if (nomeEl) nomeEl.value = '';
+      if (obsEl) obsEl.value = '';
+
+      renderizarSugestoesJogos();
+      mostrarToastNotificacao('Sugestão Recebida!', `Sua sugestão de "${nome}" foi enviada com sucesso para nossa equipe!`, '🎮');
     }
 
     // ══════════════════════════════════════════════
