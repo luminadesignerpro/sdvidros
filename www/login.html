@@ -770,17 +770,6 @@
       </div>
       <span id="txt-bio-cad">Acessar com Biometria / Digital</span>
     </button>
-
-    <!-- ADICIONAR NOVA EMPRESA PELO CADEADO -->
-    <button type="button" onclick="abrirModalCadastrarNovaEmpresa()" style="width:100%;padding:11px 12px;background:rgba(201,168,76,0.14);border:1.5px solid var(--gold);border-radius:12px;color:var(--gold-light);font-weight:800;font-size:12.5px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:10px;">
-      <span>➕</span> <span>Adicionar Nova Empresa</span>
-    </button>
-
-    <!-- LINK PARA CLIENTE INSTALAR APP -->
-    <button type="button" onclick="abrirModalLinkInstalacaoCliente()" style="width:100%;padding:11px 12px;background:rgba(37,211,102,0.14);border:1.5px solid #22c55e;border-radius:12px;color:#4ade80;font-weight:800;font-size:12.5px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:12px;box-shadow:0 3px 12px rgba(34,197,94,0.2);">
-      <span>📲</span> <span>Link para Cliente Instalar App</span>
-    </button>
-
     <!-- OPÇÕES INFERIORES -->
     <div style="border-top:1px dashed rgba(201,168,76,0.25);padding-top:14px;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
       <button type="button" onclick="abrirGestaoPeloCadeado()" style="background:none;border:none;color:var(--gold-light);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;">
@@ -1173,9 +1162,9 @@
       📲
     </div>
 
-    <h3 id="modal-link-inst-titulo" style="font-size:18px;font-weight:900;color:#4ade80;margin-bottom:4px;">Link para o Cliente Instalar o App</h3>
+    <h3 id="modal-link-inst-titulo" style="font-size:18px;font-weight:900;color:#4ade80;margin-bottom:4px;">Enviar Opção de Instalar o App</h3>
     <p id="modal-link-inst-sub" style="font-size:12px;color:rgba(240,236,228,0.85);margin-bottom:16px;line-height:1.4;">
-      Envie este link para seus clientes no WhatsApp. Ao tocar no link, eles instalam o aplicativo da sua empresa direto na tela inicial do celular!
+      Envie a opção de instalação para o WhatsApp do cliente. Ao abrir e tocar em <strong>"Confirmar"</strong>, o cliente já estará pronto para acessar o sistema imediatamente!
     </p>
 
     <!-- Visual da Empresa no Card -->
@@ -1197,7 +1186,7 @@
 
     <!-- Botão Principal: Enviar via WhatsApp -->
     <a id="btn-whats-link-inst" href="#" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;padding:13px;background:linear-gradient(135deg,#16a34a,#15803d);border:1px solid #22c55e;color:#fff;font-weight:900;font-size:13.5px;border-radius:12px;text-decoration:none;box-shadow:0 4px 18px rgba(34,197,94,0.35);margin-bottom:12px;cursor:pointer;">
-      <span>🟢</span> <span>Enviar no WhatsApp para Cliente</span>
+      <span>🟢</span> <span>Enviar Opção de Instalar no WhatsApp</span>
     </a>
 
     <button type="button" onclick="fecharModalLinkInstalacaoCliente()" style="width:100%;padding:11px;background:#181824;border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:#cbd5e1;font-weight:700;font-size:12px;cursor:pointer;">
@@ -1861,7 +1850,7 @@
 
     const baseOrigin = window.location.origin;
     const basePath = window.location.pathname.replace(/\/login\.html$/i, '').replace(/\/$/, '');
-    const urlInst = `${baseOrigin}${basePath}/cliente.html?empresa=${encodeURIComponent(emp.id)}&nome=${encodeURIComponent(emp.nome)}&instalar=1`;
+    const urlInst = `${baseOrigin}${basePath}/cliente.html?empresa=${encodeURIComponent(emp.id)}&nome=${encodeURIComponent(emp.nome)}&instalar=1&auto=1`;
 
     const titEl = document.getElementById('modal-link-inst-titulo');
     const nomeEl = document.getElementById('modal-link-inst-nome');
@@ -1870,14 +1859,14 @@
     const urlInp = document.getElementById('modal-link-inst-url');
     const btnZap = document.getElementById('btn-whats-link-inst');
 
-    if (titEl) titEl.textContent = `Link para Clientes: ${emp.nome}`;
+    if (titEl) titEl.textContent = `Enviar Opção de Instalar: ${emp.nome}`;
     if (nomeEl) nomeEl.textContent = emp.nome;
     if (segEl) segEl.textContent = emp.segmento || 'Área Exclusiva do Cliente';
     if (logoEl) logoEl.src = emp.logo || 'logo.jpg';
     if (urlInp) urlInp.value = urlInst;
 
     if (btnZap) {
-      const msg = `Olá! Acesse e instale o aplicativo oficial da *${emp.nome}* no seu celular para acompanhar orçamentos, aprovações e novidades:\n\n👉 ${urlInst}\n\nAbra o link e toque em "Instalar" ou "Adicionar à Tela Inicial"!`;
+      const msg = `📲 *INSTALAR APLICATIVO OFICIAL*\n🏢 *${emp.nome}*\n\nOlá! Você recebeu a opção de instalar o aplicativo oficial da *${emp.nome}* no seu celular para acompanhar orçamentos e serviços.\n\n👉 *Toque para Instalar e Acessar:*\n${urlInst}\n\n*(Basta abrir e tocar em "Confirmar" para já estar pronto para acessar!)*`;
       btnZap.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
     }
 
