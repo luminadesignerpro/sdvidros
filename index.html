@@ -2549,6 +2549,14 @@
       </button>
     </div>
 
+    <!-- BOTÃO DE AUTORIZAÇÃO DE CÓDIGOS DO FINANCEIRO PESSOAL -->
+    <div style="margin-bottom:12px;">
+      <button type="button" class="btn btn-sec" onclick="abrirModalLiberacoesFinanceiroPessoal()" style="width:100%;padding:9px 12px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:7px;border-color:rgba(56,189,248,0.4);background:rgba(56,189,248,0.1);color:#38bdf8;box-shadow:0 3px 12px rgba(56,189,248,0.2);">
+        <span>🔑</span> <span>Autorizar Códigos de Edição (Financeiro Pessoal)</span>
+        <span id="badge-liberacoes-fin-count" style="background:#f59e0b;color:#000;font-size:10px;font-weight:900;padding:2px 6px;border-radius:999px;display:none;">0</span>
+      </button>
+    </div>
+
     <div style="margin-bottom:14px;">
       <input type="text" id="portal-func-busca" oninput="filtrarModalLinksFuncionarios()" placeholder="🔍 Buscar funcionário por nome ou cargo..." style="width:100%;padding:10px 14px;border-radius:10px;background:#080811;border:1px solid rgba(201,168,76,0.3);color:#fff;font-family:var(--font);font-size:13px;" />
     </div>
@@ -9378,6 +9386,186 @@ try {
   setInterval(verificarNotificacoesAgenda, 20000);
   setTimeout(verificarNotificacoesAgenda, 2000);
 } catch(_) {}
+
+// ── GESTÃO DE CÓDIGOS DE LIBERAÇÃO DO FINANCEIRO PESSOAL (SIGILO TOTAL) ──
+function abrirModalLiberacoesFinanceiroPessoal() {
+  renderizarListaCodigosEmpresa();
+  const modal = document.getElementById('modal-empresa-liberacoes-fin');
+  if (modal) modal.style.display = 'flex';
+}
+
+function fecharModalLiberacoesFinanceiroPessoal() {
+  const modal = document.getElementById('modal-empresa-liberacoes-fin');
+  if (modal) modal.style.display = 'none';
+}
+
+function renderizarListaCodigosEmpresa() {
+  const cont = document.getElementById('lista-codigos-liberacao-empresa');
+  if (!cont) return;
+
+  const lista = JSON.parse(localStorage.getItem('sdv_solicitacoes_edicao_fin') || '[]');
+  const pendentes = lista.filter(function(x) { return x.status === 'pendente'; });
+
+  const badge = document.getElementById('badge-liberacoes-fin-count');
+  if (badge) {
+    if (pendentes.length > 0) {
+      badge.textContent = pendentes.length;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  if (!lista.length) {
+    cont.innerHTML = '<div style="text-align:center;padding:24px 12px;color:var(--muted);font-size:12.5px;">' +
+      'Nenhuma solicitação de código de liberação recebida até o momento.' +
+    '</div>';
+    return;
+  }
+
+  cont.innerHTML = lista.map(function(sol) {
+    const isPend = sol.status === 'pendente';
+    const statusHtml = isPend 
+      ? '<span style="color:#fbbf24;font-size:11px;font-weight:800;background:rgba(245,158,11,0.15);padding:2px 8px;border-radius:999px;">⏳ Pendente</span>'
+      : '<span style="color:#34d399;font-size:11px;font-weight:800;background:rgba(16,185,129,0.15);padding:2px 8px;border-radius:999px;">✅ Liberado</span>';
+
+    let botaoAcao = '';
+    if (isPend) {
+      botaoAcao = '<button type="button" class="btn btn-primary btn-xs" onclick="aprovarSolicitacaoEdicaoFin(\'' + sol.id + '\')" style="flex:1;padding:7px 10px;font-weight:800;font-size:11.5px;background:linear-gradient(135deg,#10b981,#059669);border-color:#34d399;color:#fff;">' +
+        '✅ Liberar Edição Agora' +
+      '</button>';
+    } else {
+      botaoAcao = '<button type="button" class="btn btn-sec btn-xs" onclick="revogarSolicitacaoEdicaoFin(\'' + sol.id + '\')" style="flex:1;padding:7px 10px;font-size:11px;color:#f87171;border-color:rgba(239,68,68,0.3);">' +
+        '🚫 Bloquear / Revogar' +
+      '</button>';
+    }
+
+    return '<div style="background:rgba(255,255,255,0.03);border:1.2px solid ' + (isPend ? 'rgba(245,158,11,0.35)' : 'rgba(16,185,129,0.35)') + ';border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+        '<div>' +
+          '<div style="font-weight:900;font-size:13.5px;color:#fff;display:flex;align-items:center;gap:6px;">' +
+            '<span>👤</span> <span>' + (sol.colaboradorNome || 'Colaborador') + '</span>' +
+          '</div>' +
+          '<div style="font-size:11px;color:var(--text2);margin-top:2px;">' +
+            (sol.dataHora || '') + ' · Tipo: ' + (sol.tipo === 'reset_senha' ? 'Redefinição de Senha' : 'Edição de Finanças') +
+          '</div>' +
+        '</div>' +
+        statusHtml +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;background:#080a12;border:1px dashed rgba(255,255,255,0.15);padding:8px 12px;border-radius:8px;">' +
+        '<div style="font-size:11px;color:var(--text2);">Código do Colaborador:</div>' +
+        '<div style="font-size:15px;font-weight:900;font-family:monospace;letter-spacing:2px;color:#38bdf8;">' + sol.codigo + '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:6px;margin-top:2px;">' +
+        botaoAcao +
+        '<button type="button" class="btn btn-whats btn-xs" onclick="responderWhatsAppCodigoLiberado(\'' + sol.id + '\')" style="padding:7px 10px;font-size:11px;font-weight:800;background:linear-gradient(135deg,#16a34a,#15803d);border-color:#22c55e;color:#fff;">' +
+          '💬 Responder no Zap' +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function aprovarSolicitacaoEdicaoFin(solId) {
+  const lista = JSON.parse(localStorage.getItem('sdv_solicitacoes_edicao_fin') || '[]');
+  const sol = lista.find(function(s) { return s.id === solId; });
+  if (!sol) return;
+
+  sol.status = 'aprovado';
+  sol.expiraEm = Date.now() + 2 * 3600 * 1000;
+  localStorage.setItem('sdv_solicitacoes_edicao_fin', JSON.stringify(lista));
+
+  if (sol.colaboradorId) {
+    localStorage.setItem('sdv_fin_edicao_liberada_' + sol.colaboradorId, JSON.stringify({ liberado: true, ate: sol.expiraEm }));
+  }
+
+  renderizarListaCodigosEmpresa();
+  if (typeof mostrarMsgPonto === 'function') {
+    mostrarMsgPonto('🔑 Edição liberada para ' + sol.colaboradorNome + ' com código ' + sol.codigo + '.', true);
+  }
+}
+
+function revogarSolicitacaoEdicaoFin(solId) {
+  const lista = JSON.parse(localStorage.getItem('sdv_solicitacoes_edicao_fin') || '[]');
+  const sol = lista.find(function(s) { return s.id === solId; });
+  if (!sol) return;
+
+  sol.status = 'revogado';
+  localStorage.setItem('sdv_solicitacoes_edicao_fin', JSON.stringify(lista));
+
+  if (sol.colaboradorId) {
+    localStorage.removeItem('sdv_fin_edicao_liberada_' + sol.colaboradorId);
+  }
+
+  renderizarListaCodigosEmpresa();
+  if (typeof mostrarMsgPonto === 'function') {
+    mostrarMsgPonto('🚫 Edição revogada para ' + sol.colaboradorNome + '.', true);
+  }
+}
+
+function responderWhatsAppCodigoLiberado(solId) {
+  const lista = JSON.parse(localStorage.getItem('sdv_solicitacoes_edicao_fin') || '[]');
+  const sol = lista.find(function(s) { return s.id === solId; });
+  if (!sol) return;
+
+  const empObj = typeof obterEmpresaAtivaGlobal === 'function' ? obterEmpresaAtivaGlobal() : null;
+  const nomeEmp = empObj && empObj.nome ? empObj.nome : 'SD Vidros';
+  const msg = 'Olá ' + sol.colaboradorNome + '! 👋\n' +
+    'Seu código de autorização *' + sol.codigo + '* para edição do painel financeiro pessoal foi LIBERADO com sucesso pela administração da *' + nomeEmp + '*.\n\n' +
+    '🛡️ Seus dados continuam 100% confidenciais e protegidos.\n' +
+    'Você já pode cadastrar e editar seus registros no app!';
+
+  const func = (funcionariosLista || []).find(function(f) {
+    return (f.nome || '').toLowerCase() === (sol.colaboradorNome || '').toLowerCase();
+  });
+  const tel = func ? (func.whatsapp || func.tel || '').replace(/\D/g, '') : '';
+  const url = tel ? 'https://wa.me/55' + tel + '?text=' + encodeURIComponent(msg) : 'https://wa.me/?text=' + encodeURIComponent(msg);
+  window.open(url, '_blank');
+}
+
+function limparHistoricoLiberacoesFin() {
+  if (!confirm('Deseja limpar as solicitações já concluídas ou expiradas?')) return;
+  let lista = JSON.parse(localStorage.getItem('sdv_solicitacoes_edicao_fin') || '[]');
+  lista = lista.filter(function(x) { return x.status === 'pendente'; });
+  localStorage.setItem('sdv_solicitacoes_edicao_fin', JSON.stringify(lista));
+  renderizarListaCodigosEmpresa();
+}
 </script>
+
+<!-- ══ MODAL DE AUTORIZAÇÃO DE EDIÇÃO (FINANCEIRO PESSOAL DOS COLABORADORES) ══ -->
+<div id="modal-empresa-liberacoes-fin" class="modal-overlay" style="display:none;z-index:10000060;background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);position:fixed;inset:0;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:linear-gradient(145deg,#0e111d,#161b2c);border:1.5px solid rgba(56,189,248,0.4);border-radius:18px;max-width:520px;width:100%;box-shadow:0 15px 45px rgba(0,0,0,0.85);padding:22px;box-sizing:border-box;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:24px;">🔑</span>
+        <div>
+          <div style="font-size:16px;font-weight:900;color:#fff;">Autorizações de Edição · Financeiro Pessoal</div>
+          <div style="font-size:11px;color:#38bdf8;font-weight:700;">Liberação de códigos enviados por colaboradores</div>
+        </div>
+      </div>
+      <button type="button" onclick="fecharModalLiberacoesFinanceiroPessoal()" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">✕</button>
+    </div>
+
+    <!-- GARANTIA DE SIGILO NO ADMIN -->
+    <div style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:11.5px;color:#cbd5e1;line-height:1.4;">
+      🛡️ <strong>Garantia de Sigilo:</strong> A empresa concede apenas a permissão para edição de dados. Nenhuma informação de contas, receitas, despesas ou saldos do colaborador é visível para a empresa.
+    </div>
+
+    <!-- LISTA DE CÓDIGOS SOLICITADOS -->
+    <div id="lista-codigos-liberacao-empresa" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:14px;padding-right:4px;">
+      <!-- Injetado dinamicamente -->
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;">
+      <button type="button" onclick="limparHistoricoLiberacoesFin()" style="background:none;border:none;color:#94a3b8;font-size:11px;cursor:pointer;">
+        🗑️ Limpar Concluídos
+      </button>
+      <button type="button" class="btn btn-sec btn-sm" onclick="fecharModalLiberacoesFinanceiroPessoal()">
+        Fechar
+      </button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

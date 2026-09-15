@@ -1460,7 +1460,133 @@
     .tiro-alvo-anim:active {
       transform: scale(1.3);
     }
-  </style>
+  
+    /* ─── ESTILOS SETOR FINANCEIRO PESSOAL (SIGILO TOTAL & CÓDIGO DE AUTORIZAÇÃO) ─── */
+    .fin-pessoal-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeInTab 0.3s ease;
+    }
+    .fin-pessoal-header-card {
+      background: linear-gradient(135deg, rgba(20, 24, 38, 0.95), rgba(10, 12, 20, 0.95));
+      border: 1.5px solid rgba(201, 168, 76, 0.35);
+      border-radius: 18px;
+      padding: 16px 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    .fin-pessoal-header-card::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 140px;
+      height: 140px;
+      background: radial-gradient(circle, rgba(201,168,76,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .fin-sigilo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.03em;
+    }
+    .fin-auth-banner {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(180, 83, 9, 0.08));
+      border: 1.5px solid rgba(245, 158, 11, 0.35);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .fin-auth-banner.liberado {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.14), rgba(5, 150, 105, 0.08));
+      border-color: rgba(16, 185, 129, 0.45);
+    }
+    .fin-card-metricas-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (min-width: 600px) {
+      .fin-card-metricas-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    .fin-metrica-box {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .fin-metrica-box:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(201, 168, 76, 0.3);
+    }
+    .fin-metrica-box.saldo-destaque {
+      grid-column: span 2;
+      background: linear-gradient(135deg, rgba(201, 168, 76, 0.15), rgba(15, 23, 42, 0.7));
+      border-color: rgba(201, 168, 76, 0.45);
+    }
+    @media (min-width: 600px) {
+      .fin-metrica-box.saldo-destaque {
+        grid-column: span 1;
+      }
+    }
+    .fin-lista-filtros {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .fin-filtro-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text2);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .fin-filtro-btn.active {
+      background: rgba(201, 168, 76, 0.2);
+      border-color: var(--gold);
+      color: var(--gold-light);
+    }
+    .fin-item-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1.2px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+    .fin-item-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(201, 168, 76, 0.25);
+    }
+
+</style>
 </head>
 <body>
 
@@ -2692,6 +2818,285 @@
   </div>
 
   
+  
+      <!-- ── ABA 7: SETOR FINANCEIRO PESSOAL (SIGILO ABSOLUTO & CÓDIGO DE AUTORIZAÇÃO) ── -->
+      <div id="pane-financeiro-pessoal" class="tab-pane">
+        <div class="fin-pessoal-wrap">
+
+          <!-- CABEÇALHO DO COFRE PESSOAL -->
+          <div class="fin-pessoal-header-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+              <div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                  <span style="font-size:22px;">💰</span>
+                  <h2 style="margin:0;font-size:18px;font-weight:900;color:#fff;">Setor Financeiro Pessoal</h2>
+                </div>
+                <div style="font-size:12px;color:var(--text2);">
+                  Controle de receitas, despesas e metas de <strong id="lbl-fin-nome-colaborador" style="color:var(--gold-light);">Colaborador</strong>
+                </div>
+              </div>
+              <div class="fin-sigilo-badge">
+                <span>🔒</span> <span>100% Sigiloso & Privado</span>
+              </div>
+            </div>
+
+            <!-- AVISO DE SIGILO EM RELAÇÃO À EMPRESA -->
+            <div style="margin-top:10px;background:rgba(0,0,0,0.3);border-left:3px solid #10b981;padding:8px 12px;border-radius:6px;font-size:11.5px;color:#cbd5e1;line-height:1.4;">
+              🛡️ <strong>Garantia de Privacidade:</strong> As informações cadastradas neste setor são estritamente suas. Nem os administradores da empresa nem ninguém têm acesso para visualizar seus valores, contas ou saldo pessoal.
+            </div>
+          </div>
+
+          <!-- ════ SUBTELA 1: CRIAÇÃO DE SENHA (PRIMEIRO ACESSO) ════ -->
+          <div id="fin-pessoal-view-setup" style="display:none;background:rgba(15,18,28,0.9);border:1.5px solid rgba(201,168,76,0.35);border-radius:16px;padding:24px 18px;text-align:center;">
+            <div style="font-size:44px;margin-bottom:8px;">🔐</div>
+            <h3 style="margin:0 0 6px;font-size:17px;font-weight:900;color:#fff;">Crie sua Senha Pessoal de Segurança</h3>
+            <p style="margin:0 auto 18px;font-size:12.5px;color:var(--text2);max-width:380px;line-height:1.4;">
+              Defina uma senha pessoal para proteger seu cofre financeiro. Somente você terá acesso aos seus lançamentos.
+            </p>
+            <div style="max-width:320px;margin:0 auto;display:flex;flex-direction:column;gap:12px;text-align:left;">
+              <div>
+                <label style="display:block;font-size:11px;font-weight:800;color:var(--gold-light);text-transform:uppercase;margin-bottom:4px;">Nova Senha Pessoal</label>
+                <div style="position:relative;">
+                  <input type="password" id="fin-setup-senha" placeholder="Digite sua senha (mínimo 4 dígitos)" style="width:100%;box-sizing:border-box;padding:11px 38px 11px 12px;background:#060810;border:1.5px solid rgba(201,168,76,0.3);border-radius:10px;color:#fff;font-size:14px;outline:none;" />
+                  <button type="button" onclick="alternarVerSenhaInput('fin-setup-senha', this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:14px;">👁️</button>
+                </div>
+              </div>
+              <div>
+                <label style="display:block;font-size:11px;font-weight:800;color:var(--gold-light);text-transform:uppercase;margin-bottom:4px;">Confirme a Senha</label>
+                <div style="position:relative;">
+                  <input type="password" id="fin-setup-senha-conf" placeholder="Repita sua nova senha" style="width:100%;box-sizing:border-box;padding:11px 38px 11px 12px;background:#060810;border:1.5px solid rgba(201,168,76,0.3);border-radius:10px;color:#fff;font-size:14px;outline:none;" />
+                  <button type="button" onclick="alternarVerSenhaInput('fin-setup-senha-conf', this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:14px;">👁️</button>
+                </div>
+              </div>
+              <button type="button" onclick="salvarCriacaoSenhaFinanceiroPessoal()" style="margin-top:6px;width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;border-radius:10px;color:#000;font-weight:900;font-size:13.5px;cursor:pointer;box-shadow:0 4px 16px rgba(201,168,76,0.35);">
+                🛡️ Criar Senha e Ativar Meu Cofre
+              </button>
+            </div>
+          </div>
+
+          <!-- ════ SUBTELA 2: COFRE BLOQUEADO (DIGITAR SENHA) ════ -->
+          <div id="fin-pessoal-view-lock" style="display:none;background:rgba(15,18,28,0.9);border:1.5px solid rgba(201,168,76,0.35);border-radius:16px;padding:26px 18px;text-align:center;">
+            <div style="font-size:44px;margin-bottom:8px;">🔒</div>
+            <h3 style="margin:0 0 6px;font-size:17.5px;font-weight:900;color:#fff;">Cofre Financeiro Bloqueado</h3>
+            <p style="margin:0 auto 18px;font-size:12.5px;color:var(--text2);max-width:360px;">
+              Digite sua senha pessoal de segurança para desbloquear a visualização das suas finanças:
+            </p>
+            <div style="max-width:320px;margin:0 auto;display:flex;flex-direction:column;gap:12px;text-align:left;">
+              <div style="position:relative;">
+                <input type="password" id="fin-lock-senha-digitada" placeholder="Sua senha de segurança" onkeydown="if(event.key==='Enter')desbloquearCofrePessoalComSenha()" style="width:100%;box-sizing:border-box;padding:11px 38px 11px 12px;background:#060810;border:1.5px solid rgba(201,168,76,0.3);border-radius:10px;color:#fff;font-size:14px;outline:none;" />
+                <button type="button" onclick="alternarVerSenhaInput('fin-lock-senha-digitada', this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:14px;">👁️</button>
+              </div>
+              <button type="button" onclick="desbloquearCofrePessoalComSenha()" style="width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;border-radius:10px;color:#000;font-weight:900;font-size:13.5px;cursor:pointer;box-shadow:0 4px 16px rgba(201,168,76,0.35);">
+                🔓 Desbloquear Acesso
+              </button>
+              <div style="display:flex;justify-content:center;margin-top:4px;">
+                <button type="button" onclick="abrirModalRedefinirSenhaFin()" style="background:none;border:none;color:#94a3b8;font-size:11.5px;cursor:pointer;text-decoration:underline;">
+                  Esqueci minha senha pessoal
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ════ SUBTELA 3: PAINEL DESBLOQUEADO (VISUALIZAÇÃO & EDIÇÃO) ════ -->
+          <div id="fin-pessoal-view-dash" style="display:none;display:flex;flex-direction:column;gap:14px;">
+
+            <!-- BARRA DE CONTROLE DO COFRE: FECHAR & OCULTAR VALORES -->
+            <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:8px 12px;flex-wrap:wrap;gap:8px;">
+              <div style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;">
+                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;"></span>
+                <span>Cofre Desbloqueado</span>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button type="button" onclick="alternarOcultarValoresFinPessoal()" id="btn-toggle-olho-valores" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#cbd5e1;font-size:11.5px;font-weight:700;padding:6px 10px;border-radius:8px;cursor:pointer;">
+                  👁️ Ocultar Valores
+                </button>
+                <button type="button" onclick="bloquearCofrePessoal()" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;font-size:11.5px;font-weight:700;padding:6px 10px;border-radius:8px;cursor:pointer;">
+                  🔒 Bloquear
+                </button>
+              </div>
+            </div>
+
+            <!-- BANNER DE STATUS DE EDIÇÃO (EXCLUSIVIDADE DE CÓDIGO DA EMPRESA) -->
+            <div id="fin-auth-banner-container" class="fin-auth-banner">
+              <!-- Renderizado via JavaScript: Se Bloqueado para edição ou Liberado -->
+            </div>
+
+            <!-- CARDS DE MÉTRICAS E RESUMO -->
+            <div class="fin-card-metricas-grid">
+              <div class="fin-metrica-box saldo-destaque">
+                <span style="font-size:11px;font-weight:800;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.05em;">💵 Saldo Atual</span>
+                <span id="fin-val-saldo" class="fin-valor-tag" style="font-size:20px;font-weight:900;color:#fff;">R$ 0,00</span>
+                <span style="font-size:10px;color:var(--text2);">Receitas Líquidas - Despesas</span>
+              </div>
+              <div class="fin-metrica-box">
+                <span style="font-size:11px;font-weight:800;color:#34d399;text-transform:uppercase;">🟢 Receitas</span>
+                <span id="fin-val-receitas" class="fin-valor-tag" style="font-size:16px;font-weight:900;color:#34d399;">R$ 0,00</span>
+                <span style="font-size:10px;color:var(--text2);">Salário, extras e outros</span>
+              </div>
+              <div class="fin-metrica-box">
+                <span style="font-size:11px;font-weight:800;color:#f87171;text-transform:uppercase;">🔴 Despesas</span>
+                <span id="fin-val-despesas" class="fin-valor-tag" style="font-size:16px;font-weight:900;color:#f87171;">R$ 0,00</span>
+                <span style="font-size:10px;color:var(--text2);">Gastos e parcelas</span>
+              </div>
+              <div class="fin-metrica-box">
+                <span style="font-size:11px;font-weight:800;color:#38bdf8;text-transform:uppercase;">🎯 Metas / Reserva</span>
+                <span id="fin-val-metas" class="fin-valor-tag" style="font-size:16px;font-weight:900;color:#38bdf8;">R$ 0,00</span>
+                <span style="font-size:10px;color:var(--text2);">Objetivos poupados</span>
+              </div>
+            </div>
+
+            <!-- BARRA DE AÇÕES DE LANÇAMENTO (QUANDO EDIÇÃO LIBERADA) -->
+            <div id="fin-botoes-acao-edicao" style="display:none;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+              <button type="button" onclick="abrirModalLancamentoPessoal('receita')" style="padding:10px 6px;background:rgba(16,185,129,0.18);border:1.5px solid #10b981;border-radius:10px;color:#34d399;font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
+                <span>➕</span> <span>Receita</span>
+              </button>
+              <button type="button" onclick="abrirModalLancamentoPessoal('despesa')" style="padding:10px 6px;background:rgba(239,68,68,0.18);border:1.5px solid #ef4444;border-radius:10px;color:#fca5a5;font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
+                <span>➖</span> <span>Despesa</span>
+              </button>
+              <button type="button" onclick="abrirModalLancamentoPessoal('meta')" style="padding:10px 6px;background:rgba(56,189,248,0.18);border:1.5px solid #38bdf8;border-radius:10px;color:#7dd3fc;font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
+                <span>🎯</span> <span>Meta</span>
+              </button>
+            </div>
+
+            <!-- FILTROS E EXTRATO DE LANÇAMENTOS -->
+            <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                <div style="font-size:13px;font-weight:900;color:#fff;display:flex;align-items:center;gap:6px;">
+                  <span>📋</span> <span>Movimentações & Lançamentos</span>
+                </div>
+                <div class="fin-lista-filtros">
+                  <button type="button" class="fin-filtro-btn active" onclick="filtrarLancamentosFinPessoal('todos', this)">Todos</button>
+                  <button type="button" class="fin-filtro-btn" onclick="filtrarLancamentosFinPessoal('receita', this)">Receitas</button>
+                  <button type="button" class="fin-filtro-btn" onclick="filtrarLancamentosFinPessoal('despesa', this)">Despesas</button>
+                  <button type="button" class="fin-filtro-btn" onclick="filtrarLancamentosFinPessoal('meta', this)">Metas</button>
+                </div>
+              </div>
+
+              <!-- LISTA DE ITENS -->
+              <div id="fin-pessoal-lista-itens" style="display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;padding-right:4px;">
+                <!-- Dinâmico -->
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══ MODAL DE SOLICITAÇÃO & ENVIO DE CÓDIGO DE LIBERAÇÃO ══ -->
+      <div id="modal-fin-codigo-liberacao" class="modal-overlay" style="display:none;z-index:10000080;background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);position:fixed;inset:0;align-items:center;justify-content:center;padding:16px;">
+        <div style="background:linear-gradient(145deg,#0e111d,#161b2c);border:1.5px solid rgba(201,168,76,0.4);border-radius:18px;max-width:440px;width:100%;box-shadow:0 15px 45px rgba(0,0,0,0.85);padding:20px;box-sizing:border-box;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:24px;">🔑</span>
+              <div>
+                <div style="font-size:16px;font-weight:900;color:#fff;">Código de Acesso para a Empresa</div>
+                <div style="font-size:11px;color:#38bdf8;font-weight:700;">Autorização de edição com sigilo financeiro</div>
+              </div>
+            </div>
+            <button type="button" onclick="fecharModalCodigoFin()" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">✕</button>
+          </div>
+
+          <p style="font-size:12px;color:var(--text2);margin:0 0 14px;line-height:1.4;">
+            Envie o código de acesso abaixo para a empresa autorizar a edição do seu financeiro pessoal. <strong>A empresa não verá nenhum dado financeiro seu.</strong>
+          </p>
+
+          <!-- DESTAQUE DO CÓDIGO -->
+          <div style="background:#060810;border:2px dashed rgba(201,168,76,0.5);border-radius:12px;padding:16px;text-align:center;margin-bottom:14px;">
+            <div style="font-size:11px;color:var(--gold-light);font-weight:800;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Seu Código de Autorização</div>
+            <div id="modal-fin-codigo-valor" style="font-size:28px;font-weight:900;font-family:monospace;letter-spacing:4px;color:#fbbf24;">------</div>
+            <div style="font-size:10.5px;color:var(--muted);margin-top:4px;">Válido por 2 horas</div>
+          </div>
+
+          <!-- BOTÕES DE ENVIO DO CÓDIGO -->
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+            <button type="button" id="btn-enviar-codigo-zap" onclick="enviarCodigoWhatsAppParaEmpresa()" style="width:100%;padding:11px;background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 14px rgba(22,163,74,0.3);">
+              <span>📲</span> <span>Enviar Código para a Empresa (WhatsApp)</span>
+            </button>
+            <button type="button" onclick="copiarCodigoFinGerado(this)" style="width:100%;padding:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#cbd5e1;font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+              <span>📋</span> <span>Copiar Código</span>
+            </button>
+          </div>
+
+          <!-- VALIDAÇÃO DO CÓDIGO LIBERADO -->
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;margin-bottom:12px;">
+            <div style="font-size:11.5px;font-weight:800;color:#fff;margin-bottom:6px;">Já recebeu a confirmação da empresa?</div>
+            <div style="display:flex;gap:6px;">
+              <input type="text" id="inp-validar-codigo-digitado" placeholder="Digite o código liberado..." style="flex:1;padding:8px 10px;background:#090a12;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:12.5px;font-family:monospace;text-transform:uppercase;outline:none;" />
+              <button type="button" onclick="validarCodigoLiberadoManual()" style="padding:8px 14px;background:linear-gradient(135deg,#10b981,#059669);border:none;border-radius:8px;color:#fff;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;">
+                ✅ Ativar
+              </button>
+            </div>
+            <button type="button" onclick="checarLiberacaoEmpresaAutomatica()" style="margin-top:8px;width:100%;background:none;border:none;color:#38bdf8;font-size:11px;font-weight:700;cursor:pointer;text-decoration:underline;">
+              🔄 Verificar se a empresa já aprovou no sistema
+            </button>
+          </div>
+
+          <button type="button" onclick="fecharModalCodigoFin()" style="width:100%;padding:10px;background:rgba(255,255,255,0.08);border:none;border-radius:8px;color:#fff;font-weight:700;font-size:12px;cursor:pointer;">
+            Fechar
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ MODAL DE LANÇAMENTO (RECEITA / DESPESA / META) ══ -->
+      <div id="modal-fin-pessoal-lancamento" class="modal-overlay" style="display:none;z-index:10000090;background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);position:fixed;inset:0;align-items:center;justify-content:center;padding:16px;">
+        <div style="background:linear-gradient(145deg,#0e111d,#161b2c);border:1.5px solid rgba(201,168,76,0.4);border-radius:18px;max-width:440px;width:100%;box-shadow:0 15px 45px rgba(0,0,0,0.85);padding:20px;box-sizing:border-box;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span id="modal-fin-tipo-icone" style="font-size:22px;">➕</span>
+              <div id="modal-fin-titulo" style="font-size:16px;font-weight:900;color:#fff;">Novo Lançamento</div>
+            </div>
+            <button type="button" onclick="fecharModalLancamentoPessoal()" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">✕</button>
+          </div>
+
+          <input type="hidden" id="fin-lanc-id" value="" />
+
+          <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
+            <div>
+              <label style="display:block;font-size:11px;font-weight:800;color:var(--gold-light);text-transform:uppercase;margin-bottom:4px;">Tipo</label>
+              <select id="fin-lanc-tipo" onchange="atualizarCategoriasLancamentoFin()" style="width:100%;box-sizing:border-box;padding:10px;background:#070912;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:13px;outline:none;">
+                <option value="receita">🟢 Receita (Entrada)</option>
+                <option value="despesa">🔴 Despesa (Saída)</option>
+                <option value="meta">🎯 Meta / Reserva Pessoal</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="display:block;font-size:11px;font-weight:800;color:var(--gold-light);text-transform:uppercase;margin-bottom:4px;">Descrição</label>
+              <input type="text" id="fin-lanc-desc" placeholder="Ex: Salário, Aluguel, Almoço, Reserva..." style="width:100%;box-sizing:border-box;padding:10px;background:#070912;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:13px;outline:none;" />
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div>
+                <label style="display:block;font-size:11px;font-weight:800;color:var(--gold-light);text-transform:uppercase;margin-bottom:4px;">Valor (R$)</label>
+                <input type="number" id="fin-lanc-valor" step="0.01" min="0" placeholder="0,00" style="width:100%;box-sizing:border-box;padding:10px;background:#070912;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:13.5px;font-weight:700;outline:none;" />
+              </div>
+              <div>
+                <label style="display:block;font-size:11px;font-weight:800;color:var(--gold-light);text-transform:uppercase;margin-bottom:4px;">Data</label>
+                <input type="date" id="fin-lanc-data" style="width:100%;box-sizing:border-box;padding:10px;background:#070912;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:12.5px;outline:none;" />
+              </div>
+            </div>
+
+            <div>
+              <label style="display:block;font-size:11px;font-weight:800;color:var(--gold-light);text-transform:uppercase;margin-bottom:4px;">Categoria</label>
+              <select id="fin-lanc-cat" style="width:100%;box-sizing:border-box;padding:10px;background:#070912;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:13px;outline:none;">
+                <!-- Preenchido via script -->
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;">
+            <button type="button" onclick="fecharModalLancamentoPessoal()" style="flex:1;padding:10px;background:rgba(255,255,255,0.08);border:none;border-radius:8px;color:#fff;font-weight:700;font-size:12px;cursor:pointer;">
+              Cancelar
+            </button>
+            <button type="button" onclick="salvarLancamentoFinPessoal()" style="flex:1.5;padding:11px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;border-radius:8px;color:#000;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 14px rgba(201,168,76,0.3);">
+              💾 Salvar Registro
+            </button>
+          </div>
+        </div>
+      </div>
+
+
   <!-- ══ MODAL ESCOLHER COLABORADOR CADASTRADO PARA JOGAR ══ -->
   <div id="modal-escolher-colaborador-jogo" class="modal-overlay" style="display:none;z-index:10000050;background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);position:fixed;inset:0;align-items:center;justify-content:center;padding:16px;">
     <div style="background:linear-gradient(145deg,#0c0e1a,#111827);border:1.5px solid rgba(201,168,76,0.4);border-radius:18px;max-width:440px;width:100%;box-shadow:0 15px 45px rgba(0,0,0,0.8);padding:20px;box-sizing:border-box;">
@@ -3288,7 +3693,7 @@
     }
 
     function mudarAba(tab) {
-      ['status', 'galeria', 'mensagens', 'financeiro', 'opiniao', 'jogos'].forEach(t => {
+      ['status', 'galeria', 'mensagens', 'financeiro', 'opiniao', 'jogos', 'financeiro-pessoal'].forEach(t => {
         const pane = document.getElementById('pane-' + t);
         const btn = document.getElementById('btn-tab-' + t);
         if (pane) pane.classList.toggle('active', t === tab);
@@ -3312,6 +3717,10 @@
 
       if (tab === 'opiniao') {
         renderizarListaOpinioes();
+      }
+
+      if (tab === 'financeiro-pessoal') {
+        inicializarFinanceiroPessoal();
       }
 
       if (tab === 'jogos') {
