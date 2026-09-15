@@ -1061,12 +1061,95 @@
         <button class="btn btn-sec btn-sm" onclick="addItem()">+ Adicionar linha</button>
       </div>
 
-      <div class="total-bar">
-        <div>
-          <div class="total-label">Total do Orçamento</div>
-          <div class="total-val" id="total">R$ 0,00</div>
+      <!-- Resumo Financeiro Completo: Produtos, Serviço, Taxa de Acréscimo, Frete, Desconto e Total -->
+      <div class="resumo-financeiro-container" style="margin-top:14px;background:rgba(255,255,255,0.02);border:1.5px solid var(--border);border-radius:var(--r-md);padding:14px;">
+        <div style="font-size:12px;font-weight:800;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+          <span style="display:flex;align-items:center;gap:6px;"><span>📊</span> Composição Financeira do Orçamento</span>
+          <span style="font-size:10.5px;color:var(--muted);font-weight:600;">Cálculo automático em tempo real</span>
         </div>
-        <div class="forma-badge" id="forma-badge">À vista</div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(135px, 1fr));gap:10px;">
+          <!-- 1. Valor Produtos -->
+          <div class="field" style="margin:0;">
+            <label style="font-size:11px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:4px;">
+              <span>📦</span> Valor Produtos
+            </label>
+            <input type="text" id="o-val-produtos" inputmode="decimal" placeholder="0,00" value="0,00"
+              onfocus="this.select()"
+              oninput="aoModificarValoresResumoFinanceiro(true)"
+              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro()"
+              style="font-weight:800;color:#fff;background:#0d0d15;border:1px solid rgba(255,255,255,0.12);padding:9px 10px;font-size:13px;border-radius:8px;">
+          </div>
+
+          <!-- 2. Valor Serviço -->
+          <div class="field" style="margin:0;">
+            <label style="font-size:11px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:4px;">
+              <span>🛠️</span> Valor Serviço
+            </label>
+            <input type="text" id="o-val-servico" inputmode="decimal" placeholder="0,00" value="0,00"
+              onfocus="this.select()"
+              oninput="aoModificarValoresResumoFinanceiro(true)"
+              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro()"
+              style="font-weight:800;color:#fff;background:#0d0d15;border:1px solid rgba(255,255,255,0.12);padding:9px 10px;font-size:13px;border-radius:8px;">
+          </div>
+
+          <!-- 3. Taxa de Acréscimo (Interno - Nunca aparece no PDF) -->
+          <div class="field" style="margin:0;background:rgba(201,168,76,0.08);border:1.5px dashed rgba(201,168,76,0.5);border-radius:10px;padding:8px 10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <label style="font-size:11px;font-weight:800;color:var(--gold-light);margin:0;display:flex;align-items:center;gap:4px;">
+                <span>🔒</span> Taxa Acréscimo (%)
+              </label>
+              <span style="font-size:9px;color:var(--gold-dim);font-weight:800;background:rgba(201,168,76,0.15);padding:2px 6px;border-radius:4px;text-transform:uppercase;">Interno</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:4px;margin-top:4px;">
+              <input type="text" id="o-taxa-acrescimo" inputmode="decimal" placeholder="0,00" value="0,00"
+                onfocus="this.select()"
+                oninput="aoModificarValoresResumoFinanceiro(true)"
+                onblur="formatarCampoTaxa(this);aoModificarValoresResumoFinanceiro()"
+                style="font-weight:800;color:var(--gold-light);background:#0d0d15;border:1px solid rgba(201,168,76,0.4);text-align:right;padding:7px 8px;font-size:13px;border-radius:6px;width:100%;">
+              <span style="font-size:13px;font-weight:800;color:var(--gold-light);">%</span>
+            </div>
+            <div id="o-taxa-acrescimo-calc" style="font-size:10px;color:var(--gold-light);margin-top:4px;text-align:right;font-weight:700;">
+              + R$ 0,00 sobre serviço
+            </div>
+            <div style="font-size:9px;color:var(--muted);margin-top:2px;line-height:1.2;">
+              🚫 Oculto ao cliente no PDF
+            </div>
+          </div>
+
+          <!-- 4. Frete -->
+          <div class="field" style="margin:0;">
+            <label style="font-size:11px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:4px;">
+              <span>🚚</span> Frete
+            </label>
+            <input type="text" id="o-val-frete" inputmode="decimal" placeholder="0,00" value="0,00"
+              onfocus="this.select()"
+              oninput="aoModificarValoresResumoFinanceiro(true)"
+              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro()"
+              style="font-weight:800;color:#fff;background:#0d0d15;border:1px solid rgba(255,255,255,0.12);padding:9px 10px;font-size:13px;border-radius:8px;">
+          </div>
+
+          <!-- 5. Desconto -->
+          <div class="field" style="margin:0;">
+            <label style="font-size:11px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:4px;">
+              <span>🏷️</span> Desconto
+            </label>
+            <input type="text" id="o-val-desconto" inputmode="decimal" placeholder="0,00" value="0,00"
+              onfocus="this.select()"
+              oninput="aoModificarValoresResumoFinanceiro(true)"
+              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro()"
+              style="font-weight:800;color:#ff7878;background:#0d0d15;border:1px solid rgba(239,68,68,0.25);padding:9px 10px;font-size:13px;border-radius:8px;">
+          </div>
+        </div>
+
+        <!-- 6. Barra de Total -->
+        <div class="total-bar" style="margin-top:14px;">
+          <div>
+            <div class="total-label">Total do Orçamento</div>
+            <div class="total-val" id="total">R$ 0,00</div>
+          </div>
+          <div class="forma-badge" id="forma-badge">À vista</div>
+        </div>
       </div>
     </div>
 
@@ -2687,7 +2770,12 @@ const PRODUTOS_PADRAO_MOVEIS = [
   { id: 109, nome: 'Aparador / Buffet de Jantar com Pés Metálicos', cat: 'Salas', vm2: 0, vunit: 1200 },
   { id: 110, nome: 'Cabeceira Estofada Modular com Frisos Dourados', cat: 'Dormitórios', vm2: 340, vunit: 0 },
   { id: 111, nome: 'Divisória de Ambientes em Madeira Ripada Giratória', cat: 'Painéis', vm2: 420, vunit: 0 },
-  { id: 112, nome: 'Montagem e Instalação Técnica Especializada', cat: 'Serviços', vm2: 0, vunit: 250 }
+  { id: 112, nome: 'Montagem e Instalação Técnica Especializada', cat: 'Serviços', vm2: 0, vunit: 250 },
+  { id: 113, nome: 'Branco tx mdf 15', cat: 'MDF', vm2: 0, vunit: 289.90 },
+  { id: 114, nome: 'Branco tx mdf 06', cat: 'MDF', vm2: 0, vunit: 249.00 },
+  { id: 115, nome: 'Madeirado mdf 06', cat: 'MDF', vm2: 0, vunit: 339.00 },
+  { id: 116, nome: 'Corrediça c/ amor', cat: 'Ferragens', vm2: 0, vunit: 89.90 },
+  { id: 117, nome: 'Suporte oculto', cat: 'Ferragens', vm2: 0, vunit: 18.00 }
 ];
 
 // ══════════════════════════════════════════════
@@ -2823,13 +2911,27 @@ function aplicarLicencaVisual(lic) {
 function recarregarDadosEmpresaAtiva() {
   const licAtiva = obterLicencaAtiva();
 
-  // 1. Produtos do catálogo da empresa
+  // 1. Produtos do catálogo da empresa (garante que produtos cadastrados fiquem sempre salvos)
   produtos = load(K.products);
+  const catalogoPadraoSegmento = (licAtiva.tipoContrato === 'moveis' || licAtiva.id === 'sdmoveis')
+    ? JSON.parse(JSON.stringify(PRODUTOS_PADRAO_MOVEIS))
+    : JSON.parse(JSON.stringify(PRODUTOS_PADRAO));
+
   if (!produtos || !produtos.length) {
-    produtos = (licAtiva.tipoContrato === 'moveis' || licAtiva.id === 'sdmoveis')
-      ? JSON.parse(JSON.stringify(PRODUTOS_PADRAO_MOVEIS))
-      : JSON.parse(JSON.stringify(PRODUTOS_PADRAO));
+    produtos = catalogoPadraoSegmento;
     save(K.products, produtos);
+  } else {
+    // Mescla produtos padrão sem sobrescrever ou apagar nenhum produto já cadastrado pelo usuário
+    let alterouCatalogo = false;
+    catalogoPadraoSegmento.forEach(def => {
+      if (!produtos.some(p => p.nome && p.nome.toLowerCase() === def.nome.toLowerCase())) {
+        produtos.push(def);
+        alterouCatalogo = true;
+      }
+    });
+    if (alterouCatalogo) {
+      save(K.products, produtos);
+    }
   }
 
   // 2. Clientes da empresa
@@ -3295,11 +3397,48 @@ function atualizarBadge() {
 // ══════════════════════════════════════════════
 function esc(s) { return String(s||'').replace(/"/g,'&quot;'); }
 
+function formatarValorPtBr(val) {
+  if (val === '' || val === null || val === undefined) return '0,00';
+  const n = parseNum(val);
+  return n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatarCampoMoeda(el) {
+  if (!el) return;
+  const n = parseNum(el.value);
+  el.value = formatarValorPtBr(n);
+}
+
+function formatarCampoTaxa(el) {
+  if (!el) return;
+  const n = parseNum(el.value);
+  el.value = n > 0 ? n.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) : '0,00';
+}
+
 function parseNum(val) {
-  if (!val) return 0;
-  const cleaned = String(val).replace(/\s/g, '').replace(',', '.');
-  const n = parseFloat(cleaned);
+  if (!val && val !== 0) return 0;
+  if (typeof val === 'number') return isNaN(val) ? 0 : val;
+  let str = String(val).replace(/R\$/g, '').replace(/\s/g, '').trim();
+  if (!str) return 0;
+  if (str.includes(',') && str.includes('.')) {
+    if (str.indexOf('.') < str.indexOf(',')) {
+      str = str.replace(/\./g, '').replace(',', '.');
+    } else {
+      str = str.replace(/,/g, '');
+    }
+  } else if (str.includes(',')) {
+    str = str.replace(',', '.');
+  }
+  const n = parseFloat(str);
   return isNaN(n) ? 0 : n;
+}
+
+function isDescricaoServico(desc) {
+  if (!desc) return false;
+  const d = String(desc).toLowerCase();
+  return d.includes('serviço') || d.includes('servico') || d.includes('instalação') ||
+         d.includes('instalacao') || d.includes('montagem') || d.includes('mão de obra') ||
+         d.includes('mao de obra') || d.includes('manutenção') || d.includes('manutencao');
 }
 
 function updateDatalistProdutos() {
@@ -3359,8 +3498,8 @@ function usarProdutoDoCatalogo(pId) {
       const ins = tr.querySelectorAll('input');
       if (ins && ins.length >= 8) {
         ins[1].value = p.nome || '';
-        if (p.vm2)   ins[6].value = String(p.vm2);
-        if (p.vunit) ins[7].value = String(p.vunit);
+        if (p.vm2)   ins[6].value = formatarValorPtBr(p.vm2);
+        if (p.vunit) ins[7].value = formatarValorPtBr(p.vunit);
         calcItem(targetId);
 
         // Feedback visual na linha
@@ -3383,8 +3522,8 @@ function usarProdutoDoCatalogo(pId) {
     }
   }
 
-  // Novo item
-  addItem(p.nome, '1', '', '', '', p.vm2 ? String(p.vm2) : '', p.vunit ? String(p.vunit) : '');
+  // Novo item formatado com 2 decimais
+  addItem(p.nome, '1', '', '', '', p.vm2 ? formatarValorPtBr(p.vm2) : '', p.vunit ? formatarValorPtBr(p.vunit) : '');
   itemEmEdicaoId = null;
   atualizarBannerSelecaoProduto();
   goTab('orcamento');
@@ -3409,11 +3548,11 @@ function aoMudarDescricaoItem(id) {
   const ins = tr.querySelectorAll('input');
   const descVal = ins[1].value.trim();
 
-  // Auto-fill price if matched in catalog
+  // Auto-fill price if matched in catalog (formatado ex: 249,00)
   const prod = produtos.find(p => p.nome.toLowerCase() === descVal.toLowerCase());
   if (prod) {
-    if (prod.vm2 && !ins[6].value)   ins[6].value = prod.vm2;
-    if (prod.vunit && !ins[7].value) ins[7].value = prod.vunit;
+    if (prod.vm2 && (!ins[6].value || ins[6].value === '0,00'))   ins[6].value = formatarValorPtBr(prod.vm2);
+    if (prod.vunit && (!ins[7].value || ins[7].value === '0,00')) ins[7].value = formatarValorPtBr(prod.vunit);
   }
   calcItem(id);
 }
@@ -3428,16 +3567,16 @@ function salvarItemNoCatalogo(id) {
   const v_m2   = parseNum(ins[6].value);
   const v_unit = parseNum(ins[7].value);
 
-  const idx = produtos.findIndex(p => p.nome.toLowerCase() === desc.toLowerCase());
+  const idx = produtos.findIndex(p => p.nome && p.nome.toLowerCase() === desc.toLowerCase());
   if (idx !== -1) {
-    if (v_m2)   produtos[idx].vm2 = v_m2;
-    if (v_unit) produtos[idx].vunit = v_unit;
-    alert(`✅ Produto "${desc}" atualizado no catálogo!`);
+    produtos[idx].vm2 = v_m2;
+    produtos[idx].vunit = v_unit;
+    alert(`✅ Produto "${desc}" atualizado no catálogo!\nV. M²: R$ ${formatarValorPtBr(v_m2)} · V. Unit: R$ ${formatarValorPtBr(v_unit)}`);
   } else {
     produtos.push({
       id: Date.now(),
       nome: desc,
-      cat: 'Geral',
+      cat: isDescricaoServico(desc) ? 'Serviços' : 'Geral',
       vm2: v_m2,
       vunit: v_unit
     });
@@ -3452,9 +3591,19 @@ function addItem(desc='', qtd='1', cor='', alt='', larg='', v_m2='', v_unit='', 
   const id = ++itemId;
   const tr = document.createElement('tr');
   tr.id = 'item-' + id;
+
+  // Formata valores iniciais no padrão brasileiro (ex: 249,00)
+  const v_m2_formatado = (v_m2 !== '' && v_m2 != null) ? formatarValorPtBr(v_m2) : '';
+  const v_unit_formatado = (v_unit !== '' && v_unit != null) ? formatarValorPtBr(v_unit) : '';
+
   tr.innerHTML = `
     <td style="text-align:center">
-      <input type="text" inputmode="numeric" value="${esc(qtd)}" oninput="calcItem(${id})" style="text-align:center">
+      <input type="text" inputmode="numeric" value="${esc(qtd)}"
+        onclick="this.value='';calcItem(${id});"
+        onfocus="this.value='';calcItem(${id});"
+        onblur="if(!this.value.trim()){this.value='1';}calcItem(${id});"
+        oninput="calcItem(${id})"
+        style="text-align:center" title="Clique para limpar e digitar a quantidade">
     </td>
     <td style="min-width:240px">
       <div style="display:flex;gap:5px;align-items:center;">
@@ -3477,10 +3626,18 @@ function addItem(desc='', qtd='1', cor='', alt='', larg='', v_m2='', v_unit='', 
       <input id="m2-${id}" readonly value="0,00 m²" style="text-align:center">
     </td>
     <td>
-      <input type="text" inputmode="decimal" placeholder="0,00" value="${esc(v_m2)}" oninput="calcItem(${id})">
+      <input type="text" inputmode="decimal" placeholder="0,00" value="${v_m2_formatado}"
+        onfocus="this.select()"
+        oninput="calcItem(${id})"
+        onblur="if(this.value.trim()){this.value=formatarValorPtBr(this.value);}calcItem(${id})"
+        style="text-align:right;">
     </td>
     <td>
-      <input type="text" inputmode="decimal" placeholder="0,00" value="${esc(v_unit)}" oninput="calcItem(${id})">
+      <input type="text" inputmode="decimal" placeholder="0,00" value="${v_unit_formatado}"
+        onfocus="this.select()"
+        oninput="calcItem(${id})"
+        onblur="if(this.value.trim()){this.value=formatarValorPtBr(this.value);}calcItem(${id})"
+        style="text-align:right;">
     </td>
     <td>
       <input placeholder="Ex: Lapidado" value="${esc(bizt)}">
@@ -3498,13 +3655,14 @@ function addItem(desc='', qtd='1', cor='', alt='', larg='', v_m2='', v_unit='', 
   calcItem(id);
 }
 
-
 function calcItem(id) {
   const tr = document.getElementById('item-' + id);
   if (!tr) return;
   const ins = tr.querySelectorAll('input');
 
-  const qtd    = parseNum(ins[0].value) || 1;
+  const rawQtd = ins[0].value.trim();
+  // Quando o usuário clica e limpa a quantidade, consideramos 1 temporariamente para o cálculo não sumir enquanto ele digita
+  const qtd    = rawQtd === '' ? 1 : (parseNum(rawQtd) || 0);
   const alt    = parseNum(ins[3].value);
   const larg   = parseNum(ins[4].value);
   const v_m2   = parseNum(ins[6].value);
@@ -3531,12 +3689,58 @@ function calcItem(id) {
   calcTotal();
 }
 
+let valoresResumoEditadosManualmente = false;
+
+function aoModificarValoresResumoFinanceiro(manual = false) {
+  if (manual) valoresResumoEditadosManualmente = true;
+  recalcularTotaisGerais();
+}
+
+function recalcularTotaisGerais() {
+  const elProd = document.getElementById('o-val-produtos');
+  const elServ = document.getElementById('o-val-servico');
+  const elTaxa = document.getElementById('o-taxa-acrescimo');
+  const elFrete = document.getElementById('o-val-frete');
+  const elDesc = document.getElementById('o-val-desconto');
+
+  const valProd = parseNum(elProd ? elProd.value : 0);
+  const valServ = parseNum(elServ ? elServ.value : 0);
+  const taxaPercent = parseNum(elTaxa ? elTaxa.value : 0);
+  const valFrete = parseNum(elFrete ? elFrete.value : 0);
+  const valDesc = parseNum(elDesc ? elDesc.value : 0);
+
+  // Cálculo da taxa de acréscimo sobre o valor do serviço
+  const valAcrescimo = valServ > 0 ? (valServ * (taxaPercent / 100)) : 0;
+
+  const elAcrescimoCalc = document.getElementById('o-taxa-acrescimo-calc');
+  if (elAcrescimoCalc) {
+    if (taxaPercent > 0 && valServ > 0) {
+      elAcrescimoCalc.innerHTML = `+ R$ <strong>${formatarValorPtBr(valAcrescimo)}</strong> (${taxaPercent}% s/ serviço)`;
+    } else if (taxaPercent > 0 && valServ === 0) {
+      elAcrescimoCalc.innerHTML = `<span style="color:var(--muted)">Informe o valor do serviço</span>`;
+    } else {
+      elAcrescimoCalc.innerHTML = `+ R$ 0,00 sobre serviço`;
+    }
+  }
+
+  const totalFinal = Math.max(0, valProd + valServ + valAcrescimo + valFrete - valDesc);
+  const elTotal = document.getElementById('total');
+  if (elTotal) {
+    elTotal.textContent = 'R$ ' + formatarValorPtBr(totalFinal);
+  }
+  return totalFinal;
+}
+
 function calcTotal() {
-  let t = 0;
+  let somaProdutosTabela = 0;
+  let somaServicosTabela = 0;
+
   document.querySelectorAll('#itens-lista tr').forEach(tr => {
     const ins = tr.querySelectorAll('input');
     if (!ins || ins.length < 10) return;
-    const qtd    = parseNum(ins[0].value) || 1;
+    const desc   = (ins[1].value || '').trim();
+    const rawQtd = ins[0].value.trim();
+    const qtd    = rawQtd === '' ? 1 : (parseNum(rawQtd) || 0);
     const alt    = parseNum(ins[3].value);
     const larg   = parseNum(ins[4].value);
     const v_m2   = parseNum(ins[6].value);
@@ -3545,17 +3749,34 @@ function calcTotal() {
     const m2 = alt * larg;
     const sub_m2 = m2 > 0 ? (m2 * v_m2) : 0;
 
+    let lineTotal = 0;
     if (sub_m2 > 0 && v_unit > 0) {
-      t += qtd * (sub_m2 + v_unit);
+      lineTotal = qtd * (sub_m2 + v_unit);
     } else if (sub_m2 > 0) {
-      t += qtd * sub_m2;
+      lineTotal = qtd * sub_m2;
     } else if (v_unit > 0) {
-      t += qtd * v_unit;
+      lineTotal = qtd * v_unit;
+    }
+
+    if (isDescricaoServico(desc)) {
+      somaServicosTabela += lineTotal;
+    } else {
+      somaProdutosTabela += lineTotal;
     }
   });
 
-  document.getElementById('total').textContent = 'R$ ' + t.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
-  return t;
+  const elProd = document.getElementById('o-val-produtos');
+  const elServ = document.getElementById('o-val-servico');
+
+  // Atualiza campos de resumo se existirem
+  if (elProd) {
+    elProd.value = formatarValorPtBr(somaProdutosTabela);
+  }
+  if (elServ && somaServicosTabela > 0) {
+    elServ.value = formatarValorPtBr(somaServicosTabela);
+  }
+
+  return recalcularTotaisGerais();
 }
 
 function getItens() {
@@ -3583,6 +3804,19 @@ function getItens() {
 }
 
 function getOrc() {
+  const elProd = document.getElementById('o-val-produtos');
+  const elServ = document.getElementById('o-val-servico');
+  const elTaxa = document.getElementById('o-taxa-acrescimo');
+  const elFrete = document.getElementById('o-val-frete');
+  const elDesc = document.getElementById('o-val-desconto');
+
+  const valProdutos = parseNum(elProd ? elProd.value : 0);
+  const valServico = parseNum(elServ ? elServ.value : 0);
+  const taxaAcrescimo = parseNum(elTaxa ? elTaxa.value : 0);
+  const valFrete = parseNum(elFrete ? elFrete.value : 0);
+  const valDesconto = parseNum(elDesc ? elDesc.value : 0);
+  const valAcrescimo = valServico > 0 ? (valServico * (taxaAcrescimo / 100)) : 0;
+
   return {
     numero: document.getElementById('orc-numero-display').textContent,
     nome:   document.getElementById('o-nome').value.trim(),
@@ -3598,6 +3832,12 @@ function getOrc() {
     garantia: document.getElementById('o-garantia').value.trim(),
     obs:    document.getElementById('o-obs').value.trim(),
     total:  document.getElementById('total').textContent,
+    valProdutos: valProdutos,
+    valServico: valServico,
+    taxaAcrescimo: taxaAcrescimo,
+    valAcrescimo: valAcrescimo,
+    valFrete: valFrete,
+    valDesconto: valDesconto,
     itens:  getItens(),
     data:   new Date().toLocaleDateString('pt-BR')
   };
@@ -3822,6 +4062,10 @@ function cancelarEdicaoOs() {
 
   ['o-nome','o-cnpj','o-tel','o-bairro','o-end','o-num','o-apto','o-resp','o-prazo','o-garantia','o-obs','forma-outro']
     .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  ['o-val-produtos','o-val-servico','o-taxa-acrescimo','o-val-frete','o-val-desconto']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value='0,00'; });
+  const elAcrescimoCalc = document.getElementById('o-taxa-acrescimo-calc');
+  if (elAcrescimoCalc) elAcrescimoCalc.innerHTML = '+ R$ 0,00 sobre serviço';
   document.getElementById('itens-lista').innerHTML = '';
   itemId = 0; addItem();
   selChip(document.querySelector('.chip'),'À vista');
@@ -4497,6 +4741,20 @@ function editarOs(id) {
   } else {
     addItem();
   }
+
+  // Restaura campos financeiros customizados se houver
+  const elProd = document.getElementById('o-val-produtos');
+  const elServ = document.getElementById('o-val-servico');
+  const elTaxa = document.getElementById('o-taxa-acrescimo');
+  const elFrete = document.getElementById('o-val-frete');
+  const elDesc = document.getElementById('o-val-desconto');
+
+  if (elProd && d.valProdutos != null) elProd.value = formatarValorPtBr(d.valProdutos);
+  if (elServ && d.valServico != null) elServ.value = formatarValorPtBr(d.valServico);
+  if (elTaxa && d.taxaAcrescimo != null) elTaxa.value = formatarCampoTaxa({ value: d.taxaAcrescimo });
+  if (elFrete && d.valFrete != null) elFrete.value = formatarValorPtBr(d.valFrete);
+  if (elDesc && d.valDesconto != null) elDesc.value = formatarValorPtBr(d.valDesconto);
+  recalcularTotaisGerais();
 
   // Configurações do modo de edição de O.S. com modificações
   const foiAprovadoOuReajuste = o.status === 'aprovado' || o.status === 'modificacao_aprovada' || o.status === 'reajustar' || !!o.assinado_por;
@@ -7725,16 +7983,36 @@ async function gerarPdfOrcamentoDoc(dados) {
   let totY = bottomY - 32;
   const valorTotalLimpo = String(total || '0,00').replace('R$', '').trim();
 
-  page.drawText('Valor dos Materiais:', { x: rightCardX + 10, y: totY, size: 7, font: fontRegular, color: GRAY });
-  page.drawText(`R$ ${valorTotalLimpo}`, { x: rightCardX + rightCardW - 10 - fontBold.widthOfTextAtSize(`R$ ${valorTotalLimpo}`, 7.5), y: totY, size: 7.5, font: fontBold, color: DARK });
+  // Valores discriminados para o PDF (a taxa de acréscimo é embutida no serviço ou oculta, NUNCA exibida como taxa ao cliente)
+  const valProdNum = parseNum(dados.valProdutos);
+  const valServNum = parseNum(dados.valServico);
+  const valAcrescimoNum = parseNum(dados.valAcrescimo);
+  const valFreteNum = parseNum(dados.valFrete);
+  const valDescNum = parseNum(dados.valDesconto);
 
-  totY -= 14;
-  page.drawText('Mão de Obra e Instalação:', { x: rightCardX + 10, y: totY, size: 7, font: fontRegular, color: GRAY });
-  page.drawText('Inclusa', { x: rightCardX + rightCardW - 10 - fontRegular.widthOfTextAtSize('Inclusa', 7), y: totY, size: 7, font: fontRegular, color: DARK });
+  // O valor final do serviço apresentado no PDF já absorve o acréscimo sem exibir percentual de margem/taxa
+  const valServicoFinal = valServNum + valAcrescimoNum;
 
-  totY -= 14;
-  page.drawText('Frete e Deslocamento:', { x: rightCardX + 10, y: totY, size: 7, font: fontRegular, color: GRAY });
-  page.drawText('Incluso', { x: rightCardX + rightCardW - 10 - fontRegular.widthOfTextAtSize('Incluso', 7), y: totY, size: 7, font: fontRegular, color: DARK });
+  const txtValProdutos = valProdNum > 0 ? ('R$ ' + formatarValorPtBr(valProdNum)) : ('R$ ' + valorTotalLimpo);
+  page.drawText('Valor dos Produtos / Materiais:', { x: rightCardX + 10, y: totY, size: 6.8, font: fontRegular, color: GRAY });
+  page.drawText(txtValProdutos, { x: rightCardX + rightCardW - 10 - fontBold.widthOfTextAtSize(txtValProdutos, 7.2), y: totY, size: 7.2, font: fontBold, color: DARK });
+
+  totY -= 13;
+  const txtValServico = valServicoFinal > 0 ? ('R$ ' + formatarValorPtBr(valServicoFinal)) : 'Inclusa';
+  page.drawText('Mão de Obra e Instalação:', { x: rightCardX + 10, y: totY, size: 6.8, font: fontRegular, color: GRAY });
+  page.drawText(txtValServico, { x: rightCardX + rightCardW - 10 - (valServicoFinal > 0 ? fontBold : fontRegular).widthOfTextAtSize(txtValServico, 7.2), y: totY, size: 7.2, font: valServicoFinal > 0 ? fontBold : fontRegular, color: DARK });
+
+  totY -= 13;
+  const txtValFrete = valFreteNum > 0 ? ('R$ ' + formatarValorPtBr(valFreteNum)) : 'Incluso';
+  page.drawText('Frete e Deslocamento:', { x: rightCardX + 10, y: totY, size: 6.8, font: fontRegular, color: GRAY });
+  page.drawText(txtValFrete, { x: rightCardX + rightCardW - 10 - (valFreteNum > 0 ? fontBold : fontRegular).widthOfTextAtSize(txtValFrete, 7.2), y: totY, size: 7.2, font: valFreteNum > 0 ? fontBold : fontRegular, color: DARK });
+
+  if (valDescNum > 0) {
+    totY -= 13;
+    const txtDesc = '- R$ ' + formatarValorPtBr(valDescNum);
+    page.drawText('Desconto Especial:', { x: rightCardX + 10, y: totY, size: 6.8, font: fontRegular, color: rgb(0.8, 0.2, 0.2) });
+    page.drawText(txtDesc, { x: rightCardX + rightCardW - 10 - fontBold.widthOfTextAtSize(txtDesc, 7.2), y: totY, size: 7.2, font: fontBold, color: rgb(0.8, 0.2, 0.2) });
+  }
 
   // Bloco de destaque do VALOR TOTAL
   const totalBoxH = 50;
