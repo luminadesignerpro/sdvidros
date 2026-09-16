@@ -7,10 +7,30 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Portal do Funcionário – SD Vidros</title>
-    <link id="dynamic-favicon" rel="icon" type="image/png" href="logo.jpg">
-  <link id="dynamic-apple-icon" rel="apple-touch-icon" sizes="192x192" href="logo.jpg">
-  <link id="dynamic-apple-icon-512" rel="apple-touch-icon" sizes="512x512" href="logo.jpg">
-  <link id="dynamic-manifest" rel="manifest" href="manifest.json">
+    <script>
+    (function() {
+      try {
+        var p = new URLSearchParams(window.location.search);
+        var emp = (p.get('empresa') || p.get('emp') || localStorage.getItem('sdv_licenca_ativa') || '').toLowerCase();
+        var nome = (p.get('nome') || p.get('empNome') || '').toLowerCase();
+        var isMoveis = emp === 'sdmoveis' || emp.includes('moveis') || nome.includes('móveis') || nome.includes('moveis');
+        var manifestHref = isMoveis ? 'manifest-moveis.json' : 'manifest.json';
+        var logoSrc = isMoveis ? 'logo_moveis.jpg' : 'logo.jpg';
+        var appTitle = isMoveis ? 'SD Móveis Projetados' : 'SD Vidros';
+        var shortTitle = isMoveis ? 'SD Móveis' : 'SD Vidros';
+
+        document.write('<link id="dynamic-manifest" rel="manifest" href="' + manifestHref + '">');
+        document.write('<link id="dynamic-favicon" rel="icon" type="image/jpeg" href="' + logoSrc + '">');
+        document.write('<link id="dynamic-apple-icon" rel="apple-touch-icon" sizes="192x192" href="' + logoSrc + '">');
+        document.write('<link id="dynamic-apple-icon-512" rel="apple-touch-icon" sizes="512x512" href="' + logoSrc + '">');
+        document.write('<meta name="apple-mobile-web-app-title" content="' + shortTitle + '">');
+        document.write('<meta name="application-name" content="' + appTitle + '">');
+        document.title = appTitle + ' – Área Oficial';
+      } catch (_) {
+        document.write('<link id="dynamic-manifest" rel="manifest" href="manifest.json">');
+      }
+    })();
+  </script>
   <meta name="description" content="Toque para instalar o aplicativo oficial no celular e acessar seu portal de orçamentos e serviços.">
   <meta property="og:title" content="📲 Instalar Aplicativo Oficial – Portal do Funcionário">
   <meta property="og:description" content="Toque para instalar o aplicativo oficial no celular e acessar seu portal de orçamentos e serviços.">
@@ -4742,7 +4762,8 @@ function mudarAba(tab) {
             } else if (nomeEmpresa && nomeEmpresa !== 'SD Vidros') {
               targetManifestUrl = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(dynamicManifest));
             }
-            manLink.href = targetManifestUrl;
+            const manLink = document.getElementById("dynamic-manifest") || document.querySelector('link[rel="manifest"]');
+            if (manLink) manLink.href = targetManifestUrl;
           } catch (_) {}
         };
         img.src = logoUrl;

@@ -3,6 +3,7 @@
   "rewrites": [
     { "source": "/", "destination": "/login.html" },
     { "source": "/cliente", "destination": "/cliente.html" },
-    { "source": "/funcionario", "destination": "/funcionario.html" }
+    { "source": "/funcionario", "destination": "/funcionario.html" },
+    { "source": "/moveis", "destination": "/cliente.html?empresa=sdmoveis&nome=SD%20M%C3%B3veis%20Projetados&instalar=1&auto=1" }
   ]
 }
