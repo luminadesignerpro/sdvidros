@@ -3755,23 +3755,46 @@
     function obterLicencaAtivaCliente() {
       try {
         const params = new URLSearchParams(window.location.search);
-        const empUrl = params.get('empresa');
-        const nomeUrl = params.get('nome');
+        let empUrl = params.get('empresa') || params.get('emp');
+        const nomeUrl = params.get('nome') || params.get('empNome');
+
+        // Se veio SD Móveis pelo nome na URL mas sem ID específico
+        if (!empUrl && nomeUrl && (nomeUrl.toLowerCase().includes('sd móveis') || nomeUrl.toLowerCase().includes('sd moveis'))) {
+          empUrl = 'sdmoveis';
+        }
+
         if (empUrl) {
           localStorage.setItem('sdv_licenca_ativa', empUrl);
           let lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
           let enc = lista.find(l => l.id === empUrl);
-          if (!enc && nomeUrl) {
+          const ehMoveis = (nomeUrl && (nomeUrl.toLowerCase().includes('móveis') || nomeUrl.toLowerCase().includes('moveis'))) || 
+                           (enc && enc.nome && (enc.nome.toLowerCase().includes('móveis') || enc.nome.toLowerCase().includes('moveis'))) || 
+                           empUrl === 'sdmoveis';
+
+          if (!enc) {
             enc = {
               id: empUrl,
-              nome: nomeUrl,
-              segmento: params.get('seg') || 'Vidraçaria & Esquadrias',
+              nome: nomeUrl || (empUrl === 'sdmoveis' ? 'SD Móveis Projetados' : 'Empresa'),
+              segmento: ehMoveis ? 'Móveis Planejados & Ambientes Sob Medida' : (params.get('seg') || 'Vidraçaria & Esquadrias'),
               telefone: params.get('tel') || '(85) 99611-9824',
-              slogan: params.get('seg') || 'Acompanhamento de Serviços',
-              logo: params.get('logo') || 'logo.jpg',
-              banner: 'banner_ia_vidros.jpg'
+              slogan: ehMoveis ? 'Ambientes Sob Medida' : 'Acompanhamento de Serviços',
+              logo: ehMoveis ? 'logo_moveis.jpg' : (params.get('logo') || 'logo.jpg'),
+              banner: ehMoveis ? 'banner_ia_moveis.jpg' : 'banner.jpg'
             };
             lista.push(enc);
+            localStorage.setItem('sdv_licencas', JSON.stringify(lista));
+            return enc;
+          } else {
+            // Atualiza com o nome e segmento mais recentes se vieram na URL
+            if (nomeUrl && enc.nome !== nomeUrl) {
+              enc.nome = nomeUrl;
+            }
+            if (ehMoveis) {
+              enc.segmento = 'Móveis Planejados & Ambientes Sob Medida';
+              enc.slogan = 'Ambientes Sob Medida';
+              if (!enc.logo || enc.logo === 'logo.jpg') enc.logo = 'logo_moveis.jpg';
+              if (!enc.banner || enc.banner === 'banner.jpg' || enc.banner === 'banner_ia_vidros.jpg') enc.banner = 'banner_ia_moveis.jpg';
+            }
             localStorage.setItem('sdv_licencas', JSON.stringify(lista));
             return enc;
           }
@@ -3825,7 +3848,10 @@
       // 5. Banner principal
       const bannerEl = document.getElementById('portal-banner-img');
       if (bannerEl) {
-        if (lic.id !== 'sdvidros' && (!lic.banner || lic.banner === 'banner.jpg')) {
+        const ehMoveis = (lic.nome && (lic.nome.toLowerCase().includes('móveis') || lic.nome.toLowerCase().includes('moveis'))) || lic.id === 'sdmoveis';
+        if (ehMoveis) {
+          bannerEl.src = (lic.banner && lic.banner !== 'banner.jpg' && lic.banner !== 'banner_ia_vidros.jpg') ? lic.banner : 'banner_ia_moveis.jpg';
+        } else if (lic.id !== 'sdvidros' && (!lic.banner || lic.banner === 'banner.jpg')) {
           bannerEl.src = 'banner_ia_vidros.jpg';
         } else if (lic.banner) {
           bannerEl.src = lic.banner;
@@ -3979,20 +4005,36 @@
 
       // Verifica se já estava logado
       const salvo = localStorage.getItem('sdv_cliente_sessao');
+      const paramEmpUrl = urlParams.get('empresa') || urlParams.get('emp');
+      const paramNomeEmpUrl = urlParams.get('nome') || urlParams.get('empNome');
+
       if (salvo) {
         try {
           const c = JSON.parse(salvo);
-          // Se for sessão de funcionário (por flag ou pelo nome)
-          if (c.isFuncionario || (c.nome && (c.nome.toLowerCase().includes('instalador') || c.nome.toLowerCase().includes('técnico') || c.nome.toLowerCase().includes('tecnico')))) {
-            c.isFuncionario = true;
+          const sessaoOutraEmpresa = paramEmpUrl && c.empresaId && c.empresaId !== paramEmpUrl;
+          const sessaoNomeDiferente = paramNomeEmpUrl && c.empresaNome && c.empresaNome.toLowerCase() !== paramNomeEmpUrl.toLowerCase();
+
+          if (sessaoOutraEmpresa || (sessaoNomeDiferente && (paramInstalar || autoLogin))) {
+            localStorage.removeItem('sdv_cliente_sessao');
+          } else {
+            if (paramNomeEmpUrl && c.nome && (c.nome.toLowerCase().includes('sd móveis') || c.nome.toLowerCase().includes('sd vidros') || c.nome.toLowerCase() !== paramNomeEmpUrl.toLowerCase())) {
+              c.nome = paramNomeEmpUrl;
+              c.empresaNome = paramNomeEmpUrl;
+              if (paramEmpUrl) c.empresaId = paramEmpUrl;
+              localStorage.setItem('sdv_cliente_sessao', JSON.stringify(c));
+            }
+            if (c.isFuncionario || (c.nome && (c.nome.toLowerCase().includes('instalador') || c.nome.toLowerCase().includes('técnico') || c.nome.toLowerCase().includes('tecnico')))) {
+              c.isFuncionario = true;
+            }
+            if (paramOs && c.os && !c.os.includes(paramOs)) {
+              c.os = paramOs.startsWith('#') ? paramOs : '#' + paramOs;
+              if (paramNome) c.nome = paramNome;
+              localStorage.setItem('sdv_cliente_sessao', JSON.stringify(c));
+            }
+            aplicarLicencaAtivaCliente();
+            iniciarPortalCliente(c);
+            return;
           }
-          if (paramOs && c.os && !c.os.includes(paramOs)) {
-            c.os = paramOs.startsWith('#') ? paramOs : '#' + paramOs;
-            if (paramNome) c.nome = paramNome;
-            localStorage.setItem('sdv_cliente_sessao', JSON.stringify(c));
-          }
-          iniciarPortalCliente(c);
-          return;
         } catch (_) {}
       }
 
@@ -4032,7 +4074,7 @@
       }
 
       const urlParams = new URLSearchParams(window.location.search);
-      const urlNome = urlParams.get('nome') || (clienteSessao && clienteSessao.nome) || ('Colaborador');
+      const urlNome = lic.nome || urlParams.get('nome') || (clienteSessao && clienteSessao.nome) || ('Cliente');
       const urlOs = urlParams.get('os') || '#0001';
       const urlTel = urlParams.get('tel') || lic.telefone || '(85) 99611-9824';
 
@@ -4040,7 +4082,7 @@
       let ordemEncontrada = ordens.find(o => String(o.empresaId || '') === String(lic.id)) || ordens[0];
 
       const sessao = {
-        nome: urlNome,
+        nome:  lic.nome || urlNome,
         telefone: urlTel,
         os: (ordemEncontrada && ordemEncontrada.numero) || urlOs,
         empresaId: lic.id,
