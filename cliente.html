@@ -8012,7 +8012,7 @@ function mudarAba(tab) {
             <strong>4. DA GARANTIA (1 ANO):</strong> A ${lic.nome} concede garantia integral de 1 (um) ano contra defeitos de fabricação, montagem e fixação, a contar da entrega.
           </div>
 
-          <div class="assinaturas">
+                    <div class="assinaturas">
             <div class="linha-ass">
               <strong>${lic.nome.toUpperCase()}</strong><br>
               Contratada Oficial
@@ -8022,111 +8022,7 @@ function mudarAba(tab) {
               Contratante (Autorizado Digitalmente)
             </div>
           </div>
-        <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
-    });
-  }
-</script>
-
-<script>
-function ativarAlarmePontoCelularSegundoPlano() {
-  if (!('Notification' in window)) {
-    alert('Seu navegador não possui suporte à Notificação do Ponto.');
-    return;
-  }
-  Notification.requestPermission().then(permission => {
-    if (permission === 'granted') {
-      const turnos = [
-        { hora: '08:00', label: 'Entrada' },
-        { hora: '12:00', label: 'Saída para Almoço' },
-        { hora: '13:00', label: 'Retorno do Almoço' },
-        { hora: '17:00', label: 'Saída Final' }
-      ];
-      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-          action: 'configurarAlarmesPonto',
-          alarmes: turnos,
-          nome: (typeof clienteSessao !== 'undefined' && clienteSessao ? clienteSessao.nome : 'Colaborador'),
-          testar: true
-        });
-      }
-      alert('🔔 Alarme de Ponto ativado no celular com sucesso! Você receberá aviso 5 minutos antes de cada turno mesmo com o app fechado.');
-    } else {
-      alert('Por favor, permita as notificações no navegador para receber os alarmes de ponto no celular.');
-    }
-  });
-}
-
-function baixarSincronizacaoAlarmeCalendario() {
-  const icsContent = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//SD Vidros e Moveis//Alarme Ponto//PT-BR',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
-    'BEGIN:VEVENT',
-    'SUMMARY:⏰ Bater Ponto - Entrada (08:00)',
-    'DESCRIPTION:Alarme oficial de ponto eletrônico SD Vidros / SD Móveis Projetados.',
-    'DTSTART;TZID=America/Fortaleza:20260101T080000',
-    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
-    'BEGIN:VALARM',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:⏰ Faltam 5 minutos para a Entrada do Ponto!',
-    'TRIGGER:-PT5M',
-    'END:VALARM',
-    'END:VEVENT',
-    'BEGIN:VEVENT',
-    'SUMMARY:⏰ Bater Ponto - Almoço (12:00)',
-    'DESCRIPTION:Alarme oficial de ponto - Almoço.',
-    'DTSTART;TZID=America/Fortaleza:20260101T120000',
-    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
-    'BEGIN:VALARM',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:⏰ Faltam 5 minutos para o Almoço!',
-    'TRIGGER:-PT5M',
-    'END:VALARM',
-    'END:VEVENT',
-    'BEGIN:VEVENT',
-    'SUMMARY:⏰ Bater Ponto - Retorno Almoço (13:00)',
-    'DESCRIPTION:Alarme oficial de ponto - Retorno do Almoço.',
-    'DTSTART;TZID=America/Fortaleza:20260101T130000',
-    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
-    'BEGIN:VALARM',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:⏰ Faltam 5 minutos para o Retorno do Almoço!',
-    'TRIGGER:-PT5M',
-    'END:VALARM',
-    'END:VEVENT',
-    'BEGIN:VEVENT',
-    'SUMMARY:⏰ Bater Ponto - Saída (17:00)',
-    'DESCRIPTION:Alarme oficial de ponto - Saída Final.',
-    'DTSTART;TZID=America/Fortaleza:20260101T170000',
-    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
-    'BEGIN:VALARM',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:⏰ Faltam 5 minutos para o Fim do Expediente!',
-    'TRIGGER:-PT5M',
-    'END:VALARM',
-    'END:VEVENT',
-    'END:VCALENDAR'
-  ].join('\r\n');
-
-  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'alarmes-ponto-sdvidros.ics';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  alert('📅 Arquivo de calendário baixado! Toque nele para importar os alarmes no despertador do celular.');
-}
-</script>
-
-</body>
+        </body>
         </html>
       `);
       janela.document.close();
@@ -8937,6 +8833,111 @@ function baixarSincronizacaoAlarmeCalendario() {
     }
 
 
-  </script>
+  
+
+// ==========================================
+// REGISTRO DE SERVICE WORKER E ALARMES DE PONTO
+// ==========================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
+function ativarAlarmePontoCelularSegundoPlano() {
+  if (!('Notification' in window)) {
+    alert('Seu navegador não possui suporte à Notificação do Ponto.');
+    return;
+  }
+  Notification.requestPermission().then(permission => {
+    if (permission === 'granted') {
+      const turnos = [
+        { hora: '08:00', label: 'Entrada' },
+        { hora: '12:00', label: 'Saída para Almoço' },
+        { hora: '13:00', label: 'Retorno do Almoço' },
+        { hora: '17:00', label: 'Saída Final' }
+      ];
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          action: 'configurarAlarmesPonto',
+          alarmes: turnos,
+          nome: (typeof clienteSessao !== 'undefined' && clienteSessao ? clienteSessao.nome : 'Colaborador'),
+          testar: true
+        });
+      }
+      alert('🔔 Alarme de Ponto ativado no celular com sucesso! Você receberá aviso 5 minutos antes de cada turno mesmo com o app fechado.');
+    } else {
+      alert('Por favor, permita as notificações no navegador para receber os alarmes de ponto no celular.');
+    }
+  });
+}
+
+function baixarSincronizacaoAlarmeCalendario() {
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//SD Vidros e Moveis//Alarme Ponto//PT-BR',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Entrada (08:00)',
+    'DESCRIPTION:Alarme oficial de ponto eletrônico SD Vidros / SD Móveis Projetados.',
+    'DTSTART;TZID=America/Fortaleza:20260101T080000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para a Entrada do Ponto!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Almoço (12:00)',
+    'DESCRIPTION:Alarme oficial de ponto - Almoço.',
+    'DTSTART;TZID=America/Fortaleza:20260101T120000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para o Almoço!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Retorno Almoço (13:00)',
+    'DESCRIPTION:Alarme oficial de ponto - Retorno do Almoço.',
+    'DTSTART;TZID=America/Fortaleza:20260101T130000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para o Retorno do Almoço!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Saída (17:00)',
+    'DESCRIPTION:Alarme oficial de ponto - Saída Final.',
+    'DTSTART;TZID=America/Fortaleza:20260101T170000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para o Fim do Expediente!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'alarmes-ponto-sdvidros.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert('📅 Arquivo de calendário baixado! Toque nele para importar os alarmes no despertador do celular.');
+}
+
+</script>
 </body>
 </html>

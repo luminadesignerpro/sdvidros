@@ -4199,7 +4199,7 @@ function renderizarModalLinksFuncionarios(filtro = '') {
     const idParam = f.id || String(f.nome || 'colaborador').replace(/\s+/g, '_');
     const nomeParam = encodeURIComponent(f.nome || 'Colaborador');
     const licAtivaLink = (typeof obterLicencaAtiva === 'function' ? obterLicencaAtiva() : { id: 'sdvidros', nome: 'SD Vidros' });
-  const linkPortal = `${baseOrigin}${basePath}/funcionario.html?funcId=${idParam}&nome=${nomeParam}&empresa=${encodeURIComponent(licAtivaLink.id)}&empNome=${encodeURIComponent(licAtivaLink.nome)}`;
+  const linkPortal = `${baseOrigin}${basePath}/funcionario.html?portal=funcionario&funcId=${idParam}&nome=${nomeParam}&cargo=${encodeURIComponent(f.cargo || 'Colaborador')}&empresa=${encodeURIComponent(licAtivaLink.id)}&empNome=${encodeURIComponent(licAtivaLink.nome)}`;
     const telLimpo = (f.whatsapp || f.tel || '').replace(/\D/g, '');
     const msgZap = `Olá ${f.nome}! Segue seu link oficial do Portal do Funcionário SD Vidros (registro de ponto eletrônico e acompanhamento de obras):\n\n${linkPortal}\n\nSalve nos favoritos do seu celular!`;
     const urlZap = telLimpo ? `https://wa.me/55${telLimpo}?text=${encodeURIComponent(msgZap)}` : `https://wa.me/?text=${encodeURIComponent(msgZap)}`;
@@ -4388,7 +4388,13 @@ function enviarWhatsAppPortalFuncionario(urlZap) {
 function abrirPortalFuncionarioDireto() {
   const baseOrigin = window.location.origin;
   const basePath = window.location.pathname.replace(/\/index\.html$/i, '').replace(/\/$/, '');
-  const url = `${baseOrigin}${basePath}/funcionario.html`;
+  const licAtivaLink = (typeof obterLicencaAtiva === 'function' ? obterLicencaAtiva() : { id: 'sdvidros', nome: 'SD Vidros' });
+  const listaFuncs = (typeof funcionarios !== 'undefined' && Array.isArray(funcionarios) && funcionarios.length > 0) ? funcionarios : [];
+  let url = `${baseOrigin}${basePath}/funcionario.html?portal=funcionario&empresa=${encodeURIComponent(licAtivaLink.id)}&empNome=${encodeURIComponent(licAtivaLink.nome)}`;
+  if (listaFuncs.length > 0) {
+    const f1 = listaFuncs[0];
+    url += `&funcId=${encodeURIComponent(f1.id)}&nome=${encodeURIComponent(f1.nome)}&cargo=${encodeURIComponent(f1.cargo || 'Colaborador')}`;
+  }
   abrirLinkPortalFuncionario(url);
 }
 

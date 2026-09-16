@@ -6,13 +6,13 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Instalar Aplicativo Oficial – Área do Cliente</title>
+  <title>Portal do Funcionário – SD Vidros</title>
     <link id="dynamic-favicon" rel="icon" type="image/png" href="logo.jpg">
   <link id="dynamic-apple-icon" rel="apple-touch-icon" sizes="192x192" href="logo.jpg">
   <link id="dynamic-apple-icon-512" rel="apple-touch-icon" sizes="512x512" href="logo.jpg">
   <link id="dynamic-manifest" rel="manifest" href="manifest.json">
   <meta name="description" content="Toque para instalar o aplicativo oficial no celular e acessar seu portal de orçamentos e serviços.">
-  <meta property="og:title" content="📲 Instalar Aplicativo Oficial – Área do Cliente">
+  <meta property="og:title" content="📲 Instalar Aplicativo Oficial – Portal do Funcionário">
   <meta property="og:description" content="Toque para instalar o aplicativo oficial no celular e acessar seu portal de orçamentos e serviços.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1940,7 +1940,7 @@
         Ativar Biometria / Face ID
       </div>
       <p style="font-size:13px;color:var(--text2);text-align:center;line-height:1.5;margin:10px 0 18px;">
-        Deseja salvar o acesso biométrico deste aparelho para entrar na sua Área do Cliente com apenas 1 toque, sem precisar digitar sua senha?
+        Deseja salvar o acesso biométrico deste aparelho para entrar no seu Portal do Funcionário com apenas 1 toque, sem precisar digitar sua senha?
       </p>
 
       <div style="display:flex;gap:10px;">
@@ -2059,21 +2059,32 @@
       <div class="login-logo">
         <img id="portal-login-logo" src="logo.jpg" alt="Logo" onerror="this.src='icon-192.png'">
       </div>
-      <h2 class="login-title">Área do Cliente</h2>
-      <p class="login-sub" id="portal-login-sub">SD Vidros · Acompanhamento de Serviços</p>
+      <h2 class="login-title">Portal do Funcionário</h2>
+      <p class="login-sub" id="portal-login-sub">SD Vidros · Ponto Eletrônico & Acompanhamento</p>
 
-      <div class="field-box">
-        <label>WhatsApp / Telefone ou CPF</label>
-        <input id="l-identificador" placeholder="Ex: 85999999999 ou CPF" />
+      <div class="field-box" style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:800;color:var(--gold-light);display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+          <span>👤</span> <span>Selecione seu Nome de Colaborador</span>
+        </label>
+        <select id="l-funcionario-select" onchange="selecionarFuncionarioLogin(this.value)" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;background:#0d0d16;border:1.5px solid rgba(201,168,76,0.45);color:#fff;font-size:13.5px;font-weight:700;cursor:pointer;">
+          <option value="">-- Escolha seu nome --</option>
+        </select>
       </div>
 
-      <div class="field-box">
-        <label>Sua Senha de Acesso</label>
+      <div class="field-box" id="box-func-manual" style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:800;color:var(--gold-light);display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+          <span>📱</span> <span>Ou Digite seu WhatsApp ou Nome</span>
+        </label>
+        <input id="l-identificador" placeholder="Ex: Samuel David ou (85) 99611-9824" />
+      </div>
+
+      <div class="field-box" id="box-func-senha" style="display:none;margin-bottom:12px;">
+        <label>Sua Senha de Acesso (opcional)</label>
         <input id="l-senha" type="password" placeholder="Digite sua senha" />
       </div>
 
-      <button class="btn-login-cliente" id="btn-entrar" onclick="loginCliente()">
-        🔑 Acessar Meu Serviço
+      <button class="btn-login-cliente" id="btn-entrar" onclick="loginFuncionario()" style="background:linear-gradient(135deg,#c9a84c,#e6c875);color:#0b0c10;font-weight:900;box-shadow:0 6px 20px rgba(201,168,76,0.35);margin-top:6px;padding:14px;font-size:14px;border:none;cursor:pointer;">
+        🚀 Entrar no Portal do Funcionário
       </button>
 
       <!-- BOTÃO DE ACESSO POR BIOMETRIA -->
@@ -2090,7 +2101,7 @@
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;">
         <a href="javascript:void(0)" onclick="abrirModalEsqueciSenha()" style="color:var(--gold-light);text-decoration:none;font-weight:700;">
-          🔑 Esqueceu sua senha?
+          🔑 Ajuda com acesso?
         </a>
         <span id="bio-status-badge" style="display:none;color:#4ade80;font-size:11px;font-weight:700;">
           ✓ Biometria Ativa
@@ -2100,12 +2111,12 @@
       <div id="login-feedback" style="margin-top: 12px; font-size: 13px; font-weight: 700;"></div>
 
       <div class="login-info-box">
-        💡 <strong>Primeiro acesso?</strong> Caso ainda não possua uma senha cadastrada, utilize os <strong>4 últimos dígitos do seu WhatsApp</strong> ou entre em contato pelo suporte: <strong style="color:var(--gold-light);" id="portal-support-tel">(85) 99611-9824</strong>.
+        💡 <strong>Ponto & Serviços:</strong> Registre seus horários de entrada, almoço e saída pelo Ponto Eletrônico e acompanhe suas tarefas e obras com facilidade.
       </div>
     </div>
 
     <!-- ══════════════════════════════════════════════ -->
-    <!-- TELA 2: PORTAL PRINCIPAL DO CLIENTE           -->
+    <!-- TELA 2: PORTAL PRINCIPAL DO FUNCIONÁRIO       -->
     <!-- ══════════════════════════════════════════════ -->
     <div id="view-portal" style="display: none;">
 
@@ -3914,52 +3925,162 @@
       }
     }
 
-    function checarParametrosUrl() {
-      // Se o usuário acabou de clicar em "Sair", limpa parâmetros e NÃO auto-loga de jeito nenhum
+    function popularSelectFuncionariosLogin() {
+      const sel = document.getElementById('l-funcionario-select');
+      if (!sel) return;
+      const funcs = (typeof carregarFuncionariosDoStorage === 'function') ? carregarFuncionariosDoStorage() : [
+        { id: 100, nome: 'Samuel David', cargo: 'Instalador / Técnico Líder', whatsapp: '(85) 99611-9824' }
+      ];
+      sel.innerHTML = '<option value="">-- Escolha seu nome --</option>';
+      funcs.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.id;
+        opt.textContent = f.nome + ' (' + (f.cargo || 'Colaborador') + ')';
+        sel.appendChild(opt);
+      });
+      if (funcs.length === 1) {
+        sel.value = funcs[0].id;
+        const inp = document.getElementById('l-identificador');
+        if (inp) inp.value = funcs[0].nome;
+      }
+    }
+
+    function selecionarFuncionarioLogin(idVal) {
+      if (!idVal) return;
+      const funcs = (typeof carregarFuncionariosDoStorage === 'function') ? carregarFuncionariosDoStorage() : [];
+      const f = funcs.find(x => String(x.id) === String(idVal));
+      if (f) {
+        const inp = document.getElementById('l-identificador');
+        if (inp) inp.value = f.nome;
+      }
+    }
+
+    function loginFuncionario() {
+      const sel = document.getElementById('l-funcionario-select');
+      const selVal = sel ? sel.value : '';
+      const inpVal = (document.getElementById('l-identificador') ? document.getElementById('l-identificador').value : '').trim();
+      const funcs = (typeof carregarFuncionariosDoStorage === 'function') ? carregarFuncionariosDoStorage() : [
+        { id: 100, nome: 'Samuel David', cargo: 'Instalador / Técnico Líder', whatsapp: '(85) 99611-9824' }
+      ];
+
+      let colab = null;
+      if (selVal) {
+        colab = funcs.find(f => String(f.id) === String(selVal));
+      }
+      if (!colab && inpVal) {
+        const inpLimpo = inpVal.toLowerCase().replace(/\D/g, '');
+        colab = funcs.find(f => {
+          const fTel = (f.whatsapp || f.tel || '').replace(/\D/g, '');
+          const fNome = (f.nome || '').toLowerCase();
+          return (inpLimpo && fTel.includes(inpLimpo)) || fNome.includes(inpVal.toLowerCase());
+        });
+      }
+      if (!colab && funcs.length > 0) {
+        colab = funcs[0];
+      }
+
+      const nomeFinal = colab ? colab.nome : (inpVal || 'Samuel David');
+      const idFinal = colab ? colab.id : 100;
+      const cargoFinal = colab ? (colab.cargo || 'Instalador / Técnico Líder') : 'Instalador / Técnico Líder';
+
+      const sessaoColab = {
+        id: idFinal,
+        nome: nomeFinal,
+        cargo: cargoFinal,
+        isFuncionario: true,
+        os: '#PONTO',
+        dataLogin: new Date().toISOString()
+      };
+
       try {
-        if (sessionStorage.getItem('sdv_usuario_deslogou') === 'true' || localStorage.getItem('sdv_usuario_deslogou') === 'true') {
-          sessionStorage.removeItem('sdv_usuario_deslogou');
-          localStorage.removeItem('sdv_usuario_deslogou');
-          try { window.history.replaceState(null, '', window.location.pathname || 'cliente.html'); } catch(_) {}
-          const vPort = document.getElementById('view-portal');
-          const vLog = document.getElementById('view-login');
-          if (vPort) vPort.style.display = 'none';
-          if (vLog) vLog.style.display = 'block';
-          return;
-        }
+        localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessaoColab));
+        localStorage.setItem('sdv_colaborador_sessao', JSON.stringify(sessaoColab));
       } catch(_) {}
 
+      iniciarPortalCliente(sessaoColab);
+    }
+
+    // Alias para loginCliente
+    function loginCliente() {
+      loginFuncionario();
+    }
+
+    function checarParametrosUrl() {
       const urlParams = new URLSearchParams(window.location.search);
-      // PRIORIDADE: Se veio de "Abrir" ou "Instalar" com nome de colaborador na URL
       const paramNomeUrl = urlParams.get('nome');
       const paramFuncIdUrl = urlParams.get('funcId') || urlParams.get('colabId') || urlParams.get('id');
       const paramCargoUrl = urlParams.get('cargo') || 'Colaborador';
+      const paramPortal = (urlParams.get('portal') || urlParams.get('modo') || '').toLowerCase();
       const paramInstalarUrl = urlParams.get('instalar') === '1';
 
-      if (paramNomeUrl || paramFuncIdUrl) {
-        const nomeFinal = paramNomeUrl || 'Colaborador';
-        const colabIdFinal = paramFuncIdUrl || 101;
+      // Se veio com parâmetros de funcionário ou portal=funcionario, LIMPA qualquer flag de deslogar!
+      if (paramNomeUrl || paramFuncIdUrl || paramPortal === 'funcionario') {
+        try {
+          sessionStorage.removeItem('sdv_usuario_deslogou');
+          localStorage.removeItem('sdv_usuario_deslogou');
+        } catch(_) {}
+      } else {
+        // Se NÃO tem parâmetros e o usuário acabou de clicar em "Sair" nesta mesma aba
+        try {
+          if (sessionStorage.getItem('sdv_usuario_deslogou') === 'true') {
+            sessionStorage.removeItem('sdv_usuario_deslogou');
+            const vPort = document.getElementById('view-portal');
+            const vLog = document.getElementById('view-login');
+            if (vPort) vPort.style.display = 'none';
+            if (vLog) vLog.style.display = 'block';
+            popularSelectFuncionariosLogin();
+            return;
+          }
+        } catch(_) {}
+      }
+
+      // ── PRIORIDADE MÁXIMA: LOGIN AUTOMÁTICO DO FUNCIONÁRIO ──
+      if (paramNomeUrl || paramFuncIdUrl || paramPortal === 'funcionario') {
+        const funcs = (typeof carregarFuncionariosDoStorage === 'function') ? carregarFuncionariosDoStorage() : [
+          { id: 100, nome: 'Samuel David', cargo: 'Instalador / Técnico Líder', whatsapp: '(85) 99611-9824' }
+        ];
+
+        let colabEncontrado = null;
+        if (paramFuncIdUrl) {
+          colabEncontrado = funcs.find(f => String(f.id) === String(paramFuncIdUrl));
+        }
+        if (!colabEncontrado && paramNomeUrl) {
+          colabEncontrado = funcs.find(f => f.nome && f.nome.toLowerCase().includes(paramNomeUrl.toLowerCase()));
+        }
+        if (!colabEncontrado && funcs.length > 0) {
+          colabEncontrado = funcs[0];
+        }
+
+        const nomeFinal = colabEncontrado ? colabEncontrado.nome : (paramNomeUrl || 'Samuel David');
+        const colabIdFinal = colabEncontrado ? colabEncontrado.id : (paramFuncIdUrl || 100);
+        const cargoFinal = colabEncontrado ? (colabEncontrado.cargo || 'Instalador / Técnico Líder') : (paramCargoUrl || 'Instalador / Técnico Líder');
+
         const sessaoColab = {
           id: colabIdFinal,
           nome: nomeFinal,
-          cargo: paramCargoUrl,
+          cargo: cargoFinal,
           isFuncionario: true,
-          os: urlParams.get('os') || '#0001',
+          os: urlParams.get('os') || '#PONTO',
           dataLogin: new Date().toISOString()
         };
-        localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessaoColab));
-        localStorage.setItem('sdv_colaborador_sessao', JSON.stringify(sessaoColab));
+
+        try {
+          localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessaoColab));
+          localStorage.setItem('sdv_colaborador_sessao', JSON.stringify(sessaoColab));
+        } catch(_) {}
 
         if (paramInstalarUrl) {
           const lic = (typeof obterLicencaAtivaCliente === 'function' ? obterLicencaAtivaCliente() : {});
-          configurarIconeEManifestDinamico(lic.nome || 'Empresa', lic.logo || 'logo.jpg');
+          if (typeof configurarIconeEManifestDinamico === 'function') {
+            configurarIconeEManifestDinamico(lic.nome || 'Empresa', lic.logo || 'logo.jpg');
+          }
           const mConf = document.getElementById('modal-confirmar-acesso-direto');
           const logoConf = document.getElementById('conf-direto-logo');
           const nomeConf = document.getElementById('conf-direto-nome');
           const segConf = document.getElementById('conf-direto-seg');
           if (logoConf && lic.logo) logoConf.src = lic.logo;
           if (nomeConf) nomeConf.textContent = nomeFinal;
-          if (segConf) segConf.textContent = paramCargoUrl + ' · Pronto para Acessar';
+          if (segConf) segConf.textContent = cargoFinal + ' · Pronto para Acessar';
           if (mConf) mConf.style.display = 'flex';
           return;
         }
@@ -3968,81 +4089,28 @@
         return;
       }
 
-      const paramPortal = (urlParams.get('portal') || urlParams.get('modo') || urlParams.get('tipo') || '').toLowerCase();
-      const paramOs = urlParams.get('os');
-      const paramTel = urlParams.get('tel');
-      const paramSenha = urlParams.get('senha') || urlParams.get('s');
-      const paramNome = urlParams.get('nome');
-      const autoLogin = urlParams.get('auto') === '1' || urlParams.get('direct') === '1';
-      const isFuncParam = paramPortal === 'funcionario' || paramPortal === 'colaborador' || urlParams.get('func') === '1' || urlParams.get('funcionario') === '1';
-
-      // Se aberto como Portal do Funcionário, redireciona para a página dedicada do colaborador
-      if (isFuncParam) {
-        window.location.replace('funcionario.html' + (window.location.search ? window.location.search : ''));
-        return;
-      }
-
-      // Auto-preenche se passado na URL
-      if (paramTel) {
-        document.getElementById('l-identificador').value = paramTel;
-      } else if (paramOs) {
-        document.getElementById('l-identificador').value = paramOs;
-      }
-
-      const telLimpo = (paramTel || '').replace(/\D/g, '');
-      const senhaPadrao = paramSenha || (telLimpo.length >= 4 ? telLimpo.slice(-4) : '1234');
-      if (senhaPadrao) {
-        document.getElementById('l-senha').value = senhaPadrao;
-      }
-
-      // Verifica se já estava logado
-      const salvo = localStorage.getItem('sdv_cliente_sessao');
-      if (salvo) {
-        try {
-          const c = JSON.parse(salvo);
-          // Se for sessão de funcionário (por flag ou pelo nome)
-          if (c.isFuncionario || (c.nome && (c.nome.toLowerCase().includes('instalador') || c.nome.toLowerCase().includes('técnico') || c.nome.toLowerCase().includes('tecnico')))) {
-            c.isFuncionario = true;
-          }
-          if (paramOs && c.os && !c.os.includes(paramOs)) {
-            c.os = paramOs.startsWith('#') ? paramOs : '#' + paramOs;
-            if (paramNome) c.nome = paramNome;
-            localStorage.setItem('sdv_cliente_sessao', JSON.stringify(c));
-          }
+      // Verifica se já tinha sessão salva de colaborador
+      try {
+        const salvoColab = localStorage.getItem('sdv_colaborador_sessao') || localStorage.getItem('sdv_cliente_sessao');
+        if (salvoColab) {
+          const c = JSON.parse(salvoColab);
+          c.isFuncionario = true;
           iniciarPortalCliente(c);
           return;
-        } catch (_) {}
-      }
+        }
+      } catch (_) {}
 
-      // Se tiver parâmetros na URL para login automático convencional
-      if ((paramTel || paramOs) && (paramSenha || autoLogin)) {
-        setTimeout(() => {
-          loginCliente();
-        }, 120);
-        return;
-      }
-
-      // Se for convite de instalação enviado ao cliente (?instalar=1 ou ?empresa=...)
-      const paramEmp = urlParams.get('empresa');
-      const paramInstalar = urlParams.get('instalar') === '1';
-      if (paramEmp || paramInstalar || autoLogin) {
-        const lic = obterLicencaAtivaCliente();
-        const mConf = document.getElementById('modal-confirmar-acesso-direto');
-        const logoConf = document.getElementById('conf-direto-logo');
-        const nomeConf = document.getElementById('conf-direto-nome');
-        const segConf = document.getElementById('conf-direto-seg');
-        if (logoConf && lic.logo) logoConf.src = lic.logo;
-        if (nomeConf) nomeConf.textContent = lic.nome || 'Empresa';
-        if (segConf) segConf.textContent = lic.segmento || 'Área Exclusiva do Cliente';
-        if (mConf) mConf.style.display = 'flex';
-      }
+      // Se chegou aqui sem sessão, inicializa seletor e exibe a tela de login do funcionário
+      popularSelectFuncionariosLogin();
+      const vPort = document.getElementById('view-portal');
+      const vLog = document.getElementById('view-login');
+      if (vPort) vPort.style.display = 'none';
+      if (vLog) vLog.style.display = 'block';
     }
 
     function confirmarAcessoDiretoCliente() {
-      const lic = obterLicencaAtivaCliente();
-
-      // Dispara prompt do PWA se estiver disponível
-      if (_deferredPromptCliente) {
+      const lic = (typeof obterLicencaAtivaCliente === 'function' ? obterLicencaAtivaCliente() : {});
+      if (typeof _deferredPromptCliente !== 'undefined' && _deferredPromptCliente) {
         try {
           _deferredPromptCliente.prompt();
           _deferredPromptCliente = null;
@@ -4050,31 +4118,25 @@
       }
 
       const urlParams = new URLSearchParams(window.location.search);
-      const urlNome = urlParams.get('nome') || (clienteSessao && clienteSessao.nome) || ('Colaborador');
-      const urlOs = urlParams.get('os') || '#0001';
-      const urlTel = urlParams.get('tel') || lic.telefone || '(85) 99611-9824';
-
-      const ordens = carregarOrdensDoStorage();
-      let ordemEncontrada = ordens.find(o => String(o.empresaId || '') === String(lic.id)) || ordens[0];
+      const urlNome = urlParams.get('nome') || (clienteSessao && clienteSessao.nome) || ('Samuel David');
+      const urlCargo = urlParams.get('cargo') || 'Instalador / Técnico Líder';
+      const colabId = urlParams.get('funcId') || 100;
 
       const sessao = {
+        id: colabId,
         nome: urlNome,
-        telefone: urlTel,
-        os: (ordemEncontrada && ordemEncontrada.numero) || urlOs,
+        cargo: urlCargo,
+        isFuncionario: true,
+        os: '#PONTO',
         empresaId: lic.id,
         empresaNome: lic.nome,
-        ordem: ordemEncontrada || {
-          numero: urlOs,
-          nome: urlNome,
-          dados: { tel: urlTel, nome: urlNome },
-          etapa_servico: 2,
-          status_servico_texto: 'Serviço em Andamento',
-          status_obs: 'Acesso confirmado. Acompanhe aqui as atualizações do seu pedido.',
-          previsao_instalacao: 'Consulte no atendimento'
-        }
+        dataLogin: new Date().toISOString()
       };
 
-      localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessao));
+      try {
+        localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessao));
+        localStorage.setItem('sdv_colaborador_sessao', JSON.stringify(sessao));
+      } catch(_) {}
 
       const mConf = document.getElementById('modal-confirmar-acesso-direto');
       if (mConf) mConf.style.display = 'none';
@@ -4082,100 +4144,22 @@
       iniciarPortalCliente(sessao);
     }
 
-    function loginCliente(ativarBioDireto = false) {
-      const iden = (document.getElementById('l-identificador').value || '').trim().toLowerCase();
-      const senha = (document.getElementById('l-senha').value || '').trim();
-      const fb = document.getElementById('login-feedback');
-
-      if (!iden || !senha) {
-        fb.style.color = '#ef4444';
-        fb.textContent = 'Preencha o identificador e a senha.';
-        return;
-      }
-
-      fb.style.color = '#eab308';
-      fb.textContent = 'Verificando cadastro...';
-
-      // 1. Busca nos clientes e ordens salvas
-      const ordens = carregarOrdensDoStorage();
-      const clientes = carregarClientesDoStorage();
-
-      const idenLimpo = iden.replace(/\D/g, '');
-
-      // Procura ordem correspondente
-      let ordemEncontrada = ordens.find(o => {
-        const numOs = String(o.numero || '').toLowerCase();
-        const oTel = String((o.dados && o.dados.tel) || '').replace(/\D/g, '');
-        const oCpf = String((o.dados && o.dados.cnpj) || '').replace(/\D/g, '');
-        return numOs.includes(iden) || (idenLimpo && (oTel.includes(idenLimpo) || oCpf.includes(idenLimpo)));
-      });
-
-      // Procura cliente correspondente
-      let clienteEncontrado = clientes.find(c => {
-        const cTel = String(c.whatsapp || '').replace(/\D/g, '');
-        return idenLimpo && cTel.includes(idenLimpo);
-      });
-
-      // Validação de senha:
-      let senhaCorreta = '1234';
-      if (clienteEncontrado && clienteEncontrado.senha) {
-        senhaCorreta = String(clienteEncontrado.senha).trim();
-      } else if (ordemEncontrada && ordemEncontrada.senha_cliente) {
-        senhaCorreta = String(ordemEncontrada.senha_cliente).trim();
-      } else if (idenLimpo.length >= 4) {
-        senhaCorreta = idenLimpo.slice(-4);
-      }
-
-      if (senha !== senhaCorreta && senha !== 'admin123') {
-        fb.style.color = '#ef4444';
-        fb.textContent = '❌ Senha incorreta. Tente novamente ou use os 4 últimos dígitos do seu WhatsApp.';
-        return;
-      }
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlNome = urlParams.get('nome');
-      const urlOs = urlParams.get('os');
-      const numOsFinal = (ordemEncontrada && ordemEncontrada.numero) || (urlOs ? (urlOs.startsWith('#') ? urlOs : '#' + urlOs) : '#0001');
-      const nomeFinal = (ordemEncontrada && ordemEncontrada.nome) || (clienteEncontrado && clienteEncontrado.nome) || urlNome || 'Cliente Especial';
-      const telFinal = (ordemEncontrada && ordemEncontrada.dados && ordemEncontrada.dados.tel) || (clienteEncontrado && clienteEncontrado.whatsapp) || iden;
-
-      const sessao = {
-        nome: nomeFinal,
-        telefone: telFinal,
-        os: numOsFinal,
-        ordem: ordemEncontrada || {
-          numero: numOsFinal,
-          nome: nomeFinal,
-          dados: { tel: telFinal, nome: nomeFinal },
-          etapa_servico: 2,
-          status_servico_texto: 'O.S. Aprovada & Em Produção',
-          status_obs: 'Assinatura digital confirmada com sucesso. Materiais enviados para produção.',
-          previsao_instalacao: 'Em agendamento com a equipe'
-        }
-      };
-
-      localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessao));
-
-      // Se ainda não salvou biometria neste aparelho, salva para acesso rápido
-      salvarCredencialBiometricaLocal(iden, senha, sessao, ativarBioDireto);
-
-      iniciarPortalCliente(sessao);
-    }
-
     function sairCliente() {
-      // 1. Marca flag no sessionStorage e localStorage para não re-logar automaticamente
+      // 1. Marca flag no sessionStorage para esta aba
       try { sessionStorage.setItem('sdv_usuario_deslogou', 'true'); } catch(_) {}
-      try { localStorage.setItem('sdv_usuario_deslogou', 'true'); } catch(_) {}
+      try { localStorage.removeItem('sdv_usuario_deslogou'); } catch(_) {}
 
-      // 2. Remove todos os dados da sessão
+      // 2. Remove sessões
       try { localStorage.removeItem('sdv_cliente_sessao'); } catch(_) {}
+      try { localStorage.removeItem('sdv_colaborador_sessao'); } catch(_) {}
       try { sessionStorage.removeItem('sdv_cliente_sessao'); } catch(_) {}
+      try { sessionStorage.removeItem('sdv_colaborador_sessao'); } catch(_) {}
       clienteSessao = null;
       dadosOsCliente = null;
 
       if (ssePortal) { try { ssePortal.close(); } catch(_) {} }
 
-      // 3. Limpa campos do formulário de login
+      // 3. Limpa feedback
       const iden = document.getElementById('l-identificador');
       const sen = document.getElementById('l-senha');
       if (iden) iden.value = '';
@@ -4183,20 +4167,21 @@
       const fb = document.getElementById('login-feedback');
       if (fb) { fb.textContent = ''; fb.style.display = 'none'; }
 
-      // 4. IMEDIATO: Oculta o portal e exibe a tela de login na hora!
+      // 4. Exibe tela de login do funcionário
       const vPort = document.getElementById('view-portal');
       const vLog = document.getElementById('view-login');
       if (vPort) vPort.style.display = 'none';
       if (vLog) vLog.style.display = 'block';
+      popularSelectFuncionariosLogin();
       window.scrollTo(0, 0);
 
-      // 5. Limpa a URL na barra de endereços (remove ?portal=funcionario, ?os=, etc.)
+      // 5. Limpa a URL na barra de endereços
       try {
-        const urlSemParametros = window.location.pathname || 'cliente.html';
+        const urlSemParametros = window.location.pathname || 'funcionario.html';
         window.history.replaceState(null, '', urlSemParametros);
       } catch(_) {}
 
-      // 6. Recarrega de forma limpa caso necessário
+      // 6. Recarrega de forma limpa caso haja search params
       setTimeout(() => {
         try {
           const limpa = window.location.href.split('?')[0].split('#')[0];
@@ -4209,15 +4194,17 @@
 
     function iniciarPortalCliente(sessao) {
       clienteSessao = sessao;
+      sessao.isFuncionario = true; // No portal do colaborador, é sempre funcionário
       document.getElementById('view-login').style.display = 'none';
       document.getElementById('view-portal').style.display = 'block';
 
-      document.getElementById('lbl-cliente-nome').textContent = sessao.nome || 'Cliente';
+      document.getElementById('lbl-cliente-nome').textContent = sessao.nome || 'Samuel David';
       const elOsTxt = document.getElementById('lbl-cliente-os-texto');
-      if (elOsTxt) elOsTxt.textContent = 'O.S. ' + sessao.os;
-      else {
+      if (elOsTxt) {
+        elOsTxt.textContent = '👷 ' + (sessao.cargo || 'Ponto Eletrônico');
+      } else {
         const elOs = document.getElementById('lbl-cliente-os');
-        if (elOs) elOs.textContent = '📋 O.S. ' + sessao.os;
+        if (elOs) elOs.textContent = '👷 ' + (sessao.cargo || 'Ponto Eletrônico');
       }
 
       // ── MODO FUNCIONÁRIO VS CLIENTE (EXCLUSÃO TOTAL DO SETOR FINANCEIRO) ──
@@ -4236,10 +4223,9 @@
 
         iniciarRelogioPontoCliente();
         renderizarResumoPontoCliente();
-          renderizarEspelhoPontoCliente();
-          atualizarMenuJogosVisiveis();
         renderizarEspelhoPontoCliente();
         atualizarMenuJogosVisiveis();
+        mudarAba('financeiro');
       } else {
         // Restaura para cliente normal
         if (tabRotulo) tabRotulo.textContent = 'Setor Financeiro';
@@ -8012,7 +7998,7 @@ function mudarAba(tab) {
             <strong>4. DA GARANTIA (1 ANO):</strong> A ${lic.nome} concede garantia integral de 1 (um) ano contra defeitos de fabricação, montagem e fixação, a contar da entrega.
           </div>
 
-          <div class="assinaturas">
+                    <div class="assinaturas">
             <div class="linha-ass">
               <strong>${lic.nome.toUpperCase()}</strong><br>
               Contratada Oficial
@@ -8022,111 +8008,7 @@ function mudarAba(tab) {
               Contratante (Autorizado Digitalmente)
             </div>
           </div>
-        <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
-    });
-  }
-</script>
-
-<script>
-function ativarAlarmePontoCelularSegundoPlano() {
-  if (!('Notification' in window)) {
-    alert('Seu navegador não possui suporte à Notificação do Ponto.');
-    return;
-  }
-  Notification.requestPermission().then(permission => {
-    if (permission === 'granted') {
-      const turnos = [
-        { hora: '08:00', label: 'Entrada' },
-        { hora: '12:00', label: 'Saída para Almoço' },
-        { hora: '13:00', label: 'Retorno do Almoço' },
-        { hora: '17:00', label: 'Saída Final' }
-      ];
-      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-          action: 'configurarAlarmesPonto',
-          alarmes: turnos,
-          nome: (typeof clienteSessao !== 'undefined' && clienteSessao ? clienteSessao.nome : 'Colaborador'),
-          testar: true
-        });
-      }
-      alert('🔔 Alarme de Ponto ativado no celular com sucesso! Você receberá aviso 5 minutos antes de cada turno mesmo com o app fechado.');
-    } else {
-      alert('Por favor, permita as notificações no navegador para receber os alarmes de ponto no celular.');
-    }
-  });
-}
-
-function baixarSincronizacaoAlarmeCalendario() {
-  const icsContent = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//SD Vidros e Moveis//Alarme Ponto//PT-BR',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
-    'BEGIN:VEVENT',
-    'SUMMARY:⏰ Bater Ponto - Entrada (08:00)',
-    'DESCRIPTION:Alarme oficial de ponto eletrônico SD Vidros / SD Móveis Projetados.',
-    'DTSTART;TZID=America/Fortaleza:20260101T080000',
-    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
-    'BEGIN:VALARM',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:⏰ Faltam 5 minutos para a Entrada do Ponto!',
-    'TRIGGER:-PT5M',
-    'END:VALARM',
-    'END:VEVENT',
-    'BEGIN:VEVENT',
-    'SUMMARY:⏰ Bater Ponto - Almoço (12:00)',
-    'DESCRIPTION:Alarme oficial de ponto - Almoço.',
-    'DTSTART;TZID=America/Fortaleza:20260101T120000',
-    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
-    'BEGIN:VALARM',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:⏰ Faltam 5 minutos para o Almoço!',
-    'TRIGGER:-PT5M',
-    'END:VALARM',
-    'END:VEVENT',
-    'BEGIN:VEVENT',
-    'SUMMARY:⏰ Bater Ponto - Retorno Almoço (13:00)',
-    'DESCRIPTION:Alarme oficial de ponto - Retorno do Almoço.',
-    'DTSTART;TZID=America/Fortaleza:20260101T130000',
-    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
-    'BEGIN:VALARM',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:⏰ Faltam 5 minutos para o Retorno do Almoço!',
-    'TRIGGER:-PT5M',
-    'END:VALARM',
-    'END:VEVENT',
-    'BEGIN:VEVENT',
-    'SUMMARY:⏰ Bater Ponto - Saída (17:00)',
-    'DESCRIPTION:Alarme oficial de ponto - Saída Final.',
-    'DTSTART;TZID=America/Fortaleza:20260101T170000',
-    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
-    'BEGIN:VALARM',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:⏰ Faltam 5 minutos para o Fim do Expediente!',
-    'TRIGGER:-PT5M',
-    'END:VALARM',
-    'END:VEVENT',
-    'END:VCALENDAR'
-  ].join('\r\n');
-
-  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'alarmes-ponto-sdvidros.ics';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  alert('📅 Arquivo de calendário baixado! Toque nele para importar os alarmes no despertador do celular.');
-}
-</script>
-
-</body>
+        </body>
         </html>
       `);
       janela.document.close();
@@ -8937,6 +8819,111 @@ function baixarSincronizacaoAlarmeCalendario() {
     }
 
 
-  </script>
+  
+
+// ==========================================
+// REGISTRO DE SERVICE WORKER E ALARMES DE PONTO
+// ==========================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
+function ativarAlarmePontoCelularSegundoPlano() {
+  if (!('Notification' in window)) {
+    alert('Seu navegador não possui suporte à Notificação do Ponto.');
+    return;
+  }
+  Notification.requestPermission().then(permission => {
+    if (permission === 'granted') {
+      const turnos = [
+        { hora: '08:00', label: 'Entrada' },
+        { hora: '12:00', label: 'Saída para Almoço' },
+        { hora: '13:00', label: 'Retorno do Almoço' },
+        { hora: '17:00', label: 'Saída Final' }
+      ];
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          action: 'configurarAlarmesPonto',
+          alarmes: turnos,
+          nome: (typeof clienteSessao !== 'undefined' && clienteSessao ? clienteSessao.nome : 'Colaborador'),
+          testar: true
+        });
+      }
+      alert('🔔 Alarme de Ponto ativado no celular com sucesso! Você receberá aviso 5 minutos antes de cada turno mesmo com o app fechado.');
+    } else {
+      alert('Por favor, permita as notificações no navegador para receber os alarmes de ponto no celular.');
+    }
+  });
+}
+
+function baixarSincronizacaoAlarmeCalendario() {
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//SD Vidros e Moveis//Alarme Ponto//PT-BR',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Entrada (08:00)',
+    'DESCRIPTION:Alarme oficial de ponto eletrônico SD Vidros / SD Móveis Projetados.',
+    'DTSTART;TZID=America/Fortaleza:20260101T080000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para a Entrada do Ponto!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Almoço (12:00)',
+    'DESCRIPTION:Alarme oficial de ponto - Almoço.',
+    'DTSTART;TZID=America/Fortaleza:20260101T120000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para o Almoço!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Retorno Almoço (13:00)',
+    'DESCRIPTION:Alarme oficial de ponto - Retorno do Almoço.',
+    'DTSTART;TZID=America/Fortaleza:20260101T130000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para o Retorno do Almoço!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    'BEGIN:VEVENT',
+    'SUMMARY:⏰ Bater Ponto - Saída (17:00)',
+    'DESCRIPTION:Alarme oficial de ponto - Saída Final.',
+    'DTSTART;TZID=America/Fortaleza:20260101T170000',
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:⏰ Faltam 5 minutos para o Fim do Expediente!',
+    'TRIGGER:-PT5M',
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'alarmes-ponto-sdvidros.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert('📅 Arquivo de calendário baixado! Toque nele para importar os alarmes no despertador do celular.');
+}
+
+</script>
 </body>
 </html>
