@@ -1321,62 +1321,46 @@
 
     const rpId = window.location.hostname;
 
-    // ════════════════════════════════════════════════════════
-    // MODO AUTENTICAÇÃO — tenta autenticar com qualquer chave
-    //   de acesso registrada para este site no aparelho.
-    //   allowCredentials: [] = modo descobrível (mostra todas
-    //   as chaves do site, sem precisar de ID específico).
-    // ════════════════════════════════════════════════════════
-    if (!_bioModoCreate) {
+    // ── PASSO 1: tenta autenticar com passkey já existente ──
+    // allowCredentials: [] = modo descobrível (silencioso quando não há chave)
+    // Se o GET falha sem mostrar diálogo, o gesto do usuário continua válido
+    // e podemos chamar CREATE imediatamente na sequência.
+    try {
       _setBioTexto('Toque no sensor para entrar...');
-      try {
-        const challenge = window.crypto.getRandomValues(new Uint8Array(32));
-        const assertion = await navigator.credentials.get({
-          publicKey: {
-            challenge,
-            rpId,
-            allowCredentials: [],   // ← descobrível: mostra TODAS as chaves do site
-            userVerification: 'required',
-            timeout: 60000
-          }
-        });
-        if (assertion) {
-          try { if (navigator.vibrate) navigator.vibrate([50, 70, 50]); } catch (_) {}
-          _setBioTexto('✓ Digital reconhecida!');
-          localStorage.setItem('sdv_bio_user', JSON.stringify({ id: user.id, username: user.username, nome: user.nome }));
-          localStorage.setItem('sdv_bio_enabled', 'true');
-          mostrarMsg(`✅ Entrando como ${user.nome || user.username}...`, 'suc');
-          setTimeout(() => concluirLogin(user, true), 300);
-          return;
+      const challenge1 = window.crypto.getRandomValues(new Uint8Array(32));
+      const assertion = await navigator.credentials.get({
+        publicKey: {
+          challenge: challenge1,
+          rpId,
+          allowCredentials: [],     // ← descobrível: sem diálogo ao falhar
+          userVerification: 'required',
+          timeout: 10000            // ← curto: falha rápido sem esperar
         }
-      } catch (errGet) {
-        console.warn('BIO GET falhou:', errGet.name, errGet.message);
-        // Nenhuma chave encontrada → ativa modo cadastro para o PRÓXIMO toque
-        localStorage.removeItem('sdv_bio_cred_id');
-        _bioModoCreate = true;
-        resetarBotoesBio();
-        mostrarMsg('⚠️ Nenhuma digital cadastrada para este site.\nToque novamente no botão para registrar sua digital.', 'info');
+      });
+      if (assertion) {
+        // ✅ Passkey encontrada — autentica e entra
+        try { if (navigator.vibrate) navigator.vibrate([50, 70, 50]); } catch (_) {}
+        _setBioTexto('✓ Digital reconhecida!');
+        localStorage.setItem('sdv_bio_user', JSON.stringify({ id: user.id, username: user.username, nome: user.nome }));
+        localStorage.setItem('sdv_bio_enabled', 'true');
+        mostrarMsg(`✅ Entrando como ${user.nome || user.username}...`, 'suc');
+        setTimeout(() => concluirLogin(user, true), 300);
         return;
-        // ↑ RETORNA. O próximo toque chama CREATE direto do gesto do usuário.
       }
+    } catch (_) {
+      // GET falhou silenciosamente → cai no CREATE abaixo
     }
 
-    // ════════════════════════════════════════════════════════
-    // MODO CADASTRO — chamado direto do toque do usuário,
-    //                 sem nenhuma operação async antes.
-    //                 Isso é crítico para o Chrome Android
-    //                 reconhecer o user gesture.
-    // ════════════════════════════════════════════════════════
-    _bioModoCreate = false; // reseta flag
+    // ── PASSO 2: nenhuma passkey encontrada → cadastra a digital agora ──
+    // Chamado direto do mesmo gesto do usuário (sem toque extra necessário)
     _setBioTexto('Coloque o dedo no sensor para cadastrar...');
     try {
-      const challenge = window.crypto.getRandomValues(new Uint8Array(32));
-      // userId fixo baseado no username — evita duplicatas no Gerenciador do Google
+      const challenge2 = window.crypto.getRandomValues(new Uint8Array(32));
       const userId = new TextEncoder().encode((user.username || 'admin').padEnd(16, '0').substring(0, 16));
 
       const cred = await navigator.credentials.create({
         publicKey: {
-          challenge,
+          challenge: challenge2,
           rp: { name: 'SD Móveis / Vidros', id: rpId },
           user: {
             id: userId,
@@ -1384,13 +1368,13 @@
             displayName: user.nome || user.username || 'Admin'
           },
           pubKeyCredParams: [
-            { alg: -7,   type: 'public-key' }, // ES256
-            { alg: -257, type: 'public-key' }  // RS256
+            { alg: -7,   type: 'public-key' },
+            { alg: -257, type: 'public-key' }
           ],
           authenticatorSelection: {
             authenticatorAttachment: 'platform',
             userVerification: 'required',
-            residentKey: 'preferred'
+            residentKey: 'required'
           },
           timeout: 60000,
           attestation: 'none'
@@ -1398,13 +1382,11 @@
       });
 
       if (cred && cred.rawId) {
-        const rawB64 = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
-        localStorage.setItem('sdv_bio_cred_id', rawB64);
         localStorage.setItem('sdv_bio_user', JSON.stringify({ id: user.id, username: user.username, nome: user.nome }));
         localStorage.setItem('sdv_bio_enabled', 'true');
         try { if (navigator.vibrate) navigator.vibrate([50, 70, 50]); } catch (_) {}
         _setBioTexto('✓ Digital cadastrada!');
-        mostrarMsg(`✅ Digital cadastrada com sucesso! Entrando como ${user.nome || user.username}...`, 'suc');
+        mostrarMsg(`✅ Digital cadastrada! Entrando como ${user.nome || user.username}...`, 'suc');
         setTimeout(() => concluirLogin(user, true), 300);
         return;
       }
@@ -1414,12 +1396,12 @@
       console.warn('BIO CREATE falhou:', errCreate.name, errCreate.message);
       resetarBotoesBio();
       const msgs = {
-        NotAllowedError:   '❌ Leitura cancelada. Toque no botão e encoste o dedo no sensor.',
-        NotSupportedError: '❌ Este celular não tem suporte a chaves de acesso. Use usuário e senha.',
-        SecurityError:     '❌ Erro de segurança. Acesse via https://sdvidros.vercel.app',
-        InvalidStateError: '❌ Digital já cadastrada. Tente novamente ou limpe os dados do site.'
+        NotAllowedError:   '❌ Leitura cancelada. Toque no botão e encoste o dedo.',
+        NotSupportedError: '❌ Este aparelho não suporta chaves de acesso.',
+        SecurityError:     '❌ Acesse via https://sdvidros.vercel.app',
+        InvalidStateError: '❌ Digital já cadastrada. Toque novamente.'
       };
-      mostrarMsg(msgs[errCreate.name] || `❌ Erro biométrico (${errCreate.name}). Use usuário e senha.`, 'err');
+      mostrarMsg(msgs[errCreate.name] || `❌ Erro (${errCreate.name}). Use usuário e senha.`, 'err');
     }
   }
 
