@@ -897,18 +897,10 @@
   <div class="banner" id="banner-container-main" style="position:relative;overflow:hidden;border-radius:var(--r-lg);border:1px solid var(--border);box-shadow:0 10px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,168,76,0.2);background:#000;">
     <img id="banner-img-main" src="banner.jpg" alt="SD Vidros – Alumínio e Vidraçaria" style="display:block;width:100%;height:auto;min-height:140px;object-fit:cover;">
     
-    <!-- OVERLAY DE MARCA / LOGO PARA EMPRESAS CADASTRADAS (SOMENTE PARA NOVAS EMPRESAS) -->
-    <div id="banner-custom-brand" style="display:none;position:absolute;inset:0;background:linear-gradient(90deg, rgba(7,7,11,0.94) 0%, rgba(7,7,11,0.82) 55%, rgba(7,7,11,0.28) 100%);backdrop-filter:blur(2px);align-items:center;padding:12px 16px;gap:14px;z-index:2;line-height:normal;">
-      <div style="position:relative;width:60px;height:60px;min-width:60px;border-radius:14px;border:2px solid var(--gold);overflow:hidden;background:#0d0d15;box-shadow:0 4px 18px rgba(0,0,0,0.6), 0 0 14px rgba(201,168,76,0.35);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <img id="empresa-logo-overlay" src="logo.jpg" alt="Logo da Empresa" style="width:100%;height:100%;object-fit:cover;display:block;">
-      </div>
-      <div style="display:flex;flex-direction:column;justify-content:center;gap:3px;overflow:hidden;flex:1;min-width:0;line-height:1.25;">
-        <div id="empresa-nome-overlay" style="font-size:18px;font-weight:900;color:#ffffff;line-height:1.25;letter-spacing:0.3px;text-shadow:0 2px 10px rgba(0,0,0,0.95), 0 0 20px rgba(0,0,0,0.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Tc móveis</div>
-        <div id="empresa-seg-overlay" style="font-size:12px;font-weight:700;color:var(--gold-light, #f6e05e);line-height:1.25;text-shadow:0 1px 6px rgba(0,0,0,0.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Móveis Planejados & Ambientes Sob Medida</div>
-        <div id="empresa-contato-overlay" style="font-size:11px;color:#cbd5e1;line-height:1.25;display:flex;gap:8px;align-items:center;margin-top:2px;">
-          <span id="empresa-tel-overlay">📱 (85) 99611-9824</span>
-        </div>
-      </div>
+    <!-- OVERLAY DE MARCA / LOGO SUPERIOR CENTRALIZADO (ESTILO IMAGEM 2) -->
+    <div id="banner-custom-brand" style="display:none;position:absolute;top:0;left:0;right:0;padding:10px 14px 18px;background:linear-gradient(180deg, rgba(6,6,10,0.96) 0%, rgba(6,6,10,0.85) 60%, rgba(6,6,10,0.0) 100%);flex-direction:column;align-items:center;justify-content:center;z-index:2;line-height:normal;text-align:center;">
+      <div id="empresa-nome-overlay" style="font-size:20px;font-weight:900;color:#F3DE8A;letter-spacing:2px;text-transform:uppercase;text-shadow:0 2px 12px rgba(0,0,0,0.95), 0 0 25px rgba(243,222,138,0.45);line-height:1.2;">Tc móveis</div>
+      <div id="empresa-seg-overlay" style="font-size:11px;font-weight:700;color:#ffffff;letter-spacing:2.5px;text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,0.95);line-height:1.2;margin-top:3px;">Móveis Planejados · Ambientes Sob Medida</div>
     </div>
   </div>
 
@@ -952,18 +944,17 @@
             }
             if (cBrand) cBrand.style.display = 'none';
           } else {
-            // Empresa cadastrada nova: usa showroom com overlay de sua marca
+            // Empresa cadastrada nova: usa showroom nobre com marca no topo (estilo Imagem 2)
+            const ehMoveis = lic.tipoContrato === 'moveis' || (lic.nome && lic.nome.toLowerCase().includes('móveis'));
             if (bImg) {
-              bImg.src = (!lic.banner || lic.banner === 'banner.jpg' || lic.banner === 'banner_moveis.jpg') ? ((lic.tipoContrato === 'moveis' || (lic.nome && lic.nome.toLowerCase().includes('móveis'))) ? 'banner_ia_moveis.jpg' : 'banner_ia_vidros.jpg') : lic.banner;
+              bImg.src = (!lic.banner || lic.banner === 'banner.jpg' || lic.banner === 'banner_ia_vidros.jpg' || lic.banner === 'banner_ia_moveis.jpg') ? (ehMoveis ? 'banner_moveis.jpg' : 'banner.jpg') : lic.banner;
             }
             if (cBrand) {
               cBrand.style.display = 'flex';
-              if (lOverlay) lOverlay.src = lic.logo || 'logo.jpg';
               if (nOverlay) nOverlay.textContent = lic.nome || 'Tc móveis';
               if (sOverlay) {
-                sOverlay.textContent = lic.segmento || (lic.tipoContrato === 'moveis' || (lic.nome && lic.nome.toLowerCase().includes('móveis')) ? 'Móveis Planejados & Ambientes Sob Medida' : 'Vidraçaria & Esquadrias');
+                sOverlay.textContent = lic.segmento || (ehMoveis ? 'Móveis Planejados · Ambientes Sob Medida' : 'Alumínio, Vidros & Esquadrias');
               }
-              if (tOverlay) tOverlay.textContent = '📱 ' + (lic.telefone || '(85) 99611-9824');
             }
           }
         }
@@ -2876,23 +2867,21 @@ function aplicarLicencaVisual(lic) {
     if (customBrand) customBrand.style.display = 'none';
   } else {
     // Qualquer nova empresa cadastrada:
+    const ehMoveis = lic.tipoContrato === 'moveis' || (lic.nome && lic.nome.toLowerCase().includes('móveis'));
     if (bannerImg) {
-      // Se não tiver banner ou estiver com banners oficiais com logo embutida, usa showroom limpo
-      if (!lic.banner || lic.banner === 'banner.jpg' || lic.banner === 'banner_moveis.jpg') {
-        bannerImg.src = (lic.tipoContrato === 'moveis' || (lic.nome && lic.nome.toLowerCase().includes('móveis'))) ? 'banner_ia_moveis.jpg' : 'banner_ia_vidros.jpg';
+      if (!lic.banner || lic.banner === 'banner.jpg' || lic.banner === 'banner_ia_vidros.jpg' || lic.banner === 'banner_ia_moveis.jpg') {
+        bannerImg.src = ehMoveis ? 'banner_moveis.jpg' : 'banner.jpg';
       } else {
         bannerImg.src = lic.banner;
       }
       bannerImg.alt = `${lic.nome} – ${lic.segmento}`;
     }
-        if (customBrand) {
+    if (customBrand) {
       customBrand.style.display = 'flex';
-      if (logoOverlay) logoOverlay.src = lic.logo || 'logo.jpg';
       if (nomeOverlay) nomeOverlay.textContent = lic.nome || 'Tc móveis';
       if (segOverlay) {
-        segOverlay.textContent = lic.segmento || (lic.tipoContrato === 'moveis' || (lic.nome && lic.nome.toLowerCase().includes('móveis')) ? 'Móveis Planejados & Ambientes Sob Medida' : 'Vidraçaria & Esquadrias');
+        segOverlay.textContent = lic.segmento || (ehMoveis ? 'Móveis Planejados · Ambientes Sob Medida' : 'Alumínio, Vidros & Esquadrias');
       }
-      if (telOverlay) telOverlay.textContent = '📱 ' + (lic.telefone || '(85) 99611-9824');
     }
   }
 
