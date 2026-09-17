@@ -1286,20 +1286,17 @@
     const txtBioCad = document.getElementById('txt-bio-cad');
 
     if (btnBio) btnBio.disabled = true;
-    if (txtBio) txtBio.textContent = 'Toque no sensor biométrico... 👆';
     if (btnBioCad) btnBioCad.disabled = true;
-    if (txtBioCad) txtBioCad.textContent = 'Toque no sensor biométrico... 👆';
-
     try { if (navigator.vibrate) navigator.vibrate(40); } catch (_) {}
 
-    // 1. Valida suporte a WebAuthn no navegador
+    // 1. Valida suporte a WebAuthn
     if (!window.PublicKeyCredential || !navigator.credentials) {
       resetarBotoesBio();
       mostrarMsg('Sensor biométrico não suportado neste navegador. Entre com usuário e senha.', 'err');
       return;
     }
 
-    // 2. Identifica o usuário do aparelho
+    // 2. Identifica o usuário
     const users = getUsers();
     let user = null;
     const bioUserRaw = localStorage.getItem('sdv_bio_user');
@@ -1320,81 +1317,70 @@
     }
     if (!user) {
       const typedUser = (document.getElementById('l-user') ? document.getElementById('l-user').value : '').trim().toLowerCase();
-      if (typedUser) {
-        user = users.find(u => u.username === typedUser && u.ativo);
-      }
+      if (typedUser) user = users.find(u => u.username === typedUser && u.ativo);
     }
-    if (!user) {
-      user = users.find(u => u.username === 'admin' && u.ativo) || users[0];
-    }
+    if (!user) user = users.find(u => u.username === 'admin' && u.ativo) || users[0];
 
     if (!user) {
       resetarBotoesBio();
-      mostrarMsg('Nenhum usuário ativo localizado. Entre com sua senha.', 'err');
+      mostrarMsg('Nenhum usuário localizado. Entre com usuário e senha.', 'err');
       return;
     }
 
     const rpId = window.location.hostname;
-    const rpNome = 'SD Móveis Projetados / SD Vidros';
-    let credIdRaw = localStorage.getItem('sdv_bio_cred_id');
+    const credIdRaw = localStorage.getItem('sdv_bio_cred_id');
 
-    // CASO 1: Credencial já registrada -> autentica com a digital no sensor (get)
+    // ── MODO AUTENTICAÇÃO: já tem digital cadastrada neste aparelho ──
     if (credIdRaw) {
+      if (txtBio) txtBio.textContent = '👆 Toque no sensor para entrar...';
+      if (txtBioCad) txtBioCad.textContent = '👆 Toque no sensor para entrar...';
       try {
         const challenge = new Uint8Array(32);
         window.crypto.getRandomValues(challenge);
-        const credIdBytes = Uint8Array.from(atob(credIdRaw), c => c.charCodeAt(0));
 
-        const getOptions = {
+        const assertion = await navigator.credentials.get({
           publicKey: {
-            challenge: challenge,
-            rpId: rpId,
-            allowCredentials: [{
-              id: credIdBytes,
-              type: 'public-key'
-            }],
+            challenge,
+            rpId,
+            allowCredentials: [{ id: Uint8Array.from(atob(credIdRaw), c => c.charCodeAt(0)), type: 'public-key' }],
             userVerification: 'required',
             timeout: 60000
           }
-        };
+        });
 
-        const assertion = await navigator.credentials.get(getOptions);
-
-        if (assertion && (assertion.response || assertion.id)) {
+        if (assertion) {
           try { if (navigator.vibrate) navigator.vibrate([50, 70, 50]); } catch (_) {}
-          if (txtBio) txtBio.textContent = '✓ Biometria Confirmada!';
-          if (txtBioCad) txtBioCad.textContent = '✓ Biometria Confirmada!';
-
+          if (txtBio) txtBio.textContent = '✓ Digital reconhecida!';
+          if (txtBioCad) txtBioCad.textContent = '✓ Digital reconhecida!';
           localStorage.setItem('sdv_bio_user', JSON.stringify({ id: user.id, username: user.username, nome: user.nome }));
           localStorage.setItem('sdv_bio_enabled', 'true');
-
-          mostrarMsg(`✅ Biometria confirmada! Entrando como ${user.nome || user.username}...`, 'suc');
+          mostrarMsg(`✅ Entrando como ${user.nome || user.username}...`, 'suc');
           setTimeout(() => concluirLogin(user, true), 300);
           return;
         }
       } catch (errGet) {
-        console.warn('Tentativa com credencial existente falhou:', errGet.name, errGet.message);
-        // Remove chave antiga que não existe no Keystore do aparelho
+        console.warn('GET falhou:', errGet.name);
+        // Chave salva não existe mais no aparelho — apaga e pede novo cadastro no próximo toque
         localStorage.removeItem('sdv_bio_cred_id');
-        credIdRaw = null;
-        // NÃO retorna aqui — cai no fluxo de CREATE abaixo para cadastrar a digital
+        resetarBotoesBio();
+        mostrarMsg('⚠️ Digital não encontrada neste aparelho. Toque novamente para cadastrar sua digital.', 'info');
+        return;
       }
     }
 
-    // CASO 2: Primeiro acesso ou recadastro -> aciona o sensor para registrar a digital (create)
+    // ── MODO CADASTRO: primeiro acesso ou após apagar chave antiga ──
+    if (txtBio) txtBio.textContent = '👆 Coloque o dedo no sensor para cadastrar...';
+    if (txtBioCad) txtBioCad.textContent = '👆 Coloque o dedo no sensor para cadastrar...';
     try {
-      if (txtBio) txtBio.textContent = '👆 Confirme sua digital no aparelho...';
-      if (txtBioCad) txtBioCad.textContent = '👆 Confirme sua digital no aparelho...';
-
       const challenge = new Uint8Array(32);
       window.crypto.getRandomValues(challenge);
       const userId = new Uint8Array(16);
       window.crypto.getRandomValues(userId);
 
-      const createOptions = {
+      const cred = await navigator.credentials.create({
         publicKey: {
-          challenge: challenge,
-          rp: { name: rpNome, id: rpId },
+          challenge,
+          rp: { name: 'SD Móveis / Vidros', id: rpId },
           user: {
             id: userId,
             name: user.username || 'admin',
@@ -1412,34 +1398,31 @@
           timeout: 60000,
           attestation: 'none'
         }
-      };
-
-      const cred = await navigator.credentials.create(createOptions);
+      });
 
       if (cred && cred.rawId) {
         const rawB64 = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
         localStorage.setItem('sdv_bio_cred_id', rawB64);
         localStorage.setItem('sdv_bio_user', JSON.stringify({ id: user.id, username: user.username, nome: user.nome }));
         localStorage.setItem('sdv_bio_enabled', 'true');
-
         try { if (navigator.vibrate) navigator.vibrate([50, 70, 50]); } catch (_) {}
-        if (txtBio) txtBio.textContent = '✓ Digital Reconhecida!';
-        if (txtBioCad) txtBioCad.textContent = '✓ Digital Reconhecida!';
-
-        mostrarMsg(`✅ Biometria confirmada! Entrando como ${user.nome || user.username}...`, 'suc');
+        if (txtBio) txtBio.textContent = '✓ Digital cadastrada!';
+        if (txtBioCad) txtBioCad.textContent = '✓ Digital cadastrada!';
+        mostrarMsg(`✅ Digital cadastrada! Entrando como ${user.nome || user.username}...`, 'suc');
         setTimeout(() => concluirLogin(user, true), 300);
         return;
-      } else {
-        resetarBotoesBio();
-        mostrarMsg('❌ Leitura biométrica não concluída.', 'err');
       }
+      resetarBotoesBio();
+      mostrarMsg('❌ Cadastro não concluído. Tente novamente.', 'err');
     } catch (errCreate) {
-      console.warn('Falha no registro de biometria:', errCreate.name, errCreate.message);
+      console.warn('CREATE falhou:', errCreate.name, errCreate.message);
       resetarBotoesBio();
       if (errCreate.name === 'NotAllowedError') {
-        mostrarMsg('❌ Leitura cancelada. Toque novamente no botão para registrar sua digital.', 'err');
+        mostrarMsg('❌ Leitura cancelada. Toque no botão e encoste o dedo no sensor do celular.', 'err');
+      } else if (errCreate.name === 'NotSupportedError') {
+        mostrarMsg('❌ Este celular não suporta autenticação biométrica. Entre com usuário e senha.', 'err');
       } else {
-        mostrarMsg('❌ Sensor biométrico não respondeu. Verifique se seu celular possui digital cadastrada.', 'err');
+        mostrarMsg(`❌ Erro biométrico (${errCreate.name}). Entre com usuário e senha.`, 'err');
       }
     }
   }
