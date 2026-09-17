@@ -1301,7 +1301,7 @@
     }
   }
 
-          let _activeBioAbort = null;
+            let _activeBioAbort = null;
 
   async function loginComBiometria() {
     const btnBio = document.getElementById('btn-biometria');
@@ -1317,11 +1317,11 @@
       _activeBioAbort = null;
     };
 
-    // Cancela qualquer requisição biométrica anterior pendente no navegador
+    // Cancela com segurança qualquer requisição biométrica anterior pendente no navegador
     if (_activeBioAbort) {
       try { _activeBioAbort.abort(); } catch (_) {}
       _activeBioAbort = null;
-      await new Promise(r => setTimeout(r, 120));
+      await new Promise(r => setTimeout(r, 100));
     }
 
     _activeBioAbort = new AbortController();
@@ -1337,7 +1337,7 @@
     const users = getUsers();
     let user = null;
 
-    // Identifica o usuário vinculado a este aparelho
+    // 1. Identifica o usuário vinculado a este aparelho
     const bioUserRaw = localStorage.getItem('sdv_bio_user');
     if (bioUserRaw) {
       try {
@@ -1361,40 +1361,40 @@
       }
     }
     if (!user) {
-      user = users.find(u => u.ativo);
+      user = users.find(u => u.username === 'admin' && u.ativo) || users[0];
     }
 
     if (!user) {
       resetBotoes();
-      mostrarMsg('Entre com usuário e senha uma vez para vincular sua biometria neste aparelho.', 'info');
-      const uInp = document.getElementById('l-user');
-      if (uInp && !uInp.value) uInp.focus();
+      mostrarMsg('Nenhum usuário ativo localizado. Entre com sua senha.', 'err');
       return;
     }
 
+    // 2. Valida suporte a WebAuthn
     if (!window.PublicKeyCredential || !navigator.credentials) {
       resetBotoes();
-      mostrarMsg('Sensor biométrico não suportado neste navegador. Entre com seu usuário e senha.', 'err');
+      mostrarMsg('Sensor biométrico não suportado neste navegador. Entre com usuário e senha.', 'err');
       return;
     }
 
-    const credIdRaw = localStorage.getItem('sdv_bio_cred_id');
+    let credIdRaw = localStorage.getItem('sdv_bio_cred_id');
 
-    try {
-      // CASO 1: Já possui credencial cadastrada -> executa validação biométrica com o leitor físico
-      if (credIdRaw) {
+    // 3. TENTA AUTENTICAR COM A DIGITAL CADASTRADA (GET)
+    if (credIdRaw) {
+      try {
         const challenge = new Uint8Array(32);
         window.crypto.getRandomValues(challenge);
 
         const allowList = [{
           id: Uint8Array.from(atob(credIdRaw), c => c.charCodeAt(0)),
-          type: 'public-key'
+          type: 'public-key',
+          transports: ['internal']
         }];
 
         const getOptions = {
           publicKey: {
             challenge: challenge,
-            timeout: 20000,
+            timeout: 10000,
             userVerification: 'required',
             rpId: window.location.hostname,
             allowCredentials: allowList
@@ -1402,9 +1402,12 @@
           signal: signal
         };
 
-        const assertion = await navigator.credentials.get(getOptions);
+        const assertion = await Promise.race([
+          navigator.credentials.get(getOptions),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000))
+        ]);
 
-        if (assertion && assertion.response) {
+        if (assertion && (assertion.response || assertion.id)) {
           try { if (navigator.vibrate) navigator.vibrate([50, 70, 50]); } catch (_) {}
           if (txtBio) txtBio.textContent = '✓ Biometria Confirmada!';
           if (txtBioCad) txtBioCad.textContent = '✓ Biometria Confirmada!';
@@ -1415,27 +1418,36 @@
           mostrarMsg(`✅ Biometria confirmada! Entrando como ${user.nome || user.username}...`, 'suc');
           setTimeout(() => concluirLogin(user, true), 350);
           return;
-        } else {
+        }
+      } catch (errGet) {
+        console.warn('Tentativa com credencial existente falhou:', errGet);
+        if (errGet.name === 'NotAllowedError') {
           resetBotoes();
-          mostrarMsg('❌ Digital não reconhecida pelo sensor do aparelho.', 'err');
+          mostrarMsg('❌ Leitura cancelada ou digital não reconhecida.', 'err');
           return;
         }
+        localStorage.removeItem('sdv_bio_cred_id');
+        credIdRaw = null;
       }
+    }
 
-      // CASO 2: Primeiro acesso biométrico -> solicita ao Android/iOS o registro oficial da digital
+    // 4. REGISTRA A DIGITAL NO HARDWARE NATIVO DO APARELHO (CREATE)
+    try {
+      txtBio.textContent = 'Cadastrando sua digital no sensor... 👆';
+      if (txtBioCad) txtBioCad.textContent = 'Cadastrando sua digital no sensor... 👆';
+
       const challengeReg = new Uint8Array(32);
       window.crypto.getRandomValues(challengeReg);
-      const userId = new Uint8Array(16);
-      window.crypto.getRandomValues(userId);
+      const userId = new TextEncoder().encode(user.username || 'admin');
 
       const createOptions = {
         publicKey: {
           challenge: challengeReg,
-          rp: { name: 'SD Móveis / Vidros', id: window.location.hostname },
+          rp: { name: 'SD Móveis Projetados', id: window.location.hostname },
           user: {
             id: userId,
-            name: user.username,
-            displayName: user.nome || user.username
+            name: user.username || 'admin',
+            displayName: user.nome || user.username || 'Administrador'
           },
           pubKeyCredParams: [
             { alg: -7, type: 'public-key' },
@@ -1444,15 +1456,18 @@
           authenticatorSelection: {
             authenticatorAttachment: 'platform',
             userVerification: 'required',
-            requireResidentKey: false
+            residentKey: 'preferred'
           },
-          timeout: 25000,
+          timeout: 12000,
           attestation: 'none'
         },
         signal: signal
       };
 
-      const cred = await navigator.credentials.create(createOptions);
+      const cred = await Promise.race([
+        navigator.credentials.create(createOptions),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 12000))
+      ]);
 
       if (cred && cred.rawId) {
         const rawB64 = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
@@ -1469,21 +1484,17 @@
         return;
       } else {
         resetBotoes();
-        mostrarMsg('❌ Cadastro biométrico cancelado no aparelho.', 'err');
+        mostrarMsg('❌ Cadastro biométrico cancelado.', 'err');
       }
-
-    } catch (err) {
-      console.warn('Validação biométrica:', err);
+    } catch (errCreate) {
+      console.warn('Erro ao registrar digital:', errCreate);
       resetBotoes();
-      if (err.name === 'AbortError') {
-        return;
-      }
-      if (err.name === 'NotAllowedError') {
-        mostrarMsg('❌ Leitura cancelada ou digital não reconhecida. Use a sua digital cadastrada no aparelho.', 'err');
-      } else if (err.message && err.message.includes('pending')) {
-        mostrarMsg('O sensor estava ocupado. Toque novamente para ler sua digital.', 'info');
+      if (errCreate.name === 'NotAllowedError') {
+        mostrarMsg('❌ Leitura cancelada ou digital não reconhecida.', 'err');
+      } else if (errCreate.message === 'timeout') {
+        mostrarMsg('⏱️ Tempo limite esgotado. Toque novamente para ler a digital.', 'err');
       } else {
-        mostrarMsg('❌ Falha na leitura biométrica: ' + (err.message || 'não autorizada'), 'err');
+        mostrarMsg('❌ Não foi possível ativar o sensor biométrico. Entre com a senha.', 'err');
       }
     }
   }
