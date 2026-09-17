@@ -513,6 +513,17 @@
         <polyline points="12 5 19 12 12 19"></polyline>
       </svg>
     </button>
+    <!-- DIVISOR OU & BOTÃO BIOMETRIA -->
+    <div style="display:flex;align-items:center;margin:16px 0 12px;gap:12px;width:100%;">
+      <div style="flex:1;height:1px;background:rgba(255,255,255,0.12);"></div>
+      <span style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;font-weight:700;letter-spacing:0.08em;">ou</span>
+      <div style="flex:1;height:1px;background:rgba(255,255,255,0.12);"></div>
+    </div>
+
+    <button type="button" class="btn-biometria" id="btn-biometria" onclick="loginComBiometria()">
+      <span class="bio-icon">👆</span>
+      <span id="txt-btn-bio">Entrar com Biometria / Face ID</span>
+    </button>
 
 
 
@@ -1309,13 +1320,14 @@
     }
 
     const rpId = window.location.hostname;
-    const credIdRaw = localStorage.getItem('sdv_bio_cred_id');
 
     // ════════════════════════════════════════════════════════
-    // MODO AUTENTICAÇÃO — só executa se: tem credId salvo E
-    //                     NÃO estamos no modo create forçado
+    // MODO AUTENTICAÇÃO — tenta autenticar com qualquer chave
+    //   de acesso registrada para este site no aparelho.
+    //   allowCredentials: [] = modo descobrível (mostra todas
+    //   as chaves do site, sem precisar de ID específico).
     // ════════════════════════════════════════════════════════
-    if (credIdRaw && !_bioModoCreate) {
+    if (!_bioModoCreate) {
       _setBioTexto('Toque no sensor para entrar...');
       try {
         const challenge = window.crypto.getRandomValues(new Uint8Array(32));
@@ -1323,7 +1335,7 @@
           publicKey: {
             challenge,
             rpId,
-            allowCredentials: [{ id: Uint8Array.from(atob(credIdRaw), c => c.charCodeAt(0)), type: 'public-key' }],
+            allowCredentials: [],   // ← descobrível: mostra TODAS as chaves do site
             userVerification: 'required',
             timeout: 60000
           }
@@ -1339,13 +1351,13 @@
         }
       } catch (errGet) {
         console.warn('BIO GET falhou:', errGet.name, errGet.message);
-        // Chave antiga inválida — limpa e ativa modo create para o PRÓXIMO toque
+        // Nenhuma chave encontrada → ativa modo cadastro para o PRÓXIMO toque
         localStorage.removeItem('sdv_bio_cred_id');
         _bioModoCreate = true;
-        resetarBotoesBio(); // botão volta com texto "Toque para cadastrar"
-        mostrarMsg('⚠️ Digital não registrada neste aparelho.\nToque novamente no botão para cadastrar sua digital.', 'info');
+        resetarBotoesBio();
+        mostrarMsg('⚠️ Nenhuma digital cadastrada para este site.\nToque novamente no botão para registrar sua digital.', 'info');
         return;
-        // ↑ RETORNA AQUI. O próximo toque vai direto ao CREATE (nenhum GET antes).
+        // ↑ RETORNA. O próximo toque chama CREATE direto do gesto do usuário.
       }
     }
 
