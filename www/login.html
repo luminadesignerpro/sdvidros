@@ -1291,7 +1291,7 @@
     const b2 = document.getElementById('btn-bio-cad');
     if (b1) { b1.disabled = false; }
     if (b2) { b2.disabled = false; }
-    _setBioTexto(_bioModoCreate ? '👆 Toque para cadastrar sua digital' : 'Entrar com Biometria / Face ID');
+    _setBioTexto(_bioModoCreate ? 'Toque para cadastrar sua digital' : 'Entrar com Biometria / Face ID');
   }
 
   async function loginComBiometria() {
@@ -1326,7 +1326,7 @@
     //                     NÃO estamos no modo create forçado
     // ════════════════════════════════════════════════════════
     if (credIdRaw && !_bioModoCreate) {
-      _setBioTexto('👆 Toque no sensor para entrar...');
+      _setBioTexto('Toque no sensor para entrar...');
       try {
         const challenge = window.crypto.getRandomValues(new Uint8Array(32));
         const assertion = await navigator.credentials.get({
@@ -1366,7 +1366,7 @@
     //                 reconhecer o user gesture.
     // ════════════════════════════════════════════════════════
     _bioModoCreate = false; // reseta flag
-    _setBioTexto('👆 Coloque o dedo no sensor para cadastrar...');
+    _setBioTexto('Coloque o dedo no sensor para cadastrar...');
     try {
       const challenge = window.crypto.getRandomValues(new Uint8Array(32));
       // userId fixo baseado no username — evita duplicatas no Gerenciador do Google
