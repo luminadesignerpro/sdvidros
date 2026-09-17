@@ -602,18 +602,43 @@
   }
 
   function obterLicencaAtiva() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const empParam = (urlParams.get('empresa') || urlParams.get('lic') || '').toLowerCase().trim();
+
+    if (empParam.includes('moveis') || empParam === 'sdmoveis') {
+      return {
+        id: 'sdmoveis',
+        nome: 'SD Móveis Projetados',
+        segmento: 'Móveis Planejados & Ambientes Sob Medida',
+        slogan: 'Cozinhas Planejadas, Closets & Ambientes Sob Medida',
+        telefone: '(85) 99611-9824',
+        cidade: 'Itaitinga - CE',
+        pix: '85996119824'
+      };
+    }
+
     try {
       const lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
-      const idAtivo = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+      const idAtivo = empParam || localStorage.getItem('sdv_licenca_ativa') || 'sdmoveis';
       if (Array.isArray(lista) && lista.length) {
-        const encontrada = lista.find(l => l.id === idAtivo);
+        const encontrada = lista.find(l => l.id === idAtivo || (empParam && (l.id.toLowerCase() === empParam || l.nome.toLowerCase().includes(empParam))));
         if (encontrada) return encontrada;
       }
     } catch (_) {}
+
+    if (empParam && empParam !== 'sdvidros') {
+      return {
+        id: empParam,
+        nome: empParam.toUpperCase(),
+        segmento: 'Ambientes Sob Medida & Design',
+        telefone: '(85) 99611-9824'
+      };
+    }
+
     return {
-      id: 'sdvidros',
-      nome: 'SD Vidros',
-      segmento: 'Soluções em Vidros & Esquadrias de Alumínio',
+      id: 'sdmoveis',
+      nome: 'SD Móveis Projetados',
+      segmento: 'Móveis Planejados & Ambientes Sob Medida',
       telefone: '(85) 99611-9824'
     };
   }
@@ -622,12 +647,25 @@
     const lic = obterLicencaAtiva();
     const titleEl = document.getElementById('header-brand-title');
     const badgeEl = document.getElementById('header-brand-badge');
+    const subTit = document.getElementById('subtitulo');
+    const btnAjustar = document.getElementById('btn-ajustar-zap');
+    const zapLimpo = String(lic.telefone || '85996119824').replace(/\D/g, '');
+    const zapHref = 'https://wa.me/' + (zapLimpo.startsWith('55') ? zapLimpo : '55' + zapLimpo);
+
     if (titleEl) {
-      const icone = (lic.id === 'sdmoveis' || String(lic.nome).toLowerCase().includes('móveis') || String(lic.nome).toLowerCase().includes('moveis')) ? '🪑' : '🪟';
+      const ehMoveis = (lic.id === 'sdmoveis' || String(lic.nome).toLowerCase().includes('móveis') || String(lic.nome).toLowerCase().includes('moveis'));
+      const icone = ehMoveis ? '🛋️' : '🪟';
       titleEl.innerHTML = `<span>${icone}</span> ${lic.nome.toUpperCase()}`;
     }
     if (badgeEl && lic.segmento) {
       badgeEl.textContent = lic.segmento;
+    }
+    if (subTit) {
+      subTit.textContent = lic.nome;
+    }
+    if (btnAjustar) {
+      btnAjustar.href = zapHref;
+      btnAjustar.textContent = `💬 Falar com ${lic.nome} / Solicitar Ajustes`;
     }
     document.title = `Aprovação & Assinatura Digital — ${lic.nome}`;
   }
@@ -871,7 +909,7 @@ Itaitinga - CE, ${hoje}
 ══════════════════════════════════════════════════════════════
 
 CONTRATADA:
-Razão Social.....: SD Vidros
+Razão Social.....: ' + (obterLicencaAtiva().nome || 'SD Móveis Projetados') + '
 WhatsApp.........: (85) 99611-9824
 Instagram........: @sdvidros
 Cidade...........: Itaitinga - CE
@@ -931,7 +969,7 @@ Itaitinga - CE, ${hoje}
 
 
 _________________________________________________
-CONTRATADA: SD Vidros
+CONTRATADA: ' + (obterLicencaAtiva().nome || 'SD Móveis Projetados') + '
 WhatsApp: (85) 99611-9824
 
 

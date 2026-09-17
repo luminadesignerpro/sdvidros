@@ -3902,29 +3902,37 @@ function abrirWhats(tel, msg) {
 }
 
 function gerarLinkAprovacaoWhats(numero, total, aprovado) {
+  const lic = (typeof obterLicencaAtiva === "function") ? obterLicencaAtiva() : { nome: "SD Móveis Projetados", telefone: "(85) 99611-9824" };
+  const zapNumLimpo = String(lic.telefone || "85996119824").replace(/\D/g, "");
+  const numDestinoZap = zapNumLimpo.startsWith("55") ? zapNumLimpo : ("55" + zapNumLimpo);
   const texto = aprovado
-    ? `Olá! Aprovo o orçamento ${numero} no valor de ${total} da SD Vidros! Podemos iniciar a produção.`
+    ? `Olá! Aprovo o orçamento ${numero} no valor de ${total} da ${lic.nome}! Podemos iniciar a produção.`
     : `Olá! Recebi o orçamento ${numero} no valor de ${total}, mas gostaria de falar sobre ajustes e condições.`;
-  return `https://wa.me/${SD_ZAP_NUM}?text=${encodeURIComponent(texto)}`;
+  return `https://wa.me/${numDestinoZap}?text=${encodeURIComponent(texto)}`;
 }
 
 function gerarMensagemWhatsAppAprovacao(o) {
-  const numOs = o.numero || '';
-  const totalVal = o.total || '';
-  const nomeCli = o.nome || '';
-  const baseUrl = (window.location.origin && window.location.origin.startsWith('http'))
+  const lic = (typeof obterLicencaAtiva === "function") ? obterLicencaAtiva() : { id: "sdmoveis", nome: "SD Móveis Projetados", telefone: "(85) 99611-9824" };
+  const numOs = o.numero || "";
+  const totalVal = o.total || "";
+  const nomeCli = o.nome || "";
+  const baseUrl = (window.location.origin && window.location.origin.startsWith("http"))
     ? window.location.origin
-    : 'https://sdvidros.vercel.app';
-  const linkAprovacaoOnline = `${baseUrl}/api/aprovar-orcamento?os=${encodeURIComponent(numOs)}&total=${encodeURIComponent(totalVal)}&cliente=${encodeURIComponent(nomeCli)}`;
+    : "https://sdvidros.vercel.app";
+  const linkAprovacaoOnline = `${baseUrl}/api/aprovar-orcamento?os=${encodeURIComponent(numOs)}&total=${encodeURIComponent(totalVal)}&cliente=${encodeURIComponent(nomeCli)}&empresa=${encodeURIComponent(lic.id || "sdmoveis")}`;
 
-  let m = `*SD VIDROS* 🪟\n`;
+  const zapNumLimpo = String(lic.telefone || "85996119824").replace(/\D/g, "");
+  const numDestinoZap = zapNumLimpo.startsWith("55") ? zapNumLimpo : ("55" + zapNumLimpo);
+
+  const iconeEmpresa = (lic.tipoContrato === "moveis" || lic.id === "sdmoveis" || (lic.nome && lic.nome.toLowerCase().includes("moveis"))) ? "🛋️" : "🪟";
+  let m = `*${(lic.nome || "SD MÓVEIS PROJETADOS").toUpperCase()}* ${iconeEmpresa}\n`;
   m += `Orçamento *${numOs}* em anexo (PDF).\n\n`;
   if (nomeCli) m += `👤 Cliente: *${nomeCli}*\n`;
   if (totalVal) m += `💰 Valor Total: *${totalVal}*\n\n`;
   m += `Para aprovar seu orçamento e autorizar a produção com *confirmação automática*, toque no link abaixo:\n\n`;
   m += `👉 *CLIQUE AQUI PARA APROVAR O ORÇAMENTO:*\n${linkAprovacaoOnline}\n\n`;
   m += `_(Ao tocar no link, a aprovação é registrada instantaneamente no sistema e o WhatsApp abre com a confirmação pronta)_\n\n`;
-  m += `👉 *Solicitar Ajustes:*\nhttps://wa.me/${SD_ZAP_NUM}?text=${encodeURIComponent(`Olá! Recebi o orçamento ${numOs}, mas gostaria de falar sobre ajustes e condições.`)}`;
+  m += `👉 *Solicitar Ajustes:*\nhttps://wa.me/${numDestinoZap}?text=${encodeURIComponent(`Olá! Recebi o orçamento ${numOs}, mas gostaria de falar sobre ajustes e condições com ${lic.nome}.`)}`;
   return m;
 }
 
@@ -5539,16 +5547,18 @@ async function salvarCanvasAssinaturaModal(id, versaoNum) {
 function enviarLinkAssinarComDedo(id) {
   const o = historico.find(x => String(x.id) === String(id));
   if (!o) return;
-  const numLimpo = String(o.numero || '').replace(/\D/g, '');
-  const urlAssinatura = `https://sdvidros.vercel.app/assinar.html?os=${numLimpo}`;
-  const msg = `*SD Vidros - Assinatura Digital da O.S.*\n\nOlá, *${o.nome || 'Cliente'}*!\nPara assinar sua Ordem de Serviço *#${o.numero}* desenhando com o dedo na tela do seu celular, toque no link seguro abaixo:\n\n👉 ${urlAssinatura}\n\nSua assinatura será registrada e anexada automaticamente!`;
+  const numLimpo = String(o.numero || "").replace(/\D/g, "");
+  const lic = (typeof obterLicencaAtiva === "function") ? obterLicencaAtiva() : { id: "sdmoveis", nome: "SD Móveis Projetados" };
+  const empId = lic.id || "sdmoveis";
+  const urlAssinatura = `https://sdvidros.vercel.app/assinar.html?os=${numLimpo}&empresa=${encodeURIComponent(empId)}`;
+  const msg = `*${lic.nome} - Assinatura Digital da O.S.*\n\nOlá, *${o.nome || "Cliente"}*!\nPara assinar sua Ordem de Serviço *#${o.numero}* desenhando com o dedo na tela do seu celular, toque no link seguro abaixo:\n\n👉 ${urlAssinatura}\n\nSua assinatura será registrada e anexada automaticamente!`;
   
-  let fone = String(o.fone || '').replace(/\D/g, '');
-  if (fone.length >= 10 && !fone.startsWith('55')) fone = '55' + fone;
+  let fone = String(o.fone || o.tel || "").replace(/\D/g, "");
+  if (fone.length >= 10 && !fone.startsWith("55")) fone = "55" + fone;
   const linkWhats = fone.length >= 12
     ? `https://api.whatsapp.com/send?phone=${fone}&text=${encodeURIComponent(msg)}`
     : `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
-  window.open(linkWhats, '_blank');
+  window.open(linkWhats, "_blank");
 }
 
 function fecharModalAssinatura(e) {
@@ -7255,43 +7265,48 @@ async function enviarOrcamentoParaAssinaturaDigital() {
     }
     const dParam = btoa(binStr).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
-    let linkAssinatura = window.location.origin + '/assinar.html?d=' + dParam;
-    let linkPdf = window.location.origin + '/api/gerar-pdf-orcamento?d=' + dParam;
+    const lic = (typeof obterLicencaAtiva === "function") ? obterLicencaAtiva() : { id: "sdmoveis", nome: "SD Móveis Projetados" };
+    const empParamUrl = "&empresa=" + encodeURIComponent(lic.id || "sdmoveis");
+    let linkAssinatura = window.location.origin + "/assinar.html?d=" + dParam + empParamUrl;
+    let linkPdf = window.location.origin + "/api/gerar-pdf-orcamento?d=" + dParam + empParamUrl;
 
     // 3. Tentar criar registro no Supabase
     try {
-      const res = await fetch('/api/criar-contrato', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/criar-contrato", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           numero_os: d.numero,
-          cliente_nome: d.nome || '',
-          cliente_tel: d.tel || '',
+          cliente_nome: d.nome || "",
+          cliente_tel: d.tel || "",
+          empresa: lic.id || "sdmoveis",
           texto: textoContrato
         })
       });
       const resData = await res.json().catch(() => ({}));
       if (res.ok && resData.id) {
-        linkAssinatura = window.location.origin + '/assinar.html?id=' + resData.id;
-        linkPdf = window.location.origin + '/api/gerar-pdf-orcamento?id=' + resData.id;
+        linkAssinatura = window.location.origin + "/assinar.html?id=" + resData.id + empParamUrl;
+        linkPdf = window.location.origin + "/api/gerar-pdf-orcamento?id=" + resData.id + empParamUrl;
       }
     } catch (e) {
-      console.warn('Supabase offline ou inacessível, gerando link autônomo:', e);
+      console.warn("Supabase offline ou inacessível, gerando link autônomo:", e);
     }
 
-    // 4. Montar mensagem no WhatsApp (Personalizada para Reenvio com Modificações ou Nova Proposta)
-    let msg = '';
+    // 4. Montar mensagem no WhatsApp 100% responsiva à empresa ativa
+    const nomeEmpresaUpper = (lic.nome || "SD MÓVEIS PROJETADOS").toUpperCase();
+    const iconeEmp = (lic.tipoContrato === "moveis" || lic.id === "sdmoveis" || (lic.nome && lic.nome.toLowerCase().includes("moveis"))) ? "🛋️" : "🪟";
+    let msg = "";
     if (ehReenvio) {
-      msg = '*SD VIDROS — REAJUSTE DE PROPOSTA & NOVA ASSINATURA DIGITAL* ✍️\n\n'
-        + 'Olá' + (d.nome ? ', ' + d.nome : '') + '! Conforme solicitado, atualizamos sua Ordem de Serviço *' + d.numero + '* no valor de *' + d.total + '* com as novas modificações:\n\n'
-        + '📄 *Baixar Novo PDF com Modificações:*\n' + linkPdf + '\n\n'
-        + '✍️ *Assinar Nova Versão Online:*\n' + linkAssinatura + '\n\n'
-        + '💡 _A versão anterior assinada permanece arquivada em nosso sistema com total transparência e segurança._';
+      msg = `*${nomeEmpresaUpper} — REAJUSTE DE PROPOSTA & NOVA ASSINATURA DIGITAL* ✍️ ${iconeEmp}\n\n`
+        + "Olá" + (d.nome ? ", " + d.nome : "") + "! Conforme solicitado, atualizamos sua Ordem de Serviço *" + d.numero + "* no valor de *" + d.total + "* com as novas modificações:\n\n"
+        + "📄 *Baixar Novo PDF com Modificações:*\n" + linkPdf + "\n\n"
+        + "✍️ *Assinar Nova Versão Online:*\n" + linkAssinatura + "\n\n"
+        + "💡 _A versão anterior assinada permanece arquivada em nosso sistema com total transparência e segurança._";
     } else {
-      msg = '*SD VIDROS — PROPOSTA & ASSINATURA DIGITAL* ✍️\n\n'
-        + 'Olá' + (d.nome ? ', ' + d.nome : '') + '! Segue o link com seu orçamento *' + d.numero + '* no valor de *' + d.total + '*:\n\n'
-        + '📄 *Baixar PDF Oficial:*\n' + linkPdf + '\n\n'
-        + '✍️ *Assinar Orçamento Online:*\n' + linkAssinatura;
+      msg = `*${nomeEmpresaUpper} — PROPOSTA & ASSINATURA DIGITAL* ✍️ ${iconeEmp}\n\n`
+        + "Olá" + (d.nome ? ", " + d.nome : "") + "! Segue o link com seu orçamento *" + d.numero + "* no valor de *" + d.total + "*:\n\n"
+        + "📄 *Baixar PDF Oficial:*\n" + linkPdf + "\n\n"
+        + "✍️ *Assinar Orçamento Online:*\n" + linkAssinatura;
     }
 
     // 5. Enviar diretamente no WhatsApp do cliente
@@ -7756,10 +7771,30 @@ async function gerarPdfOrcamentoDoc(dados) {
   }
 
   const textX = logoImage ? MARGIN_X + 56 : MARGIN_X;
-  page.drawText('SD VIDROS', { x: textX, y: headerY - 14, size: 17, font: fontBold, color: DARK });
-  page.drawText('SOLUÇÕES EM VIDROS TEMPERADOS E ESQUADRIAS DE ALUMÍNIO', { x: textX, y: headerY - 26, size: 7.2, font: fontBold, color: GOLD });
-  page.drawText('Rua Jorge Figueiredo 740, Barrocão - Itaitinga-CE • CNPJ: 49.226.611/0001-33', { x: textX, y: headerY - 37, size: 7, font: fontRegular, color: GRAY });
-  page.drawText('WhatsApp: (85) 99611-9824 • 99760-2237 • 98574-9606 | sdvidros2025@gmail.com', { x: textX, y: headerY - 48, size: 7, font: fontRegular, color: GRAY });
+  const nomeEmpresaUpper = sanitizePdf((lic.nome || (ehMoveis ? "SD MÓVEIS PROJETADOS" : "SD VIDROS")).toUpperCase());
+  page.drawText(nomeEmpresaUpper, { x: textX, y: headerY - 14, size: 16, font: fontBold, color: DARK });
+
+  const sloganEmpresa = sanitizePdf((lic.segmento || lic.slogan || (ehMoveis ? "MÓVEIS PLANEJADOS & MARCENARIA DE LUXO" : "SOLUÇÕES EM VIDROS TEMPERADOS E ESQUADRIAS DE ALUMÍNIO")).toUpperCase());
+  page.drawText(sloganEmpresa, { x: textX, y: headerY - 26, size: 7.2, font: fontBold, color: GOLD });
+
+  let endEmpresa = "";
+  if (lic.id === "sdvidros") {
+    endEmpresa = "Rua Jorge Figueiredo 740, Barrocão - Itaitinga-CE • CNPJ: 49.226.611/0001-33";
+  } else {
+    const cid = lic.cidade || "Itaitinga-CE";
+    const cnp = lic.cnpj ? (" • CNPJ: " + lic.cnpj) : "";
+    endEmpresa = cid + cnp;
+  }
+  page.drawText(sanitizePdf(endEmpresa), { x: textX, y: headerY - 37, size: 7, font: fontRegular, color: GRAY });
+
+  let contatosEmpresa = "";
+  const zapEmpresa = lic.telefone || "(85) 99611-9824";
+  if (lic.id === "sdvidros") {
+    contatosEmpresa = `WhatsApp: ${zapEmpresa} • 99760-2237 • 98574-9606 | sdvidros2025@gmail.com`;
+  } else {
+    contatosEmpresa = `WhatsApp: ${zapEmpresa} | ${lic.email || "Atendimento & Projetos Sob Medida"}`;
+  }
+  page.drawText(sanitizePdf(contatosEmpresa), { x: textX, y: headerY - 48, size: 7, font: fontRegular, color: GRAY });
 
   // Badge do Orçamento no canto direito superior
   const badgeW = 138;
@@ -7992,8 +8027,15 @@ async function gerarPdfOrcamentoDoc(dados) {
     borderWidth: 0.8
   });
   page.drawText('DADOS PARA PAGAMENTO VIA PIX:', { x: MARGIN_X + 16, y: pixBoxY + 32, size: 6.8, font: fontBold, color: GREEN_TXT });
-  page.drawText('Chave CNPJ: 49.226.611/0001-33 (InfinityPay - SD Vidros)', { x: MARGIN_X + 16, y: pixBoxY + 20, size: 6.8, font: fontRegular, color: DARK });
-  page.drawText('Chave Celular: (85) 99760-2237 (Itaú - Samuel David)', { x: MARGIN_X + 16, y: pixBoxY + 9, size: 6.8, font: fontRegular, color: DARK });
+  if (lic.id === 'sdvidros') {
+    page.drawText('Chave CNPJ: 49.226.611/0001-33 (InfinityPay - SD Vidros)', { x: MARGIN_X + 16, y: pixBoxY + 20, size: 6.8, font: fontRegular, color: DARK });
+    page.drawText('Chave Celular: (85) 99760-2237 (Itaú - Samuel David)', { x: MARGIN_X + 16, y: pixBoxY + 9, size: 6.8, font: fontRegular, color: DARK });
+  } else {
+    const pixChave = lic.pix || lic.cnpj || lic.telefone || '85996119824';
+    const titularPix = lic.nome || 'SD Móveis Projetados';
+    page.drawText(sanitizePdf(`Chave PIX: ${pixChave} (${titularPix})`), { x: MARGIN_X + 16, y: pixBoxY + 20, size: 6.8, font: fontBold, color: DARK });
+    page.drawText(sanitizePdf(`WhatsApp / Contato: ${lic.telefone || '(85) 99611-9824'}`), { x: MARGIN_X + 16, y: pixBoxY + 9, size: 6.8, font: fontRegular, color: DARK });
+  }
 
   // CARD DIREITO: RESUMO FINANCEIRO E TOTAL
   const rightCardW = CONTENT_W - leftCardW - 12;
@@ -8128,7 +8170,8 @@ async function gerarPdfOrcamentoDoc(dados) {
     color: GRAY
   });
 
-  page.drawText('Confirmação rápida WhatsApp: (85) 99611-9824', {
+  const telRodapeZap = (lic && lic.telefone) ? lic.telefone : "(85) 99611-9824";
+  page.drawText(sanitizePdf(`Confirmação rápida WhatsApp: ${telRodapeZap}`), {
     x: MARGIN_X + CONTENT_W - 205,
     y: rodapeCardY + 12,
     size: 6.8,
