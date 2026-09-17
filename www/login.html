@@ -1373,23 +1373,18 @@
           return;
         }
       } catch (errGet) {
-        console.warn('Tentativa com credencial existente falhou:', errGet);
+        console.warn('Tentativa com credencial existente falhou:', errGet.name, errGet.message);
         // Remove chave antiga que não existe no Keystore do aparelho
         localStorage.removeItem('sdv_bio_cred_id');
         credIdRaw = null;
-
-        if (errGet.name === 'NotAllowedError') {
-          resetarBotoesBio();
-          mostrarMsg('❌ Leitura cancelada ou digital não reconhecida. Toque no botão para tentar novamente.', 'err');
-          return;
-        }
+        // NÃO retorna aqui — cai no fluxo de CREATE abaixo para cadastrar a digital
       }
     }
 
     // CASO 2: Primeiro acesso ou recadastro -> aciona o sensor para registrar a digital (create)
     try {
-      if (txtBio) txtBio.textContent = 'Confirme sua digital no aparelho... 👆';
-      if (txtBioCad) txtBioCad.textContent = 'Confirme sua digital no aparelho... 👆';
+      if (txtBio) txtBio.textContent = '👆 Confirme sua digital no aparelho...';
+      if (txtBioCad) txtBioCad.textContent = '👆 Confirme sua digital no aparelho...';
 
       const challenge = new Uint8Array(32);
       window.crypto.getRandomValues(challenge);
@@ -1439,10 +1434,10 @@
         mostrarMsg('❌ Leitura biométrica não concluída.', 'err');
       }
     } catch (errCreate) {
-      console.warn('Falha no registro de biometria:', errCreate);
+      console.warn('Falha no registro de biometria:', errCreate.name, errCreate.message);
       resetarBotoesBio();
       if (errCreate.name === 'NotAllowedError') {
-        mostrarMsg('❌ Leitura cancelada ou digital não reconhecida. Toque para tentar novamente.', 'err');
+        mostrarMsg('❌ Leitura cancelada. Toque novamente no botão para registrar sua digital.', 'err');
       } else {
         mostrarMsg('❌ Sensor biométrico não respondeu. Verifique se seu celular possui digital cadastrada.', 'err');
       }
