@@ -3911,6 +3911,50 @@ function gerarLinkAprovacaoWhats(numero, total, aprovado) {
   return `https://wa.me/${numDestinoZap}?text=${encodeURIComponent(texto)}`;
 }
 
+function gerarParametroD(d) {
+  try {
+    const payloadCompacto = {
+      n: d.numero || "0001",
+      c: d.nome || "",
+      t: d.tel || d.fone || "",
+      v: d.total || ""
+    };
+    if (d.data) payloadCompacto.d = d.data;
+    if (d.forma) payloadCompacto.f = d.forma;
+    if (d.prazo) payloadCompacto.p = d.prazo;
+    if (d.garantia) payloadCompacto.g = d.garantia;
+    if (d.end) payloadCompacto.e = d.end;
+    if (d.bairro) payloadCompacto.b = d.bairro;
+    if (d.num) payloadCompacto.num = d.num;
+    if (d.apto) payloadCompacto.apto = d.apto;
+    if (d.cnpj) payloadCompacto.cnpj = d.cnpj;
+    if (d.resp) payloadCompacto.resp = d.resp;
+    if (d.obs) payloadCompacto.obs = d.obs;
+    if (d.itens && d.itens.length) {
+      payloadCompacto.i = d.itens.map(it => [
+        it.desc || "",
+        it.qtd || 1,
+        it.larg || "",
+        it.alt || "",
+        it.m2 || "",
+        it.v_unit || "",
+        it.total || "",
+        it.cor || "",
+        it.bizt || ""
+      ]);
+    }
+    const jsonStr = JSON.stringify(payloadCompacto);
+    const u8 = new TextEncoder().encode(jsonStr);
+    let binStr = "";
+    for (let i = 0; i < u8.length; i++) {
+      binStr += String.fromCharCode(u8[i]);
+    }
+    return btoa(binStr).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  } catch (_) {
+    return "";
+  }
+}
+
 function gerarMensagemWhatsAppAprovacao(o) {
   const lic = (typeof obterLicencaAtiva === "function") ? obterLicencaAtiva() : { id: "sdmoveis", nome: "SD Móveis Projetados", telefone: "(85) 99611-9824" };
   const numOs = o.numero || "";
@@ -3919,7 +3963,13 @@ function gerarMensagemWhatsAppAprovacao(o) {
   const baseUrl = (window.location.origin && window.location.origin.startsWith("http"))
     ? window.location.origin
     : "https://sdvidros.vercel.app";
-  const linkAprovacaoOnline = `${baseUrl}/api/aprovar-orcamento?os=${encodeURIComponent(numOs)}&total=${encodeURIComponent(totalVal)}&cliente=${encodeURIComponent(nomeCli)}&empresa=${encodeURIComponent(lic.id || "sdmoveis")}`;
+
+  const numLimpo = String(numOs || "").replace(/\D/g, "");
+  const dParam = gerarParametroD(o);
+  const queryParams = [`os=${encodeURIComponent(numLimpo)}`];
+  if (dParam) queryParams.push(`d=${dParam}`);
+  queryParams.push(`empresa=${encodeURIComponent(lic.id || "sdmoveis")}`);
+  const linkVisualizarEAssinar = `${baseUrl}/assinar.html?${queryParams.join("&")}`;
 
   const zapNumLimpo = String(lic.telefone || "85996119824").replace(/\D/g, "");
   const numDestinoZap = zapNumLimpo.startsWith("55") ? zapNumLimpo : ("55" + zapNumLimpo);
@@ -3929,9 +3979,9 @@ function gerarMensagemWhatsAppAprovacao(o) {
   m += `Orçamento *${numOs}* em anexo (PDF).\n\n`;
   if (nomeCli) m += `👤 Cliente: *${nomeCli}*\n`;
   if (totalVal) m += `💰 Valor Total: *${totalVal}*\n\n`;
-  m += `Para aprovar seu orçamento e autorizar a produção com *confirmação automática*, toque no link abaixo:\n\n`;
-  m += `👉 *CLIQUE AQUI PARA APROVAR O ORÇAMENTO:*\n${linkAprovacaoOnline}\n\n`;
-  m += `_(Ao tocar no link, a aprovação é registrada instantaneamente no sistema e o WhatsApp abre com a confirmação pronta)_\n\n`;
+  m += `Para visualizar o PDF do orçamento e ter a opção de aprovar e assinar, toque no link abaixo:\n\n`;
+  m += `👉 *CLIQUE AQUI PARA ABRIR O PDF E ASSINAR:*\n${linkVisualizarEAssinar}\n\n`;
+  m += `_(Ao abrir o link, você visualiza a proposta completa com a opção de aprovar e assinar na tela)_\n\n`;
   m += `👉 *Solicitar Ajustes:*\nhttps://wa.me/${numDestinoZap}?text=${encodeURIComponent(`Olá! Recebi o orçamento ${numOs}, mas gostaria de falar sobre ajustes e condições com ${lic.nome}.`)}`;
   return m;
 }
