@@ -1387,15 +1387,29 @@
         lista = LICENCAS_PADRAO;
         localStorage.setItem('sdv_licencas', JSON.stringify(lista));
       } else {
-        // Assegura que empresas customizadas não usem o banner que contém a arte SD Vidros impressa
         let mudou = false;
         lista.forEach(l => {
+          if (l.nome && (l.nome.toLowerCase().includes('tc m') || l.nome.toLowerCase().includes('tcmoveis') || l.id === 'tcmoveis' || l.id === 'tc')) {
+            l.id = 'sdmoveis';
+            l.nome = 'SD Móveis Projetados';
+            l.segmento = 'Móveis Planejados & Marcenaria de Luxo';
+            l.slogan = 'Cozinhas Planejadas, Closets & Ambientes Sob Medida';
+            l.banner = 'banner_moveis.jpg';
+            l.logo = 'logo_moveis.jpg';
+            l.tipoContrato = 'moveis';
+            mudou = true;
+          }
           if (l.id !== 'sdvidros' && (!l.banner || l.banner === 'banner.jpg')) {
             l.banner = (l.tipoContrato === 'moveis' || l.id === 'sdmoveis') ? 'banner_ia_moveis.jpg' : 'banner_ia_vidros.jpg';
             mudou = true;
           }
         });
-        if (mudou) localStorage.setItem('sdv_licencas', JSON.stringify(lista));
+        if (mudou) {
+          localStorage.setItem('sdv_licencas', JSON.stringify(lista));
+          if (localStorage.getItem('sdv_licenca_ativa') === 'tcmoveis' || localStorage.getItem('sdv_licenca_ativa') === 'tc') {
+            localStorage.setItem('sdv_licenca_ativa', 'sdmoveis');
+          }
+        }
       }
       return lista;
     } catch (_) {

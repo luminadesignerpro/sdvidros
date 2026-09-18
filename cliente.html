@@ -3493,7 +3493,7 @@
           if (!enc) {
             enc = {
               id: empUrl,
-              nome: nomeUrl || (empUrl === 'sdmoveis' ? 'SD Móveis Projetados' : 'Empresa'),
+              nome: (nomeUrl && !nomeUrl.toLowerCase().includes('tc m')) ? nomeUrl : (empUrl === 'sdmoveis' ? 'SD Móveis Projetados' : 'SD Móveis Projetados'),
               segmento: ehMoveis ? 'Móveis Planejados & Ambientes Sob Medida' : (params.get('seg') || 'Vidraçaria & Esquadrias'),
               telefone: params.get('tel') || '(85) 99611-9824',
               slogan: ehMoveis ? 'Ambientes Sob Medida' : 'Acompanhamento de Serviços',
@@ -3521,7 +3521,12 @@
         const lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
         const idAtivo = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
         if (Array.isArray(lista) && lista.length) {
-          const encontrada = lista.find(l => l.id === idAtivo);
+          if (idAtivo === 'tcmoveis' || idAtivo === 'tc') idAtivo = 'sdmoveis';
+        let encontrada = lista.find(l => l.id === idAtivo);
+        if (encontrada && encontrada.nome && encontrada.nome.toLowerCase().includes('tc m')) {
+          encontrada.nome = 'SD Móveis Projetados';
+          encontrada.id = 'sdmoveis';
+        }
           if (encontrada) return encontrada;
         }
       } catch(_) {}

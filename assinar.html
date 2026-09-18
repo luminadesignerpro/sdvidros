@@ -829,8 +829,10 @@
         const btnNotif = document.getElementById('btn-notificar-sdv');
         if (btnNotif) {
           const numZap = (info.lic.telefone ? info.lic.telefone.replace(/\D/g, '') : '5585996119824');
-          const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* 🪟\n\n'
-            + 'Olá ' + info.lic.nome + '! Já confirmei a aprovação da Ordem de Serviço ' + info.osFormatada + '!\n'
+          const licNomeSanitizado = (info.lic && info.lic.nome && !info.lic.nome.toLowerCase().includes('tc m')) ? info.lic.nome : 'SD Móveis Projetados';
+          const iconeAprov = (info.lic && (info.lic.id === 'sdmoveis' || licNomeSanitizado.toLowerCase().includes('móveis') || licNomeSanitizado.toLowerCase().includes('moveis'))) ? '🛋️' : '🪟';
+          const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* ' + iconeAprov + '\n\n'
+            + 'Olá ' + licNomeSanitizado + '! Já confirmei a aprovação da Ordem de Serviço ' + info.osFormatada + '!\n'
             + '👤 *Assinado por:* ' + nomeFinal + '\n\n'
             + '🔗 *Área Exclusiva do Cliente:* ' + info.urlCompleta + '\n'
             + '💡 _Acesse para acompanhar a produção, fotos e pagamentos._';
@@ -857,7 +859,8 @@
     // Link de ajuste via WhatsApp pré-configurado
     const btnAjustar = document.getElementById('btn-ajustar-zap');
     if (btnAjustar) {
-      const zapMsg = 'Olá SD Vidros! Recebi a proposta ' + numOs + ' (' + cliNome + '), mas gostaria de tirar algumas dúvidas e falar sobre ajustes antes de aprovar.';
+      const licAtivaAjuste = obterLicencaAtiva();
+    const zapMsg = 'Olá ' + (licAtivaAjuste.nome || 'SD Móveis Projetados') + '! Recebi a proposta ' + numOs + ' (' + cliNome + '), mas gostaria de tirar algumas dúvidas e falar sobre ajustes antes de aprovar.';
       btnAjustar.href = 'https://wa.me/5585996119824?text=' + encodeURIComponent(zapMsg);
     }
 
@@ -910,7 +913,7 @@ Itaitinga - CE, ${hoje}
 ══════════════════════════════════════════════════════════════
 
 CONTRATADA:
-Razão Social.....: ' + (obterLicencaAtiva().nome || 'SD Móveis Projetados') + '
+Razão Social.....: ${(obterLicencaAtiva().nome || 'SD Móveis Projetados')}
 WhatsApp.........: (85) 99611-9824
 Instagram........: @sdvidros
 Cidade...........: Itaitinga - CE
@@ -970,7 +973,7 @@ Itaitinga - CE, ${hoje}
 
 
 _________________________________________________
-CONTRATADA: ' + (obterLicencaAtiva().nome || 'SD Móveis Projetados') + '
+CONTRATADA: ${(obterLicencaAtiva().nome || 'SD Móveis Projetados')}
 WhatsApp: (85) 99611-9824
 
 
@@ -1216,8 +1219,10 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
             console.warn('Aviso storage assinatura:', e);
           }
 
-          const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* 🪟\n\n'
-            + 'Olá ' + info.lic.nome + '! Acabei de aprovar e assinar a Ordem de Serviço ' + info.osFormatada + '!\n'
+          const licNomeSanitizado = (info.lic && info.lic.nome && !info.lic.nome.toLowerCase().includes('tc m')) ? info.lic.nome : 'SD Móveis Projetados';
+          const iconeAprov = (info.lic && (info.lic.id === 'sdmoveis' || licNomeSanitizado.toLowerCase().includes('móveis') || licNomeSanitizado.toLowerCase().includes('moveis'))) ? '🛋️' : '🪟';
+          const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* ' + iconeAprov + '\n\n'
+            + 'Olá ' + licNomeSanitizado + '! Acabei de aprovar e assinar a Ordem de Serviço ' + info.osFormatada + '!\n'
             + '👤 *Assinado por:* ' + nomeFinal + '\n\n'
             + '🔗 *Área Exclusiva do Cliente:* ' + info.urlCompleta + '\n'
             + '💡 _Acompanhamento em tempo real da produção, fotos e pagamentos._\n\n'

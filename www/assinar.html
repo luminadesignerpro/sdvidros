@@ -605,11 +605,18 @@
   function obterLicencaAtiva() {
     const urlParams = new URLSearchParams(window.location.search);
     const empParam = (urlParams.get('empresa') || urlParams.get('lic') || '').toLowerCase().trim();
+    let empNomeParam = (urlParams.get('empNome') || urlParams.get('nome') || '').trim();
 
-    if (empParam.includes('moveis') || empParam === 'sdmoveis') {
+    // Se vier nome da empresa na URL, sanitiza contra 'Tc móveis'
+    if (empNomeParam && empNomeParam.toLowerCase().includes('tc m')) {
+      empNomeParam = 'SD Móveis Projetados';
+    }
+
+    // Regra prioritária para SD Móveis Projetados
+    if (empParam.includes('moveis') || empParam === 'sdmoveis' || empParam.includes('tc') || (empNomeParam && empNomeParam.toLowerCase().includes('móveis'))) {
       return {
         id: 'sdmoveis',
-        nome: 'SD Móveis Projetados',
+        nome: empNomeParam || 'SD Móveis Projetados',
         segmento: 'Móveis Planejados & Ambientes Sob Medida',
         slogan: 'Cozinhas Planejadas, Closets & Ambientes Sob Medida',
         telefone: '(85) 99611-9824',
@@ -620,12 +627,28 @@
 
     try {
       const lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
-      const idAtivo = empParam || localStorage.getItem('sdv_licenca_ativa') || 'sdmoveis';
+      let idAtivo = empParam || localStorage.getItem('sdv_licenca_ativa') || 'sdmoveis';
+      if (idAtivo === 'tcmoveis' || idAtivo === 'tc') idAtivo = 'sdmoveis';
       if (Array.isArray(lista) && lista.length) {
         const encontrada = lista.find(l => l.id === idAtivo || (empParam && (l.id.toLowerCase() === empParam || l.nome.toLowerCase().includes(empParam))));
-        if (encontrada) return encontrada;
+        if (encontrada) {
+          if (encontrada.nome && encontrada.nome.toLowerCase().includes('tc m')) {
+            encontrada.nome = 'SD Móveis Projetados';
+            encontrada.id = 'sdmoveis';
+          }
+          return encontrada;
+        }
       }
     } catch (_) {}
+
+    if (empNomeParam) {
+      return {
+        id: empParam || 'sdmoveis',
+        nome: empNomeParam,
+        segmento: 'Móveis Planejados & Ambientes Sob Medida',
+        telefone: '(85) 99611-9824'
+      };
+    }
 
     if (empParam && empParam !== 'sdvidros') {
       return {
@@ -829,8 +852,10 @@
         const btnNotif = document.getElementById('btn-notificar-sdv');
         if (btnNotif) {
           const numZap = (info.lic.telefone ? info.lic.telefone.replace(/\D/g, '') : '5585996119824');
-          const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* 🪟\n\n'
-            + 'Olá ' + info.lic.nome + '! Já confirmei a aprovação da Ordem de Serviço ' + info.osFormatada + '!\n'
+          const licNomeSanitizado = (info.lic && info.lic.nome && !info.lic.nome.toLowerCase().includes('tc m')) ? info.lic.nome : 'SD Móveis Projetados';
+          const iconeAprov = (info.lic && (info.lic.id === 'sdmoveis' || licNomeSanitizado.toLowerCase().includes('móveis') || licNomeSanitizado.toLowerCase().includes('moveis'))) ? '🛋️' : '🪟';
+          const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* ' + iconeAprov + '\n\n'
+            + 'Olá ' + licNomeSanitizado + '! Já confirmei a aprovação da Ordem de Serviço ' + info.osFormatada + '!\n'
             + '👤 *Assinado por:* ' + nomeFinal + '\n\n'
             + '🔗 *Área Exclusiva do Cliente:* ' + info.urlCompleta + '\n'
             + '💡 _Acesse para acompanhar a produção, fotos e pagamentos._';
@@ -857,7 +882,8 @@
     // Link de ajuste via WhatsApp pré-configurado
     const btnAjustar = document.getElementById('btn-ajustar-zap');
     if (btnAjustar) {
-      const zapMsg = 'Olá SD Vidros! Recebi a proposta ' + numOs + ' (' + cliNome + '), mas gostaria de tirar algumas dúvidas e falar sobre ajustes antes de aprovar.';
+      const licAtivaAjuste = obterLicencaAtiva();
+    const zapMsg = 'Olá ' + (licAtivaAjuste.nome || 'SD Móveis Projetados') + '! Recebi a proposta ' + numOs + ' (' + cliNome + '), mas gostaria de tirar algumas dúvidas e falar sobre ajustes antes de aprovar.';
       btnAjustar.href = 'https://wa.me/5585996119824?text=' + encodeURIComponent(zapMsg);
     }
 
@@ -910,7 +936,7 @@ Itaitinga - CE, ${hoje}
 ══════════════════════════════════════════════════════════════
 
 CONTRATADA:
-Razão Social.....: ' + (obterLicencaAtiva().nome || 'SD Móveis Projetados') + '
+Razão Social.....: ${(obterLicencaAtiva().nome || 'SD Móveis Projetados')}
 WhatsApp.........: (85) 99611-9824
 Instagram........: @sdvidros
 Cidade...........: Itaitinga - CE
@@ -970,7 +996,7 @@ Itaitinga - CE, ${hoje}
 
 
 _________________________________________________
-CONTRATADA: ' + (obterLicencaAtiva().nome || 'SD Móveis Projetados') + '
+CONTRATADA: ${(obterLicencaAtiva().nome || 'SD Móveis Projetados')}
 WhatsApp: (85) 99611-9824
 
 
@@ -1216,8 +1242,10 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
             console.warn('Aviso storage assinatura:', e);
           }
 
-          const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* 🪟\n\n'
-            + 'Olá ' + info.lic.nome + '! Acabei de aprovar e assinar a Ordem de Serviço ' + info.osFormatada + '!\n'
+          const licNomeSanitizado = (info.lic && info.lic.nome && !info.lic.nome.toLowerCase().includes('tc m')) ? info.lic.nome : 'SD Móveis Projetados';
+          const iconeAprov = (info.lic && (info.lic.id === 'sdmoveis' || licNomeSanitizado.toLowerCase().includes('móveis') || licNomeSanitizado.toLowerCase().includes('moveis'))) ? '🛋️' : '🪟';
+          const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* ' + iconeAprov + '\n\n'
+            + 'Olá ' + licNomeSanitizado + '! Acabei de aprovar e assinar a Ordem de Serviço ' + info.osFormatada + '!\n'
             + '👤 *Assinado por:* ' + nomeFinal + '\n\n'
             + '🔗 *Área Exclusiva do Cliente:* ' + info.urlCompleta + '\n'
             + '💡 _Acompanhamento em tempo real da produção, fotos e pagamentos._\n\n'
