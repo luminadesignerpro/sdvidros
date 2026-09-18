@@ -653,6 +653,15 @@
       <div class="input-wrap">
         <input id="gestao-empresa-pix" type="text" placeholder="Chave PIX para pagamentos">
       </div>
+    <div class="field">
+      <label>LINK / DOMÍNIO PRÓPRIO (OPCIONAL)</label>
+      <div class="input-wrap">
+        <input id="gestao-empresa-link" type="text" placeholder="Ex: https://sdmoveis.vercel.app ou deixe em branco">
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px;">
+        💡 Se desejar usar outro link ou domínio cadastrado (ex: sdmoveis.vercel.app), digite aqui.
+      </div>
+    </div>
     </div>
 
     <!-- MENSAGEM DO PAINEL DE GESTÃO -->
@@ -1191,6 +1200,12 @@
         https://sdvidros.vercel.app/sd-moveis
       </div>
       <input id="modal-link-inst-url" type="hidden" />
+      <div style="margin-top:8px;padding-top:6px;border-top:1px dashed rgba(56,189,248,0.25);display:flex;justify-content:space-between;align-items:center;">
+        <button type="button" onclick="alterarLinkCustomizadoModal()" style="background:none;border:none;color:#38bdf8;font-size:11px;font-weight:800;cursor:pointer;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+          <span>✏️</span> <span>Mudar Domínio / Link desta Empresa</span>
+        </button>
+        <span style="font-size:10px;color:rgba(255,255,255,0.45);">Personalizável</span>
+      </div>
     </div>
     <div id="modal-link-inst-feedback" style="display:none;font-size:11.5px;font-weight:800;color:#4ade80;margin-bottom:12px;text-align:center;padding:5px;background:rgba(34,197,94,0.1);border-radius:6px;border:1px solid rgba(34,197,94,0.25);"></div>
     <!-- Botão Principal: Enviar via WhatsApp -->
@@ -1815,9 +1830,10 @@
     const isVercel = host.includes('vercel.app') || window.location.protocol === 'https:';
 
     // Link curto específico e exclusivo para a empresa selecionada
-    const urlCurta = isVercel 
+    const urlPadrao = isVercel 
       ? `https://${host || 'sdvidros.vercel.app'}/${slug}`
       : `${window.location.origin}${window.location.pathname.replace(/\/login\.html$/i, '').replace(/\/$/, '')}/cliente.html?empresa=${encodeURIComponent(slug)}&nome=${encodeURIComponent(emp.nome)}&instalar=1&auto=1`;
+    const urlCurta = emp.linkPersonalizado || urlPadrao;
 
     const titEl = document.getElementById('modal-link-inst-titulo');
     const nomeEl = document.getElementById('modal-link-inst-nome');
@@ -1851,6 +1867,7 @@
       urlInp.value = urlCurta;
       urlInp.setAttribute('data-full-url', urlCurta);
       urlInp.setAttribute('data-emp-nome', emp.nome);
+      urlInp.setAttribute('data-emp-id', emp.id);
     }
     if (displayEl) {
       displayEl.textContent = urlCurta;
@@ -1907,9 +1924,35 @@
 
     if (feed) {
       feed.style.display = 'block';
-      feed.innerHTML = `✅ Link de <strong>${empNome}</strong> copiado com sucesso!\n<span style="font-family:monospace;font-size:11px;display:block;margin-top:2px;">${urlParaCopiar}</span>`;
+      feed.innerHTML = `✅ Link de <strong>${empNome}</strong> copiado com sucesso!<br><span style="font-family:monospace;font-size:11px;display:block;margin-top:2px;">${urlParaCopiar}</span>`;
       setTimeout(() => { feed.style.display = 'none'; }, 4000);
     }
+  }
+
+  function alterarLinkCustomizadoModal() {
+    const inp = document.getElementById('modal-link-inst-url');
+    const atual = (inp && inp.getAttribute('data-full-url')) || '';
+    const empNome = (inp && inp.getAttribute('data-emp-nome')) || 'Empresa';
+    const empId = (inp && inp.getAttribute('data-emp-id')) || '';
+
+    const novoLink = prompt(`✏️ PERSONALIZAR LINK DA EMPRESA (${empNome})\n\nO link padrão atual é:\n${atual}\n\nSe você configurou outro domínio na Vercel (ex: https://sdmoveis.vercel.app) ou tem um domínio próprio (ex: https://sdmoveis.com.br), digite abaixo:\n\n(Para voltar ao link padrão, basta apagar e dar OK)`, atual);
+    
+    if (novoLink === null) return;
+    
+    let linkFinal = novoLink.trim();
+    if (linkFinal && !linkFinal.startsWith('http://') && !linkFinal.startsWith('https://')) {
+      linkFinal = 'https://' + linkFinal;
+    }
+
+    const lista = obterLicencasLogin();
+    const emp = lista.find(e => e.id === empId);
+    if (emp) {
+      emp.linkPersonalizado = linkFinal;
+      salvarLicencasLogin(lista);
+    }
+
+    abrirModalLinkInstalacaoCliente(empId);
+    alert(`✅ Link da empresa "${empNome}" atualizado com sucesso!\n\nLink de envio agora:\n${linkFinal || 'Link Padrão do Sistema'}`);
   }
 
   function carregarPainelGestao(forcarId = null) {
@@ -2065,6 +2108,8 @@
 
     const inpPix = document.getElementById('gestao-empresa-pix');
     if (inpPix) inpPix.value = emp.pix || '';
+    const inpLink = document.getElementById('gestao-empresa-link');
+    if (inpLink) inpLink.value = emp.linkPersonalizado || '';
 
     const areaExcluir = document.getElementById('btn-excluir-empresa-area');
     if (areaExcluir) {
@@ -2112,6 +2157,8 @@
     const segmento = (document.getElementById('gestao-empresa-segmento').value || '').trim();
     const telefone = (document.getElementById('gestao-empresa-tel').value || '').trim();
     const pix = (document.getElementById('gestao-empresa-pix').value || '').trim();
+    const inpLinkVal = document.getElementById('gestao-empresa-link');
+    const linkPersonalizado = (inpLinkVal ? inpLinkVal.value : '').trim();
 
     if (!nome) {
       alert('Informe o nome da empresa.');
@@ -2128,6 +2175,7 @@
       lista[idx].slogan = segmento;
       lista[idx].telefone = telefone;
       lista[idx].pix = pix;
+    lista[idx].linkPersonalizado = linkPersonalizado;
       if (logoEmEdicaoBase64) lista[idx].logo = logoEmEdicaoBase64;
       if (bannerEmEdicaoBase64) lista[idx].banner = bannerEmEdicaoBase64;
     } else {
