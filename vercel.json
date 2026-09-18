@@ -34,12 +34,16 @@
       "destination": "/cliente.html?empresa=tcmoveis&nome=Tc%20m%C3%B3veis&instalar=1&auto=1"
     },
     {
-      "source": "/moveis",
-      "destination": "/cliente.html?empresa=sdmoveis&nome=SD%20M%C3%B3veis%20Projetados&instalar=1&auto=1"
+      "source": "/sd-moveis",
+      "destination": "/cliente.html?empresa=sdmoveis&nome=SD%20m%C3%B3veis&instalar=1&auto=1"
     },
     {
       "source": "/sdmoveis",
-      "destination": "/cliente.html?empresa=sdmoveis&nome=SD%20M%C3%B3veis%20Projetados&instalar=1&auto=1"
+      "destination": "/cliente.html?empresa=sdmoveis&nome=SD%20m%C3%B3veis&instalar=1&auto=1"
+    },
+    {
+      "source": "/moveis",
+      "destination": "/cliente.html?empresa=sdmoveis&nome=SD%20m%C3%B3veis&instalar=1&auto=1"
     },
     {
       "source": "/app/:empresa",

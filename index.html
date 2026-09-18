@@ -3176,7 +3176,7 @@ function obterSlugEmpresa(emp) {
   const nomeLower = String(emp.nome || '').toLowerCase().trim();
 
   if (idLower === 'sdvidros' || (nomeLower.includes('sd vidros') && !nomeLower.includes('moveis'))) return 'sdvidros';
-  if (idLower === 'sdmoveis' || nomeLower.includes('sd móveis') || nomeLower.includes('sd moveis')) return 'moveis';
+  if (idLower === 'sdmoveis' || idLower.includes('moveis') || nomeLower.includes('móveis') || nomeLower.includes('moveis')) return 'sd-moveis';
   if (nomeLower.includes('samuel') || idLower.includes('samuel')) return 'samuel-david';
   if (nomeLower.includes('tc') || idLower.includes('tc')) return 'tc-moveis';
 

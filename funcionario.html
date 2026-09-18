@@ -3809,7 +3809,7 @@
           const nl = nomeUrl.toLowerCase();
           if (nl.includes('samuel')) empUrl = 'samuel-david';
           else if (nl.includes('tc')) empUrl = 'tcmoveis';
-          else if (nl.includes('sd móveis') || nl.includes('sd moveis')) empUrl = 'sdmoveis';
+          else if (nl.includes('sd móveis') || nl.includes('sd moveis') || nl === 'sd-moveis') empUrl = 'sd-moveis';
           else if (nl.includes('vidros')) empUrl = 'sdvidros';
         }
 
@@ -3819,7 +3819,7 @@
           let enc = lista.find(l => l.id === empUrl || 
             (empUrl.includes('samuel') && (l.id.includes('samuel') || (l.nome && l.nome.toLowerCase().includes('samuel')))) ||
             (empUrl.includes('tc') && (l.id.includes('tc') || (l.nome && l.nome.toLowerCase().includes('tc')))) ||
-            (empUrl === 'sdmoveis' && l.id === 'sdmoveis') ||
+            ((empUrl.includes('moveis') || empUrl === 'sdmoveis' || empUrl === 'sd-moveis') && (l.id.includes('moveis') || (l.nome && l.nome.toLowerCase().includes('moveis')))) ||
             (empUrl === 'sdvidros' && l.id === 'sdvidros'));
 
           const ehMoveis = (nomeUrl && (nomeUrl.toLowerCase().includes('móveis') || nomeUrl.toLowerCase().includes('moveis') || nomeUrl.toLowerCase().includes('samuel') || nomeUrl.toLowerCase().includes('tc'))) || 
@@ -3829,7 +3829,7 @@
           const nomePadrao = (empUrl === 'sdvidros') ? 'SD Vidros' :
                              (empUrl.includes('samuel')) ? 'Samuel David' :
                              (empUrl.includes('tc')) ? 'Tc móveis' :
-                             (empUrl === 'sdmoveis') ? 'SD Móveis Projetados' : 'Empresa';
+                             (empUrl.includes('moveis') || empUrl === 'sdmoveis' || empUrl === 'sd-moveis') ? 'SD móveis' : 'Empresa';
 
           if (!enc) {
             enc = {
