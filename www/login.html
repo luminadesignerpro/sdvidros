@@ -678,8 +678,8 @@
       </div>
     </div>
     <div id="btn-excluir-empresa-area" style="text-align:center;margin-top:14px;display:none;">
-      <button type="button" onclick="excluirEmpresaSelecionada()" style="background:none;border:none;color:#ef4444;font-size:11.5px;cursor:pointer;text-decoration:underline;">
-        🗑️ Excluir esta Empresa cadastrada
+      <button type="button" onclick="excluirEmpresaSelecionada()" style="background:rgba(239,68,68,0.14);border:1.5px solid rgba(239,68,68,0.5);color:#f87171;padding:10px 18px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.25)'" onmouseout="this.style.background='rgba(239,68,68,0.14)'">
+        <span>🗑️</span> <span>Excluir Esta Empresa Selecionada</span>
       </button>
     </div>
   </div>
@@ -1936,7 +1936,7 @@
     container.innerHTML = lista.map(emp => {
       const isEdit = emp.id === idEditando;
       const isAtiva = emp.id === idAtivo;
-      const podeExcluir = (emp.id !== 'sdvidros' && emp.id !== 'sdmoveis');
+      const podeExcluir = lista.length > 1;
 
       return `
         <div style="background:${isEdit ? 'rgba(201,168,76,0.08)' : '#0e0e17'};border:1.5px solid ${isEdit ? 'var(--gold)' : 'rgba(255,255,255,0.08)'};border-radius:12px;padding:10px 12px;transition:all 0.2s;box-shadow:${isEdit ? '0 0 16px rgba(201,168,76,0.22)' : 'none'};">
@@ -1974,8 +1974,8 @@
             </button>
 
             ${podeExcluir ? `
-              <button type="button" onclick="excluirEmpresaPorId('${emp.id}')" style="margin-left:auto;padding:5px 8px;background:none;color:#ef4444;border:none;font-size:11px;cursor:pointer;opacity:0.8;" title="Excluir empresa">
-                🗑️
+              <button type="button" onclick="excluirEmpresaPorId('${emp.id}')" style="margin-left:auto;padding:5px 10px;background:rgba(239,68,68,0.14);border:1.2px solid rgba(239,68,68,0.45);color:#f87171;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.25)'" onmouseout="this.style.background='rgba(239,68,68,0.14)'" title="Excluir esta empresa">
+                <span>🗑️</span> <span>Excluir</span>
               </button>
             ` : ''}
           </div>
@@ -2043,7 +2043,7 @@
 
     const areaExcluir = document.getElementById('btn-excluir-empresa-area');
     if (areaExcluir) {
-      areaExcluir.style.display = (emp.id !== 'sdvidros' && emp.id !== 'sdmoveis') ? 'block' : 'none';
+      areaExcluir.style.display = (lista.length > 1) ? 'block' : 'none';
     }
 
     const idAtivo = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
@@ -2199,31 +2199,38 @@
   }
 
   function excluirEmpresaPorId(id) {
-    if (id === 'sdvidros' || id === 'sdmoveis') {
-      alert('As empresas padrão SD Vidros e SD Móveis não podem ser excluídas.');
+    const lista = obterLicencasLogin();
+    if (lista.length <= 1) {
+      alert('⚠️ Não é possível excluir esta empresa pois o sistema precisa manter pelo menos 1 empresa cadastrada.');
       return;
     }
 
-    const lista = obterLicencasLogin();
     const emp = lista.find(e => e.id === id);
-    if (!confirm(`Tem certeza que deseja excluir a empresa "${emp ? emp.nome : id}" do sistema?`)) return;
+    const nomeEmp = emp ? emp.nome : id;
+
+    if (!confirm(`⚠️ CONFIRMAÇÃO DE EXCLUSÃO\n\nDeseja realmente excluir a empresa "${nomeEmp}" do sistema?\n\nEsta ação removerá a empresa permanentemente da sua lista.`)) {
+      return;
+    }
 
     const novaLista = lista.filter(e => e.id !== id);
     salvarLicencasLogin(novaLista);
 
+    const proximoId = novaLista[0].id;
     if (localStorage.getItem('sdv_licenca_ativa') === id) {
-      localStorage.setItem('sdv_licenca_ativa', 'sdvidros');
+      localStorage.setItem('sdv_licenca_ativa', proximoId);
     }
-    idEmpresaEditando = 'sdvidros';
+    if (idEmpresaEditando === id) {
+      idEmpresaEditando = proximoId;
+    }
 
-    carregarPainelGestao('sdvidros');
+    carregarPainelGestao(idEmpresaEditando);
     renderEmpresasLogin();
-    atualizarVisualEmpresaLogin('sdvidros');
+    atualizarVisualEmpresaLogin(localStorage.getItem('sdv_licenca_ativa'));
 
     const msg = document.getElementById('gestao-msg');
     if (msg) {
-      msg.innerHTML = '<div class="msg suc">Empresa excluída com sucesso.</div>';
-      setTimeout(() => { if (msg) msg.innerHTML = ''; }, 3000);
+      msg.innerHTML = `<div style="background:rgba(239,68,68,0.15);border:1px solid #ef4444;color:#fca5a5;padding:10px 14px;border-radius:10px;font-size:12.5px;font-weight:700;margin-top:12px;text-align:center;">🗑️ Empresa "${nomeEmp}" foi excluída com sucesso!</div>`;
+      setTimeout(() => { if (msg) msg.innerHTML = ''; }, 4000);
     }
   }
 

@@ -3058,6 +3058,11 @@ function renderPainelLicenca() {
             <button type="button" class="btn btn-sm" style="margin-top:6px;width:100%;background:rgba(37,211,102,0.15);border:1px solid #22c55e;color:#4ade80;font-weight:800;" onclick="event.stopPropagation();compartilharLinkInstalacaoClienteIndex('${l.id}')">
               📲 Link para Cliente Instalar App
             </button>
+            ${lista.length > 1 ? `
+              <button type="button" class="btn btn-sm" style="margin-top:6px;width:100%;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);color:#f87171;font-weight:800;" onclick="event.stopPropagation();excluirLicencaIndex('${l.id}')">
+                🗑️ Excluir Empresa
+              </button>
+            ` : ''}
           </div>
         </div>
       `;
@@ -3206,6 +3211,30 @@ function compartilharLinkInstalacaoClienteIndex(id) {
       prompt(`Copie o link de instalação (${emp.nome}):`, urlInst);
     }
   }
+}
+
+function excluirLicencaIndex(id) {
+  const lista = obterLicencas();
+  if (lista.length <= 1) {
+    alert('⚠️ Não é possível excluir pois o sistema precisa manter pelo menos 1 empresa cadastrada.');
+    return;
+  }
+  const emp = lista.find(e => e.id === id);
+  const nome = emp ? emp.nome : id;
+  if (!confirm(`⚠️ CONFIRMAÇÃO DE EXCLUSÃO\n\nDeseja realmente excluir a empresa "${nome}"?\n\nEsta ação removerá a empresa do sistema.`)) {
+    return;
+  }
+
+  const novaLista = lista.filter(e => e.id !== id);
+  salvarLicencas(novaLista);
+
+  const ativa = obterLicencaAtiva();
+  if (ativa.id === id) {
+    ativarLicenca(novaLista[0].id);
+  } else {
+    renderPainelLicenca();
+  }
+  alert(`🗑️ Empresa "${nome}" foi excluída com sucesso!`);
 }
 
 function abrirSeletorArteLicenca(tipoAlvo = 'banner') {
