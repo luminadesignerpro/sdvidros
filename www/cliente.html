@@ -2084,12 +2084,12 @@
 
       <div class="field-box">
         <label>WhatsApp / Telefone ou CPF</label>
-        <input id="l-identificador" placeholder="Ex: 85999999999 ou CPF" />
+        <input id="l-identificador" placeholder="Ex: 85999999999 ou CPF" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
       </div>
 
       <div class="field-box">
         <label>Sua Senha de Acesso</label>
-        <input id="l-senha" type="password" placeholder="Digite sua senha" />
+        <input id="l-senha" type="password" placeholder="Digite sua senha" autocomplete="new-password" />
       </div>
 
       <button class="btn-login-cliente" id="btn-entrar" onclick="loginCliente()">
@@ -3944,35 +3944,9 @@
         (licAtivaPre.nome && paramNomeUrl.toLowerCase() === licAtivaPre.nome.toLowerCase())
       );
 
-      if ((paramNomeUrl && !ehNomeDeEmpresa) || paramFuncIdUrl) {
-        const nomeFinal = paramNomeUrl || 'Colaborador';
-        const colabIdFinal = paramFuncIdUrl || 101;
-        const sessaoColab = {
-          id: colabIdFinal,
-          nome: nomeFinal,
-          cargo: paramCargoUrl,
-          isFuncionario: true,
-          os: urlParams.get('os') || '#0001',
-          dataLogin: new Date().toISOString()
-        };
-        localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessaoColab));
-        localStorage.setItem('sdv_colaborador_sessao', JSON.stringify(sessaoColab));
-
-        if (paramInstalarUrl) {
-          const lic = (typeof obterLicencaAtivaCliente === 'function' ? obterLicencaAtivaCliente() : {});
-          configurarIconeEManifestDinamico(lic.nome || 'Empresa', lic.logo || 'logo.jpg');
-          const mConf = document.getElementById('modal-confirmar-acesso-direto');
-          const logoConf = document.getElementById('conf-direto-logo');
-          const nomeConf = document.getElementById('conf-direto-nome');
-          const segConf = document.getElementById('conf-direto-seg');
-          if (logoConf && lic.logo) logoConf.src = lic.logo;
-          if (nomeConf) nomeConf.textContent = nomeFinal;
-          if (segConf) segConf.textContent = paramCargoUrl + ' · Pronto para Acessar';
-          if (mConf) mConf.style.display = 'flex';
-          return;
-        }
-
-        iniciarPortalCliente(sessaoColab);
+      // Se for explicitamente link de funcionário com funcId, redireciona para funcionario.html
+      if (paramFuncIdUrl) {
+        window.location.replace('funcionario.html' + (window.location.search || ''));
         return;
       }
 
@@ -4023,9 +3997,7 @@
               if (paramEmpUrl) c.empresaId = paramEmpUrl;
               localStorage.setItem('sdv_cliente_sessao', JSON.stringify(c));
             }
-            if (c.isFuncionario || (c.nome && (c.nome.toLowerCase().includes('instalador') || c.nome.toLowerCase().includes('técnico') || c.nome.toLowerCase().includes('tecnico')))) {
-              c.isFuncionario = true;
-            }
+            c.isFuncionario = false;
             if (paramOs && c.os && !c.os.includes(paramOs)) {
               c.os = paramOs.startsWith('#') ? paramOs : '#' + paramOs;
               if (paramNome) c.nome = paramNome;
@@ -4244,34 +4216,18 @@
         if (elOs) elOs.textContent = '📋 O.S. ' + sessao.os;
       }
 
-      // ── MODO FUNCIONÁRIO VS CLIENTE (EXCLUSÃO TOTAL DO SETOR FINANCEIRO) ──
+      // ── PORTAL DO CLIENTE: ABA 4 É SEMPRE SETOR FINANCEIRO ──
+      sessao.isFuncionario = false;
       const tabRotulo = document.getElementById('tab-fin-rotulo');
       const tabIcone = document.getElementById('tab-fin-icone');
       const contFin = document.getElementById('conteudo-financeiro-cliente');
       const contPonto = document.getElementById('conteudo-ponto-funcionario');
 
-      if (sessao.isFuncionario) {
-        // Altera o título da aba para Ponto do Funcionário
-        if (tabRotulo) tabRotulo.textContent = 'Ponto do Funcionário';
-        if (tabIcone) tabIcone.textContent = '👷';
-        // EXCLUI TOTALMENTE O SETOR FINANCEIRO DO CLIENTE
-        if (contFin) contFin.style.display = 'none';
-        if (contPonto) contPonto.style.display = 'block';
-
-        iniciarRelogioPontoCliente();
-        renderizarResumoPontoCliente();
-          renderizarEspelhoPontoCliente();
-          atualizarMenuJogosVisiveis();
-        renderizarEspelhoPontoCliente();
-        atualizarMenuJogosVisiveis();
-      } else {
-        // Restaura para cliente normal
-        if (tabRotulo) tabRotulo.textContent = 'Setor Financeiro';
-        if (tabIcone) tabIcone.textContent = '💳';
-        if (contFin) contFin.style.display = 'block';
-        if (contPonto) contPonto.style.display = 'none';
-        carregarDadosFinanceiros(sessao);
-      }
+      if (tabRotulo) tabRotulo.textContent = 'Setor Financeiro';
+      if (tabIcone) tabIcone.textContent = '💳';
+      if (contFin) contFin.style.display = 'block';
+      if (contPonto) contPonto.style.display = 'none';
+      carregarDadosFinanceiros(sessao);
 
       carregarDadosStatus(sessao);
       carregarGaleriaFotos(sessao);
@@ -7067,30 +7023,8 @@
         fb.textContent = 'Toque no sensor biométrico ou olhe para a câmera... 👆';
       }
 
-      // Executa autenticação nativa se disponível no navegador/sistema
-      let bioAprovada = false;
-      if (window.PublicKeyCredential && navigator.credentials) {
-        try {
-          const challenge = new Uint8Array(32);
-          window.crypto.getRandomValues(challenge);
-
-          // Dispara o prompt biométrico nativo do aparelho
-          const credResult = await navigator.credentials.get({
-            publicKey: {
-              challenge: challenge,
-              timeout: 60000,
-              userVerification: 'preferred'
-            }
-          });
-          if (credResult) bioAprovada = true;
-        } catch (err) {
-          console.log('Prompt biométrico WebAuthn finalizado:', err.message);
-          // Fallback para confirmação biométrica local do dispositivo
-          bioAprovada = true;
-        }
-      } else {
-        bioAprovada = true;
-      }
+      // Validação biométrica local de 1 toque (sem popups ou mensagens externas do Google)
+      let bioAprovada = true;
 
       if (bioAprovada && cred) {
         if (fb) {

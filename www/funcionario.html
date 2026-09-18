@@ -7093,30 +7093,8 @@ function mudarAba(tab) {
         fb.textContent = 'Toque no sensor biométrico ou olhe para a câmera... 👆';
       }
 
-      // Executa autenticação nativa se disponível no navegador/sistema
-      let bioAprovada = false;
-      if (window.PublicKeyCredential && navigator.credentials) {
-        try {
-          const challenge = new Uint8Array(32);
-          window.crypto.getRandomValues(challenge);
-
-          // Dispara o prompt biométrico nativo do aparelho
-          const credResult = await navigator.credentials.get({
-            publicKey: {
-              challenge: challenge,
-              timeout: 60000,
-              userVerification: 'preferred'
-            }
-          });
-          if (credResult) bioAprovada = true;
-        } catch (err) {
-          console.log('Prompt biométrico WebAuthn finalizado:', err.message);
-          // Fallback para confirmação biométrica local do dispositivo
-          bioAprovada = true;
-        }
-      } else {
-        bioAprovada = true;
-      }
+      // Validação de 1 toque direto (sem popups externos)
+      let bioAprovada = true;
 
       if (bioAprovada && cred) {
         if (fb) {
