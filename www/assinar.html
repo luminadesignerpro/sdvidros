@@ -607,18 +607,13 @@
     const empParam = (urlParams.get('empresa') || urlParams.get('lic') || '').toLowerCase().trim();
     let empNomeParam = (urlParams.get('empNome') || urlParams.get('nome') || '').trim();
 
-    // Se vier nome da empresa na URL, sanitiza contra 'Tc móveis'
-    if (empNomeParam && empNomeParam.toLowerCase().includes('tc m')) {
-      empNomeParam = 'SD Móveis Projetados';
-    }
-
-    // Regra prioritária para SD Móveis Projetados
-    if (empParam.includes('moveis') || empParam === 'sdmoveis' || empParam.includes('tc') || (empNomeParam && empNomeParam.toLowerCase().includes('móveis'))) {
+    // Identificação dinâmica e precisa de qualquer empresa (Samuel David, Tc móveis, SD Vidros, etc.)
+    if (empNomeParam) {
+      const ehM = empNomeParam.toLowerCase().includes('móveis') || empNomeParam.toLowerCase().includes('moveis') || empNomeParam.toLowerCase().includes('samuel') || empNomeParam.toLowerCase().includes('tc');
       return {
-        id: 'sdmoveis',
-        nome: empNomeParam || 'SD Móveis Projetados',
-        segmento: 'Móveis Planejados & Ambientes Sob Medida',
-        slogan: 'Cozinhas Planejadas, Closets & Ambientes Sob Medida',
+        id: empParam || 'empresa',
+        nome: empNomeParam,
+        segmento: ehM ? 'Móveis Planejados & Ambientes Sob Medida' : 'Alumínio, Vidros & Esquadrias',
         telefone: '(85) 99611-9824',
         cidade: 'Itaitinga - CE',
         pix: '85996119824'
@@ -627,19 +622,22 @@
 
     try {
       const lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
-      let idAtivo = empParam || localStorage.getItem('sdv_licenca_ativa') || 'sdmoveis';
-      if (idAtivo === 'tcmoveis' || idAtivo === 'tc') idAtivo = 'sdmoveis';
+      let idAtivo = empParam || localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
       if (Array.isArray(lista) && lista.length) {
         const encontrada = lista.find(l => l.id === idAtivo || (empParam && (l.id.toLowerCase() === empParam || l.nome.toLowerCase().includes(empParam))));
-        if (encontrada) {
-          if (encontrada.nome && encontrada.nome.toLowerCase().includes('tc m')) {
-            encontrada.nome = 'SD Móveis Projetados';
-            encontrada.id = 'sdmoveis';
-          }
-          return encontrada;
-        }
+        if (encontrada) return encontrada;
       }
     } catch (_) {}
+
+    if (empParam.includes('samuel')) {
+      return { id: 'samuel-david', nome: 'Samuel David', segmento: 'Móveis Planejados & Ambientes Sob Medida', telefone: '(85) 99611-9824' };
+    }
+    if (empParam.includes('tc')) {
+      return { id: 'tcmoveis', nome: 'Tc móveis', segmento: 'Móveis planejados', telefone: '(85) 99611-9824' };
+    }
+    if (empParam === 'sdmoveis' || empParam.includes('moveis')) {
+      return { id: 'sdmoveis', nome: 'SD Móveis Projetados', segmento: 'Móveis Planejados & Ambientes Sob Medida', telefone: '(85) 99611-9824' };
+    }
 
     if (empNomeParam) {
       return {
@@ -852,7 +850,7 @@
         const btnNotif = document.getElementById('btn-notificar-sdv');
         if (btnNotif) {
           const numZap = (info.lic.telefone ? info.lic.telefone.replace(/\D/g, '') : '5585996119824');
-          const licNomeSanitizado = (info.lic && info.lic.nome && !info.lic.nome.toLowerCase().includes('tc m')) ? info.lic.nome : 'SD Móveis Projetados';
+          const licNomeSanitizado = (info.lic && info.lic.nome) ? info.lic.nome : 'Empresa';
           const iconeAprov = (info.lic && (info.lic.id === 'sdmoveis' || licNomeSanitizado.toLowerCase().includes('móveis') || licNomeSanitizado.toLowerCase().includes('moveis'))) ? '🛋️' : '🪟';
           const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* ' + iconeAprov + '\n\n'
             + 'Olá ' + licNomeSanitizado + '! Já confirmei a aprovação da Ordem de Serviço ' + info.osFormatada + '!\n'
@@ -1242,7 +1240,7 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
             console.warn('Aviso storage assinatura:', e);
           }
 
-          const licNomeSanitizado = (info.lic && info.lic.nome && !info.lic.nome.toLowerCase().includes('tc m')) ? info.lic.nome : 'SD Móveis Projetados';
+          const licNomeSanitizado = (info.lic && info.lic.nome) ? info.lic.nome : 'Empresa';
           const iconeAprov = (info.lic && (info.lic.id === 'sdmoveis' || licNomeSanitizado.toLowerCase().includes('móveis') || licNomeSanitizado.toLowerCase().includes('moveis'))) ? '🛋️' : '🪟';
           const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* ' + iconeAprov + '\n\n'
             + 'Olá ' + licNomeSanitizado + '! Acabei de aprovar e assinar a Ordem de Serviço ' + info.osFormatada + '!\n'

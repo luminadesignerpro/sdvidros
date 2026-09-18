@@ -829,7 +829,7 @@
         const btnNotif = document.getElementById('btn-notificar-sdv');
         if (btnNotif) {
           const numZap = (info.lic.telefone ? info.lic.telefone.replace(/\D/g, '') : '5585996119824');
-          const licNomeSanitizado = (info.lic && info.lic.nome && !info.lic.nome.toLowerCase().includes('tc m')) ? info.lic.nome : 'SD Móveis Projetados';
+          const licNomeSanitizado = (info.lic && info.lic.nome) ? info.lic.nome : 'Empresa';
           const iconeAprov = (info.lic && (info.lic.id === 'sdmoveis' || licNomeSanitizado.toLowerCase().includes('móveis') || licNomeSanitizado.toLowerCase().includes('moveis'))) ? '🛋️' : '🪟';
           const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* ' + iconeAprov + '\n\n'
             + 'Olá ' + licNomeSanitizado + '! Já confirmei a aprovação da Ordem de Serviço ' + info.osFormatada + '!\n'
@@ -1219,7 +1219,7 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
             console.warn('Aviso storage assinatura:', e);
           }
 
-          const licNomeSanitizado = (info.lic && info.lic.nome && !info.lic.nome.toLowerCase().includes('tc m')) ? info.lic.nome : 'SD Móveis Projetados';
+          const licNomeSanitizado = (info.lic && info.lic.nome) ? info.lic.nome : 'Empresa';
           const iconeAprov = (info.lic && (info.lic.id === 'sdmoveis' || licNomeSanitizado.toLowerCase().includes('móveis') || licNomeSanitizado.toLowerCase().includes('moveis'))) ? '🛋️' : '🪟';
           const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* ' + iconeAprov + '\n\n'
             + 'Olá ' + licNomeSanitizado + '! Acabei de aprovar e assinar a Ordem de Serviço ' + info.osFormatada + '!\n'

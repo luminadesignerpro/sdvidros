@@ -1169,13 +1169,23 @@
     </div>
 
     <!-- Campo de URL com Botão Copiar -->
-    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-      <input id="modal-link-inst-url" type="text" readonly style="flex:1;background:transparent;border:none;color:#38bdf8;font-size:12px;font-weight:700;font-family:monospace;outline:none;" />
-      <button type="button" id="btn-copiar-link-inst" onclick="copiarLinkInstalacaoCliente()" style="background:#1e293b;border:1px solid #38bdf8;color:#38bdf8;padding:6px 12px;border-radius:8px;font-size:11.5px;font-weight:800;cursor:pointer;white-space:nowrap;">
+    <!-- Identificação visual da Empresa no Link -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;padding:0 4px;">
+      <span style="font-size:11px;font-weight:800;color:rgba(255,255,255,0.7);display:flex;align-items:center;gap:4px;">
+        🔗 Link Oficial Exclusivo:
+      </span>
+      <span id="modal-link-inst-badge-empresa" style="font-size:11.5px;font-weight:900;color:#4ade80;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);padding:2px 10px;border-radius:6px;">
+        SD Vidros
+      </span>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+      <input id="modal-link-inst-url" type="text" readonly style="flex:1;background:transparent;border:none;color:#38bdf8;font-size:11.5px;font-weight:700;font-family:monospace;outline:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" />
+      <button type="button" id="btn-copiar-link-inst" onclick="copiarLinkInstalacaoCliente()" style="background:#1e293b;border:1px solid #38bdf8;color:#38bdf8;padding:6px 12px;border-radius:8px;font-size:11.5px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all 0.2s ease;">
         📋 Copiar
       </button>
     </div>
-
+    <div id="modal-link-inst-feedback" style="display:none;font-size:11.5px;font-weight:800;color:#4ade80;margin-bottom:12px;text-align:center;padding:4px;background:rgba(34,197,94,0.1);border-radius:6px;border:1px solid rgba(34,197,94,0.25);"></div>
     <!-- Botão Principal: Enviar via WhatsApp -->
     <a id="btn-whats-link-inst" href="#" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;padding:13px;background:linear-gradient(135deg,#16a34a,#15803d);border:1px solid #22c55e;color:#fff;font-weight:900;font-size:13.5px;border-radius:12px;text-decoration:none;box-shadow:0 4px 18px rgba(34,197,94,0.35);margin-bottom:12px;cursor:pointer;">
       <span>🟢</span> <span>Enviar Opção de Instalar no WhatsApp</span>
@@ -1386,30 +1396,6 @@
       if (!Array.isArray(lista) || !lista.length) {
         lista = LICENCAS_PADRAO;
         localStorage.setItem('sdv_licencas', JSON.stringify(lista));
-      } else {
-        let mudou = false;
-        lista.forEach(l => {
-          if (l.nome && (l.nome.toLowerCase().includes('tc m') || l.nome.toLowerCase().includes('tcmoveis') || l.id === 'tcmoveis' || l.id === 'tc')) {
-            l.id = 'sdmoveis';
-            l.nome = 'SD Móveis Projetados';
-            l.segmento = 'Móveis Planejados & Marcenaria de Luxo';
-            l.slogan = 'Cozinhas Planejadas, Closets & Ambientes Sob Medida';
-            l.banner = 'banner_moveis.jpg';
-            l.logo = 'logo_moveis.jpg';
-            l.tipoContrato = 'moveis';
-            mudou = true;
-          }
-          if (l.id !== 'sdvidros' && (!l.banner || l.banner === 'banner.jpg')) {
-            l.banner = (l.tipoContrato === 'moveis' || l.id === 'sdmoveis') ? 'banner_ia_moveis.jpg' : 'banner_ia_vidros.jpg';
-            mudou = true;
-          }
-        });
-        if (mudou) {
-          localStorage.setItem('sdv_licencas', JSON.stringify(lista));
-          if (localStorage.getItem('sdv_licenca_ativa') === 'tcmoveis' || localStorage.getItem('sdv_licenca_ativa') === 'tc') {
-            localStorage.setItem('sdv_licenca_ativa', 'sdmoveis');
-          }
-        }
       }
       return lista;
     } catch (_) {
@@ -1790,32 +1776,66 @@
     abrirModalLinkInstalacaoCliente(novoId);
   }
 
+  
+  function obterSlugEmpresa(emp) {
+    if (!emp) return 'sdvidros';
+    const idLower = String(emp.id || '').toLowerCase().trim();
+    const nomeLower = String(emp.nome || '').toLowerCase().trim();
+
+    if (idLower === 'sdvidros' || (nomeLower.includes('sd vidros') && !nomeLower.includes('moveis'))) return 'sdvidros';
+    if (idLower === 'sdmoveis' || nomeLower.includes('sd móveis') || nomeLower.includes('sd moveis')) return 'moveis';
+    if (nomeLower.includes('samuel') || idLower.includes('samuel')) return 'samuel-david';
+    if (nomeLower.includes('tc') || idLower.includes('tc')) return 'tc-moveis';
+
+    return String(emp.nome || emp.id)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'app';
+  }
+
   function abrirModalLinkInstalacaoCliente(empId) {
     if (!empId) {
       empId = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
     }
     const lista = obterLicencasLogin();
-    const emp = lista.find(e => e.id === empId) || lista[0] || LICENCAS_PADRAO[0];
+    const emp = lista.find(e => e.id === empId || String(e.id).toLowerCase() === String(empId).toLowerCase()) || lista[0] || LICENCAS_PADRAO[0];
 
-    const baseOrigin = window.location.origin;
-    const basePath = window.location.pathname.replace(/\/login\.html$/i, '').replace(/\/$/, '');
-    const urlInst = `${baseOrigin}${basePath}/cliente.html?empresa=${encodeURIComponent(emp.id)}&nome=${encodeURIComponent(emp.nome)}&instalar=1&auto=1`;
+    const slug = obterSlugEmpresa(emp);
+    const host = window.location.host;
+    const isVercel = host.includes('vercel.app') || window.location.protocol === 'https:';
+
+    // Link curto específico e exclusivo para a empresa selecionada
+    const urlCurta = isVercel 
+      ? `https://${host || 'sdvidros.vercel.app'}/${slug}`
+      : `${window.location.origin}${window.location.pathname.replace(/\/login\.html$/i, '').replace(/\/$/, '')}/cliente.html?empresa=${encodeURIComponent(slug)}&nome=${encodeURIComponent(emp.nome)}&instalar=1&auto=1`;
 
     const titEl = document.getElementById('modal-link-inst-titulo');
     const nomeEl = document.getElementById('modal-link-inst-nome');
     const segEl = document.getElementById('modal-link-inst-seg');
     const logoEl = document.getElementById('modal-link-inst-logo');
     const urlInp = document.getElementById('modal-link-inst-url');
+    const badgeEmp = document.getElementById('modal-link-inst-badge-empresa');
     const btnZap = document.getElementById('btn-whats-link-inst');
+    const feed = document.getElementById('modal-link-inst-feedback');
 
     if (titEl) titEl.textContent = `Enviar Opção de Instalar: ${emp.nome}`;
     if (nomeEl) nomeEl.textContent = emp.nome;
     if (segEl) segEl.textContent = emp.segmento || 'Área Exclusiva do Cliente';
     if (logoEl) logoEl.src = emp.logo || 'logo.jpg';
-    if (urlInp) urlInp.value = urlInst;
+    if (badgeEmp) badgeEmp.textContent = emp.nome;
+    if (feed) feed.style.display = 'none';
+
+    if (urlInp) {
+      urlInp.value = urlCurta;
+      urlInp.setAttribute('data-full-url', urlCurta);
+      urlInp.setAttribute('data-emp-nome', emp.nome);
+    }
 
     if (btnZap) {
-      const msg = `📲 *INSTALAR APLICATIVO OFICIAL*\n🏢 *${emp.nome}*\n\nOlá! Você recebeu a opção de instalar o aplicativo oficial da *${emp.nome}* no seu celular para acompanhar orçamentos e serviços.\n\n👉 *Toque para Instalar e Acessar:*\n${urlInst}\n\n*(Basta abrir e tocar em "Confirmar" para já estar pronto para acessar!)*`;
+      const msg = `📲 *INSTALAR APLICATIVO OFICIAL*\n🏢 *${emp.nome.toUpperCase()}*\n${emp.segmento ? `_${emp.segmento}_\n` : ''}\nOlá! Você recebeu a opção de instalar o aplicativo oficial da *${emp.nome}* no seu celular para acompanhar orçamentos e serviços.\n\n👉 *Toque para Instalar e Acessar:*\n${urlCurta}\n\n*(Basta abrir e tocar em "Confirmar" para já estar pronto para acessar!)*`;
       btnZap.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
     }
 
@@ -1832,26 +1852,38 @@
   function copiarLinkInstalacaoCliente() {
     const inp = document.getElementById('modal-link-inst-url');
     const btn = document.getElementById('btn-copiar-link-inst');
+    const feed = document.getElementById('modal-link-inst-feedback');
     if (!inp) return;
 
-    inp.focus();
-    inp.select();
+    const urlParaCopiar = inp.getAttribute('data-full-url') || inp.value;
+    const empNome = inp.getAttribute('data-emp-nome') || 'Empresa';
+
     try {
-      navigator.clipboard.writeText(inp.value);
+      navigator.clipboard.writeText(urlParaCopiar);
     } catch (_) {
+      inp.focus();
+      inp.select();
       document.execCommand('copy');
     }
 
     if (btn) {
       const orig = btn.innerHTML;
-      btn.innerHTML = '✓ Copiado!';
-      btn.style.background = '#10b981';
+      btn.innerHTML = `✓ Copiado (${empNome})!`;
+      btn.style.background = '#16a34a';
+      btn.style.borderColor = '#22c55e';
       btn.style.color = '#fff';
       setTimeout(() => {
         btn.innerHTML = orig;
         btn.style.background = '#1e293b';
+        btn.style.borderColor = '#38bdf8';
         btn.style.color = '#38bdf8';
-      }, 2000);
+      }, 2500);
+    }
+
+    if (feed) {
+      feed.style.display = 'block';
+      feed.innerHTML = `✅ Link de <strong>${empNome}</strong> copiado com sucesso!`;
+      setTimeout(() => { feed.style.display = 'none'; }, 3500);
     }
   }
 

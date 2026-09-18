@@ -1,9 +1,53 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/", "destination": "/login.html" },
-    { "source": "/cliente", "destination": "/cliente.html" },
-    { "source": "/funcionario", "destination": "/funcionario.html" },
-    { "source": "/moveis", "destination": "/cliente.html?empresa=sdmoveis&nome=SD%20M%C3%B3veis%20Projetados&instalar=1&auto=1" }
+    {
+      "source": "/",
+      "destination": "/login.html"
+    },
+    {
+      "source": "/cliente",
+      "destination": "/cliente.html"
+    },
+    {
+      "source": "/funcionario",
+      "destination": "/funcionario.html"
+    },
+    {
+      "source": "/sdvidros",
+      "destination": "/cliente.html?empresa=sdvidros&nome=SD%20Vidros&instalar=1&auto=1"
+    },
+    {
+      "source": "/samuel-david",
+      "destination": "/cliente.html?empresa=samuel-david&nome=Samuel%20David&instalar=1&auto=1"
+    },
+    {
+      "source": "/samuel",
+      "destination": "/cliente.html?empresa=samuel-david&nome=Samuel%20David&instalar=1&auto=1"
+    },
+    {
+      "source": "/tc-moveis",
+      "destination": "/cliente.html?empresa=tcmoveis&nome=Tc%20m%C3%B3veis&instalar=1&auto=1"
+    },
+    {
+      "source": "/tc",
+      "destination": "/cliente.html?empresa=tcmoveis&nome=Tc%20m%C3%B3veis&instalar=1&auto=1"
+    },
+    {
+      "source": "/moveis",
+      "destination": "/cliente.html?empresa=sdmoveis&nome=SD%20M%C3%B3veis%20Projetados&instalar=1&auto=1"
+    },
+    {
+      "source": "/sdmoveis",
+      "destination": "/cliente.html?empresa=sdmoveis&nome=SD%20M%C3%B3veis%20Projetados&instalar=1&auto=1"
+    },
+    {
+      "source": "/app/:empresa",
+      "destination": "/cliente.html?empresa=:empresa&instalar=1&auto=1"
+    },
+    {
+      "source": "/c/:empresa",
+      "destination": "/cliente.html?empresa=:empresa&instalar=1&auto=1"
+    }
   ]
 }

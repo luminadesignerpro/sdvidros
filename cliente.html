@@ -3474,27 +3474,41 @@
     function obterLicencaAtivaCliente() {
       try {
         const params = new URLSearchParams(window.location.search);
-        let empUrl = params.get('empresa') || params.get('emp');
-        const nomeUrl = params.get('nome') || params.get('empNome');
+        let empUrl = (params.get('empresa') || params.get('emp') || '').toLowerCase().trim();
+        let nomeUrl = params.get('nome') || params.get('empNome');
 
-        // Se veio SD Móveis pelo nome na URL mas sem ID específico
-        if (!empUrl && nomeUrl && (nomeUrl.toLowerCase().includes('sd móveis') || nomeUrl.toLowerCase().includes('sd moveis'))) {
-          empUrl = 'sdmoveis';
+        // Mapeamento automático de rotas e nomes para as empresas correspondentes
+        if (!empUrl && nomeUrl) {
+          const nl = nomeUrl.toLowerCase();
+          if (nl.includes('samuel')) empUrl = 'samuel-david';
+          else if (nl.includes('tc')) empUrl = 'tcmoveis';
+          else if (nl.includes('sd móveis') || nl.includes('sd moveis')) empUrl = 'sdmoveis';
+          else if (nl.includes('vidros')) empUrl = 'sdvidros';
         }
 
         if (empUrl) {
           localStorage.setItem('sdv_licenca_ativa', empUrl);
           let lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
-          let enc = lista.find(l => l.id === empUrl);
-          const ehMoveis = (nomeUrl && (nomeUrl.toLowerCase().includes('móveis') || nomeUrl.toLowerCase().includes('moveis'))) || 
-                           (enc && enc.nome && (enc.nome.toLowerCase().includes('móveis') || enc.nome.toLowerCase().includes('moveis'))) || 
-                           empUrl === 'sdmoveis';
+          let enc = lista.find(l => l.id === empUrl || 
+            (empUrl.includes('samuel') && (l.id.includes('samuel') || (l.nome && l.nome.toLowerCase().includes('samuel')))) ||
+            (empUrl.includes('tc') && (l.id.includes('tc') || (l.nome && l.nome.toLowerCase().includes('tc')))) ||
+            (empUrl === 'sdmoveis' && l.id === 'sdmoveis') ||
+            (empUrl === 'sdvidros' && l.id === 'sdvidros'));
+
+          const ehMoveis = (nomeUrl && (nomeUrl.toLowerCase().includes('móveis') || nomeUrl.toLowerCase().includes('moveis') || nomeUrl.toLowerCase().includes('samuel') || nomeUrl.toLowerCase().includes('tc'))) || 
+                           (enc && enc.nome && (enc.nome.toLowerCase().includes('móveis') || enc.nome.toLowerCase().includes('moveis') || enc.nome.toLowerCase().includes('samuel') || enc.nome.toLowerCase().includes('tc'))) || 
+                           empUrl === 'sdmoveis' || empUrl.includes('samuel') || empUrl.includes('tc');
+
+          const nomePadrao = (empUrl === 'sdvidros') ? 'SD Vidros' :
+                             (empUrl.includes('samuel')) ? 'Samuel David' :
+                             (empUrl.includes('tc')) ? 'Tc móveis' :
+                             (empUrl === 'sdmoveis') ? 'SD Móveis Projetados' : 'Empresa';
 
           if (!enc) {
             enc = {
               id: empUrl,
-              nome: (nomeUrl && !nomeUrl.toLowerCase().includes('tc m')) ? nomeUrl : (empUrl === 'sdmoveis' ? 'SD Móveis Projetados' : 'SD Móveis Projetados'),
-              segmento: ehMoveis ? 'Móveis Planejados & Ambientes Sob Medida' : (params.get('seg') || 'Vidraçaria & Esquadrias'),
+              nome: nomeUrl || nomePadrao,
+              segmento: ehMoveis ? (empUrl.includes('tc') ? 'Móveis planejados' : 'Móveis Planejados & Ambientes Sob Medida') : (params.get('seg') || 'Alumínio, Vidros & Esquadrias'),
               telefone: params.get('tel') || '(85) 99611-9824',
               slogan: ehMoveis ? 'Ambientes Sob Medida' : 'Acompanhamento de Serviços',
               logo: ehMoveis ? 'logo_moveis.jpg' : (params.get('logo') || 'logo.jpg'),
@@ -3504,13 +3518,11 @@
             localStorage.setItem('sdv_licencas', JSON.stringify(lista));
             return enc;
           } else {
-            // Atualiza com o nome e segmento mais recentes se vieram na URL
             if (nomeUrl && enc.nome !== nomeUrl) {
               enc.nome = nomeUrl;
             }
             if (ehMoveis) {
-              enc.segmento = 'Móveis Planejados & Ambientes Sob Medida';
-              enc.slogan = 'Ambientes Sob Medida';
+              enc.segmento = enc.segmento || (empUrl.includes('tc') ? 'Móveis planejados' : 'Móveis Planejados & Ambientes Sob Medida');
               if (!enc.logo || enc.logo === 'logo.jpg') enc.logo = 'logo_moveis.jpg';
               if (!enc.banner || enc.banner === 'banner.jpg' || enc.banner === 'banner_ia_vidros.jpg') enc.banner = 'banner_ia_moveis.jpg';
             }
@@ -3521,12 +3533,7 @@
         const lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
         const idAtivo = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
         if (Array.isArray(lista) && lista.length) {
-          if (idAtivo === 'tcmoveis' || idAtivo === 'tc') idAtivo = 'sdmoveis';
-        let encontrada = lista.find(l => l.id === idAtivo);
-        if (encontrada && encontrada.nome && encontrada.nome.toLowerCase().includes('tc m')) {
-          encontrada.nome = 'SD Móveis Projetados';
-          encontrada.id = 'sdmoveis';
-        }
+          let encontrada = lista.find(l => l.id === idAtivo);
           if (encontrada) return encontrada;
         }
       } catch(_) {}

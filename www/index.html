@@ -3164,22 +3164,46 @@ function processarUploadImagemLicenca(event, tipo) {
   reader.readAsDataURL(file);
 }
 
+
+function obterSlugEmpresa(emp) {
+  if (!emp) return 'sdvidros';
+  const idLower = String(emp.id || '').toLowerCase().trim();
+  const nomeLower = String(emp.nome || '').toLowerCase().trim();
+
+  if (idLower === 'sdvidros' || (nomeLower.includes('sd vidros') && !nomeLower.includes('moveis'))) return 'sdvidros';
+  if (idLower === 'sdmoveis' || nomeLower.includes('sd móveis') || nomeLower.includes('sd moveis')) return 'moveis';
+  if (nomeLower.includes('samuel') || idLower.includes('samuel')) return 'samuel-david';
+  if (nomeLower.includes('tc') || idLower.includes('tc')) return 'tc-moveis';
+
+  return String(emp.nome || emp.id)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'app';
+}
+
 function compartilharLinkInstalacaoClienteIndex(id) {
   const lista = obterLicencas();
   const emp = lista.find(e => e.id === id) || lista[0];
-  const origin = window.location.origin;
-  const path = window.location.pathname.replace(/\/index\.html$/i, '').replace(/\/$/, '');
-  const urlInst = `${origin}${path}/cliente.html?empresa=${encodeURIComponent(emp.id)}&nome=${encodeURIComponent(emp.nome)}&instalar=1`;
-  const msg = `Olá! Acesse e instale o aplicativo oficial da *${emp.nome}* no seu celular para acompanhar seus orçamentos, aprovações e novidades:\n\n👉 ${urlInst}\n\nAbra o link e toque em "Instalar" ou "Adicionar à Tela Inicial"!`;
+  const slug = obterSlugEmpresa(emp);
+  const host = window.location.host;
+  const isVercel = host.includes('vercel.app') || window.location.protocol === 'https:';
+  const urlInst = isVercel
+    ? `https://${host || 'sdvidros.vercel.app'}/${slug}`
+    : `${window.location.origin}${window.location.pathname.replace(/\/index\.html$/i, '').replace(/\/$/, '')}/cliente.html?empresa=${encodeURIComponent(slug)}&nome=${encodeURIComponent(emp.nome)}&instalar=1`;
 
-  if (confirm(`📲 LINK DE INSTALAÇÃO DO APP PARA CLIENTES (${emp.nome}):\n\n${urlInst}\n\nDeseja abrir o WhatsApp agora para enviar aos clientes?`)) {
+  const msg = `📲 *INSTALAR APLICATIVO OFICIAL*\n🏢 *${emp.nome.toUpperCase()}*\n${emp.segmento ? `_${emp.segmento}_\n` : ''}\nOlá! Você recebeu a opção de instalar o aplicativo oficial da *${emp.nome}* no seu celular para acompanhar seus orçamentos e serviços.\n\n👉 *Toque para Instalar:*\n${urlInst}\n\n*(Basta abrir e tocar em "Confirmar" para acessar imediatamente!)*`;
+
+  if (confirm(`📲 LINK DE INSTALAÇÃO DO APP (${emp.nome}):\n\n${urlInst}\n\nDeseja abrir o WhatsApp agora para enviar aos clientes?`)) {
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
   } else {
     try {
       navigator.clipboard.writeText(urlInst);
-      alert('✓ Link copiado para a área de transferência!');
+      alert(`✓ Link de ${emp.nome} copiado para a área de transferência!\n\n${urlInst}`);
     } catch (_) {
-      prompt('Copie o link de instalação abaixo:', urlInst);
+      prompt(`Copie o link de instalação (${emp.nome}):`, urlInst);
     }
   }
 }
