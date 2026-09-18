@@ -6413,6 +6413,17 @@
       const hFinal = Math.floor(totalMin / 60);
       const mFinal = totalMin % 60;
       p.tempoTrabalhado = `${String(hFinal).padStart(2, '0')}h ${String(mFinal).padStart(2, '0')}m`;
+      let vHora = (colab && colab.valorHora) ? Number(colab.valorHora) : 0;
+      if (!vHora && colab && colab.salario) {
+        const jH = parseInt(String(colab.jornada || '44').replace(/\D/g, '')) || 44;
+        vHora = Number(colab.salario) / (jH * 4.545);
+      }
+      const valorDia = (totalMin / 60) * vHora;
+      p.valorSalario = 'R$ ' + valorDia.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (vHora > 0) {
+        const vMin = vHora / 60;
+        p.valorHoraInfo = 'R$ ' + vHora.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '/h · R$ ' + vMin.toFixed(3).replace('.', ',') + '/min';
+      }
 
       if (idxFunc !== -1) funcionarios[idxFunc] = colab;
       else funcionarios.push(colab);

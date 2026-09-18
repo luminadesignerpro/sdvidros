@@ -578,6 +578,10 @@
       color: #38bdf8; font-weight: 800; font-size: 11.5px; padding: 4px 10px;
       border-radius: 999px; display: inline-block; white-space: nowrap;
     }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.75); }
+    }
     .ponto-hora-ent { color: #4ade80; font-weight: 700; }
     .ponto-hora-alm { color: #fbbf24; font-weight: 700; }
     .ponto-hora-vol { color: #2dd4bf; font-weight: 700; }
@@ -6254,6 +6258,24 @@ function iniciarRelogioPonto() {
   }
 }
 
+function ehDataHoje(dataStr) {
+  if (!dataStr) return false;
+  const hoje = getHojeFormatado(); // DD/MM/YYYY
+  if (dataStr === hoje) return true;
+  const partes = String(dataStr).split(/[-/]/);
+  if (partes.length === 3) {
+    if (partes[0].length === 4) {
+      // YYYY-MM-DD -> DD/MM/YYYY
+      const d = `${partes[2].padStart(2, '0')}/${partes[1].padStart(2, '0')}/${partes[0]}`;
+      return d === hoje;
+    } else {
+      const d = `${partes[0].padStart(2, '0')}/${partes[1].padStart(2, '0')}/${partes[2]}`;
+      return d === hoje;
+    }
+  }
+  return false;
+}
+
 function atualizarRelogioDisplay() {
   const agora = new Date();
   const diasSemana = ['DOMINGO', 'SEGUNDA-FEIRA', 'TERÇA-FEIRA', 'QUARTA-FEIRA', 'QUINTA-FEIRA', 'SEXTA-FEIRA', 'SÁBADO'];
@@ -6266,12 +6288,46 @@ function atualizarRelogioDisplay() {
   const elHora = document.getElementById('ponto-hora-atual');
   if (elData) elData.textContent = strData;
   if (elHora) elHora.textContent = strHora;
+
+  // Atualização em tempo real: a cada 5 segundos recalcula minutos trabalhados e valores ao vivo na tela
+  if (pontosLista && pontosLista.some(p => ehDataHoje(p.data) && (p.entrada1 || p.voltaAlmoco || p.horaExtraInicial) && !p.saidaFinal)) {
+    if (agora.getSeconds() % 5 === 0) {
+      atualizarEspelhoPontoTempoReal();
+    }
+  }
+}
+
+function atualizarEspelhoPontoTempoReal() {
+  const tbody = document.getElementById('espelho-ponto-tbody');
+  if (!tbody) return;
+
+  pontosLista.forEach(p => {
+    if (ehDataHoje(p.data) && (p.entrada1 || p.voltaAlmoco || p.horaExtraInicial) && !p.saidaFinal) {
+      recalcularHorasPonto(p);
+      const row = tbody.querySelector(`tr[data-ponto-id="${p.id}"]`);
+      if (row) {
+        const badgeEl = row.querySelector('.ponto-badge-tempo');
+        if (badgeEl) {
+          badgeEl.innerHTML = `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#4ade80;margin-right:6px;animation:pulseDot 1.5s infinite;vertical-align:middle;"></span>${p.tempoTrabalhado}`;
+        }
+        const valDiv = row.querySelector('.ponto-salario-val');
+        if (valDiv) {
+          valDiv.textContent = p.valorSalario;
+        }
+        const subDiv = row.querySelector('.ponto-salario-sub');
+        if (subDiv && p.valorHoraInfo) {
+          subDiv.textContent = p.valorHoraInfo;
+        }
+      }
+    }
+  });
 }
 
 function renderPontoView() {
   iniciarRelogioPonto();
   atualizarSelectColaboradoresPonto();
   renderFuncionarios();
+  inicializarPontoHojeSeNecessario();
   renderEspelhoPonto();
 }
 
@@ -6287,7 +6343,12 @@ function atualizarSelectColaboradoresPonto() {
 
   if (selRelogio) {
     selRelogio.innerHTML = '<option value="">Selecione o Funcionário...</option>' + opts;
-    if (valAtual) selRelogio.value = valAtual;
+    if (valAtual && funcionariosLista.some(f => String(f.id) === String(valAtual))) {
+      selRelogio.value = valAtual;
+    } else if (funcionariosLista.length > 0) {
+      // Auto-seleciona o primeiro funcionário (ex: Samuel David) para agilidade no mobile
+      selRelogio.value = funcionariosLista[0].id;
+    }
   }
   if (selFiltro) {
     selFiltro.innerHTML = '<option value="">Todos os Funcionários</option>' + opts;
@@ -6298,6 +6359,7 @@ function atualizarSelectColaboradoresPonto() {
   }
   const badge = document.getElementById('funcionarios-count');
   if (badge) badge.textContent = funcionariosLista.length;
+  atualizarStatusBatidaColaborador();
 }
 
 function renderFuncionarios() {
@@ -6360,6 +6422,39 @@ function renderFuncionarios() {
   }).join('');
 }
 
+function inicializarPontoHojeSeNecessario() {
+  if (!funcionariosLista || !funcionariosLista.length) return;
+  const hoje = getHojeFormatado();
+  let alterou = false;
+
+  funcionariosLista.forEach(f => {
+    // Se o colaborador está cadastrado e não tem registro no espelho para hoje, inicializa
+    const jaTem = pontosLista.some(p => (p.colaboradorId === f.id || (p.colaboradorNome && p.colaboradorNome.toLowerCase() === f.nome.toLowerCase())) && ehDataHoje(p.data));
+    if (!jaTem) {
+      const pNovo = {
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        colaboradorId: f.id,
+        colaboradorNome: f.nome,
+        data: hoje,
+        entrada1: '08:00',
+        saidaAlmoco: '12:00',
+        voltaAlmoco: '13:00',
+        saidaFinal: '',
+        tempoTrabalhado: '00h 00m',
+        valorSalario: 'R$ 0,00',
+        status: f.status || 'Presente'
+      };
+      recalcularHorasPonto(pNovo, f);
+      pontosLista.unshift(pNovo);
+      alterou = true;
+    }
+  });
+
+  if (alterou) {
+    save(K.timesheet, pontosLista);
+  }
+}
+
 function renderEspelhoPonto() {
   const tbody = document.getElementById('espelho-ponto-tbody');
   if (!tbody) return;
@@ -6367,9 +6462,21 @@ function renderEspelhoPonto() {
   const selFiltro = document.getElementById('filtro-ponto-colaborador');
   const filtroId = selFiltro && selFiltro.value ? parseInt(selFiltro.value) : null;
 
+  // Garante que todos os registros tenham recálculo exato de horas, minutos trabalhados e salário
+  pontosLista.forEach(p => {
+    recalcularHorasPonto(p);
+  });
+
   let lista = pontosLista.slice();
   if (filtroId) {
     lista = lista.filter(p => p.colaboradorId === filtroId);
+  }
+
+  // Se não há registros e há colaboradores ativos, cria hoje para que os valores apareçam
+  if (!lista.length && funcionariosLista.length > 0 && !filtroId) {
+    inicializarPontoHojeSeNecessario();
+    pontosLista.forEach(p => recalcularHorasPonto(p));
+    lista = pontosLista.slice();
   }
 
   if (!lista.length) {
@@ -6378,26 +6485,35 @@ function renderEspelhoPonto() {
   }
 
   tbody.innerHTML = lista.map(p => {
-    const f = funcionariosLista.find(x => x.id === p.colaboradorId);
+    const f = funcionariosLista.find(x => x.id === p.colaboradorId) || funcionariosLista.find(x => (x.nome||'').toLowerCase() === (p.colaboradorNome||'').toLowerCase());
     const nomeColab = f ? f.nome : (p.colaboradorNome || 'Colaborador');
-    const vhInfo = p.valorHoraInfo || (f && f.valorHora ? `(R$ ${f.valorHora.toFixed(2).replace('.',',')}/h)` : '');
+    const vhInfo = p.valorHoraInfo || (f && f.valorHora ? `R$ ${Number(f.valorHora).toFixed(2).replace('.',',')}/h` : '');
+
+    const badgeTempo = p.emAndamento
+      ? `<span class="ponto-badge-tempo" style="background:rgba(34,197,94,0.18);color:#4ade80;border:1px solid rgba(34,197,94,0.35);box-shadow:0 0 10px rgba(34,197,94,0.25);" title="Em andamento: atualizando a cada minuto trabalhado"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#4ade80;margin-right:6px;animation:pulseDot 1.5s infinite;vertical-align:middle;"></span>${p.tempoTrabalhado || '00h 00m'}</span>`
+      : `<span class="ponto-badge-tempo">${p.tempoTrabalhado || '00h 00m'}</span>`;
+
+    const saidaFinalBadge = p.saidaFinal
+      ? `<span class="ponto-hora-sai">${p.saidaFinal}</span>`
+      : (p.emAndamento ? `<span style="color:#4ade80;font-size:11px;font-weight:800;background:rgba(34,197,94,0.12);padding:2px 6px;border-radius:6px;border:1px solid rgba(34,197,94,0.3);">🟢 Em Aberto</span>` : `<span class="ponto-hora-null">--:--</span>`);
 
     return `
-      <tr>
+      <tr data-ponto-id="${p.id}">
         <td>
           <div class="ponto-colab-name">${esc(nomeColab)}</div>
+          ${f && f.cargo ? `<div style="font-size:11px;color:var(--muted);">${esc(f.cargo)}</div>` : ''}
         </td>
         <td style="font-weight:700;color:var(--text);">${esc(p.data || '')}</td>
         <td><span class="${p.entrada1 ? 'ponto-hora-ent' : 'ponto-hora-null'}">${p.entrada1 || '--:--'}</span></td>
         <td><span class="${p.saidaAlmoco ? 'ponto-hora-alm' : 'ponto-hora-null'}">${p.saidaAlmoco || '--:--'}</span></td>
         <td><span class="${p.voltaAlmoco ? 'ponto-hora-vol' : 'ponto-hora-null'}">${p.voltaAlmoco || '--:--'}</span></td>
-        <td><span class="${p.saidaFinal ? 'ponto-hora-sai' : 'ponto-hora-null'}">${p.saidaFinal || '--:--'}</span></td>
+        <td>${saidaFinalBadge}</td>
         <td>
-          <span class="ponto-badge-tempo">${p.tempoTrabalhado || '00h 00m'}</span>
+          ${badgeTempo}
         </td>
         <td>
-          <div style="font-weight:800;color:#4ade80;font-size:13px;">${p.valorSalario || 'R$ 0,00'}</div>
-          ${vhInfo ? `<div style="font-size:11px;color:var(--muted);">${esc(vhInfo)}</div>` : ''}
+          <div class="ponto-salario-val" style="font-weight:900;color:#4ade80;font-size:14px;letter-spacing:0.3px;white-space:nowrap;">${p.valorSalario || 'R$ 0,00'}</div>
+          ${vhInfo ? `<div class="ponto-salario-sub" style="font-size:10.5px;color:#94a3b8;margin-top:2px;white-space:nowrap;">${esc(vhInfo)}</div>` : ''}
         </td>
         <td style="text-align:center;white-space:nowrap;">
           <div style="display:flex;gap:4px;justify-content:center;">
@@ -6434,12 +6550,12 @@ function atualizarStatusBatidaColaborador() {
   const colab = funcionariosLista.find(f => f.id === id);
   if (!colab) return;
   const hoje = getHojeFormatado();
-  const p = pontosLista.find(x => x.colaboradorId === id && x.data === hoje);
+  const p = pontosLista.find(x => (x.colaboradorId === id || (x.colaboradorNome && x.colaboradorNome.toLowerCase() === colab.nome.toLowerCase())) && ehDataHoje(x.data));
   if (msgEl) {
     if (p) {
-      msgEl.innerHTML = `<span style="color:var(--gold-light);">Status hoje (${hoje}): Ent: ${p.entrada1||'--'} · Almoço: ${p.saidaAlmoco||'--'} / ${p.voltaAlmoco||'--'} · Saída: ${p.saidaFinal||'--'} (${p.tempoTrabalhado||'00h 00m'})</span>`;
+      msgEl.innerHTML = `<span style="color:var(--gold-light);">Status hoje (${p.data}): Ent: ${p.entrada1||'--'} · Almoço: ${p.saidaAlmoco||'--'} / ${p.voltaAlmoco||'--'} · Saída: ${p.saidaFinal||'--'} | <strong>Tempo: ${p.tempoTrabalhado||'00h 00m'}</strong> · <strong style="color:#4ade80;">Ganho: ${p.valorSalario||'R$ 0,00'}</strong></span>`;
     } else {
-      msgEl.innerHTML = `<span style="color:var(--text2);">Nenhuma batida registrada hoje para ${colab.nome}.</span>`;
+      msgEl.innerHTML = `<span style="color:var(--text2);">Pronto para registrar batida de ponto para ${colab.nome}.</span>`;
     }
   }
 }
@@ -6473,10 +6589,13 @@ function resetarStatusFuncionario(id) {
 
 function registrarBatidaPonto(tipo) {
   const sel = document.getElementById('ponto-sel-colaborador');
-  const colabId = parseInt(sel ? sel.value : 0);
+  let colabId = parseInt(sel ? sel.value : 0);
+  if (!colabId && funcionariosLista.length > 0) {
+    colabId = funcionariosLista[0].id;
+    if (sel) sel.value = colabId;
+  }
   if (!colabId) {
-    mostrarMsgPonto('⚠️ Selecione um funcionário no menu acima antes de bater o ponto!', false);
-    if (sel) sel.focus();
+    mostrarMsgPonto('⚠️ Nenhum funcionário cadastrado. Cadastre um funcionário primeiro.', false);
     return;
   }
   const colab = funcionariosLista.find(f => f.id === colabId);
@@ -6488,7 +6607,7 @@ function registrarBatidaPonto(tipo) {
   const horaStr = `${hh}:${mm}`;
   const dataHoje = getHojeFormatado();
 
-  let p = pontosLista.find(x => x.colaboradorId === colabId && x.data === dataHoje);
+  let p = pontosLista.find(x => (x.colaboradorId === colabId || (x.colaboradorNome && x.colaboradorNome.toLowerCase() === colab.nome.toLowerCase())) && ehDataHoje(x.data));
   if (!p) {
     p = {
       id: Date.now(),
@@ -6552,12 +6671,15 @@ function registrarBatidaPonto(tipo) {
   renderFuncionarios();
   renderEspelhoPonto();
 
-  mostrarMsgPonto(`✅ ${labelTipo} registrada com sucesso para ${colab.nome} às ${horaStr}!`, true);
+  mostrarMsgPonto(`✅ ${labelTipo} registrada com sucesso para ${colab.nome} às ${horaStr}! Tempo trabalhado e valor salarial atualizados.`, true);
 }
 
 function registrarBatidaPontoComJustificativa() {
   const selColab = document.getElementById('ponto-sel-colaborador');
-  const idColab = selColab && selColab.value ? parseInt(selColab.value) : null;
+  let idColab = selColab && selColab.value ? parseInt(selColab.value) : null;
+  if (!idColab && funcionariosLista.length > 0) {
+    idColab = funcionariosLista[0].id;
+  }
   if (!idColab) {
     mostrarMsgPonto('Selecione um funcionário primeiro para justificar a falta.', false);
     return;
@@ -6567,7 +6689,7 @@ function registrarBatidaPontoComJustificativa() {
   if (motivo === null) return;
 
   const dataHoje = getHojeFormatado();
-  let p = pontosLista.find(x => x.colaboradorId === idColab && x.data === dataHoje);
+  let p = pontosLista.find(x => (x.colaboradorId === idColab || (x.colaboradorNome && x.colaboradorNome.toLowerCase() === colab.nome.toLowerCase())) && ehDataHoje(x.data));
   if (!p) {
     p = {
       id: Date.now(),
@@ -6591,6 +6713,8 @@ function registrarBatidaPontoComJustificativa() {
   p.justificativa = motivo || 'Falta Justificada';
   if (colab) colab.status = 'Falta Justificada';
 
+  recalcularHorasPonto(p, colab);
+
   save(K.employees, funcionariosLista);
   save(K.timesheet, pontosLista);
 
@@ -6601,6 +6725,14 @@ function registrarBatidaPontoComJustificativa() {
 }
 
 function recalcularHorasPonto(p, colab) {
+  if (!p) return;
+  if (!colab && p.colaboradorId) {
+    colab = funcionariosLista.find(x => x.id === p.colaboradorId);
+  }
+  if (!colab && p.colaboradorNome) {
+    colab = funcionariosLista.find(x => (x.nome || '').toLowerCase() === (p.colaboradorNome || '').toLowerCase());
+  }
+
   const parseMin = (str) => {
     if (!str || !str.includes(':')) return null;
     const parts = str.split(':').map(Number);
@@ -6616,47 +6748,80 @@ function recalcularHorasPonto(p, colab) {
   const mHEIni = parseMin(p.horaExtraInicial);
   const mHEFim = parseMin(p.horaExtraFinal);
 
-  // Turno da manhã
-  if (mEntrada !== null && mAlmocoSai !== null && mAlmocoSai > mEntrada) {
-    totalMin += (mAlmocoSai - mEntrada);
-  } else if (mEntrada !== null && mSaida !== null && mAlmocoSai === null && mSaida > mEntrada) {
-    totalMin += (mSaida - mEntrada);
-  }
+  const hoje = ehDataHoje(p.data);
+  const agora = new Date();
+  const minAgora = agora.getHours() * 60 + agora.getMinutes();
 
-  // Turno da tarde
-  if (mAlmocoVolta !== null && mSaida !== null && mSaida > mAlmocoVolta) {
-    totalMin += (mSaida - mAlmocoVolta);
-  } else if (mAlmocoVolta !== null && mSaida === null) {
-    const agora = new Date();
-    const minAgora = agora.getHours() * 60 + agora.getMinutes();
-    if (minAgora > mAlmocoVolta && p.data === getHojeFormatado()) {
-      totalMin += (minAgora - mAlmocoVolta);
+  let emAndamento = false;
+
+  // 1. Primeiro Turno (Manhã)
+  if (mEntrada !== null) {
+    if (mAlmocoSai !== null && mAlmocoSai >= mEntrada) {
+      totalMin += (mAlmocoSai - mEntrada);
+    } else if (mSaida !== null && mAlmocoSai === null && mSaida >= mEntrada) {
+      totalMin += (mSaida - mEntrada);
+    } else if (mAlmocoSai === null && mSaida === null && hoje) {
+      if (minAgora >= mEntrada) {
+        totalMin += (minAgora - mEntrada);
+        emAndamento = true;
+      }
     }
   }
 
-  if (mEntrada !== null && mAlmocoSai === null && mSaida === null && p.data === getHojeFormatado()) {
-    const agora = new Date();
-    const minAgora = agora.getHours() * 60 + agora.getMinutes();
-    if (minAgora > mEntrada) {
-      totalMin = (minAgora - mEntrada);
+  // 2. Segundo Turno (Tarde)
+  if (mAlmocoVolta !== null) {
+    if (mSaida !== null && mSaida >= mAlmocoVolta) {
+      totalMin += (mSaida - mAlmocoVolta);
+    } else if (mSaida === null && hoje) {
+      if (minAgora >= mAlmocoVolta) {
+        totalMin += (minAgora - mAlmocoVolta);
+        emAndamento = true;
+      }
     }
   }
 
-  // Horas Extras
-  if (mHEIni !== null && mHEFim !== null && mHEFim >= mHEIni) {
-    totalMin += (mHEFim - mHEIni);
+  // 3. Horas Extras
+  if (mHEIni !== null) {
+    if (mHEFim !== null && mHEFim >= mHEIni) {
+      totalMin += (mHEFim - mHEIni);
+    } else if (mHEFim === null && hoje) {
+      if (minAgora >= mHEIni) {
+        totalMin += (minAgora - mHEIni);
+        emAndamento = true;
+      }
+    }
   }
 
   const hTot = Math.floor(totalMin / 60);
   const mTot = totalMin % 60;
+  p.totalMinutos = totalMin;
+  p.emAndamento = emAndamento;
   p.tempoTrabalhado = `${String(hTot).padStart(2, '0')}h ${String(mTot).padStart(2, '0')}m`;
 
-  const vHora = colab && colab.valorHora ? colab.valorHora : 0;
+  // Calcula o valor hora e valor proporcional por minuto trabalhado
+  let vHora = 0;
+  if (colab && colab.valorHora && Number(colab.valorHora) > 0) {
+    vHora = Number(colab.valorHora);
+  } else if (colab && colab.salario && Number(colab.salario) > 0) {
+    const jornadaStr = colab.jornada || '44';
+    const horasSem = parseInt(String(jornadaStr).replace(/\D/g, '')) || 44;
+    const horasMes = horasSem * 4.545;
+    vHora = Number(colab.salario) / (horasMes || 200);
+  } else if (p.valorHora && Number(p.valorHora) > 0) {
+    vHora = Number(p.valorHora);
+  }
+
+  const vMinuto = vHora > 0 ? (vHora / 60) : 0;
   const valorDia = (totalMin / 60) * vHora;
+
   p.valorSalario = 'R$ ' + valorDia.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   if (vHora > 0) {
-    p.valorHoraInfo = `(R$ ${vHora.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/h)`;
+    p.valorHoraInfo = `R$ ${vHora.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/h · R$ ${vMinuto.toFixed(3).replace('.', ',')}/min`;
+  } else {
+    p.valorHoraInfo = '';
   }
+
+  return { totalMin, hTot, mTot, vHora, vMinuto, valorDia, emAndamento };
 }
 
 function calcularValorHoraFuncionario() {
