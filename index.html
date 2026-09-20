@@ -973,23 +973,33 @@
           if (lTop) lTop.src = lic.logo || 'logo.jpg';
           if (pNome) pNome.textContent = lic.nome || 'SD Vidros';
 
-          if (lic.id === 'sdvidros' || lic.id === 'sdmoveis') {
-            // Empresas padrão: exibem seu banner clássico sem overlay
-            if (bImg) {
-              bImg.src = (lic.id === 'sdmoveis') ? (lic.banner || 'banner_moveis.jpg') : (lic.banner || 'banner.jpg');
-            }
+          const ehMoveis = lic.tipoContrato === 'moveis' || lic.id === 'sdmoveis' || (lic.nome && (lic.nome.toLowerCase().includes('moveis') || lic.nome.toLowerCase().includes('móve')));
+          if (lTop) lTop.src = (ehMoveis && (!lic.logo || lic.logo === 'logo.jpg')) ? 'logo_moveis.jpg' : (lic.logo || 'logo.jpg');
+
+          if (lic.id === 'sdvidros') {
+            if (bImg) bImg.src = lic.banner || 'banner.jpg';
+            if (cBrand) cBrand.style.display = 'none';
+          } else if (lic.id === 'sdmoveis' && (!lic.banner || lic.banner === 'banner_moveis.jpg')) {
+            if (bImg) bImg.src = 'banner_moveis.jpg';
             if (cBrand) cBrand.style.display = 'none';
           } else {
-            // Empresa cadastrada nova: usa showroom nobre com marca no topo (estilo Imagem 2)
-            const ehMoveis = lic.tipoContrato === 'moveis' || (lic.nome && lic.nome.toLowerCase().includes('móveis'));
+            // Empresa nova ou personalizada:
             if (bImg) {
               bImg.src = (!lic.banner || lic.banner === 'banner.jpg' || lic.banner === 'banner_ia_vidros.jpg' || lic.banner === 'banner_ia_moveis.jpg') ? (ehMoveis ? 'banner_moveis.jpg' : 'banner.jpg') : lic.banner;
             }
             if (cBrand) {
               cBrand.style.display = 'flex';
-              if (nOverlay) nOverlay.textContent = lic.nome || 'SD Móveis Projetados';
+              if (nOverlay) nOverlay.textContent = lic.nome || (ehMoveis ? 'SD Móveis Projetados' : 'SD Vidros');
               if (sOverlay) {
-                sOverlay.textContent = lic.segmento || (ehMoveis ? 'Móveis Planejados · Ambientes Sob Medida' : 'Alumínio, Vidros & Esquadrias');
+                let seg = (lic.segmento || '').trim();
+                if (ehMoveis) {
+                  // Explicitamente remover VIDRAÇARIA & ESQUADRIAS para SD Móveis
+                  if (!seg || /vidra|vidro|esquadria/i.test(seg)) {
+                    seg = '';
+                  }
+                }
+                sOverlay.textContent = seg;
+                sOverlay.style.display = seg ? 'block' : 'none';
               }
             }
           }
@@ -3230,8 +3240,25 @@ function obterLicencas() {
     } else {
       let mudou = false;
       lista.forEach(l => {
-        if (l.id !== 'sdvidros' && (!l.banner || l.banner === 'banner.jpg')) {
-          l.banner = (l.tipoContrato === 'moveis' || l.id === 'sdmoveis') ? 'banner_ia_moveis.jpg' : 'banner_ia_vidros.jpg';
+        const isMoveis = l.id === 'sdmoveis' || l.tipoContrato === 'moveis' || (l.nome && (l.nome.toLowerCase().includes('moveis') || l.nome.toLowerCase().includes('móve')));
+        if (isMoveis) {
+          l.tipoContrato = 'moveis';
+          // Se estava com a logo de vidros, migra para a logo oficial de móveis
+          if (!l.logo || l.logo === 'logo.jpg') {
+            l.logo = 'logo_moveis.jpg';
+            mudou = true;
+          }
+          // Se estava com segmento de vidraçaria/esquadrias, migra para móveis projetados
+          if (!l.segmento || /vidra|vidro|esquadria/i.test(l.segmento)) {
+            l.segmento = 'Móveis Planejados & Marcenaria de Luxo';
+            mudou = true;
+          }
+          if (!l.banner || l.banner === 'banner.jpg') {
+            l.banner = 'banner_moveis.jpg';
+            mudou = true;
+          }
+        } else if (l.id !== 'sdvidros' && (!l.banner || l.banner === 'banner.jpg')) {
+          l.banner = 'banner_ia_vidros.jpg';
           mudou = true;
         }
       });
@@ -3265,25 +3292,31 @@ function aplicarLicencaVisual(lic) {
   const logoTop = document.getElementById('empresa-logo-top');
   const empresaPillNome = document.getElementById('empresa-nome-top');
 
+  const ehMoveis = lic.tipoContrato === 'moveis' || lic.id === 'sdmoveis' || (lic.nome && (lic.nome.toLowerCase().includes('moveis') || lic.nome.toLowerCase().includes('móve')));
+
   // 1. Logo e Nome na barra superior
   if (logoTop) {
-    logoTop.src = lic.logo || 'logo.jpg';
+    logoTop.src = (ehMoveis && (!lic.logo || lic.logo === 'logo.jpg')) ? 'logo_moveis.jpg' : (lic.logo || 'logo.jpg');
   }
   if (empresaPillNome) {
-    empresaPillNome.textContent = lic.nome || 'SD Vidros';
+    empresaPillNome.textContent = lic.nome || (ehMoveis ? 'SD Móveis' : 'SD Vidros');
   }
 
   // 2. Banner principal e Marca
-  if (lic.id === 'sdvidros' || lic.id === 'sdmoveis') {
-    // Empresas oficiais do grupo SD: usam seus banners originais sem overlay
+  if (lic.id === 'sdvidros') {
     if (bannerImg) {
-      bannerImg.src = (lic.id === 'sdmoveis') ? (lic.banner || 'banner_moveis.jpg') : (lic.banner || 'banner.jpg');
+      bannerImg.src = lic.banner || 'banner.jpg';
+      bannerImg.alt = `${lic.nome} – ${lic.segmento}`;
+    }
+    if (customBrand) customBrand.style.display = 'none';
+  } else if (lic.id === 'sdmoveis' && (!lic.banner || lic.banner === 'banner_moveis.jpg')) {
+    if (bannerImg) {
+      bannerImg.src = 'banner_moveis.jpg';
       bannerImg.alt = `${lic.nome} – ${lic.segmento}`;
     }
     if (customBrand) customBrand.style.display = 'none';
   } else {
-    // Qualquer nova empresa cadastrada:
-    const ehMoveis = lic.tipoContrato === 'moveis' || (lic.nome && lic.nome.toLowerCase().includes('móveis'));
+    // Qualquer nova empresa cadastrada ou banner customizado:
     if (bannerImg) {
       if (!lic.banner || lic.banner === 'banner.jpg' || lic.banner === 'banner_ia_vidros.jpg' || lic.banner === 'banner_ia_moveis.jpg') {
         bannerImg.src = ehMoveis ? 'banner_moveis.jpg' : 'banner.jpg';
@@ -3294,9 +3327,17 @@ function aplicarLicencaVisual(lic) {
     }
     if (customBrand) {
       customBrand.style.display = 'flex';
-      if (nomeOverlay) nomeOverlay.textContent = lic.nome || 'SD Móveis Projetados';
+      if (nomeOverlay) nomeOverlay.textContent = lic.nome || (ehMoveis ? 'SD Móveis Projetados' : 'SD Vidros');
       if (segOverlay) {
-        segOverlay.textContent = lic.segmento || (ehMoveis ? 'Móveis Planejados · Ambientes Sob Medida' : 'Alumínio, Vidros & Esquadrias');
+        let seg = (lic.segmento || '').trim();
+        if (ehMoveis) {
+          // Remover "VIDRAÇARIA & ESQUADRIAS" para SD Móveis
+          if (!seg || /vidra|vidro|esquadria/i.test(seg)) {
+            seg = '';
+          }
+        }
+        segOverlay.textContent = seg;
+        segOverlay.style.display = seg ? 'block' : 'none';
       }
     }
   }
@@ -9174,12 +9215,40 @@ async function gerarPdfOrcamentoDoc(dados) {
 
   let logoImage = null;
   try {
-    const resp = await fetch('logo.jpg');
-    if (resp.ok) {
-      const buf = await resp.arrayBuffer();
-      logoImage = await pdfDoc.embedJpg(buf);
+    let logoUrl = lic.logo;
+    if (!logoUrl || logoUrl === 'logo.jpg') {
+      logoUrl = ehMoveis ? 'logo_moveis.jpg' : 'logo.jpg';
     }
-  } catch (e) {}
+
+    if (typeof logoUrl === 'string' && logoUrl.startsWith('data:')) {
+      const isPng = logoUrl.startsWith('data:image/png');
+      const base64Data = logoUrl.split(',')[1];
+      const binary = atob(base64Data);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      logoImage = isPng ? await pdfDoc.embedPng(bytes) : await pdfDoc.embedJpg(bytes);
+    } else {
+      const resp = await fetch(logoUrl);
+      if (resp.ok) {
+        const buf = await resp.arrayBuffer();
+        if (logoUrl.toLowerCase().endsWith('.png')) {
+          logoImage = await pdfDoc.embedPng(buf);
+        } else {
+          logoImage = await pdfDoc.embedJpg(buf);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Erro ao carregar logo personalizada no PDF:', e);
+    try {
+      const fallbackUrl = ehMoveis ? 'logo_moveis.jpg' : 'logo.jpg';
+      const resp = await fetch(fallbackUrl);
+      if (resp.ok) {
+        const buf = await resp.arrayBuffer();
+        logoImage = await pdfDoc.embedJpg(buf);
+      }
+    } catch (_) {}
+  }
 
   const page = pdfDoc.addPage([PAGE_W, PAGE_H]);
 
@@ -9224,7 +9293,15 @@ async function gerarPdfOrcamentoDoc(dados) {
   const nomeEmpresaUpper = sanitizePdf((lic.nome || (ehMoveis ? "SD MÓVEIS PROJETADOS" : "SD VIDROS")).toUpperCase());
   page.drawText(nomeEmpresaUpper, { x: textX, y: headerY - 14, size: 16, font: fontBold, color: DARK });
 
-  const sloganEmpresa = sanitizePdf((lic.segmento || lic.slogan || (ehMoveis ? "MÓVEIS PLANEJADOS & MARCENARIA DE LUXO" : "SOLUÇÕES EM VIDROS TEMPERADOS E ESQUADRIAS DE ALUMÍNIO")).toUpperCase());
+  let sloganTxt = (lic.segmento || lic.slogan || '').trim();
+  if (ehMoveis) {
+    if (!sloganTxt || /vidra|vidro|esquadria/i.test(sloganTxt)) {
+      sloganTxt = "MÓVEIS PROJETADOS & AMBIENTES SOB MEDIDA";
+    }
+  } else if (!sloganTxt) {
+    sloganTxt = "SOLUÇÕES EM VIDROS TEMPERADOS E ESQUADRIAS DE ALUMÍNIO";
+  }
+  const sloganEmpresa = sanitizePdf(sloganTxt.toUpperCase());
   page.drawText(sloganEmpresa, { x: textX, y: headerY - 26, size: 7.2, font: fontBold, color: GOLD });
 
   let endEmpresa = "";
@@ -9368,7 +9445,8 @@ async function gerarPdfOrcamentoDoc(dados) {
       borderColor: BORDER,
       borderWidth: 0.6
     });
-    page.drawText('SERVIÇOS DE VIDRAÇARIA E ESQUADRIAS DE ALUMÍNIO', { x: MARGIN_X + 8, y: curY + 8, size: 7.5, font: fontBold, color: DARK });
+    const defaultServicoTxt = ehMoveis ? 'SERVIÇOS DE MARCENARIA E MÓVEIS PROJETADOS SOB MEDIDA' : 'SERVIÇOS DE VIDRAÇARIA E ESQUADRIAS DE ALUMÍNIO';
+    page.drawText(defaultServicoTxt, { x: MARGIN_X + 8, y: curY + 8, size: 7.5, font: fontBold, color: DARK });
     page.drawText('Sob Medida', { x: MARGIN_X + 250, y: curY + 8, size: 7.5, font: fontRegular, color: GRAY });
     page.drawText('-', { x: MARGIN_X + 350, y: curY + 8, size: 7.5, font: fontRegular, color: GRAY });
     page.drawText('1 UND', { x: MARGIN_X + 395, y: curY + 8, size: 7.5, font: fontRegular, color: DARK });

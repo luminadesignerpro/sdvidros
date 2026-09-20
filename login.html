@@ -1418,6 +1418,27 @@
       if (!Array.isArray(lista) || !lista.length) {
         lista = LICENCAS_PADRAO;
         localStorage.setItem('sdv_licencas', JSON.stringify(lista));
+      } else {
+        let mudou = false;
+        lista.forEach(l => {
+          const isMoveis = l.id === 'sdmoveis' || l.tipoContrato === 'moveis' || (l.nome && (l.nome.toLowerCase().includes('moveis') || l.nome.toLowerCase().includes('móve')));
+          if (isMoveis) {
+            l.tipoContrato = 'moveis';
+            if (!l.logo || l.logo === 'logo.jpg') {
+              l.logo = 'logo_moveis.jpg';
+              mudou = true;
+            }
+            if (!l.segmento || /vidra|vidro|esquadria/i.test(l.segmento)) {
+              l.segmento = 'Móveis Planejados & Marcenaria de Luxo';
+              mudou = true;
+            }
+            if (!l.banner || l.banner === 'banner.jpg') {
+              l.banner = 'banner_moveis.jpg';
+              mudou = true;
+            }
+          }
+        });
+        if (mudou) localStorage.setItem('sdv_licencas', JSON.stringify(lista));
       }
       return lista;
     } catch (_) {
@@ -2005,11 +2026,19 @@
       const isEdit = emp.id === idEditando;
       const isAtiva = emp.id === idAtivo;
       const podeExcluir = lista.length > 1;
+      const ehMoveis = emp.tipoContrato === 'moveis' || emp.id === 'sdmoveis' || (emp.nome && (emp.nome.toLowerCase().includes('moveis') || emp.nome.toLowerCase().includes('móve')));
+      const cardLogo = (ehMoveis && (!emp.logo || emp.logo === 'logo.jpg')) ? 'logo_moveis.jpg' : (emp.logo || 'logo.jpg');
+      let cardSeg = (emp.segmento || '').trim();
+      if (ehMoveis && (!cardSeg || /vidra|vidro|esquadria/i.test(cardSeg))) {
+        cardSeg = 'Móveis Planejados & Ambientes Sob Medida';
+      } else if (!cardSeg) {
+        cardSeg = ehMoveis ? 'Móveis Planejados & Ambientes Sob Medida' : 'Alumínio, Vidros & Esquadrias';
+      }
 
       return `
         <div style="background:${isEdit ? 'rgba(201,168,76,0.08)' : '#0e0e17'};border:1.5px solid ${isEdit ? 'var(--gold)' : 'rgba(255,255,255,0.08)'};border-radius:12px;padding:10px 12px;transition:all 0.2s;box-shadow:${isEdit ? '0 0 16px rgba(201,168,76,0.22)' : 'none'};">
           <div style="display:flex;align-items:center;gap:10px;">
-            <img src="${emp.logo || 'logo.jpg'}" style="width:44px;height:44px;border-radius:10px;border:1.5px solid ${isEdit ? 'var(--gold)' : 'rgba(201,168,76,0.35)'};object-fit:cover;background:#000;flex-shrink:0;" alt="${emp.nome}">
+            <img src="${cardLogo}" style="width:44px;height:44px;border-radius:10px;border:1.5px solid ${isEdit ? 'var(--gold)' : 'rgba(201,168,76,0.35)'};object-fit:cover;background:#000;flex-shrink:0;" alt="${emp.nome}">
             
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -2020,7 +2049,7 @@
                 ${isEdit ? '<span style="background:rgba(201,168,76,0.25);border:1px solid var(--gold);color:var(--gold-light);font-size:9.5px;padding:1px 6px;border-radius:12px;font-weight:800;">✏️ EM EDIÇÃO</span>' : ''}
               </div>
               <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;">
-                ${emp.segmento || 'Vidros & Esquadrias'}
+                ${cardSeg}
               </div>
             </div>
           </div>
@@ -2088,8 +2117,9 @@
     const emp = lista.find(e => e.id === id);
     if (!emp) return;
 
-    logoEmEdicaoBase64 = emp.logo || 'logo.jpg';
-    bannerEmEdicaoBase64 = emp.banner || 'banner.jpg';
+    const ehMoveis = emp.tipoContrato === 'moveis' || emp.id === 'sdmoveis' || (emp.nome && (emp.nome.toLowerCase().includes('moveis') || emp.nome.toLowerCase().includes('móve')));
+    logoEmEdicaoBase64 = (ehMoveis && (!emp.logo || emp.logo === 'logo.jpg')) ? 'logo_moveis.jpg' : (emp.logo || 'logo.jpg');
+    bannerEmEdicaoBase64 = (ehMoveis && (!emp.banner || emp.banner === 'banner.jpg')) ? 'banner_moveis.jpg' : (emp.banner || 'banner.jpg');
 
     const prevLogo = document.getElementById('preview-logo-gestao');
     if (prevLogo) prevLogo.src = logoEmEdicaoBase64;
@@ -2101,7 +2131,13 @@
     if (inpNome) inpNome.value = emp.nome || '';
 
     const inpSeg = document.getElementById('gestao-empresa-segmento');
-    if (inpSeg) inpSeg.value = emp.segmento || '';
+    if (inpSeg) {
+      let s = (emp.segmento || '').trim();
+      if (ehMoveis && (!s || /vidra|vidro|esquadria/i.test(s))) {
+        s = 'Móveis Planejados & Ambientes Sob Medida';
+      }
+      inpSeg.value = s || (ehMoveis ? 'Móveis Planejados & Ambientes Sob Medida' : 'Alumínio, Vidros & Esquadrias');
+    }
 
     const inpTel = document.getElementById('gestao-empresa-tel');
     if (inpTel) inpTel.value = emp.telefone || '';
@@ -2168,31 +2204,46 @@
     let lista = obterLicencasLogin();
     let idx = lista.findIndex(e => e.id === idEmpresaEditando);
 
+    const ehMoveis = (nome.toLowerCase().includes('moveis') || nome.toLowerCase().includes('móve') || idEmpresaEditando === 'sdmoveis');
+    let segFinal = segmento;
+    if (ehMoveis && (!segFinal || /vidra|vidro|esquadria/i.test(segFinal))) {
+      segFinal = 'Móveis Planejados & Ambientes Sob Medida';
+    }
+    let logoFinal = logoEmEdicaoBase64;
+    if (ehMoveis && (!logoFinal || logoFinal === 'logo.jpg')) {
+      logoFinal = 'logo_moveis.jpg';
+    }
+    let bannerFinal = bannerEmEdicaoBase64;
+    if (ehMoveis && (!bannerFinal || bannerFinal === 'banner.jpg')) {
+      bannerFinal = 'banner_moveis.jpg';
+    }
+
     if (idx >= 0) {
       // Atualiza existente
       lista[idx].nome = nome;
-      lista[idx].segmento = segmento;
-      lista[idx].slogan = segmento;
+      lista[idx].segmento = segFinal;
+      lista[idx].slogan = segFinal;
       lista[idx].telefone = telefone;
       lista[idx].pix = pix;
-    lista[idx].linkPersonalizado = linkPersonalizado;
-      if (logoEmEdicaoBase64) lista[idx].logo = logoEmEdicaoBase64;
-      if (bannerEmEdicaoBase64) lista[idx].banner = bannerEmEdicaoBase64;
+      lista[idx].linkPersonalizado = linkPersonalizado;
+      lista[idx].tipoContrato = ehMoveis ? 'moveis' : (lista[idx].tipoContrato || 'vidros');
+      lista[idx].logo = logoFinal;
+      lista[idx].banner = bannerFinal;
     } else {
       // Cria nova
       const nova = {
         id: idEmpresaEditando,
         nome: nome,
-        segmento: segmento,
-        slogan: segmento,
+        segmento: segFinal,
+        slogan: segFinal,
         telefone: telefone,
         cidade: 'Itaitinga - CE',
         cnpj: '',
         pix: pix,
         chaveLicenca: 'LIC-' + Date.now(),
-        logo: logoEmEdicaoBase64 || 'logo.jpg',
-        banner: bannerEmEdicaoBase64 || 'banner.jpg',
-        tipoContrato: 'vidros'
+        logo: logoFinal,
+        banner: bannerFinal,
+        tipoContrato: ehMoveis ? 'moveis' : 'vidros'
       };
       lista.push(nova);
       localStorage.setItem('sdv_licenca_ativa', idEmpresaEditando);
