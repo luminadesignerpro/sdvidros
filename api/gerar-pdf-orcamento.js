@@ -1,6 +1,6 @@
 const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
 
-// Paleta de Cores Premium SD VIDROS
+// Paleta de Cores Premium SD VIDROS & SD MÓVEIS
 const DARK = rgb(0.09, 0.12, 0.18);      // Slate Navy elegante
 const GOLD = rgb(0.79, 0.63, 0.22);      // Dourado nobre
 const GOLD_LIGHT = rgb(0.96, 0.93, 0.84);// Dourado suave para fundos
@@ -63,7 +63,7 @@ function formatMoney(val) {
   return str;
 }
 
-async function gerarPdfOrcamento(dados, fetchLogo) {
+async function gerarPdfOrcamento(dados, fetchLogo, empInfo) {
   const {
     numero, dataStr, nome, cnpj, tel, endereco, bairro, cidade, apto, resp,
     itens, total, forma, obs, prazo, garantia
@@ -75,7 +75,7 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
 
   let logoImage = null;
   try {
-    const buf = await fetchLogo();
+    const buf = await fetchLogo(empInfo && empInfo.logoFile ? empInfo.logoFile : (empInfo && empInfo.ehMoveis ? 'logo_moveis.jpg' : 'logo.jpg'));
     if (buf) logoImage = await pdfDoc.embedJpg(buf);
   } catch (e) { /* segue sem logo */ }
 
@@ -114,10 +114,17 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
   }
 
   const textX = logoImage ? MARGIN_X + 56 : MARGIN_X;
-  page.drawText('SD VIDROS', { x: textX, y: headerY - 14, size: 17, font: fontBold, color: DARK });
-  page.drawText('SOLUÇÕES EM VIDROS TEMPERADOS E ESQUADRIAS DE ALUMÍNIO', { x: textX, y: headerY - 26, size: 7.2, font: fontBold, color: GOLD });
-  page.drawText('Rua Jorge Figueiredo 740, Barrocão - Itaitinga-CE • CNPJ: 49.226.611/0001-33', { x: textX, y: headerY - 37, size: 7, font: fontRegular, color: GRAY });
-  page.drawText('WhatsApp: (85) 99611-9824 • 99760-2237 • 98574-9606 | sdvidros2025@gmail.com', { x: textX, y: headerY - 48, size: 7, font: fontRegular, color: GRAY });
+  const nomeEmpresaUpper = sanitizePdf((empInfo.nome || (empInfo.ehMoveis ? 'SD MÓVEIS PROJETADOS' : 'SD VIDROS')).toUpperCase());
+  page.drawText(nomeEmpresaUpper, { x: textX, y: headerY - 14, size: 16.5, font: fontBold, color: DARK });
+
+  const segmentoEmpresa = sanitizePdf((empInfo.segmento || (empInfo.ehMoveis ? 'MÓVEIS PLANEJADOS & MARCENARIA DE LUXO' : 'SOLUÇÕES EM VIDROS TEMPERADOS E ESQUADRIAS DE ALUMÍNIO')).toUpperCase());
+  page.drawText(segmentoEmpresa, { x: textX, y: headerY - 26, size: 7.2, font: fontBold, color: GOLD });
+
+  const endEmpresa = sanitizePdf(empInfo.endereco || (empInfo.ehMoveis ? 'Itaitinga - CE' : 'Rua Jorge Figueiredo 740, Barrocão - Itaitinga-CE • CNPJ: 49.226.611/0001-33'));
+  page.drawText(endEmpresa, { x: textX, y: headerY - 37, size: 7, font: fontRegular, color: GRAY });
+
+  const contatosEmpresa = sanitizePdf(empInfo.contatos || (empInfo.ehMoveis ? 'WhatsApp: (85) 99611-9824 | Atendimento & Projetos Sob Medida' : 'WhatsApp: (85) 99611-9824 • 99760-2237 • 98574-9606 | sdvidros2025@gmail.com'));
+  page.drawText(contatosEmpresa, { x: textX, y: headerY - 48, size: 7, font: fontRegular, color: GRAY });
 
   // Badge do Orçamento no canto direito superior
   const badgeW = 142;
@@ -243,7 +250,8 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
       borderWidth: 0.6
     });
     page.drawText('01', { x: MARGIN_X + 8, y: curY + 9, size: 7.5, font: fontBold, color: GRAY });
-    page.drawText('SERVIÇOS DE VIDRAÇARIA E ESQUADRIAS DE ALUMÍNIO', { x: MARGIN_X + 30, y: curY + 9, size: 7.5, font: fontBold, color: DARK });
+    const itemPadrao = empInfo.ehMoveis ? 'MÓVEIS PLANEJADOS & MARCENARIA SOB MEDIDA' : 'SERVIÇOS DE VIDRAÇARIA E ESQUADRIAS DE ALUMÍNIO';
+    page.drawText(itemPadrao, { x: MARGIN_X + 30, y: curY + 9, size: 7.5, font: fontBold, color: DARK });
     page.drawText('Sob Medida', { x: MARGIN_X + 248, y: curY + 9, size: 7.5, font: fontRegular, color: GRAY });
     page.drawText('-', { x: MARGIN_X + 332, y: curY + 9, size: 7.5, font: fontRegular, color: GRAY });
     page.drawText('1 UND', { x: MARGIN_X + 374, y: curY + 9, size: 7.5, font: fontRegular, color: DARK });
@@ -379,8 +387,16 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
     borderWidth: 0.8
   });
   page.drawText('DADOS PARA PAGAMENTO VIA PIX:', { x: MARGIN_X + 16, y: pixBoxY + 32, size: 6.8, font: fontBold, color: GREEN_TXT });
-  page.drawText('Chave CNPJ: 49.226.611/0001-33 (InfinityPay - SD Vidros)', { x: MARGIN_X + 16, y: pixBoxY + 20, size: 6.8, font: fontRegular, color: DARK });
-  page.drawText('Chave Celular: (85) 99760-2237 (Itaú - Samuel David)', { x: MARGIN_X + 16, y: pixBoxY + 9, size: 6.8, font: fontRegular, color: DARK });
+
+  if (empInfo.ehMoveis) {
+    const pixChave = empInfo.pixChave || '85996119824';
+    const pixTit = empInfo.pixTitular || 'SD Móveis Projetados';
+    page.drawText(sanitizePdf(`Chave PIX: ${pixChave} (${pixTit})`), { x: MARGIN_X + 16, y: pixBoxY + 20, size: 6.8, font: fontBold, color: DARK });
+    page.drawText(sanitizePdf(`WhatsApp / Contato: ${empInfo.telefone || '(85) 99611-9824'}`), { x: MARGIN_X + 16, y: pixBoxY + 9, size: 6.8, font: fontRegular, color: DARK });
+  } else {
+    page.drawText('Chave CNPJ: 49.226.611/0001-33 (InfinityPay - SD Vidros)', { x: MARGIN_X + 16, y: pixBoxY + 20, size: 6.8, font: fontRegular, color: DARK });
+    page.drawText('Chave Celular: (85) 99760-2237 (Itaú - Samuel David)', { x: MARGIN_X + 16, y: pixBoxY + 9, size: 6.8, font: fontRegular, color: DARK });
+  }
 
   // CARD DIREITO: RESUMO FINANCEIRO E TOTAL (Largura: 198 pt)
   const rightCardW = CONTENT_W - leftCardW - 12; // ~199 pt
@@ -442,15 +458,20 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
   page.drawText('TOTAL DO ORÇAMENTO', { x: rightCardX + 18, y: totalBoxY + 34, size: 7, font: fontBold, color: GOLD });
   page.drawText(`R$ ${valorTotalFormatado}`, { x: rightCardX + 18, y: totalBoxY + 14, size: 14, font: fontBold, color: WHITE });
 
-  // ---------------- 6. BARRA DE DIFERENCIAIS & CARD DE ESPECIFICAÇÕES TÉCNICAS (ABNT) ----------------
+  // ---------------- 6. BARRA DE DIFERENCIAIS & CARD DE ESPECIFICAÇÕES TÉCNICAS ----------------
   // Preenche harmonicamente o espaço intermediário sem deixar vazio branco
   if (spaceBelowCards >= 140) {
-    // 6.1 Barra com 4 Pilares de Confiança SD Vidros
+    // 6.1 Barra com 4 Pilares de Confiança
     const badgesY = cardBottomY - 12;
     const badgesH = 24;
     const badgeColW = (CONTENT_W - 18) / 4;
 
-    const selos = [
+    const selos = empInfo.ehMoveis ? [
+      { t1: '100% MDF', t2: 'NAVAL PREMIUM' },
+      { t1: 'PADRÃO LUXO', t2: 'SOB MEDIDA' },
+      { t1: 'PONTUALIDADE', t2: 'NA ENTREGA' },
+      { t1: '1 ANO DE', t2: 'GARANTIA REAL' }
+    ] : [
       { t1: '100% VIDRO', t2: 'TEMPERADO' },
       { t1: 'PADRÃO NORMAS', t2: 'ABNT NBR 14698' },
       { t1: 'PONTUALIDADE', t2: 'NA ENTREGA' },
@@ -513,7 +534,12 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
         height: qualHeaderH,
         color: HEADER_BG
       });
-      page.drawText('PADRÃO TÉCNICO DE ENGENHARIA, NORMAS DE SEGURANÇA & PROCEDIMENTOS', {
+
+      const tituloCardTecnico = empInfo.ehMoveis
+        ? 'PADRÃO TÉCNICO DE MARCENARIA, NORMAS DE QUALIDADE & ACABAMENTO'
+        : 'PADRÃO TÉCNICO DE ENGENHARIA, NORMAS DE SEGURANÇA & PROCEDIMENTOS';
+
+      page.drawText(tituloCardTecnico, {
         x: MARGIN_X + 10,
         y: qualTopY - 11,
         size: 6.8,
@@ -526,25 +552,47 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
       const col2X = MARGIN_X + colW + 18;
       let textLineY = qualTopY - qualHeaderH - 13;
 
-      // Coluna 1: Materiais & Segurança
-      page.drawText('• Vidros Temperados Certificados:', { x: col1X, y: textLineY, size: 6.8, font: fontBold, color: DARK });
-      page.drawText('Conforme normas ABNT NBR 14698/14697, resistência térmica e a impacto até 5x maior que o vidro comum.', { x: col1X + 8, y: textLineY - 10, size: 6.3, font: fontRegular, color: GRAY });
+      if (empInfo.ehMoveis) {
+        // Coluna 1: Materiais & Acabamento SD Móveis
+        page.drawText('• MDF Naval e Madeiras Certificadas:', { x: col1X, y: textLineY, size: 6.8, font: fontBold, color: DARK });
+        page.drawText('Chapas de alta densidade 100% MDF com tratamento antimofo, resistentes à umidade e ao empenamento.', { x: col1X + 8, y: textLineY - 10, size: 6.3, font: fontRegular, color: GRAY });
 
-      page.drawText('• Perfis Estruturais em Alumínio Nobre:', { x: col1X, y: textLineY - 23, size: 6.8, font: fontBold, color: DARK });
-      page.drawText('Tratamento anticorrosivo especial (anodização ou pintura eletrostática), imunes a oxidação e ferrugem.', { x: col1X + 8, y: textLineY - 33, size: 6.3, font: fontRegular, color: GRAY });
+        page.drawText('• Ferragens & Amortecedores Soft-Close:', { x: col1X, y: textLineY - 23, size: 6.8, font: fontBold, color: DARK });
+        page.drawText('Dobradiças com amortecimento suave e corrediças telescópicas reforçadas para deslizamento silencioso.', { x: col1X + 8, y: textLineY - 33, size: 6.3, font: fontRegular, color: GRAY });
 
-      page.drawText('• Vedação Acústica e Hidráulica:', { x: col1X, y: textLineY - 46, size: 6.8, font: fontBold, color: DARK });
-      page.drawText('Aplicação com silicone neutro fungicida de alta vedação, evitando vazamentos, infiltrações e mofo.', { x: col1X + 8, y: textLineY - 56, size: 6.3, font: fontRegular, color: GRAY });
+        page.drawText('• Bordas Seladas & Acabamento Impecável:', { x: col1X, y: textLineY - 46, size: 6.8, font: fontBold, color: DARK });
+        page.drawText('Fita de borda aplicada com polímero termoplástico impermeabilizante, garantindo total vedação.', { x: col1X + 8, y: textLineY - 56, size: 6.3, font: fontRegular, color: GRAY });
 
-      // Coluna 2: Instalação & Atendimento
-      page.drawText('• Medição Técnica e Precisão a Laser:', { x: col2X, y: textLineY, size: 6.8, font: fontBold, color: DARK });
-      page.drawText('Conferência de vãos, prumos e esquadros antes da fabricação sob medida para encaixe milimétrico.', { x: col2X + 8, y: textLineY - 10, size: 6.3, font: fontRegular, color: GRAY });
+        // Coluna 2: Instalação & Atendimento SD Móveis
+        page.drawText('• Projeto 3D e Medição Milimétrica a Laser:', { x: col2X, y: textLineY, size: 6.8, font: fontBold, color: DARK });
+        page.drawText('Conferência precisa de prumos, desníveis e esquadros antes da fabricação sob medida para encaixe exato.', { x: col2X + 8, y: textLineY - 10, size: 6.3, font: fontRegular, color: GRAY });
 
-      page.drawText('• Ferragens e Roldanas de Alta Performance:', { x: col2X, y: textLineY - 23, size: 6.8, font: fontBold, color: DARK });
-      page.drawText('Roldanas blindadas de rolamento suave com regulagem, e componentes em aço inox e latão cromado.', { x: col2X + 8, y: textLineY - 33, size: 6.3, font: fontRegular, color: GRAY });
+        page.drawText('• Puxadores Nobres & Perfis de Alumínio:', { x: col2X, y: textLineY - 23, size: 6.8, font: fontBold, color: DARK });
+        page.drawText('Componentes de alta durabilidade, design moderno e ergonomia planejada para cada ambiente.', { x: col2X + 8, y: textLineY - 33, size: 6.3, font: fontRegular, color: GRAY });
 
-      page.drawText('• Equipe Especializada e Garantia de 1 Ano:', { x: col2X, y: textLineY - 46, size: 6.8, font: fontBold, color: DARK });
-      page.drawText('Montadores próprios capacitados com EPIs, limpeza pós-obra e cobertura total de fabricação.', { x: col2X + 8, y: textLineY - 56, size: 6.3, font: fontRegular, color: GRAY });
+        page.drawText('• Montagem Especializada & Limpeza Pós-Obra:', { x: col2X, y: textLineY - 46, size: 6.8, font: fontBold, color: DARK });
+        page.drawText('Marceneiros próprios capacitados com entrega dos ambientes higienizados, nivelados e alinhados.', { x: col2X + 8, y: textLineY - 56, size: 6.3, font: fontRegular, color: GRAY });
+      } else {
+        // Coluna 1: Materiais & Segurança SD Vidros
+        page.drawText('• Vidros Temperados Certificados:', { x: col1X, y: textLineY, size: 6.8, font: fontBold, color: DARK });
+        page.drawText('Conforme normas ABNT NBR 14698/14697, resistência térmica e a impacto até 5x maior que o vidro comum.', { x: col1X + 8, y: textLineY - 10, size: 6.3, font: fontRegular, color: GRAY });
+
+        page.drawText('• Perfis Estruturais em Alumínio Nobre:', { x: col1X, y: textLineY - 23, size: 6.8, font: fontBold, color: DARK });
+        page.drawText('Tratamento anticorrosivo especial (anodização ou pintura eletrostática), imunes a oxidação e ferrugem.', { x: col1X + 8, y: textLineY - 33, size: 6.3, font: fontRegular, color: GRAY });
+
+        page.drawText('• Vedação Acústica e Hidráulica:', { x: col1X, y: textLineY - 46, size: 6.8, font: fontBold, color: DARK });
+        page.drawText('Aplicação com silicone neutro fungicida de alta vedação, evitando vazamentos, infiltrações e mofo.', { x: col1X + 8, y: textLineY - 56, size: 6.3, font: fontRegular, color: GRAY });
+
+        // Coluna 2: Instalação & Atendimento SD Vidros
+        page.drawText('• Medição Técnica e Precisão a Laser:', { x: col2X, y: textLineY, size: 6.8, font: fontBold, color: DARK });
+        page.drawText('Conferência de vãos, prumos e esquadros antes da fabricação sob medida para encaixe milimétrico.', { x: col2X + 8, y: textLineY - 10, size: 6.3, font: fontRegular, color: GRAY });
+
+        page.drawText('• Ferragens e Roldanas de Alta Performance:', { x: col2X, y: textLineY - 23, size: 6.8, font: fontBold, color: DARK });
+        page.drawText('Roldanas blindadas de rolamento suave com regulagem, e componentes em aço inox e latão cromado.', { x: col2X + 8, y: textLineY - 33, size: 6.3, font: fontRegular, color: GRAY });
+
+        page.drawText('• Equipe Especializada e Garantia de 1 Ano:', { x: col2X, y: textLineY - 46, size: 6.8, font: fontBold, color: DARK });
+        page.drawText('Montadores próprios capacitados com EPIs, limpeza pós-obra e cobertura total de fabricação.', { x: col2X + 8, y: textLineY - 56, size: 6.3, font: fontRegular, color: GRAY });
+      }
     }
   } else if (spaceBelowCards >= 50) {
     // Versão compacta da barra de selos se houver mais itens
@@ -552,7 +600,12 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
     const badgesH = 24;
     const badgeColW = (CONTENT_W - 18) / 4;
 
-    const selos = [
+    const selos = empInfo.ehMoveis ? [
+      { t1: '100% MDF', t2: 'NAVAL PREMIUM' },
+      { t1: 'PADRÃO LUXO', t2: 'SOB MEDIDA' },
+      { t1: 'PONTUALIDADE', t2: 'NA ENTREGA' },
+      { t1: '1 ANO DE', t2: 'GARANTIA REAL' }
+    ] : [
       { t1: '100% VIDRO', t2: 'TEMPERADO' },
       { t1: 'PADRÃO NORMAS', t2: 'ABNT NBR' },
       { t1: 'PONTUALIDADE', t2: 'NA ENTREGA' },
@@ -643,7 +696,8 @@ async function gerarPdfOrcamento(dados, fetchLogo) {
     color: GRAY
   });
 
-  page.drawText('Confirmação rápida WhatsApp: (85) 99611-9824', {
+  const telRodapeZap = empInfo.telefone || '(85) 99611-9824';
+  page.drawText(`Confirmação rápida WhatsApp: ${telRodapeZap}`, {
     x: MARGIN_X + CONTENT_W - 205,
     y: rodapeCardY + 12,
     size: 6.8,
@@ -660,6 +714,23 @@ module.exports = async (req, res) => {
   }
   try {
     let dados = req.body || {};
+    let queryEmpresa = '';
+    let queryEmpNome = '';
+    let queryEmpTipo = '';
+    let queryEmpSeg = '';
+    let queryEmpTel = '';
+    let queryEmpPix = '';
+    let queryEmpCnpj = '';
+
+    if (req.query) {
+      queryEmpresa = req.query.empresa || req.query.lic || req.query.emp || '';
+      queryEmpNome = req.query.empNome || req.query.nomeEmpresa || '';
+      queryEmpTipo = req.query.empTipo || req.query.tipoContrato || '';
+      queryEmpSeg = req.query.empSeg || req.query.segmento || '';
+      queryEmpTel = req.query.empTel || req.query.telEmpresa || '';
+      queryEmpPix = req.query.empPix || req.query.pix || '';
+      queryEmpCnpj = req.query.empCnpj || req.query.cnpjEmpresa || '';
+    }
 
     if (req.method === 'GET') {
       if (req.query && req.query.d) {
@@ -671,6 +742,15 @@ module.exports = async (req, res) => {
           s = s.replace(/ /g, '+').replace(/-/g, '+').replace(/_/g, '/');
           while (s.length % 4 !== 0) s += '=';
           const p = JSON.parse(Buffer.from(s, 'base64').toString('utf-8'));
+
+          if (p.emp && !queryEmpresa) queryEmpresa = p.emp;
+          if (p.empresa && !queryEmpresa) queryEmpresa = p.empresa;
+          if (p.empNome && !queryEmpNome) queryEmpNome = p.empNome;
+          if (p.empTipo && !queryEmpTipo) queryEmpTipo = p.empTipo;
+          if (p.empSeg && !queryEmpSeg) queryEmpSeg = p.empSeg;
+          if (p.empTel && !queryEmpTel) queryEmpTel = p.empTel;
+          if (p.empPix && !queryEmpPix) queryEmpPix = p.empPix;
+          if (p.empCnpj && !queryEmpCnpj) queryEmpCnpj = p.empCnpj;
 
           let bNome = (p.b || p.bairro || '').trim();
           let cNome = (p.cidade || '').trim();
@@ -751,6 +831,10 @@ module.exports = async (req, res) => {
           if (supabase) {
             const { data, error } = await supabase.from('contratos').select('*').eq('id', req.query.id).single();
             if (!error && data) {
+              if (data.empresa && !queryEmpresa) queryEmpresa = data.empresa;
+              if (data.texto && (data.texto.includes('Móveis') || data.texto.includes('marcenaria') || data.texto.includes('moveis'))) {
+                queryEmpTipo = 'moveis';
+              }
               if (data.dados) {
                 dados = data.dados;
               } else {
@@ -768,20 +852,78 @@ module.exports = async (req, res) => {
       }
     }
 
-    const fetchLogo = async () => {
+    // Identificação precisa da empresa ativa (SD Vidros vs SD Móveis vs Custom)
+    const empParamLower = String(queryEmpresa || (dados && (dados.empresa || dados.emp)) || '').toLowerCase().trim();
+    const empNomeLower = String(queryEmpNome || (dados && (dados.empNome || dados.nomeEmpresa)) || '').toLowerCase().trim();
+    const empTipoLower = String(queryEmpTipo || (dados && (dados.empTipo || dados.tipoContrato)) || '').toLowerCase().trim();
+
+    // emp_1789700331599 é a chave criada para SD Móveis
+    const ehMoveis = (
+      empParamLower === 'emp_1789700331599' ||
+      empParamLower === 'sdmoveis' ||
+      empParamLower === 'sd-moveis' ||
+      empParamLower.includes('moveis') ||
+      empParamLower.includes('móveis') ||
+      empTipoLower === 'moveis' ||
+      empNomeLower.includes('móveis') ||
+      empNomeLower.includes('moveis') ||
+      empNomeLower.includes('planejados') ||
+      empNomeLower.includes('marcenaria')
+    );
+
+    let empInfo = {};
+    if (ehMoveis) {
+      empInfo = {
+        id: queryEmpresa || 'sdmoveis',
+        nome: queryEmpNome || 'SD Móveis Projetados',
+        segmento: queryEmpSeg || 'Móveis Planejados & Marcenaria de Luxo',
+        slogan: 'Cozinhas Planejadas, Closets & Ambientes Sob Medida',
+        endereco: 'Itaitinga - CE',
+        contatos: `WhatsApp: ${queryEmpTel || '(85) 99611-9824'} | Atendimento & Projetos Sob Medida`,
+        telefone: queryEmpTel || '(85) 99611-9824',
+        pixChave: queryEmpPix || '85996119824',
+        pixTitular: 'SD Móveis Projetados',
+        logoFile: 'logo_moveis.jpg',
+        ehMoveis: true
+      };
+    } else {
+      empInfo = {
+        id: queryEmpresa || 'sdvidros',
+        nome: queryEmpNome || 'SD Vidros',
+        segmento: queryEmpSeg || 'Soluções em Vidros Temperados e Esquadrias de Alumínio',
+        slogan: 'Box, Espelhos, Portas, Janelas & Guarda-Corpo',
+        endereco: 'Rua Jorge Figueiredo 740, Barrocão - Itaitinga-CE • CNPJ: 49.226.611/0001-33',
+        contatos: `WhatsApp: ${queryEmpTel || '(85) 99611-9824'} • 99760-2237 • 98574-9606 | sdvidros2025@gmail.com`,
+        telefone: queryEmpTel || '(85) 99611-9824',
+        pixChave: queryEmpPix || '49.226.611/0001-33',
+        pixTitular: 'InfinityPay - SD Vidros',
+        logoFile: 'logo.jpg',
+        ehMoveis: false
+      };
+    }
+
+    const fetchLogo = async (logoFileName = 'logo.jpg') => {
       try {
         const fs = require('fs');
         const path = require('path');
-        const localPath = path.join(process.cwd(), 'logo.jpg');
+        const localPath = path.join(process.cwd(), logoFileName);
         if (fs.existsSync(localPath)) {
           return fs.readFileSync(localPath);
+        }
+        // Fallback para logo padrão caso arquivo específico não exista
+        const fallbackPath = path.join(process.cwd(), 'logo.jpg');
+        if (fs.existsSync(fallbackPath)) {
+          return fs.readFileSync(fallbackPath);
         }
       } catch (_) {}
       try {
         const host = req.headers.host;
         if (!host) return null;
         const proto = host.includes('localhost') ? 'http' : 'https';
-        const resp = await fetch(`${proto}://${host}/logo.jpg`);
+        let resp = await fetch(`${proto}://${host}/${logoFileName}`);
+        if (!resp.ok) {
+          resp = await fetch(`${proto}://${host}/logo.jpg`);
+        }
         if (!resp.ok) return null;
         return Buffer.from(await resp.arrayBuffer());
       } catch (_) {
@@ -789,7 +931,7 @@ module.exports = async (req, res) => {
       }
     };
 
-    const pdfBytes = await gerarPdfOrcamento(dados, fetchLogo);
+    const pdfBytes = await gerarPdfOrcamento(dados, fetchLogo, empInfo);
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="orcamento-${(dados.numero || '0001').replace('#', '')}.pdf"`);

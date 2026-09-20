@@ -8645,11 +8645,20 @@ async function enviarOrcamentoParaAssinaturaDigital() {
     // 2. Gerar texto do contrato e links
     const textoContrato = montarTextoContrato(d);
 
+    const licAtivaParaPayload = (typeof obterLicencaAtiva === "function") ? obterLicencaAtiva() : { id: "sdmoveis", nome: "SD Móveis Projetados" };
+    const ehMoveisPayload = (licAtivaParaPayload.tipoContrato === "moveis" || licAtivaParaPayload.id === "sdmoveis" || (licAtivaParaPayload.nome && licAtivaParaPayload.nome.toLowerCase().includes("moveis")) || licAtivaParaPayload.id === "emp_1789700331599");
+
     const payloadCompacto = {
       n: d.numero || '0001',
       c: d.nome || '',
       t: d.tel || '',
-      v: d.total || ''
+      v: d.total || '',
+      emp: licAtivaParaPayload.id || (ehMoveisPayload ? 'sdmoveis' : 'sdvidros'),
+      empNome: licAtivaParaPayload.nome || (ehMoveisPayload ? 'SD Móveis Projetados' : 'SD Vidros'),
+      empTipo: ehMoveisPayload ? 'moveis' : 'vidros',
+      empSeg: licAtivaParaPayload.segmento || '',
+      empTel: licAtivaParaPayload.telefone || '',
+      empPix: licAtivaParaPayload.pix || ''
     };
     if (d.data) payloadCompacto.d = d.data;
     if (d.forma) payloadCompacto.f = d.forma;
@@ -8685,7 +8694,10 @@ async function enviarOrcamentoParaAssinaturaDigital() {
     const dParam = btoa(binStr).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
     const lic = (typeof obterLicencaAtiva === "function") ? obterLicencaAtiva() : { id: "sdmoveis", nome: "SD Móveis Projetados" };
-    const empParamUrl = "&empresa=" + encodeURIComponent(lic.id || "sdmoveis");
+    const ehMoveisUrl = (lic.tipoContrato === "moveis" || lic.id === "sdmoveis" || (lic.nome && lic.nome.toLowerCase().includes("moveis")) || lic.id === "emp_1789700331599");
+    const empParamUrl = "&empresa=" + encodeURIComponent(lic.id || (ehMoveisUrl ? "sdmoveis" : "sdvidros"))
+      + "&empNome=" + encodeURIComponent(lic.nome || (ehMoveisUrl ? "SD Móveis Projetados" : "SD Vidros"))
+      + "&empTipo=" + encodeURIComponent(ehMoveisUrl ? "moveis" : "vidros");
     let linkAssinatura = window.location.origin + "/assinar.html?d=" + dParam + empParamUrl;
     let linkPdf = window.location.origin + "/api/gerar-pdf-orcamento?d=" + dParam + empParamUrl;
 

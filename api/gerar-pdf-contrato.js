@@ -11,8 +11,15 @@ const PAGE_H = 841.89;
 const MARGIN = 50;
 const CONTENT_W = PAGE_W - MARGIN * 2;
 
+function sanitizePdf(text) {
+  if (text == null) return '';
+  return String(text)
+    .replace(/[^\x00-\x7F\xA0-\xFF\u2022]/g, '')
+    .trim();
+}
+
 function wrapText(text, font, size, maxWidth) {
-  const words = String(text == null ? '' : text).split(/\s+/).filter(Boolean);
+  const words = sanitizePdf(text).split(/\s+/).filter(Boolean);
   const lines = [];
   let line = '';
   for (const word of words) {
@@ -28,7 +35,7 @@ function wrapText(text, font, size, maxWidth) {
   return lines.length ? lines : [''];
 }
 
-async function gerarPdfContrato(dados, fetchLogo) {
+async function gerarPdfContrato(dados, fetchLogo, empInfo) {
   const {
     numero, dataStr, nome, cnpj, tel, endereco, resp,
     itens, total, forma, obs, prazo, garantia
@@ -40,7 +47,7 @@ async function gerarPdfContrato(dados, fetchLogo) {
 
   let logoImage = null;
   try {
-    const buf = await fetchLogo();
+    const buf = await fetchLogo(empInfo && empInfo.logoFile ? empInfo.logoFile : (empInfo && empInfo.ehMoveis ? 'logo_moveis.jpg' : 'logo.jpg'));
     if (buf) logoImage = await pdfDoc.embedJpg(buf);
   } catch (e) { /* segue sem logo */ }
 
@@ -85,10 +92,17 @@ async function gerarPdfContrato(dados, fetchLogo) {
     page.drawImage(logoImage, { x: MARGIN, y: headerTop - logoSize + 6, width: lw || logoSize, height: lh || logoSize });
   }
   const textX = logoImage ? MARGIN + 66 : MARGIN;
-  page.drawText('SD VIDROS', { x: textX, y: headerTop - 6, size: 19, font: fontBold, color: DARK });
-  page.drawText('Vidraçaria, Esquadrias de Alumínio e Soluções em Vidro', { x: textX, y: headerTop - 23, size: 8.5, font: fontRegular, color: GRAY });
-  page.drawText('WhatsApp: (85) 99611-9824 | Instagram: @sdvidros', { x: textX, y: headerTop - 35, size: 8.5, font: fontRegular, color: GRAY });
-  page.drawText('Itaitinga - CE', { x: textX, y: headerTop - 47, size: 8.5, font: fontRegular, color: GRAY });
+  const nomeEmpresaUpper = sanitizePdf((empInfo.nome || (empInfo.ehMoveis ? 'SD MÓVEIS PROJETADOS' : 'SD VIDROS')).toUpperCase());
+  page.drawText(nomeEmpresaUpper, { x: textX, y: headerTop - 6, size: 19, font: fontBold, color: DARK });
+
+  const segmentoEmpresa = sanitizePdf(empInfo.segmento || (empInfo.ehMoveis ? 'Móveis Planejados & Marcenaria de Luxo' : 'Vidraçaria, Esquadrias de Alumínio e Soluções em Vidro'));
+  page.drawText(segmentoEmpresa, { x: textX, y: headerTop - 23, size: 8.5, font: fontRegular, color: GRAY });
+
+  const contatosEmpresa = sanitizePdf(empInfo.contatos || (empInfo.ehMoveis ? 'WhatsApp: (85) 99611-9824 | Atendimento & Projetos Sob Medida' : 'WhatsApp: (85) 99611-9824 | Instagram: @sdvidros'));
+  page.drawText(contatosEmpresa, { x: textX, y: headerTop - 35, size: 8.5, font: fontRegular, color: GRAY });
+
+  const cidadeEmpresa = sanitizePdf(empInfo.endereco || 'Itaitinga - CE');
+  page.drawText(cidadeEmpresa, { x: textX, y: headerTop - 47, size: 8.5, font: fontRegular, color: GRAY });
 
   const numeroStr = `CONTRATO N° ${numero || ''}`;
   const numeroW = fontBold.widthOfTextAtSize(numeroStr, 11);
@@ -111,8 +125,8 @@ async function gerarPdfContrato(dados, fetchLogo) {
 
   // ---------------- CAIXA QUALIFICAÇÃO ----------------
   const rows = [
-    ['CONTRATADA:', 'SD VIDROS (Itaitinga - CE)'],
-    ['WhatsApp / Redes:', '(85) 99611-9824 | Instagram: @sdvidros'],
+    ['CONTRATADA:', `${nomeEmpresaUpper} (${cidadeEmpresa})`],
+    ['WhatsApp / Redes:', contatosEmpresa],
     ['GAP', ''],
     ['CONTRATANTE:', nome || 'Não informado'],
   ];
@@ -149,74 +163,85 @@ async function gerarPdfContrato(dados, fetchLogo) {
   }
   y = boxTop - boxHeight - 24;
 
-  // ---------------- CLÁUSULAS ----------------
-  const pSize = 9.5;
-  const pLineH = 14.5;
-
+  // ---------------- CLÁUSULA 1: OBJETO ----------------
   tituloClausula('CLÁUSULA 1ª – DO OBJETO');
-  paragraph('A CONTRATADA obriga-se a fornecer e instalar ao CONTRATANTE os seguintes serviços de vidraçaria e esquadrias:', pSize, fontRegular, DARK, MARGIN, CONTENT_W, pLineH);
-  y -= 4;
-  const itensList = Array.isArray(itens) && itens.length ? itens : [];
-  if (!itensList.length) {
-    paragraph('(itens não especificados)', pSize, fontRegular, GRAY, MARGIN + 10, CONTENT_W - 10, pLineH);
-  } else {
-    itensList.forEach((it, i) => {
-      let detalhe = '';
-      if (it.alt && it.larg) detalhe += ` [Dimensões: ${it.alt}m x ${it.larg}m = ${it.m2 || ''}]`;
-      if (it.cor) detalhe += ` [Cor: ${it.cor}]`;
-      if (it.bizt) detalhe += ` [Lapidação/Bizotê: ${it.bizt}]`;
-      const linha = `${i + 1}. ${it.desc || ''}${detalhe} — Qtd: ${it.qtd || ''} — Total: ${it.total || ''}`;
-      paragraph(linha, pSize, fontRegular, DARK, MARGIN + 10, CONTENT_W - 10, pLineH);
+  const descObjeto = empInfo.ehMoveis
+    ? 'O presente contrato tem por objeto a produção, marcenaria sob medida, beneficiamento e instalação dos móveis planejados discriminados a seguir:'
+    : 'O presente contrato tem por objeto a fabricação, corte, beneficiamento e instalação dos seguintes produtos e serviços de vidraçaria e esquadrias de alumínio:';
+  paragraph(descObjeto, 9.5, fontRegular, DARK, MARGIN, CONTENT_W, 14);
+  y -= 8;
+
+  if (Array.isArray(itens) && itens.length) {
+    const itensY = y;
+    let tableH = 22 + itens.length * 20;
+    ensureSpace(tableH);
+
+    page.drawRectangle({ x: MARGIN, y: y - 20, width: CONTENT_W, height: 20, color: rgb(0.92, 0.92, 0.92) });
+    page.drawText('ITEM / DESCRIÇÃO', { x: MARGIN + 8, y: y - 14, size: 8, font: fontBold, color: DARK });
+    page.drawText('QTD', { x: MARGIN + CONTENT_W - 140, y: y - 14, size: 8, font: fontBold, color: DARK });
+    page.drawText('VALOR TOTAL', { x: MARGIN + CONTENT_W - 70, y: y - 14, size: 8, font: fontBold, color: DARK });
+    y -= 20;
+
+    itens.forEach((it, idx) => {
+      ensureSpace(20);
+      const desc = it.desc || it[0] || 'Item sem descrição';
+      const qtd = it.qtd || it[1] || 1;
+      const tot = it.total || it[6] || '';
+      page.drawText(`${idx + 1}. ${desc}`, { x: MARGIN + 8, y: y - 14, size: 8.5, font: fontRegular, color: DARK });
+      page.drawText(`${qtd}`, { x: MARGIN + CONTENT_W - 140, y: y - 14, size: 8.5, font: fontRegular, color: DARK });
+      page.drawText(`${tot}`, { x: MARGIN + CONTENT_W - 70, y: y - 14, size: 8.5, font: fontBold, color: DARK });
+      page.drawLine({ start: { x: MARGIN, y: y - 20 }, end: { x: PAGE_W - MARGIN, y: y - 20 }, thickness: 0.5, color: BORDER });
+      y -= 20;
     });
+    y -= 14;
+  } else if (obs) {
+    paragraph(`Especificações: ${obs}`, 9.5, fontRegular, DARK, MARGIN, CONTENT_W, 14);
+    y -= 10;
   }
-  y -= 14;
 
+  // ---------------- CLÁUSULA 2: VALOR E FORMA DE PAGAMENTO ----------------
   tituloClausula('CLÁUSULA 2ª – DO VALOR E FORMA DE PAGAMENTO');
-  paragraph(`Valor Total: ${total || 'R$ 0,00'}`, pSize, fontBold, DARK, MARGIN, CONTENT_W, pLineH);
-  paragraph(`Forma de Pagamento: ${forma || 'À vista'}`, pSize, fontRegular, DARK, MARGIN, CONTENT_W, pLineH);
-  if (obs) paragraph(`Observações: ${obs}`, pSize, fontRegular, DARK, MARGIN, CONTENT_W, pLineH);
-  y -= 4;
-  paragraph('A CONTRATANTE efetuará o pagamento conforme a forma descrita acima.', pSize, fontRegular, DARK, MARGIN, CONTENT_W, pLineH);
-  paragraph('Chave Pix para pagamento: (85) 99760-2237', pSize, fontRegular, DARK, MARGIN, CONTENT_W, pLineH);
-  y -= 14;
+  paragraph(`Pela execução dos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor total de ${total || 'R$ 0,00'}.`, 9.5, fontRegular, DARK, MARGIN, CONTENT_W, 14);
+  if (forma) {
+    paragraph(`Forma de pagamento acordada: ${forma}.`, 9.5, fontRegular, DARK, MARGIN, CONTENT_W, 14);
+  }
+  const pixTexto = empInfo.ehMoveis
+    ? `Dados para pagamento via PIX: Chave PIX: ${empInfo.pixChave || '85996119824'} (${empInfo.pixTitular || 'SD Móveis Projetados'}).`
+    : 'Dados para pagamento via PIX: Chave CNPJ: 49.226.611/0001-33 (InfinityPay - SD Vidros) ou Chave Celular: (85) 99760-2237 (Itaú - Samuel David).';
+  paragraph(pixTexto, 9.5, fontRegular, DARK, MARGIN, CONTENT_W, 14);
+  y -= 10;
 
+  // ---------------- CLÁUSULA 3: PRAZO DE ENTREGA ----------------
   tituloClausula('CLÁUSULA 3ª – DO PRAZO DE ENTREGA E EXECUÇÃO');
-  paragraph(`O prazo para execução e entrega dos serviços é de ${prazo || 'a combinar'}, contados a partir da confirmação do pagamento/sinal e da aprovação de todos os detalhes técnicos do projeto.`, pSize, fontRegular, DARK, MARGIN, CONTENT_W, pLineH);
-  y -= 14;
+  const prazoTexto = prazo
+    ? `O prazo estimado para conclusão e entrega dos serviços é de ${prazo}, contados a partir da confirmação do pagamento do sinal e aprovação das medidas finais.`
+    : 'O prazo para conclusão e entrega dos serviços será de até 15 (quinze) dias úteis após a confirmação do pagamento do sinal e aprovação das medidas finais no local.';
+  paragraph(prazoTexto, 9.5, fontRegular, DARK, MARGIN, CONTENT_W, 14);
+  y -= 10;
 
+  // ---------------- CLÁUSULA 4: GARANTIA ----------------
   tituloClausula('CLÁUSULA 4ª – DA GARANTIA');
-  paragraph(`A CONTRATADA oferece garantia de ${garantia || '1 (um) ano'} contra defeitos de fabricação e instalação, excluindo danos causados por mau uso, vandalismo, acidentes ou fenômenos naturais.`, pSize, fontRegular, DARK, MARGIN, CONTENT_W, pLineH);
-  y -= 14;
-
-  tituloClausula('CLÁUSULA 5ª – DAS OBRIGAÇÕES DAS PARTES');
-  paragraph('5.1 – A CONTRATADA executará os serviços com materiais de alta qualidade e mão de obra especializada;', pSize, fontRegular, DARK, MARGIN, CONTENT_W, pLineH);
-  paragraph('5.2 – A CONTRATANTE garantirá o acesso ao local nos dias combinados e efetuará o pagamento acordado.', pSize, fontRegular, DARK, MARGIN, CONTENT_W, pLineH);
+  const garantiaTexto = garantia
+    ? `Os materiais e a instalação possuem garantia de ${garantia}, nos termos legais.`
+    : (empInfo.ehMoveis
+      ? 'A CONTRATADA oferece garantia de 1 (um) ano sobre a estrutura do MDF naval e montagem, e garantia legal sobre ferragens contra defeitos de fabricação.'
+      : 'A CONTRATADA oferece garantia de 1 (um) ano sobre a instalação e garantia legal sobre os vidros temperados contra defeitos de fabricação.');
+  paragraph(garantiaTexto, 9.5, fontRegular, DARK, MARGIN, CONTENT_W, 14);
+  y -= 18;
 
   // ---------------- ASSINATURAS ----------------
   ensureSpace(90);
-  y -= 30;
-  const colW = (CONTENT_W - 30) / 2;
-  const line1X = MARGIN;
-  const line2X = MARGIN + colW + 30;
-  page.drawLine({ start: { x: line1X, y }, end: { x: line1X + colW, y }, thickness: 0.8, color: DARK });
-  page.drawLine({ start: { x: line2X, y }, end: { x: line2X + colW, y }, thickness: 0.8, color: DARK });
-  y -= 16;
-  const centerText = (text, x, w, size, font, color) => {
-    const tw = font.widthOfTextAtSize(text, size);
-    page.drawText(text, { x: x + (w - tw) / 2, y, size, font, color });
-  };
-  centerText('SD VIDROS', line1X, colW, 10, fontBold, DARK);
-  centerText((nome || 'CLIENTE').toUpperCase(), line2X, colW, 10, fontBold, DARK);
+  y -= 20;
+  const colW = (CONTENT_W - 40) / 2;
+  page.drawLine({ start: { x: MARGIN, y }, end: { x: MARGIN + colW, y }, thickness: 0.8, color: DARK });
+  page.drawLine({ start: { x: MARGIN + colW + 40, y }, end: { x: PAGE_W - MARGIN, y }, thickness: 0.8, color: DARK });
   y -= 14;
-  centerText('CONTRATADA', line1X, colW, 8.5, fontRegular, GRAY);
-  centerText('CONTRATANTE (CLIENTE)', line2X, colW, 8.5, fontRegular, GRAY);
-
-  // ---------------- RODAPÉ (todas as páginas) ----------------
-  pages.forEach((p, i) => {
-    const label = `Página ${i + 1} de ${pages.length}`;
-    const w = fontRegular.widthOfTextAtSize(label, 8);
-    p.drawText(label, { x: (PAGE_W - w) / 2, y: 28, size: 8, font: fontRegular, color: GRAY });
-  });
+  page.drawText('CONTRATADA', { x: MARGIN + (colW - fontBold.widthOfTextAtSize('CONTRATADA', 9)) / 2, y, size: 9, font: fontBold, color: DARK });
+  page.drawText('CONTRATANTE', { x: MARGIN + colW + 40 + (colW - fontBold.widthOfTextAtSize('CONTRATANTE', 9)) / 2, y, size: 9, font: fontBold, color: DARK });
+  y -= 12;
+  page.drawText(nomeEmpresaUpper, { x: MARGIN + (colW - fontRegular.widthOfTextAtSize(nomeEmpresaUpper, 8)) / 2, y, size: 8, font: fontRegular, color: GRAY });
+  const cliNome = String(nome || 'Cliente').substring(0, 32);
+  page.drawText(cliNome, { x: MARGIN + colW + 40 + (colW - fontRegular.widthOfTextAtSize(cliNome, 8)) / 2, y, size: 8, font: fontRegular, color: GRAY });
 
   return pdfDoc.save();
 }
@@ -227,6 +252,15 @@ module.exports = async (req, res) => {
   }
   try {
     let dados = req.body || {};
+    let queryEmpresa = '';
+    let queryEmpNome = '';
+    let queryEmpTipo = '';
+
+    if (req.query) {
+      queryEmpresa = req.query.empresa || req.query.lic || req.query.emp || '';
+      queryEmpNome = req.query.empNome || req.query.nomeEmpresa || '';
+      queryEmpTipo = req.query.empTipo || req.query.tipoContrato || '';
+    }
 
     if (req.method === 'GET') {
       if (req.query && req.query.d) {
@@ -238,23 +272,10 @@ module.exports = async (req, res) => {
           s = s.replace(/ /g, '+').replace(/-/g, '+').replace(/_/g, '/');
           while (s.length % 4 !== 0) s += '=';
           const p = JSON.parse(Buffer.from(s, 'base64').toString('utf-8'));
-
-          let bNome = (p.b || p.bairro || '').trim();
-          let cNome = (p.cidade || '').trim();
-          if (bNome.includes(',')) {
-            const parts = bNome.split(',').map(s => s.trim());
-            bNome = parts[0] || '';
-            cNome = parts[1] || '';
-          } else if (bNome.includes('-')) {
-            const parts = bNome.split('-').map(s => s.trim());
-            bNome = parts[0] || '';
-            cNome = parts[1] || '';
-          }
-
-          let endCompleto = (p.e || p.endereco || '').trim();
-          if (p.num && !endCompleto.includes(p.num)) {
-            endCompleto = endCompleto ? `${endCompleto}, Nº ${p.num}` : `Nº ${p.num}`;
-          }
+          if (p.emp && !queryEmpresa) queryEmpresa = p.emp;
+          if (p.empresa && !queryEmpresa) queryEmpresa = p.empresa;
+          if (p.empNome && !queryEmpNome) queryEmpNome = p.empNome;
+          if (p.empTipo && !queryEmpTipo) queryEmpTipo = p.empTipo;
 
           dados = {
             numero: p.n || p.numero || '0001',
@@ -262,11 +283,9 @@ module.exports = async (req, res) => {
             nome: p.c || p.nome || '',
             cnpj: p.cnpj || '',
             tel: p.t || p.tel || '',
-            endereco: endCompleto,
-            bairro: bNome,
-            cidade: cNome,
+            endereco: p.e || p.endereco || '',
             resp: p.resp || '',
-            itens: p.itens || [],
+            itens: p.i || p.itens || [],
             total: p.v || p.total || '',
             forma: p.f || p.forma || '',
             obs: p.obs || '',
@@ -274,42 +293,85 @@ module.exports = async (req, res) => {
             garantia: p.g || p.garantia || ''
           };
         } catch (e) {
-          return res.status(400).json({ error: 'Parâmetro inválido' });
+          return res.status(400).json({ error: 'Parâmetro de contrato inválido' });
         }
       } else if (req.query && req.query.id) {
         try {
-          const { getSupabaseClient } = require('./_supabase');
-          const supabase = getSupabaseClient();
+          const { getClient } = require('./_supabase');
+          const supabase = getClient();
           if (supabase) {
             const { data, error } = await supabase.from('contratos').select('*').eq('id', req.query.id).single();
             if (!error && data) {
-              dados = data.dados || {
-                numero: data.numero_os || '0001',
-                nome: data.cliente_nome || '',
-                tel: data.cliente_tel || '',
-                total: data.valor_total || '',
-                obs: data.texto || ''
-              };
+              if (data.empresa && !queryEmpresa) queryEmpresa = data.empresa;
+              if (data.texto && (data.texto.includes('Móveis') || data.texto.includes('marcenaria') || data.texto.includes('moveis'))) {
+                queryEmpTipo = 'moveis';
+              }
+              if (data.dados) {
+                dados = data.dados;
+              } else {
+                dados = {
+                  numero: data.numero_os || '0001',
+                  nome: data.cliente_nome || '',
+                  tel: data.cliente_tel || '',
+                  total: data.valor_total || '',
+                  obs: data.texto || ''
+                };
+              }
             }
           }
         } catch (e) {}
       }
     }
 
-    const fetchLogo = async () => {
+    const empParamLower = String(queryEmpresa || (dados && (dados.empresa || dados.emp)) || '').toLowerCase().trim();
+    const empNomeLower = String(queryEmpNome || (dados && (dados.empNome || dados.nomeEmpresa)) || '').toLowerCase().trim();
+    const empTipoLower = String(queryEmpTipo || (dados && (dados.empTipo || dados.tipoContrato)) || '').toLowerCase().trim();
+
+    const ehMoveis = (
+      empParamLower === 'emp_1789700331599' ||
+      empParamLower === 'sdmoveis' ||
+      empParamLower === 'sd-moveis' ||
+      empParamLower.includes('moveis') ||
+      empParamLower.includes('móveis') ||
+      empTipoLower === 'moveis' ||
+      empNomeLower.includes('móveis') ||
+      empNomeLower.includes('moveis')
+    );
+
+    const empInfo = {
+      id: queryEmpresa || (ehMoveis ? 'sdmoveis' : 'sdvidros'),
+      nome: queryEmpNome || (ehMoveis ? 'SD Móveis Projetados' : 'SD Vidros'),
+      segmento: ehMoveis ? 'Móveis Planejados & Marcenaria de Luxo' : 'Vidraçaria, Esquadrias de Alumínio e Soluções em Vidro',
+      contatos: ehMoveis ? 'WhatsApp: (85) 99611-9824 | Atendimento & Projetos Sob Medida' : 'WhatsApp: (85) 99611-9824 | Instagram: @sdvidros',
+      endereco: 'Itaitinga - CE',
+      telefone: '(85) 99611-9824',
+      pixChave: ehMoveis ? '85996119824' : '49.226.611/0001-33',
+      pixTitular: ehMoveis ? 'SD Móveis Projetados' : 'InfinityPay - SD Vidros',
+      logoFile: ehMoveis ? 'logo_moveis.jpg' : 'logo.jpg',
+      ehMoveis: ehMoveis
+    };
+
+    const fetchLogo = async (logoFileName = 'logo.jpg') => {
       try {
         const fs = require('fs');
         const path = require('path');
-        const localPath = path.join(process.cwd(), 'logo.jpg');
+        const localPath = path.join(process.cwd(), logoFileName);
         if (fs.existsSync(localPath)) {
           return fs.readFileSync(localPath);
+        }
+        const fallbackPath = path.join(process.cwd(), 'logo.jpg');
+        if (fs.existsSync(fallbackPath)) {
+          return fs.readFileSync(fallbackPath);
         }
       } catch (_) {}
       try {
         const host = req.headers.host;
         if (!host) return null;
         const proto = host.includes('localhost') ? 'http' : 'https';
-        const resp = await fetch(`${proto}://${host}/logo.jpg`);
+        let resp = await fetch(`${proto}://${host}/${logoFileName}`);
+        if (!resp.ok) {
+          resp = await fetch(`${proto}://${host}/logo.jpg`);
+        }
         if (!resp.ok) return null;
         return Buffer.from(await resp.arrayBuffer());
       } catch (_) {
@@ -317,7 +379,7 @@ module.exports = async (req, res) => {
       }
     };
 
-    const pdfBytes = await gerarPdfContrato(dados, fetchLogo);
+    const pdfBytes = await gerarPdfContrato(dados, fetchLogo, empInfo);
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="contrato-${(dados.numero || '0001').replace('#', '')}.pdf"`);
