@@ -2634,11 +2634,14 @@
               ⏰ Próxima Liberação: <span id="lbl-proxima-liberacao">12:00</span>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+              <button type="button" onclick="alterarModoHorarioJogos('livre')" style="padding:10px 18px;background:linear-gradient(135deg,#38bdf8,#0ea5e9);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 18px rgba(14,165,233,0.5);">
+                <span>🎮</span> <span>Jogar Agora (Liberar Acesso)</span>
+              </button>
               <button type="button" onclick="notificarGerenciaTentativaJogo()" style="padding:10px 18px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:12.5px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 15px rgba(34,197,94,0.4);">
-                <span>📲</span> <span>Notificar Gerência (WhatsApp)</span>
+                <span>📲</span> <span>Notificar Gerência</span>
               </button>
               <button type="button" onclick="mudarAba('status')" style="padding:10px 16px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:#fff;font-weight:800;font-size:12px;cursor:pointer;">
-                Voltar ao Portal
+                Voltar
               </button>
             </div>
           </div>
@@ -2726,6 +2729,18 @@
               <button type="button" class="btn-jogo-opcao" id="btn-jogo-tiro" onclick="selecionarJogo('tiro')">
                 <span style="font-size:22px;">🎯</span>
                 <span style="font-size:12px;font-weight:800;">Tiro</span>
+              </button>
+              <button type="button" class="btn-jogo-opcao" id="btn-jogo-gta" onclick="selecionarJogo('gta')">
+                <span style="font-size:22px;">🔫</span>
+                <span style="font-size:12px;font-weight:800;">GTA Vice</span>
+              </button>
+              <button type="button" class="btn-jogo-opcao" id="btn-jogo-pes" onclick="selecionarJogo('pes')">
+                <span style="font-size:22px;">⚽</span>
+                <span style="font-size:12px;font-weight:800;">PES 2018</span>
+              </button>
+              <button type="button" class="btn-jogo-opcao" id="btn-jogo-nfs" onclick="selecionarJogo('nfs')">
+                <span style="font-size:22px;">🏎️💨</span>
+                <span style="font-size:12px;font-weight:800;">Need for Speed</span>
               </button>
               <button type="button" class="btn-jogo-opcao" id="btn-jogo-sugestao" onclick="selecionarJogo('sugestao')" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:#fbbf24;">
                 <span style="font-size:22px;">💡</span>
@@ -4588,12 +4603,12 @@ function mudarAba(tab) {
       try {
         const salvos = JSON.parse(localStorage.getItem('sdv_config_horarios_jogos') || '{}');
         return Object.assign({
-          modo: 'almoco_pos', // 'livre', 'almoco_pos', 'personalizado'
+          modo: 'livre', // 'livre', 'almoco_pos', 'personalizado'
           inicioPers: '12:00',
           fimPers: '13:30'
         }, salvos);
       } catch (_) {
-        return { modo: 'almoco_pos', inicioPers: '12:00', fimPers: '13:30' };
+        return { modo: 'livre', inicioPers: '12:00', fimPers: '13:30' };
       }
     }
 

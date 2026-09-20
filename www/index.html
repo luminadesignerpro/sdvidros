@@ -7101,11 +7101,15 @@ function registrarBatidaPontoComJustificativa() {
 
 function recalcularHorasPonto(p, colab) {
   if (!p) return;
-  if (!colab && p.colaboradorId) {
-    colab = funcionariosLista.find(x => x.id === p.colaboradorId);
+  if (!colab && p.colaboradorId != null) {
+    colab = funcionariosLista.find(x => String(x.id) === String(p.colaboradorId));
   }
   if (!colab && p.colaboradorNome) {
-    colab = funcionariosLista.find(x => (x.nome || '').toLowerCase() === (p.colaboradorNome || '').toLowerCase());
+    const pNome = String(p.colaboradorNome).toLowerCase().trim();
+    colab = funcionariosLista.find(x => {
+      const xNome = String(x.nome || '').toLowerCase().trim();
+      return xNome === pNome || xNome.includes(pNome) || pNome.includes(xNome);
+    });
   }
 
   const parseMin = (str) => {
@@ -7136,15 +7140,27 @@ function recalcularHorasPonto(p, colab) {
 
   // Calcula o valor hora do colaborador primeiro para descontos proporcionais
   let vHora = 0;
-  if (colab && colab.valorHora && Number(colab.valorHora) > 0) {
-    vHora = Number(colab.valorHora);
-  } else if (colab && colab.salario && Number(colab.salario) > 0) {
-    const jornadaStr = colab.jornada || '44';
-    const horasSem = parseInt(String(jornadaStr).replace(/\D/g, '')) || 44;
-    const horasMes = horasSem * 4.545;
-    vHora = Number(colab.salario) / (horasMes || 200);
-  } else if (p.valorHora && Number(p.valorHora) > 0) {
-    vHora = Number(p.valorHora);
+  if (colab) {
+    if (colab.valorHora != null && parseNum(colab.valorHora) > 0) {
+      vHora = parseNum(colab.valorHora);
+    } else if (colab.salario != null && parseNum(colab.salario) > 0) {
+      const jornadaStr = String(colab.jornada || '44');
+      const horasSem = parseInt(jornadaStr.replace(/\D/g, '')) || 44;
+      const horasMes = horasSem * 4.545;
+      vHora = parseNum(colab.salario) / (horasMes || 200);
+    }
+  }
+  if (vHora <= 0 && p.valorHora != null && parseNum(p.valorHora) > 0) {
+    vHora = parseNum(p.valorHora);
+  }
+  // Se ainda assim for 0, obtém valor da base de funcionários ou valor hora padrão SD Vidros (R$ 25,50/h)
+  if (vHora <= 0) {
+    const refColab = (Array.isArray(funcionariosLista) ? funcionariosLista : []).find(f => (parseNum(f.valorHora) > 0) || (parseNum(f.salario) > 0));
+    if (refColab) {
+      vHora = parseNum(refColab.valorHora) || (parseNum(refColab.salario) / 200);
+    } else {
+      vHora = 25.50;
+    }
   }
 
   // ═══════════════════════════════════════════════════════
