@@ -2806,7 +2806,54 @@
 
         </div> <!-- FIM #conteudo-ponto-funcionario -->
 
-        <!-- ══ MODAL DE LANÇAMENTO MANUAL DE PONTO (+ LANÇAMENTO) ══ -->
+        
+<!-- ══ MODAL CLIENTE JUSTIFICAR SAÍDA FINAL ANTECIPADA ══ -->
+<div id="modal-cliente-saida-final" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);z-index:999999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:linear-gradient(145deg,#111322,#1a1d33);border:1.5px solid rgba(250,204,21,0.4);border-radius:18px;max-width:440px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.85);padding:22px;color:#fff;box-sizing:border-box;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:22px;">🚪</span>
+        <div style="font-size:16px;font-weight:900;color:#facc15;">Saída Final Antecipada</div>
+      </div>
+      <button type="button" onclick="fecharModalSaidaFinalCliente()" style="background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">✕</button>
+    </div>
+
+    <p style="font-size:13px;color:#cbd5e1;line-height:1.5;margin-bottom:14px;">
+      Você está registrando a sua <strong>Saída Final</strong> antes do término da jornada normal. Deseja justificar para encerrar o expediente <strong>sem gerar horas negativas</strong>?
+    </p>
+
+    <div style="margin-bottom:12px;">
+      <label style="display:block;font-size:11.5px;font-weight:800;color:var(--gold-light);text-transform:uppercase;margin-bottom:6px;">Motivo da Saída:</label>
+      <select id="sel-motivo-saida-final-cli" style="width:100%;padding:10px;background:#090a14;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:13px;outline:none;">
+        <option value="Serviço Externo / Obra Concluída">Serviço Externo / Obra Concluída</option>
+        <option value="Dispensa Autorizada pela Gerência">Dispensa Autorizada pela Gerência</option>
+        <option value="Consulta / Atestado Médico">Consulta / Atestado Médico</option>
+        <option value="Compensação / Acordo de Horas">Compensação / Acordo de Horas</option>
+        <option value="Motivo Pessoal / Emergência">Motivo Pessoal / Emergência</option>
+        <option value="Outro">Outro Motivo (digitar abaixo)</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label style="display:block;font-size:11.5px;font-weight:800;color:var(--gold-light);text-transform:uppercase;margin-bottom:6px;">Observações (opcional):</label>
+      <input type="text" id="txt-obs-saida-final-cli" placeholder="Ex: Obra finalizada às 10:30..." style="width:100%;box-sizing:border-box;padding:10px;background:#090a14;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:13px;outline:none;" />
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button type="button" onclick="confirmarSaidaFinalCliente(true)" class="btn btn-primary" style="background:linear-gradient(135deg,#10b981,#059669);border:none;padding:12px;border-radius:10px;font-weight:900;font-size:13px;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(16,185,129,0.35);">
+        ✅ Justificar e Finalizar (Sem Horas Negativas)
+      </button>
+      <button type="button" onclick="confirmarSaidaFinalCliente(false)" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);padding:10px;border-radius:10px;font-weight:700;font-size:12px;color:#94a3b8;cursor:pointer;">
+        Registrar Saída Sem Justificativa
+      </button>
+      <button type="button" onclick="fecharModalSaidaFinalCliente()" style="background:transparent;border:none;color:#64748b;font-size:12px;cursor:pointer;margin-top:4px;">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL DE LANÇAMENTO MANUAL DE PONTO (+ LANÇAMENTO) ══ -->
         <div id="modal-cliente-lancamento-ponto" class="modal-overlay" style="display:none;z-index:10000075;background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);position:fixed;inset:0;align-items:center;justify-content:center;padding:16px;">
           <div style="background:linear-gradient(145deg,#0e111d,#161b2c);border:1.5px solid rgba(6,182,212,0.4);border-radius:18px;max-width:440px;width:100%;box-shadow:0 15px 45px rgba(0,0,0,0.85);padding:20px;box-sizing:border-box;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:10px;">
@@ -6353,7 +6400,9 @@ function mudarAba(tab) {
         }
 
         if (mSaida !== null) {
-          if (mSaida < expSai) {
+          if (p.saidaAntecipadaJustificada || p.justificativaSaida || p.semHoraNegativa || ehFds) {
+            antecipadoSaidaMin = 0;
+          } else if (mSaida < expSai) {
             const diff = expSai - mSaida;
             if (diff <= 5) {
               mSaidaEfetivo = expSai;
@@ -6363,6 +6412,14 @@ function mudarAba(tab) {
             }
           }
         }
+      }
+
+      if (p.saidaAntecipadaJustificada || p.justificativaSaida || p.semHoraNegativa || ehFds) {
+        minutosNegativos = 0;
+        atrasoEntradaMin = 0;
+        antecipadoAlmocoMin = 0;
+        atrasoVoltaAlmocoMin = 0;
+        antecipadoSaidaMin = 0;
       }
 
       p.atrasoEntradaMin = atrasoEntradaMin;
@@ -6452,7 +6509,7 @@ function mudarAba(tab) {
         const ehFdsCli = ehFimDeSemanaPonto(p.data);
         const txtHNegCli = (p.minutosNegativos && p.minutosNegativos > 0)
           ? `<strong style="color:#f87171;">⏳ H. Negativa: ${p.horaNegativa} (${p.descontoNegativoFormatado})</strong>`
-          : (ehFdsCli ? `<span style="color:#38bdf8;font-weight:700;">🌴 Fim de Semana (Sem H. Negativa)</span>` : `<span style="color:#94a3b8;">⏳ H. Negativa: 00h 00m</span>`);
+          : (p.justificativaSaida ? `<span style="color:#34d399;font-weight:700;">🟢 Saída Justificada: ${p.justificativaSaida} (Sem H. Negativa)</span>` : (ehFdsCli ? `<span style="color:#38bdf8;font-weight:700;">🌴 Fim de Semana (Sem H. Negativa)</span>` : `<span style="color:#94a3b8;">⏳ H. Negativa: 00h 00m</span>`));
         msgEl.innerHTML = `<span style="color:var(--gold-light);">Status hoje (${p.data}): Ent: ${p.entrada1||'--'} · Almoço: ${p.saidaAlmoco||'--'} / ${p.voltaAlmoco||'--'} · Saída: ${p.saidaFinal||'--'} | <strong>Tempo: ${p.tempoTrabalhado||'00h 00m'}</strong> · ${txtHNegCli} · <strong style="color:#4ade80;">Ganho: ${p.valorSalario||'R$ 0,00'}</strong></span>`;
 
         const totEl = document.getElementById('cliente-ponto-total-horas');
@@ -6673,7 +6730,58 @@ function mudarAba(tab) {
       }
     }
 
+
+    let _saidaFinalCliPendente = null;
+
+    function abrirModalSaidaFinalCliente(horaStr) {
+      _saidaFinalCliPendente = { horaStr };
+      const m = document.getElementById('modal-cliente-saida-final');
+      const txt = document.getElementById('txt-obs-saida-final-cli');
+      if (txt) txt.value = '';
+      if (m) m.style.display = 'flex';
+    }
+
+    function fecharModalSaidaFinalCliente() {
+      const m = document.getElementById('modal-cliente-saida-final');
+      if (m) m.style.display = 'none';
+      _saidaFinalCliPendente = null;
+    }
+
+    function confirmarSaidaFinalCliente(comJustificativa) {
+      if (!_saidaFinalCliPendente) return;
+      const { horaStr } = _saidaFinalCliPendente;
+      let justificativa = '';
+      if (comJustificativa) {
+        const sel = document.getElementById('sel-motivo-saida-final-cli');
+        const txt = document.getElementById('txt-obs-saida-final-cli');
+        const motivo = sel ? sel.value : 'Serviço Concluído';
+        const obs = (txt && txt.value) ? txt.value.trim() : '';
+        justificativa = obs ? `${motivo} (${obs})` : motivo;
+      }
+      fecharModalSaidaFinalCliente();
+      executarBatidaPontoNoCliente('saidaFinal', horaStr, comJustificativa, justificativa);
+    }
+
     function baterPontoNoCliente(tipo) {
+      if (tipo === 'saidaFinal') {
+        const agora = new Date();
+        const hh = String(agora.getHours()).padStart(2, '0');
+        const mm = String(agora.getMinutes()).padStart(2, '0');
+        const horaStr = `${hh}:${mm}`;
+        const colab = obterFuncionarioAtivoPonto();
+        const expSaiMin = 1080; // 18:00
+        const horaAgoraMin = agora.getHours() * 60 + agora.getMinutes();
+        const dataHoje = getHojeFormatadoPonto();
+        const ehFds = ehFimDeSemanaPonto(dataHoje);
+        if (horaAgoraMin < (expSaiMin - 5) && !ehFds) {
+          abrirModalSaidaFinalCliente(horaStr);
+          return;
+        }
+      }
+      executarBatidaPontoNoCliente(tipo);
+    }
+
+    function executarBatidaPontoNoCliente(tipo, horaStrParam, saidaJustificada, motivoJustificativa) {
       const colab = obterFuncionarioAtivoPonto();
       const agora = new Date();
       const hh = String(agora.getHours()).padStart(2, '0');
@@ -6727,6 +6835,11 @@ function mudarAba(tab) {
         p.saidaFinal = horaStr;
         colab.status = 'Finalizado';
         p.status = 'Finalizado';
+        if (saidaJustificada) {
+          p.saidaAntecipadaJustificada = true;
+          p.semHoraNegativa = true;
+          p.justificativaSaida = motivoJustificativa || 'Saída Autorizada';
+        }
         labelTipo = 'Saída Final';
       } else if (tipo === 'horaExtraInicial') {
         p.horaExtraInicial = horaStr;
@@ -8591,7 +8704,7 @@ function mudarAba(tab) {
           <td>
             ${(p.minutosNegativos && p.minutosNegativos > 0) 
               ? `<span class="ponto-badge-negativa" style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:11.5px;font-weight:800;background:rgba(239,68,68,0.18);color:#f87171;border:1px solid rgba(239,68,68,0.35);" title="Atraso além da tolerância de 5min">${p.horaNegativa}<br><span style="font-size:10px;color:#fca5a5;">${p.descontoNegativoFormatado}</span></span>` 
-              : (ehFdsP ? `<span style="font-size:11.5px;color:#38bdf8;font-weight:700;">00h 00m<br><small style="font-size:9.5px;color:#7dd3fc;">Fim de Semana</small></span>` : `<span style="font-size:11.5px;color:#94a3b8;font-weight:600;">00h 00m</span>`)}
+              : (p.justificativaSaida ? `<span style="font-size:11px;color:#34d399;font-weight:800;background:rgba(52,211,153,0.15);padding:3px 7px;border-radius:6px;border:1px solid rgba(52,211,153,0.3);display:inline-block;text-align:center;">00h 00m<br><small style="font-size:9.5px;color:#a7f3d0;" title="${esc(p.justificativaSaida)}">Justificada ✓</small></span>` : (ehFdsP ? `<span style="font-size:11.5px;color:#38bdf8;font-weight:700;">00h 00m<br><small style="font-size:9.5px;color:#7dd3fc;">Fim de Semana</small></span>` : `<span style="font-size:11.5px;color:#94a3b8;font-weight:600;">00h 00m</span>`))}
           </td>
           <td>
             <div class="ponto-salario-val" style="font-weight:900;color:#4ade80;font-size:14px;letter-spacing:0.3px;white-space:nowrap;">${p.valorSalario || 'R$ 0,00'}</div>
