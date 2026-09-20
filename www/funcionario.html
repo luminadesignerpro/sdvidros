@@ -2212,6 +2212,9 @@
           <button type="button" class="portal-tab" id="btn-tab-financeiro" onclick="mudarAba('financeiro')">
             <span id="tab-fin-icone">💳</span> <span id="tab-fin-rotulo">Setor Financeiro</span>
           </button>
+          <button type="button" class="portal-tab" id="btn-tab-meu-financeiro" onclick="mudarAba('meu-financeiro')">
+            <span>💰</span> <span>Meu Setor Financeiro</span>
+          </button>
           <button type="button" class="portal-tab" id="btn-tab-opiniao" onclick="mudarAba('opiniao')">
             <span>💡</span> <span>Minha Opinião</span>
           </button>
@@ -2993,6 +2996,242 @@
         </div>
 
         <!-- ── ABA 5: MINHA OPINIÃO ── -->
+      
+      <!-- ── ABA: MEU SETOR FINANCEIRO DO FUNCIONÁRIO ── -->
+      <div id="pane-meu-financeiro" class="tab-pane">
+        
+        <!-- Header do Setor Financeiro -->
+        <div style="background:linear-gradient(135deg,rgba(212,175,55,0.16),rgba(15,20,35,0.95));border:1.5px solid rgba(212,175,55,0.4);border-radius:18px;padding:18px 20px;margin-bottom:16px;box-shadow:0 8px 30px rgba(0,0,0,0.45);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 18px rgba(245,158,11,0.4);">
+              💰
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:800;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.8px;">Painel de Remuneração & Vales</div>
+              <div id="fin-colab-nome" style="font-size:18px;font-weight:900;color:#fff;margin-top:2px;">Samuel David</div>
+              <div id="fin-colab-cargo" style="font-size:12px;color:#94a3b8;">Instalador / Técnico Líder · SD Vidros</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(0,0,0,0.35);padding:8px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.08);">
+            <div style="font-size:11px;color:#94a3b8;">
+              <span style="display:block;font-size:9.5px;text-transform:uppercase;color:var(--gold-light);font-weight:700;">Chave Pix Cadastrada</span>
+              <strong id="fin-colab-pix" style="color:#fff;">(85) 99611-9824</strong>
+            </div>
+            <button type="button" onclick="abrirModalEditarPixColab()" style="background:rgba(212,175,55,0.18);border:1px solid rgba(212,175,55,0.4);color:#fef08a;padding:5px 9px;border-radius:7px;font-size:11px;font-weight:800;cursor:pointer;">
+              ✏️
+            </button>
+          </div>
+        </div>
+
+        <!-- Grade dos 5 Indicadores Financeiros -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));gap:12px;margin-bottom:18px;">
+          
+          <!-- 1. Valor do Salário -->
+          <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;box-shadow:0 4px 16px rgba(0,0,0,0.25);">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#38bdf8;text-transform:uppercase;letter-spacing:0.5px;">
+              <span>💵</span> <span>Salário Base</span>
+            </div>
+            <div id="fin-val-salario" style="font-size:19px;font-weight:900;color:#fff;margin:6px 0 2px;">R$ 4.500,00</div>
+            <div style="font-size:10.5px;color:#94a3b8;">Jornada: 44h/semana</div>
+          </div>
+
+          <!-- 2. Valor da Hora -->
+          <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;box-shadow:0 4px 16px rgba(0,0,0,0.25);">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:0.5px;">
+              <span>⏱️</span> <span>Valor da Hora</span>
+            </div>
+            <div id="fin-val-hora" style="font-size:19px;font-weight:900;color:#fff;margin:6px 0 2px;">R$ 20,45/h</div>
+            <div style="font-size:10.5px;color:#94a3b8;">Base: 220h mensais</div>
+          </div>
+
+          <!-- 3. Horas Trabalhadas -->
+          <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;box-shadow:0 4px 16px rgba(0,0,0,0.25);">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#34d399;text-transform:uppercase;letter-spacing:0.5px;">
+              <span>⌛</span> <span>Horas Trabalhadas</span>
+            </div>
+            <div id="fin-val-horas-trab" style="font-size:19px;font-weight:900;color:#34d399;margin:6px 0 2px;">00h 00m</div>
+            <div id="fin-val-ganho-bruto" style="font-size:10.5px;color:#4ade80;font-weight:700;">Ganhos: R$ 0,00</div>
+          </div>
+
+          <!-- 4. Horas Negativas -->
+          <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(239,68,68,0.25);border-radius:14px;padding:14px 16px;box-shadow:0 4px 16px rgba(0,0,0,0.25);">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#f87171;text-transform:uppercase;letter-spacing:0.5px;">
+              <span>⏳</span> <span>Horas Negativas</span>
+            </div>
+            <div id="fin-val-horas-neg" style="font-size:19px;font-weight:900;color:#f87171;margin:6px 0 2px;">00h 00m</div>
+            <div id="fin-val-desconto-neg" style="font-size:10.5px;color:#fca5a5;font-weight:700;">Desconto: -R$ 0,00</div>
+          </div>
+
+          <!-- 5. Valor Líquido a Receber (Destaque Principal) -->
+          <div style="background:linear-gradient(135deg,rgba(250,204,21,0.14),rgba(20,20,35,0.95));border:1.5px solid var(--gold);border-radius:14px;padding:14px 18px;box-shadow:0 6px 20px rgba(0,0,0,0.4);grid-column:1 / -1;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+              <div>
+                <div style="font-size:11.5px;font-weight:900;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.6px;display:flex;align-items:center;gap:6px;">
+                  <span>💳</span> <span>Valor Líquido a Receber</span>
+                </div>
+                <div id="fin-val-a-receber" style="font-size:28px;font-weight:900;color:#facc15;margin-top:4px;">
+                  R$ 0,00
+                </div>
+                <div id="fin-val-a-receber-sub" style="font-size:11px;color:#cbd5e1;margin-top:2px;">
+                  Calculado: (Ganhos de Horas) - (Descontos H. Negativas) - (Vales Pagos)
+                </div>
+              </div>
+              <button type="button" onclick="renderizarMeuSetorFinanceiro()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:#fff;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                🔄 Atualizar Cálculos
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ══ SEÇÃO DE SOLICITAÇÃO DE VALE (ADIANTAMENTO) ══ -->
+        <div style="background:linear-gradient(145deg,#0e111d,#161b2c);border:1.5px solid rgba(250,204,21,0.35);border-radius:18px;padding:20px;margin-bottom:18px;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+          
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:24px;">💸</span>
+              <div>
+                <div style="font-size:16px;font-weight:900;color:#fff;">Solicitar Adiantamento / Vale</div>
+                <div style="font-size:11.5px;color:#94a3b8;">Condicionado à assiduidade e faltas da semana corrente</div>
+              </div>
+            </div>
+            <button type="button" id="btn-abrir-solicitar-vale" onclick="abrirModalPedirVale()" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;border:none;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 18px rgba(245,158,11,0.4);">
+              <span>💸</span> <span>Pedir Vale</span>
+            </button>
+          </div>
+
+          <!-- Card da Regra Semanal de Faltas -->
+          <div id="fin-box-regra-faltas" style="background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.09);border-radius:14px;padding:14px 16px;margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+              <div style="font-size:12px;font-weight:800;color:#fff;display:flex;align-items:center;gap:6px;">
+                <span>📅</span> <span>Assiduidade desta Semana:</span>
+                <span id="fin-semana-periodo-txt" style="color:var(--gold-light);font-size:11px;">(Segunda a Domingo)</span>
+              </div>
+              <div id="fin-status-vale-badge" style="font-size:11px;font-weight:900;padding:4px 10px;border-radius:999px;background:#10b981;color:#000;">
+                Carregando...
+              </div>
+            </div>
+
+            <!-- Faltas na Semana -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+              <div style="background:rgba(255,255,255,0.03);padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);">
+                <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;font-weight:700;">Faltas Registradas na Semana</div>
+                <div id="fin-faltas-semana-count" style="font-size:18px;font-weight:900;color:#f87171;margin-top:2px;">
+                  0 falta(s)
+                </div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03);padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);">
+                <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;font-weight:700;">Vales Pedidos nesta Semana</div>
+                <div id="fin-vales-semana-resumo" style="font-size:18px;font-weight:900;color:#38bdf8;margin-top:2px;">
+                  0 de 2 utilizados
+                </div>
+              </div>
+            </div>
+
+            <!-- Política Oficial da Empresa -->
+            <div style="font-size:11.5px;line-height:1.5;background:rgba(250,204,21,0.06);border:1px dashed rgba(250,204,21,0.3);border-radius:10px;padding:10px 12px;color:#cbd5e1;">
+              <strong style="color:#facc15;">📜 Política de Adiantamento da Empresa:</strong><br>
+              • <strong>3 ou mais faltas na semana:</strong> <span style="color:#f87171;font-weight:800;">🚫 Sem direito a vale</span><br>
+              • <strong>2 faltas na semana:</strong> <span style="color:#fbbf24;font-weight:800;">⚠️ Direito a apenas 1 vale</span><br>
+              • <strong>1 falta na semana:</strong> <span style="color:#38bdf8;font-weight:800;">ℹ️ Direito a até 2 vales</span><br>
+              • <strong>0 faltas na semana:</strong> <span style="color:#4ade80;font-weight:800;">✅ Direito a 2 vales (Assiduidade 100%)</span>
+            </div>
+          </div>
+
+          <!-- Tabela de Histórico de Vales Solicitados -->
+          <div style="margin-top:14px;">
+            <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+              <span>📋</span> <span>Histórico dos Seus Vales Solicitados</span>
+            </div>
+            <div id="fin-lista-vales-container" style="display:flex;flex-direction:column;gap:8px;">
+              <!-- Injetado dinamicamente -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ══ MODAL SOLICITAR VALE ══ -->
+      <div id="modal-solicitar-vale" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(8px);z-index:9999999;align-items:center;justify-content:center;padding:16px;" onclick="fecharModalPedirVale(event)">
+        <div style="background:linear-gradient(145deg,#101322,#181c30);border:1.5px solid rgba(250,204,21,0.45);border-radius:20px;max-width:460px;width:100%;box-shadow:0 25px 60px rgba(0,0,0,0.9);padding:22px;color:#fff;box-sizing:border-box;" onclick="event.stopPropagation()">
+          
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:24px;">💸</span>
+              <div>
+                <div style="font-size:16px;font-weight:900;color:#facc15;">Solicitar Novo Vale</div>
+                <div style="font-size:11px;color:#94a3b8;">Envio direto para aprovação e Pix da empresa</div>
+              </div>
+            </div>
+            <button type="button" onclick="fecharModalPedirVale()" style="background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">✕</button>
+          </div>
+
+          <!-- Banner Informativo de Elegibilidade -->
+          <div id="modal-vale-info-elegibilidade" style="background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.3);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#cbd5e1;line-height:1.4;">
+            <!-- Preenchido via JS -->
+          </div>
+
+          <!-- Campo Valor do Vale -->
+          <div style="margin-bottom:12px;">
+            <label style="display:block;font-size:11px;font-weight:800;color:var(--gold-light);text-transform:uppercase;margin-bottom:4px;">
+              Valor Solicitado (R$) *
+            </label>
+            <input type="number" id="inp-vale-valor" step="0.01" min="10" placeholder="Ex: 300,00" style="width:100%;box-sizing:border-box;padding:11px 14px;background:#090a14;border:1px solid rgba(250,204,21,0.3);border-radius:10px;color:#fff;font-size:16px;font-weight:900;outline:none;" />
+            <div style="display:flex;gap:6px;margin-top:6px;">
+              <button type="button" onclick="document.getElementById('inp-vale-valor').value='100'" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">R$ 100</button>
+              <button type="button" onclick="document.getElementById('inp-vale-valor').value='200'" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">R$ 200</button>
+              <button type="button" onclick="document.getElementById('inp-vale-valor').value='300'" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">R$ 300</button>
+              <button type="button" onclick="document.getElementById('inp-vale-valor').value='500'" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">R$ 500</button>
+            </div>
+          </div>
+
+          <!-- Chave Pix para Depósito -->
+          <div style="margin-bottom:12px;">
+            <label style="display:block;font-size:11px;font-weight:800;color:#38bdf8;text-transform:uppercase;margin-bottom:4px;">
+              Sua Chave Pix para Depósito *
+            </label>
+            <input type="text" id="inp-vale-pix" placeholder="CPF, Telefone, E-mail ou Aleatória" style="width:100%;box-sizing:border-box;padding:10px 14px;background:#090a14;border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;font-size:13px;outline:none;" />
+          </div>
+
+          <!-- Motivo / Justificativa -->
+          <div style="margin-bottom:16px;">
+            <label style="display:block;font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;margin-bottom:4px;">
+              Motivo do Vale (Opcional)
+            </label>
+            <input type="text" id="inp-vale-motivo" placeholder="Ex: Despesas pessoais, emergência..." style="width:100%;box-sizing:border-box;padding:10px 14px;background:#090a14;border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;font-size:13px;outline:none;" />
+          </div>
+
+          <!-- Botões -->
+          <div style="display:flex;gap:10px;">
+            <button type="button" onclick="fecharModalPedirVale()" style="flex:1;padding:12px;background:rgba(255,255,255,0.08);border:none;border-radius:10px;color:#fff;font-weight:700;font-size:13px;cursor:pointer;">
+              Cancelar
+            </button>
+            <button type="button" onclick="confirmarPedidoVale()" style="flex:1.6;padding:12px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:10px;color:#000;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 4px 16px rgba(245,158,11,0.4);">
+              ✅ Enviar Pedido
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ MODAL EDITAR PIX DO COLABORADOR ══ -->
+      <div id="modal-editar-pix-colab" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);z-index:9999999;align-items:center;justify-content:center;padding:16px;" onclick="fecharModalEditarPixColab(event)">
+        <div style="background:linear-gradient(145deg,#101322,#181c30);border:1.5px solid rgba(212,175,55,0.4);border-radius:18px;max-width:400px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.85);padding:22px;color:#fff;box-sizing:border-box;" onclick="event.stopPropagation()">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-size:15px;font-weight:900;color:#facc15;">Definir Chave Pix Oficial</div>
+            <button type="button" onclick="fecharModalEditarPixColab()" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">✕</button>
+          </div>
+          <p style="font-size:12px;color:#94a3b8;margin-bottom:12px;">
+            Informe a chave Pix onde você deseja receber seus adiantamentos e pagamentos.
+          </p>
+          <input type="text" id="inp-pix-colab-edicao" placeholder="Ex: (85) 99611-9824 ou CPF" style="width:100%;box-sizing:border-box;padding:10px 14px;background:#090a14;border:1px solid rgba(250,204,21,0.3);border-radius:10px;color:#fff;font-size:13px;outline:none;margin-bottom:14px;" />
+          <div style="display:flex;gap:8px;">
+            <button type="button" onclick="fecharModalEditarPixColab()" style="flex:1;padding:10px;background:rgba(255,255,255,0.08);border:none;border-radius:8px;color:#fff;font-weight:700;font-size:12px;cursor:pointer;">Cancelar</button>
+            <button type="button" onclick="salvarPixColab()" style="flex:1.4;padding:10px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:8px;color:#000;font-weight:900;font-size:12px;cursor:pointer;">💾 Salvar Chave</button>
+          </div>
+        </div>
+      </div>
+
       <div id="pane-opiniao" class="tab-pane">
         <div class="portal-card" style="border:1.5px solid rgba(201,168,76,0.35);box-shadow:0 12px 35px rgba(0,0,0,0.4);">
           <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
@@ -4443,7 +4682,7 @@ function validarCodigoLiberadoManual() {}
 function checarLiberacaoEmpresaAutomatica() {}
 
 function mudarAba(tab) {
-      ['status', 'galeria', 'mensagens', 'financeiro', 'opiniao', 'jogos', 'financeiro-pessoal'].forEach(t => {
+      ['status', 'galeria', 'mensagens', 'financeiro', 'meu-financeiro', 'opiniao', 'jogos', 'financeiro-pessoal'].forEach(t => {
         const pane = document.getElementById('pane-' + t);
         const btn = document.getElementById('btn-tab-' + t);
         if (pane) pane.classList.toggle('active', t === tab);
@@ -4462,6 +4701,8 @@ function mudarAba(tab) {
           } else {
             if (typeof carregarDadosFinanceiros === 'function') carregarDadosFinanceiros(clienteSessao);
           }
+        } else if (tab === 'meu-financeiro') {
+          if (typeof renderizarMeuSetorFinanceiro === 'function') renderizarMeuSetorFinanceiro();
         } else if (tab === 'opiniao') {
           if (typeof renderizarListaOpinioes === 'function') renderizarListaOpinioes();
         } else if (tab === 'financeiro-pessoal') {
@@ -9924,6 +10165,469 @@ function salvarConfigHorariosAlarmeCliente() {
 
   fecharConfigHorariosAlarmeCliente();
   mostrarToastNotificacao('Alarme Salvo', 'Horários do alarme configurados e ativos!', '⏰');
+}
+
+
+
+// ════════════════════════════════════════════════════════════════════════════
+//  MÓDULO: MEU SETOR FINANCEIRO & SOLICITAÇÃO DE VALES (COM REGRAS DE FALTAS)
+// ════════════════════════════════════════════════════════════════════════════
+
+function obterInicioEFimSemanaAtual() {
+  var agora = new Date();
+  var diaSemana = agora.getDay();
+  var diffSegunda = (diaSemana === 0 ? -6 : 1 - diaSemana);
+  
+  var inicioSemana = new Date(agora);
+  inicioSemana.setDate(agora.getDate() + diffSegunda);
+  inicioSemana.setHours(0, 0, 0, 0);
+
+  var fimSemana = new Date(inicioSemana);
+  fimSemana.setDate(inicioSemana.getDate() + 6);
+  fimSemana.setHours(23, 59, 59, 999);
+
+  return { inicioSemana: inicioSemana, fimSemana: fimSemana };
+}
+
+function parseDataBr(dataStr) {
+  if (!dataStr || typeof dataStr !== 'string') return null;
+  var partes = dataStr.split('/');
+  if (partes.length !== 3) return null;
+  return new Date(Number(partes[2]), Number(partes[1]) - 1, Number(partes[0]));
+}
+
+function ehDataNaSemanaAtual(dataStr) {
+  var d = parseDataBr(dataStr);
+  if (!d) return false;
+  var sem = obterInicioEFimSemanaAtual();
+  return d >= sem.inicioSemana && d <= sem.fimSemana;
+}
+
+function carregarValesDoStorage() {
+  try {
+    var raw = localStorage.getItem('sdv_pedidos_vale');
+    if (raw) return JSON.parse(raw);
+  } catch(_) {}
+  return [];
+}
+
+function salvarValesNoStorage(lista) {
+  try {
+    localStorage.setItem('sdv_pedidos_vale', JSON.stringify(lista));
+  } catch(_) {}
+}
+
+function obterFaltasColaboradorSemana(colab) {
+  if (!colab) return 0;
+  var pontos = (typeof carregarPontosDoStorage === 'function') ? carregarPontosDoStorage() : [];
+  var cNome = (colab.nome || '').toLowerCase();
+  
+  var faltas = pontos.filter(function(p) {
+    var mesmoColab = (p.colaboradorId === colab.id) || (p.colaboradorNome && p.colaboradorNome.toLowerCase() === cNome);
+    if (!mesmoColab) return false;
+    if (!ehDataNaSemanaAtual(p.data)) return false;
+    var st = (p.status || '').toLowerCase();
+    return st.includes('falta') || st.includes('ausente');
+  });
+
+  return faltas.length;
+}
+
+function obterValesColaboradorSemana(colab) {
+  if (!colab) return [];
+  var vales = carregarValesDoStorage();
+  var cNome = (colab.nome || '').toLowerCase();
+
+  return vales.filter(function(v) {
+    var mesmoColab = (v.colaboradorId === colab.id) || (v.colaboradorNome && v.colaboradorNome.toLowerCase() === cNome);
+    if (!mesmoColab) return false;
+    if (v.status === 'Recusado' || v.status === 'Cancelado') return false;
+    return ehDataNaSemanaAtual(v.data);
+  });
+}
+
+function calcularRegraElegibilidadeVale(numFaltas, numValesSemana) {
+  var limiteVales = 2;
+  var motivoRegra = '';
+
+  if (numFaltas >= 3) {
+    limiteVales = 0;
+    motivoRegra = 'Com 3 ou mais faltas na semana, o funcionário NÃO tem direito a pedir vale.';
+  } else if (numFaltas === 2) {
+    limiteVales = 1;
+    motivoRegra = 'Com 2 faltas na semana, você tem direito a apenas 1 vale.';
+  } else if (numFaltas === 1) {
+    limiteVales = 2;
+    motivoRegra = 'Com 1 falta na semana, você tem direito a até 2 vales.';
+  } else {
+    limiteVales = 2;
+    motivoRegra = 'Com 0 faltas (100% de assiduidade), você tem direito a até 2 vales na semana.';
+  }
+
+  var valesRestantes = Math.max(0, limiteVales - numValesSemana);
+  var podePedir = (limiteVales > 0) && (valesRestantes > 0);
+
+  return {
+    limiteVales: limiteVales,
+    valesRestantes: valesRestantes,
+    podePedir: podePedir,
+    motivoRegra: motivoRegra
+  };
+}
+
+function renderizarMeuSetorFinanceiro() {
+  var colab = (typeof obterFuncionarioAtivoPonto === 'function') ? obterFuncionarioAtivoPonto() : { id: 100, nome: 'Samuel David', salario: 4500, valorHora: 20.45 };
+  if (!colab) return;
+
+  var elNome = document.getElementById('fin-colab-nome');
+  var elCargo = document.getElementById('fin-colab-cargo');
+  var elPix = document.getElementById('fin-colab-pix');
+  if (elNome) elNome.textContent = colab.nome || 'Samuel David';
+  if (elCargo) elCargo.textContent = (colab.cargo || 'Instalador / Técnico Líder') + ' · SD Vidros';
+
+  var pixSalvo = localStorage.getItem('sdv_pix_colab_' + colab.id);
+  if (!pixSalvo && colab.whatsapp) pixSalvo = colab.whatsapp;
+  if (!pixSalvo) pixSalvo = '(85) 99611-9824';
+  if (elPix) elPix.textContent = pixSalvo;
+
+  var salarioBase = Number(colab.salario || 4500);
+  var valorHora = Number(colab.valorHora || (salarioBase / 220));
+
+  var pontos = (typeof carregarPontosDoStorage === 'function') ? carregarPontosDoStorage() : [];
+  var cNome = (colab.nome || '').toLowerCase();
+  var pontosColab = pontos.filter(function(p) {
+    return (p.colaboradorId === colab.id) || (p.colaboradorNome && p.colaboradorNome.toLowerCase() === cNome);
+  });
+
+  var totalMinutosTrab = 0;
+  var totalMinutosNeg = 0;
+
+  pontosColab.forEach(function(p) {
+    if (p.minutosTrabalhados) {
+      totalMinutosTrab += Number(p.minutosTrabalhados);
+    } else if (p.tempoTrabalhado && p.tempoTrabalhado.includes('h')) {
+      var match = p.tempoTrabalhado.match(/(\d+)h\s*(\d+)m/);
+      if (match) totalMinutosTrab += Number(match[1]) * 60 + Number(match[2]);
+    }
+    if (p.minutosNegativos) {
+      totalMinutosNeg += Number(p.minutosNegativos);
+    } else if (p.horaNegativa && p.horaNegativa.includes('h')) {
+      var matchNeg = p.horaNegativa.match(/(\d+)h\s*(\d+)m/);
+      if (matchNeg) totalMinutosNeg += Number(matchNeg[1]) * 60 + Number(matchNeg[2]);
+    }
+  });
+
+  var hTrab = Math.floor(totalMinutosTrab / 60);
+  var mTrab = totalMinutosTrab % 60;
+  var strHorasTrab = String(hTrab).padStart(2, '0') + 'h ' + String(mTrab).padStart(2, '0') + 'm';
+
+  var hNeg = Math.floor(totalMinutosNeg / 60);
+  var mNeg = totalMinutosNeg % 60;
+  var strHorasNeg = String(hNeg).padStart(2, '0') + 'h ' + String(mNeg).padStart(2, '0') + 'm';
+
+  var valorGanhoHoras = (totalMinutosTrab / 60) * valorHora;
+  var valorDescontoNeg = (totalMinutosNeg / 60) * valorHora;
+
+  var todosVales = carregarValesDoStorage().filter(function(v) {
+    return ((v.colaboradorId === colab.id) || (v.colaboradorNome && v.colaboradorNome.toLowerCase() === cNome)) &&
+      (v.status !== 'Recusado' && v.status !== 'Cancelado');
+  });
+  var totalValesAbatidos = todosVales.reduce(function(acc, v) { return acc + Number(v.valor || 0); }, 0);
+
+  var valorAReceber = 0;
+  if (valorGanhoHoras > 0) {
+    valorAReceber = Math.max(0, valorGanhoHoras - valorDescontoNeg - totalValesAbatidos);
+  } else {
+    valorAReceber = Math.max(0, salarioBase - valorDescontoNeg - totalValesAbatidos);
+  }
+
+  var elSalario = document.getElementById('fin-val-salario');
+  var elHora = document.getElementById('fin-val-hora');
+  var elHT = document.getElementById('fin-val-horas-trab');
+  var elGanhoBruto = document.getElementById('fin-val-ganho-bruto');
+  var elHN = document.getElementById('fin-val-horas-neg');
+  var elDescNeg = document.getElementById('fin-val-desconto-neg');
+  var elReceber = document.getElementById('fin-val-a-receber');
+  var elReceberSub = document.getElementById('fin-val-a-receber-sub');
+
+  if (elSalario) elSalario.textContent = 'R$ ' + salarioBase.toFixed(2).replace('.', ',');
+  if (elHora) elHora.textContent = 'R$ ' + valorHora.toFixed(2).replace('.', ',') + '/h';
+  if (elHT) elHT.textContent = strHorasTrab;
+  if (elGanhoBruto) elGanhoBruto.textContent = 'Ganhos: R$ ' + valorGanhoHoras.toFixed(2).replace('.', ',');
+  if (elHN) elHN.textContent = strHorasNeg;
+  if (elDescNeg) elDescNeg.textContent = 'Desconto: -R$ ' + valorDescontoNeg.toFixed(2).replace('.', ',');
+  if (elReceber) elReceber.textContent = 'R$ ' + valorAReceber.toFixed(2).replace('.', ',');
+  if (elReceberSub) {
+    elReceberSub.innerHTML = totalValesAbatidos > 0 
+      ? 'Total após desconto de <strong>R$ ' + totalValesAbatidos.toFixed(2).replace('.', ',') + '</strong> em adiantamentos/vales'
+      : 'Nenhum vale deduzido até o momento.';
+  }
+
+  var sem = obterInicioEFimSemanaAtual();
+  var formatarDataSimples = function(d) {
+    return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth()+1).padStart(2, '0');
+  };
+  var elPeriodo = document.getElementById('fin-semana-periodo-txt');
+  if (elPeriodo) {
+    elPeriodo.textContent = '(' + formatarDataSimples(sem.inicioSemana) + ' a ' + formatarDataSimples(sem.fimSemana) + ')';
+  }
+
+  var numFaltasSemana = obterFaltasColaboradorSemana(colab);
+  var valesSemana = obterValesColaboradorSemana(colab);
+  var numValesSemana = valesSemana.length;
+
+  var regra = calcularRegraElegibilidadeVale(numFaltasSemana, numValesSemana);
+
+  var elFaltasCount = document.getElementById('fin-faltas-semana-count');
+  var elValesResumo = document.getElementById('fin-vales-semana-resumo');
+  var elBadgeStatus = document.getElementById('fin-status-vale-badge');
+  var btnPedir = document.getElementById('btn-abrir-solicitar-vale');
+
+  if (elFaltasCount) {
+    elFaltasCount.textContent = numFaltasSemana + ' falta(s)';
+    elFaltasCount.style.color = (numFaltasSemana >= 3) ? '#ef4444' : (numFaltasSemana === 2 ? '#f59e0b' : (numFaltasSemana === 1 ? '#38bdf8' : '#10b981'));
+  }
+
+  if (elValesResumo) {
+    elValesResumo.textContent = numValesSemana + ' de ' + regra.limiteVales + ' utilizado(s)';
+  }
+
+  if (elBadgeStatus) {
+    if (numFaltasSemana >= 3) {
+      elBadgeStatus.textContent = '🚫 Bloqueado (3+ faltas na semana)';
+      elBadgeStatus.style.background = '#ef4444';
+      elBadgeStatus.style.color = '#fff';
+    } else if (regra.podePedir) {
+      elBadgeStatus.textContent = '✅ Elegível (' + regra.valesRestantes + ' vale(s) disponível(is))';
+      elBadgeStatus.style.background = '#10b981';
+      elBadgeStatus.style.color = '#000';
+    } else {
+      elBadgeStatus.textContent = '⚠️ Limite semanal atingido';
+      elBadgeStatus.style.background = '#f59e0b';
+      elBadgeStatus.style.color = '#000';
+    }
+  }
+
+  if (btnPedir) {
+    if (!regra.podePedir) {
+      btnPedir.disabled = true;
+      btnPedir.style.opacity = '0.45';
+      btnPedir.style.cursor = 'not-allowed';
+      btnPedir.title = (numFaltasSemana >= 3) 
+        ? 'Bloqueado: Funcionários com 3 ou mais faltas na semana não têm direito a pedir vale.' 
+        : 'Você já atingiu o limite de vales permitido para esta semana.';
+    } else {
+      btnPedir.disabled = false;
+      btnPedir.style.opacity = '1';
+      btnPedir.style.cursor = 'pointer';
+      btnPedir.title = 'Clique para solicitar adiantamento salarial';
+    }
+  }
+
+  renderizarHistoricoVales(colab);
+}
+
+function renderizarHistoricoVales(colab) {
+  var container = document.getElementById('fin-lista-vales-container');
+  if (!container) return;
+
+  var vales = carregarValesDoStorage();
+  var cNome = (colab.nome || '').toLowerCase();
+  var meusVales = vales.filter(function(v) {
+    return (v.colaboradorId === colab.id) || (v.colaboradorNome && v.colaboradorNome.toLowerCase() === cNome);
+  });
+
+  if (!meusVales.length) {
+    container.innerHTML = '<div style="text-align:center;padding:24px 10px;color:#94a3b8;background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.08);border-radius:12px;"><div style="font-size:26px;margin-bottom:6px;">💸</div><div style="font-size:13px;font-weight:700;color:#fff;">Nenhum vale solicitado ainda</div><div style="font-size:11px;margin-top:2px;">Quando precisar de um adiantamento, clique em \"Pedir Vale\".</div></div>';
+    return;
+  }
+
+  meusVales.sort(function(a, b) {
+    return new Date(b.dataIso || b.data) - new Date(a.dataIso || a.data);
+  });
+
+  var html = '';
+  meusVales.forEach(function(v) {
+    var corBadge = '#f59e0b';
+    var bgBadge = 'rgba(245,158,11,0.15)';
+    var textoBadge = '⏳ Pendente';
+
+    if (v.status === 'Aprovado' || v.status === 'Pago') {
+      corBadge = '#10b981';
+      bgBadge = 'rgba(16,185,129,0.15)';
+      textoBadge = '✓ Pago / Aprovado';
+    } else if (v.status === 'Recusado') {
+      corBadge = '#ef4444';
+      bgBadge = 'rgba(239,68,68,0.15)';
+      textoBadge = '✕ Recusado';
+    }
+
+    var valNum = Number(v.valor || 0);
+
+    html += '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">' +
+      '<div>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<strong style="font-size:16px;color:#facc15;font-weight:900;">R$ ' + valNum.toFixed(2).replace('.', ',') + '</strong>' +
+          '<span style="font-size:10.5px;font-weight:800;color:' + corBadge + ';background:' + bgBadge + ';padding:2px 8px;border-radius:6px;border:1px solid ' + corBadge + '40;">' +
+            textoBadge +
+          '</span>' +
+        '</div>' +
+        '<div style="font-size:11.5px;color:#cbd5e1;margin-top:3px;">' +
+          '📅 ' + v.data + ' às ' + (v.hora || '12:00') + (v.motivo ? ' · Motivo: <em>' + v.motivo + '</em>' : '') +
+        '</div>' +
+        '<div style="font-size:11px;color:#94a3b8;margin-top:2px;">' +
+          'Chave Pix: <strong>' + (v.pix || '--') + '</strong>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  });
+
+  container.innerHTML = html;
+}
+
+function abrirModalPedirVale() {
+  var colab = (typeof obterFuncionarioAtivoPonto === 'function') ? obterFuncionarioAtivoPonto() : { id: 100, nome: 'Samuel David' };
+  var numFaltas = obterFaltasColaboradorSemana(colab);
+  var valesSemana = obterValesColaboradorSemana(colab);
+  var regra = calcularRegraElegibilidadeVale(numFaltas, valesSemana.length);
+
+  if (!regra.podePedir) {
+    if (numFaltas >= 3) {
+      alert('🚫 Solicitação Bloqueada:\n\nVocê possui 3 ou mais faltas nesta semana (' + numFaltas + ' faltas). Conforme a política da empresa, não é permitido solicitar vale nesta semana.');
+    } else {
+      alert('⚠️ Limite Atingido:\n\nVocê já solicitou o limite máximo de vales permitidos para esta semana (' + valesSemana.length + ' de ' + regra.limiteVales + ').');
+    }
+    return;
+  }
+
+  var infoEl = document.getElementById('modal-vale-info-elegibilidade');
+  if (infoEl) {
+    infoEl.innerHTML = '<div style="font-weight:800;color:#facc15;margin-bottom:3px;">📋 Situação Semanal:</div>' +
+      '<div>• Faltas na semana: <strong>' + numFaltas + ' falta(s)</strong></div>' +
+      '<div>• Vales permitidos: <strong>' + regra.limiteVales + ' no máximo</strong> (' + valesSemana.length + ' já solicitado(s))</div>' +
+      '<div>• Vales ainda disponíveis para solicitar: <strong style="color:#4ade80;">' + regra.valesRestantes + ' restante(s)</strong></div>';
+  }
+
+  var inpPix = document.getElementById('inp-vale-pix');
+  if (inpPix) {
+    var pixSalvo = localStorage.getItem('sdv_pix_colab_' + colab.id);
+    if (!pixSalvo && colab.whatsapp) pixSalvo = colab.whatsapp;
+    inpPix.value = pixSalvo || '(85) 99611-9824';
+  }
+
+  var inpValor = document.getElementById('inp-vale-valor');
+  if (inpValor) inpValor.value = '';
+
+  var inpMotivo = document.getElementById('inp-vale-motivo');
+  if (inpMotivo) inpMotivo.value = '';
+
+  var m = document.getElementById('modal-solicitar-vale');
+  if (m) m.style.display = 'flex';
+}
+
+function fecharModalPedirVale(e) {
+  if (e && e.target && e.target !== document.getElementById('modal-solicitar-vale')) return;
+  var m = document.getElementById('modal-solicitar-vale');
+  if (m) m.style.display = 'none';
+}
+
+function confirmarPedidoVale() {
+  var colab = (typeof obterFuncionarioAtivoPonto === 'function') ? obterFuncionarioAtivoPonto() : { id: 100, nome: 'Samuel David' };
+  var numFaltas = obterFaltasColaboradorSemana(colab);
+  var valesSemana = obterValesColaboradorSemana(colab);
+  var regra = calcularRegraElegibilidadeVale(numFaltas, valesSemana.length);
+
+  if (!regra.podePedir) {
+    alert('🚫 Não é possível solicitar vale no momento devido às regras de faltas e limite semanal.');
+    fecharModalPedirVale();
+    return;
+  }
+
+  var inpVal = document.getElementById('inp-vale-valor');
+  var valor = Number(inpVal ? inpVal.value : 0);
+  if (!valor || valor <= 0) {
+    alert('Por favor, informe um valor válido para o vale (maior que R$ 0,00).');
+    if (inpVal) inpVal.focus();
+    return;
+  }
+
+  var inpPix = document.getElementById('inp-vale-pix');
+  var pix = inpPix ? inpPix.value.trim() : '';
+  if (!pix) {
+    alert('Por favor, informe a Chave Pix para recebimento do valor.');
+    if (inpPix) inpPix.focus();
+    return;
+  }
+
+  localStorage.setItem('sdv_pix_colab_' + colab.id, pix);
+
+  var inpMotivo = document.getElementById('inp-vale-motivo');
+  var motivo = inpMotivo ? inpMotivo.value.trim() : 'Adiantamento salarial';
+
+  var agora = new Date();
+  var dataHoje = (typeof getHojeFormatadoPonto === 'function') ? getHojeFormatadoPonto() : agora.toLocaleDateString('pt-BR');
+  var horaStr = String(agora.getHours()).padStart(2, '0') + ':' + String(agora.getMinutes()).padStart(2, '0');
+
+  var novoVale = {
+    id: 'vale_' + Date.now(),
+    colaboradorId: colab.id,
+    colaboradorNome: colab.nome,
+    valor: valor,
+    pix: pix,
+    motivo: motivo,
+    data: dataHoje,
+    hora: horaStr,
+    dataIso: agora.toISOString(),
+    status: 'Pendente'
+  };
+
+  var vales = carregarValesDoStorage();
+  vales.push(novoVale);
+  salvarValesNoStorage(vales);
+
+  fecharModalPedirVale();
+  renderizarMeuSetorFinanceiro();
+
+  if (typeof mostrarToastNotificacao === 'function') {
+    mostrarToastNotificacao('💸 Vale Solicitado!', 'Pedido de R$ ' + valor.toFixed(2).replace('.', ',') + ' enviado com sucesso.', '✅');
+  } else {
+    alert('✅ Pedido de Vale de R$ ' + valor.toFixed(2).replace('.', ',') + ' registrado com sucesso!');
+  }
+}
+
+function abrirModalEditarPixColab() {
+  var colab = (typeof obterFuncionarioAtivoPonto === 'function') ? obterFuncionarioAtivoPonto() : { id: 100 };
+  var inp = document.getElementById('inp-pix-colab-edicao');
+  var pixAtual = localStorage.getItem('sdv_pix_colab_' + colab.id);
+  if (!pixAtual && colab.whatsapp) pixAtual = colab.whatsapp;
+  if (!pixAtual) pixAtual = '(85) 99611-9824';
+  if (inp) inp.value = pixAtual;
+
+  var m = document.getElementById('modal-editar-pix-colab');
+  if (m) m.style.display = 'flex';
+}
+
+function fecharModalEditarPixColab(e) {
+  if (e && e.target && e.target !== document.getElementById('modal-editar-pix-colab')) return;
+  var m = document.getElementById('modal-editar-pix-colab');
+  if (m) m.style.display = 'none';
+}
+
+function salvarPixColab() {
+  var colab = (typeof obterFuncionarioAtivoPonto === 'function') ? obterFuncionarioAtivoPonto() : { id: 100 };
+  var inp = document.getElementById('inp-pix-colab-edicao');
+  var pix = inp ? inp.value.trim() : '';
+  if (!pix) {
+    alert('Informe uma Chave Pix válida.');
+    return;
+  }
+  localStorage.setItem('sdv_pix_colab_' + colab.id, pix);
+  var elPix = document.getElementById('fin-colab-pix');
+  if (elPix) elPix.textContent = pix;
+  fecharModalEditarPixColab();
+  if (typeof mostrarToastNotificacao === 'function') {
+    mostrarToastNotificacao('Pix Atualizado', 'Sua chave Pix foi salva com sucesso!', '🔑');
+  }
 }
 
 </script>
