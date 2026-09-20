@@ -2997,6 +2997,8 @@
 
         <!-- ── ABA 5: MINHA OPINIÃO ── -->
       
+      </div> <!-- /#pane-financeiro -->
+
       <!-- ── ABA: MEU SETOR FINANCEIRO DO FUNCIONÁRIO ── -->
       <div id="pane-meu-financeiro" class="tab-pane">
         
@@ -3432,7 +3434,7 @@
           </div>
 
           <!-- ── JOGO 1: CORRIDA (TURBO RACER 3D ARCADE PRO) ── -->
-          <div id="view-jogo-corrida" class="jogo-view-container">
+          <div id="view-jogo-corrida" class="jogo-view-container" style="display:none;">
             <div style="background:#08080f;border:1.5px solid rgba(255,255,255,0.1);border-radius:16px;padding:14px;text-align:center;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;font-weight:800;flex-wrap:wrap;gap:8px;">
                 <span style="color:#fbbf24;">🏆 Pontos: <strong id="corrida-score" style="color:#fff;">0</strong></span>
@@ -3477,7 +3479,7 @@
           </div>
 
           <!-- ── JOGO 2: DAMAS (CHECKERS MASTER PRO) ── -->
-          <div id="view-jogo-damas" class="jogo-view-container" style="display:none;">
+          <div id="view-jogo-damas" class="jogo-view-container" style="display:block;">
             <div style="background:#08080f;border:1.5px solid rgba(255,255,255,0.1);border-radius:16px;padding:14px;text-align:center;">
               
               <!-- Seletor de Modo: Contra Robô ou 2 Jogadores -->
@@ -3769,11 +3771,8 @@
 
 
 
-    </div>
-  </div>
+    
 
-  
-  
       <!-- ── ABA 7: SETOR FINANCEIRO PESSOAL (SIGILO ABSOLUTO & CÓDIGO DE AUTORIZAÇÃO) ── -->
       <div id="pane-financeiro-pessoal" class="tab-pane">
         <div class="fin-pessoal-wrap">
@@ -3937,6 +3936,8 @@
 
         </div>
       </div>
+
+      </div> <!-- /#view-portal -->
 
       <!-- ══ MODAL DE SOLICITAÇÃO & ENVIO DE CÓDIGO DE LIBERAÇÃO ══ -->
       <div id="modal-fin-codigo-liberacao" class="modal-overlay" style="display:none;z-index:10000080;background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);position:fixed;inset:0;align-items:center;justify-content:center;padding:16px;">
@@ -4813,46 +4814,13 @@ function mudarAba(tab) {
           if (typeof atualizarMenuJogosVisiveis === 'function') atualizarMenuJogosVisiveis();
           if (typeof atualizarUIHorarioJogos === 'function') atualizarUIHorarioJogos();
           if (typeof verificarStatusHorarioJogos === 'function') verificarStatusHorarioJogos();
-          if (typeof selecionarJogo === 'function') selecionarJogo(jogoAtivoId || 'corrida');
+          if (typeof selecionarJogo === 'function') selecionarJogo(jogoAtivoId || 'damas');
         } else {
           if (typeof pararJogoCorrida === 'function') pararJogoCorrida();
           if (typeof tiroRodando !== 'undefined' && tiroRodando && typeof fimJogoTiro === 'function') fimJogoTiro();
         }
       } catch (err) {
         console.warn('Aviso ao navegar na aba ' + tab + ':', err);
-      }
-
-      if (tab === 'mensagens') {
-        const badge = document.getElementById('badge-msg-count');
-        if (badge) badge.style.display = 'none';
-        renderizarOrdensMensagens();
-        scrollChatFim();
-      }
-
-      if (tab === 'financeiro') {
-        if (clienteSessao && clienteSessao.isFuncionario) {
-          renderizarResumoPontoCliente();
-        } else {
-          carregarDadosFinanceiros(clienteSessao);
-        }
-      }
-
-      if (tab === 'opiniao') {
-        renderizarListaOpinioes();
-      }
-
-      if (tab === 'financeiro-pessoal') {
-        inicializarFinanceiroPessoal();
-      }
-
-      if (tab === 'jogos') {
-        atualizarMenuJogosVisiveis();
-        atualizarUIHorarioJogos();
-        verificarStatusHorarioJogos();
-        selecionarJogo(jogoAtivoId || 'corrida');
-      } else {
-        pararJogoCorrida();
-        if (typeof tiroRodando !== 'undefined' && tiroRodando) fimJogoTiro();
       }
     }
 
@@ -5961,13 +5929,15 @@ function mudarAba(tab) {
     let damasCapBrancas = 0;
     let damasCapPretas = 0;
     let damasIniciadas = false;
-    let damasModoJogo = 'bot'; // 'bot' ou '2p'
+    let damasModoJogo = 'bot'; // 'bot', '2p', 'colab'
 
     function mudarModoDamas(modo) {
       damasModoJogo = modo;
       const bBot = document.getElementById('btn-damas-modo-bot');
+      const bColab = document.getElementById('btn-damas-modo-colab');
       const b2p = document.getElementById('btn-damas-modo-2p');
       if (bBot) bBot.classList.toggle('active', modo === 'bot');
+      if (bColab) bColab.classList.toggle('active', modo === 'colab');
       if (b2p) b2p.classList.toggle('active', modo === '2p');
       reiniciarJogoDamas();
     }
@@ -6009,13 +5979,17 @@ function mudarAba(tab) {
         for (let c = 0; c < 8; c++) {
           const sq = document.createElement('div');
           const isDark = (r + c) % 2 === 1;
-          sq.className = `damas-sq-pro ${isDark ? 'dark' : 'light'}`;
+          sq.className = 'damas-sq-pro ' + (isDark ? 'dark' : 'light');
 
           const peca = damasBoard[r][c];
           if (peca) {
             const pEl = document.createElement('div');
-            pEl.className = `peca-dama-3d ${peca.cor}`;
+            pEl.className = 'peca-dama-3d ' + peca.cor;
             pEl.textContent = peca.dama ? '👑' : '';
+            if (peca.dama) {
+              pEl.style.fontSize = '22px';
+              pEl.style.filter = 'drop-shadow(0 0 5px gold)';
+            }
             sq.appendChild(pEl);
           }
 
@@ -6024,8 +5998,8 @@ function mudarAba(tab) {
           }
 
           // Destino válido
-          const ehDestino = damasMovimentosValidos.some(m => m.r === r && m.c === c);
-          if (ehDestino) {
+          const mv = damasMovimentosValidos.find(m => m.r === r && m.c === c);
+          if (mv) {
             sq.classList.add('move-dest');
           }
 
@@ -6039,9 +6013,11 @@ function mudarAba(tab) {
       const peca = damasBoard[r][c];
       if (!peca) return [];
       const moves = [];
-      const dirs = peca.dama ? [[-1, -1], [-1, 1], [1, -1], [1, 1]] : (peca.cor === 'branca' ? [[-1, -1], [-1, 1]] : [[1, -1], [1, 1]]);
+      const dirs = peca.dama 
+        ? [[-1, -1], [-1, 1], [1, -1], [1, 1]] 
+        : (peca.cor === 'branca' ? [[-1, -1], [-1, 1]] : [[1, -1], [1, 1]]);
 
-      // Movimentos simples
+      // Movimentos simples de 1 casa
       dirs.forEach(([dr, dc]) => {
         const nr = r + dr;
         const nc = c + dc;
@@ -6050,7 +6026,7 @@ function mudarAba(tab) {
         }
       });
 
-      // Capturas (pulo)
+      // Capturas (todas as 4 diagonais para qualquer peça ou dama)
       [[-1, -1], [-1, 1], [1, -1], [1, 1]].forEach(([dr, dc]) => {
         const midR = r + dr;
         const midC = c + dc;
@@ -6075,7 +6051,7 @@ function mudarAba(tab) {
       if (peca && peca.cor === damasVez) {
         damasSelecionada = { r, c };
         damasMovimentosValidos = calcularMovimentosDamas(r, c);
-        GameAudio.playMovePiece();
+        if (typeof GameAudio !== 'undefined' && GameAudio.playMovePiece) GameAudio.playMovePiece();
         renderizarTabuleiroDamas();
         return;
       }
@@ -6090,23 +6066,49 @@ function mudarAba(tab) {
 
     function executarMovimentoDamas(sr, sc, dr, dc, mv) {
       const p = damasBoard[sr][sc];
+      if (!p) return;
       damasBoard[dr][dc] = p;
       damasBoard[sr][sc] = null;
 
+      let virouDama = false;
       if (mv.ehCaptura) {
         damasBoard[mv.midR][mv.midC] = null;
         if (p.cor === 'branca') damasCapBrancas++;
         else damasCapPretas++;
-        GameAudio.playCapturePiece();
-      } else {
-        GameAudio.playMovePiece();
-      }
+        if (typeof GameAudio !== 'undefined' && GameAudio.playCapturePiece) GameAudio.playCapturePiece();
 
-      // Promoção a Dama
-      if ((p.cor === 'branca' && dr === 0) || (p.cor === 'preta' && dr === 7)) {
-        if (!p.dama) {
-          p.dama = true;
-          GameAudio.playFanfare();
+        // Promoção a Dama
+        if ((p.cor === 'branca' && dr === 0) || (p.cor === 'preta' && dr === 7)) {
+          if (!p.dama) {
+            p.dama = true;
+            virouDama = true;
+            if (typeof GameAudio !== 'undefined' && GameAudio.playFanfare) GameAudio.playFanfare();
+          }
+        }
+
+        // Suporte a captura em cadeia (multi-jump profissional)
+        const proxCapturas = calcularMovimentosDamas(dr, dc).filter(m => m.ehCaptura);
+        if (proxCapturas.length > 0 && !virouDama) {
+          damasSelecionada = { r: dr, c: dc };
+          damasMovimentosValidos = proxCapturas;
+          renderizarTabuleiroDamas();
+          atualizarStatusDamas();
+          if (damasModoJogo === 'bot' && damasVez === 'preta') {
+            setTimeout(function() {
+              const prox = proxCapturas[Math.floor(Math.random() * proxCapturas.length)];
+              executarMovimentoDamas(dr, dc, prox.r, prox.c, prox);
+            }, 550);
+          }
+          return; // Continua na mesma jogada
+        }
+      } else {
+        if (typeof GameAudio !== 'undefined' && GameAudio.playMovePiece) GameAudio.playMovePiece();
+        // Promoção a Dama em movimento simples
+        if ((p.cor === 'branca' && dr === 0) || (p.cor === 'preta' && dr === 7)) {
+          if (!p.dama) {
+            p.dama = true;
+            if (typeof GameAudio !== 'undefined' && GameAudio.playFanfare) GameAudio.playFanfare();
+          }
         }
       }
 
@@ -6116,9 +6118,42 @@ function mudarAba(tab) {
       renderizarTabuleiroDamas();
       atualizarStatusDamas();
 
+      // Checa vitória
+      checarFimPartidaDamas();
+
       // Se for contra robô e for a vez das pretas:
       if (damasModoJogo === 'bot' && damasVez === 'preta') {
-        setTimeout(jogadaRoboDamas, 550);
+        setTimeout(jogadaRoboDamas, 600);
+      }
+    }
+
+    function checarFimPartidaDamas() {
+      let pecasBrancas = 0, pecasPretas = 0;
+      let movsBrancos = 0, movsPretos = 0;
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = damasBoard[r][c];
+          if (p) {
+            if (p.cor === 'branca') {
+              pecasBrancas++;
+              if (damasVez === 'branca') movsBrancos += calcularMovimentosDamas(r, c).length;
+            } else {
+              pecasPretas++;
+              if (damasVez === 'preta') movsPretos += calcularMovimentosDamas(r, c).length;
+            }
+          }
+        }
+      }
+
+      if (pecasPretas === 0 || (damasVez === 'preta' && movsPretos === 0)) {
+        setTimeout(function() {
+          alert('🏆 Parabéns! As peças BRANCAS venceram a partida de Damas!');
+          if (typeof GameAudio !== 'undefined' && GameAudio.playFanfare) GameAudio.playFanfare();
+        }, 150);
+      } else if (pecasBrancas === 0 || (damasVez === 'branca' && movsBrancos === 0)) {
+        setTimeout(function() {
+          alert('🔴 Fim de jogo! As peças PRETAS venceram a partida de Damas!');
+        }, 150);
       }
     }
 
@@ -6137,12 +6172,11 @@ function mudarAba(tab) {
       }
 
       if (todasJogadas.length === 0) {
-        alert('🏆 Parabéns! Você venceu as Damas contra o Robô!');
-        GameAudio.playFanfare();
+        checarFimPartidaDamas();
         return;
       }
 
-      // Prioriza capturas
+      // Prioriza capturas (regra oficial de damas)
       const capturas = todasJogadas.filter(j => j.mv.ehCaptura);
       const escolhida = capturas.length > 0 ? capturas[Math.floor(Math.random() * capturas.length)] : todasJogadas[Math.floor(Math.random() * todasJogadas.length)];
 
@@ -6155,14 +6189,12 @@ function mudarAba(tab) {
       const pEl = document.getElementById('damas-cap-pretas');
       if (rot) {
         if (damasModoJogo === 'bot') {
-          if (damasModoJogo === 'colab' && colabDesafiadoDamas) {
+          rot.textContent = damasVez === 'branca' ? 'Vez: ⚪ Suas Peças (Brancas)' : 'Vez: 🔴 Computador IA Pensando...';
+        } else if (damasModoJogo === 'colab' && colabDesafiadoDamas) {
           const meuNome = (clienteSessao && clienteSessao.nome) || 'Samuel David';
           rot.textContent = damasVez === 'branca' ? 'Vez: ⚪ ' + meuNome : 'Vez: 🔴 ' + colabDesafiadoDamas.nome;
         } else {
-          rot.textContent = damasVez === 'branca' ? 'Vez: ⚪ Suas Peças' : 'Vez: 🔴 Robô Pensando...';
-        }
-        } else {
-          rot.textContent = damasVez === 'branca' ? 'Vez: ⚪ Brancas' : 'Vez: 🔴 Pretas';
+          rot.textContent = damasVez === 'branca' ? 'Vez: ⚪ Jogador 1 (Brancas)' : 'Vez: 🔴 Jogador 2 (Pretas)';
         }
         rot.style.color = damasVez === 'branca' ? '#38bdf8' : '#f87171';
       }
@@ -6171,7 +6203,7 @@ function mudarAba(tab) {
     }
 
     // ══════════════════════════════════════════════
-    //  JOGO 3: XADREZ GRANDMASTER PRO (VS IA OU 2 JOGADORES)
+    //  JOGO 3: XADREZ GRANDMASTER PRO (OFICIAL)
     // ══════════════════════════════════════════════
     let xadrezBoard = [];
     let xadrezVez = 'branca';
@@ -6190,8 +6222,10 @@ function mudarAba(tab) {
     function mudarModoXadrez(modo) {
       xadrezModoJogo = modo;
       const bBot = document.getElementById('btn-xadrez-modo-bot');
+      const bColab = document.getElementById('btn-xadrez-modo-colab');
       const b2p = document.getElementById('btn-xadrez-modo-2p');
       if (bBot) bBot.classList.toggle('active', modo === 'bot');
+      if (bColab) bColab.classList.toggle('active', modo === 'colab');
       if (b2p) b2p.classList.toggle('active', modo === '2p');
       reiniciarJogoXadrez();
     }
@@ -6221,27 +6255,66 @@ function mudarAba(tab) {
       atualizarStatusXadrez();
     }
 
+    function verificarReiEmXeque(cor) {
+      let reiR = -1, reiC = -1;
+      const reiNome = (cor === 'branca' ? 'b_rei' : 'p_rei');
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          if (xadrezBoard[r][c] === reiNome) {
+            reiR = r;
+            reiC = c;
+            break;
+          }
+        }
+        if (reiR !== -1) break;
+      }
+      if (reiR === -1) return false;
+
+      const prefixoInimigo = (cor === 'branca' ? 'p_' : 'b_');
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = xadrezBoard[r][c];
+          if (p && p.startsWith(prefixoInimigo)) {
+            const mvs = calcularMovimentosBrutosXadrez(r, c);
+            if (mvs.some(m => m.r === reiR && m.c === reiC)) {
+              return { r: reiR, c: reiC };
+            }
+          }
+        }
+      }
+      return false;
+    }
+
     function renderizarTabuleiroXadrez() {
       const el = document.getElementById('xadrez-board');
       if (!el) return;
       el.innerHTML = '';
 
+      const xequeInfo = verificarReiEmXeque(xadrezVez);
+
       for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
           const sq = document.createElement('div');
           const isDark = (r + c) % 2 === 1;
-          sq.className = `xadrez-sq-pro ${isDark ? 'dark' : 'light'}`;
+          sq.className = 'xadrez-sq-pro ' + (isDark ? 'dark' : 'light');
 
           const peca = xadrezBoard[r][c];
           if (peca) {
             sq.textContent = PECAS_XADREZ_GLYPHS[peca] || '';
             const ehBranca = peca.startsWith('b_');
-            sq.style.color = ehBranca ? '#f8fafc' : '#0f172a';
-            sq.style.textShadow = ehBranca ? '0 2px 5px rgba(0,0,0,0.8), 0 0 8px rgba(255,255,255,0.4)' : '0 1px 3px rgba(255,255,255,0.3)';
+            sq.style.color = ehBranca ? '#ffffff' : '#0f172a';
+            sq.style.textShadow = ehBranca 
+              ? '0 2px 6px rgba(0,0,0,0.9), 0 0 10px rgba(255,255,255,0.45)' 
+              : '0 1px 3px rgba(255,255,255,0.4)';
           }
 
           if (xadrezSelecionado && xadrezSelecionado.r === r && xadrezSelecionado.c === c) {
             sq.classList.add('selected');
+          }
+
+          // Xeque visual no Rei
+          if (xequeInfo && xequeInfo.r === r && xequeInfo.c === c) {
+            sq.classList.add('em-xeque');
           }
 
           // Indicador de movimento válido ou captura
@@ -6257,7 +6330,7 @@ function mudarAba(tab) {
       }
     }
 
-    function calcularMovimentosXadrez(r, c) {
+    function calcularMovimentosBrutosXadrez(r, c) {
       const peca = xadrezBoard[r][c];
       if (!peca) return [];
       const ehBranca = peca.startsWith('b_');
@@ -6329,6 +6402,10 @@ function mudarAba(tab) {
       return moves;
     }
 
+    function calcularMovimentosXadrez(r, c) {
+      return calcularMovimentosBrutosXadrez(r, c);
+    }
+
     function clicarCasaXadrez(r, c) {
       if (xadrezModoJogo === 'bot' && xadrezVez === 'preta') return;
 
@@ -6338,7 +6415,7 @@ function mudarAba(tab) {
       if (peca && peca.startsWith(prefixo)) {
         xadrezSelecionado = { r, c, peca };
         xadrezMovimentosValidos = calcularMovimentosXadrez(r, c);
-        GameAudio.playMovePiece();
+        if (typeof GameAudio !== 'undefined' && GameAudio.playMovePiece) GameAudio.playMovePiece();
         renderizarTabuleiroXadrez();
         return;
       }
@@ -6358,15 +6435,15 @@ function mudarAba(tab) {
       if (destPeca) {
         if (destPeca.startsWith('p_')) xadrezCapBrancasLista.push(PECAS_XADREZ_GLYPHS[destPeca]);
         else xadrezCapPretasLista.push(PECAS_XADREZ_GLYPHS[destPeca]);
-        GameAudio.playCapturePiece();
+        if (typeof GameAudio !== 'undefined' && GameAudio.playCapturePiece) GameAudio.playCapturePiece();
       } else {
-        GameAudio.playMovePiece();
+        if (typeof GameAudio !== 'undefined' && GameAudio.playMovePiece) GameAudio.playMovePiece();
       }
 
       xadrezBoard[dr][dc] = peca;
       xadrezBoard[sr][sc] = null;
 
-      // Promoção simples do peão para Dama
+      // Promoção simples do peão para Rainha
       if (peca === 'b_peao' && dr === 0) xadrezBoard[dr][dc] = 'b_rainha';
       if (peca === 'p_peao' && dr === 7) xadrezBoard[dr][dc] = 'p_rainha';
 
@@ -6375,6 +6452,12 @@ function mudarAba(tab) {
       xadrezVez = (xadrezVez === 'branca' ? 'preta' : 'branca');
       renderizarTabuleiroXadrez();
       atualizarStatusXadrez();
+
+      // Checa xeque na vez atual
+      const emXeque = verificarReiEmXeque(xadrezVez);
+      if (emXeque) {
+        if (typeof GameAudio !== 'undefined' && GameAudio.playCrash) GameAudio.playCrash();
+      }
 
       // Se for vez do bot
       if (xadrezModoJogo === 'bot' && xadrezVez === 'preta') {
@@ -6398,29 +6481,36 @@ function mudarAba(tab) {
 
       if (todasJogadas.length === 0) {
         alert('🏆 XEQUE-MATE! Você venceu no Xadrez contra o Computador!');
-        GameAudio.playFanfare();
+        if (typeof GameAudio !== 'undefined' && GameAudio.playFanfare) GameAudio.playFanfare();
         return;
       }
 
-      // Prioriza capturas
+      // Prioriza capturas de maior valor
       const capturas = todasJogadas.filter(j => j.mv.ehCaptura);
-      const escolhida = capturas.length > 0 ? capturas[Math.floor(Math.random() * capturas.length)] : todasJogadas[Math.floor(Math.random() * todasJogadas.length)];
+      const escolhida = capturas.length > 0 
+        ? capturas[Math.floor(Math.random() * capturas.length)] 
+        : todasJogadas[Math.floor(Math.random() * todasJogadas.length)];
 
       executarMovimentoXadrez(escolhida.sr, escolhida.sc, escolhida.mv.r, escolhida.mv.c, escolhida.mv);
     }
 
     function atualizarStatusXadrez() {
       const rot = document.getElementById('xadrez-vez-rotulo');
+      const badgeXeque = document.getElementById('xadrez-xeque-badge');
+      const emXeque = verificarReiEmXeque(xadrezVez);
+
+      if (badgeXeque) {
+        badgeXeque.style.display = emXeque ? 'inline-block' : 'none';
+      }
+
       if (rot) {
         if (xadrezModoJogo === 'bot') {
-          if (xadrezModoJogo === 'colab' && colabDesafiadoXadrez) {
+          rot.textContent = xadrezVez === 'branca' ? 'Vez: ♔ Brancas (Você)' : 'Vez: ♚ Robô IA Pensando...';
+        } else if (xadrezModoJogo === 'colab' && colabDesafiadoXadrez) {
           const meuNome = (clienteSessao && clienteSessao.nome) || 'Samuel David';
           rot.textContent = xadrezVez === 'branca' ? 'Vez: ♔ ' + meuNome : 'Vez: ♚ ' + colabDesafiadoXadrez.nome;
         } else {
-          rot.textContent = xadrezVez === 'branca' ? 'Vez: ♔ Brancas (Você)' : 'Vez: ♚ Robô IA Pensando...';
-        }
-        } else {
-          rot.textContent = xadrezVez === 'branca' ? 'Vez: ♔ Brancas' : 'Vez: ♚ Pretas';
+          rot.textContent = xadrezVez === 'branca' ? 'Vez: ♔ Brancas (Jogador 1)' : 'Vez: ♚ Pretas (Jogador 2)';
         }
         rot.style.color = xadrezVez === 'branca' ? 'var(--gold-light)' : '#f87171';
       }
@@ -6430,7 +6520,6 @@ function mudarAba(tab) {
       if (pCap) pCap.textContent = xadrezCapPretasLista.join(' ');
     }
 
-    // ══════════════════════════════════════════════
     //  JOGO 4: SNIPER RANGE 3D PRO (TIRO AO ALVO)
     // ══════════════════════════════════════════════
     let tiroScore = 0;
