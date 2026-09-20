@@ -1460,9 +1460,14 @@
             </div>
           </div>
         </div>
-        <button type="button" onclick="abrirModalEditarHorarioTrabalho()" style="background:rgba(212,175,55,0.18);border:1px solid rgba(212,175,55,0.45);color:#fef08a;font-size:11.5px;font-weight:800;padding:6px 12px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
-          ✏️ Editar Horário
-        </button>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <button type="button" onclick="abrirConfigHorariosAlarmePonto()" style="background:rgba(56,189,248,0.18);border:1px solid rgba(56,189,248,0.45);color:#38bdf8;font-size:11.5px;font-weight:800;padding:6px 12px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" title="Configurar horários do alarme do ponto">
+            ⏰ Editar Alarme
+          </button>
+          <button type="button" onclick="abrirModalEditarHorarioTrabalho()" style="background:rgba(212,175,55,0.18);border:1px solid rgba(212,175,55,0.45);color:#fef08a;font-size:11.5px;font-weight:800;padding:6px 12px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" title="Editar jornada de trabalho do colaborador">
+            ✏️ Editar Horário
+          </button>
+        </div>
       </div>
 
       <div class="ponto-grid-actions">
@@ -2077,6 +2082,16 @@
       <label style="display:block;font-size:11px;font-weight:800;color:var(--gold-light);text-transform:uppercase;margin-bottom:4px;">Jornada Semanal</label>
       <input type="text" id="edit-horario-jornada" placeholder="Ex: 44h/sem" style="width:100%;box-sizing:border-box;padding:9px;background:#090a14;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:13px;outline:none;" />
     </div>
+
+    <div style="margin-bottom:14px;padding:10px 12px;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.3);border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+      <div style="font-size:11.5px;color:#cbd5e1;">
+        <strong style="color:#38bdf8;">⏰ Alarme de Ponto:</strong> Ajustar horários e som do alarme
+      </div>
+      <button type="button" onclick="fecharModalEditarHorarioTrabalho(); abrirConfigHorariosAlarmePonto();" style="background:#38bdf8;color:#000;border:none;padding:5px 11px;border-radius:6px;font-size:11px;font-weight:900;cursor:pointer;white-space:nowrap;">
+        Editar Alarme
+      </button>
+    </div>
+
 
     <div style="display:flex;gap:8px;">
       <button type="button" onclick="fecharModalEditarHorarioTrabalho()" style="flex:1;padding:10px;background:rgba(255,255,255,0.08);border:none;border-radius:8px;color:#fff;font-weight:700;font-size:12px;cursor:pointer;">
@@ -4860,6 +4875,26 @@ function atualizarResumoHorariosAlarme() {
       badgeStatus.style.color = '#fff';
     }
   }
+}
+
+
+function copiarHorariosColaboradorParaAlarme() {
+  const sel = document.getElementById('ponto-sel-colaborador');
+  const id = sel ? parseInt(sel.value) : 0;
+  const colab = (typeof funcionariosLista !== 'undefined') ? funcionariosLista.find(f => f.id === id) : null;
+  if (!colab) {
+    alert('Selecione um colaborador na lista de ponto para copiar os horários.');
+    return;
+  }
+  const inpEnt = document.getElementById('cfg-ponto-ent');
+  const inpAlm = document.getElementById('cfg-ponto-alm');
+  const inpVol = document.getElementById('cfg-ponto-vol');
+  const inpSai = document.getElementById('cfg-ponto-sai');
+  if (inpEnt && colab.horarioEntrada) inpEnt.value = colab.horarioEntrada;
+  if (inpAlm && colab.horarioAlmocoSai) inpAlm.value = colab.horarioAlmocoSai;
+  if (inpVol && colab.horarioAlmocoVolta) inpVol.value = colab.horarioAlmocoVolta;
+  if (inpSai && colab.horarioSaida) inpSai.value = colab.horarioSaida;
+  mostrarMsgPonto('⚡ Horários copiados do colaborador ' + colab.nome + '!', true);
 }
 
 function abrirConfigHorariosAlarmePonto() {
