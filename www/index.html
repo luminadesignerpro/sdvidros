@@ -1533,9 +1533,9 @@
               <th style="width:95px">SAÍDA ALMOÇO</th>
               <th style="width:95px">VOLTA ALMOÇO</th>
               <th style="width:90px">SAÍDA FINAL</th>
-              <th style="min-width:110px">TEMPO TRABALHADO</th>
               <th style="min-width:115px">HORA NEGATIVA</th>
               <th style="min-width:130px">VALOR DO SALÁRIO</th>
+              <th style="min-width:110px">TEMPO TRABALHADO</th>
               <th style="width:110px;text-align:center">AÇÕES</th>
             </tr>
           </thead>
@@ -6701,6 +6701,23 @@ function renderEspelhoPonto() {
       ? `<span class="ponto-hora-sai">${p.saidaFinal}</span>`
       : (p.emAndamento ? `<span style="color:#4ade80;font-size:11px;font-weight:800;background:rgba(34,197,94,0.12);padding:2px 6px;border-radius:6px;border:1px solid rgba(34,197,94,0.3);">🟢 Em Aberto</span>` : `<span class="ponto-hora-null">--:--</span>`);
 
+    // Badges visíveis diretamente em cada ponto (ENTRADA 1, ALMOÇO, etc.)
+    const badgeEnt = (p.entrada1 && p.atrasoEntradaMin > 0)
+      ? `<div style="font-size:10px;color:#f87171;font-weight:800;background:rgba(239,68,68,0.22);padding:1px 5px;border-radius:4px;margin-top:3px;display:inline-block;border:1px solid rgba(239,68,68,0.4);" title="Atraso de ${p.atrasoEntradaMin}min além dos 5min de tolerância">-${p.atrasoEntradaMin}m (-R$ ${(p.atrasoEntradaDesconto||0).toFixed(2).replace('.', ',')})</div>`
+      : (p.entrada1 === '08:05' || (p.entrada1 && p.entrada1 > '08:00' && p.entrada1 <= '08:05') ? `<div style="font-size:9.5px;color:#34d399;font-weight:700;margin-top:2px;">Tolerância 5m ✓</div>` : '');
+
+    const badgeAlmSai = (p.saidaAlmoco && p.antecipadoAlmocoMin > 0)
+      ? `<div style="font-size:10px;color:#f87171;font-weight:800;background:rgba(239,68,68,0.22);padding:1px 5px;border-radius:4px;margin-top:3px;display:inline-block;border:1px solid rgba(239,68,68,0.4);" title="Saída antecipada de ${p.antecipadoAlmocoMin}min">-${p.antecipadoAlmocoMin}m (-R$ ${(p.antecipadoAlmocoDesconto||0).toFixed(2).replace('.', ',')})</div>`
+      : '';
+
+    const badgeAlmVol = (p.voltaAlmoco && p.atrasoVoltaAlmocoMin > 0)
+      ? `<div style="font-size:10px;color:#f87171;font-weight:800;background:rgba(239,68,68,0.22);padding:1px 5px;border-radius:4px;margin-top:3px;display:inline-block;border:1px solid rgba(239,68,68,0.4);" title="Atraso no retorno de ${p.atrasoVoltaAlmocoMin}min">-${p.atrasoVoltaAlmocoMin}m (-R$ ${(p.atrasoVoltaAlmocoDesconto||0).toFixed(2).replace('.', ',')})</div>`
+      : '';
+
+    const badgeSai2 = (p.saidaFinal && p.antecipadoSaidaMin > 0)
+      ? `<div style="font-size:10px;color:#f87171;font-weight:800;background:rgba(239,68,68,0.22);padding:1px 5px;border-radius:4px;margin-top:3px;display:inline-block;border:1px solid rgba(239,68,68,0.4);" title="Saída antecipada de ${p.antecipadoSaidaMin}min">-${p.antecipadoSaidaMin}m (-R$ ${(p.antecipadoSaidaDesconto||0).toFixed(2).replace('.', ',')})</div>`
+      : '';
+
     return `
       <tr data-ponto-id="${p.id}">
         <td>
@@ -6708,21 +6725,34 @@ function renderEspelhoPonto() {
           ${f && f.cargo ? `<div style="font-size:11px;color:var(--muted);">${esc(f.cargo)}</div>` : ''}
         </td>
         <td style="font-weight:700;color:var(--text);">${esc(p.data || '')}</td>
-        <td><span class="${p.entrada1 ? 'ponto-hora-ent' : 'ponto-hora-null'}">${p.entrada1 || '--:--'}</span></td>
-        <td><span class="${p.saidaAlmoco ? 'ponto-hora-alm' : 'ponto-hora-null'}">${p.saidaAlmoco || '--:--'}</span></td>
-        <td><span class="${p.voltaAlmoco ? 'ponto-hora-vol' : 'ponto-hora-null'}">${p.voltaAlmoco || '--:--'}</span></td>
-        <td>${saidaFinalBadge}</td>
         <td>
-          ${badgeTempo}
+          <span class="${p.entrada1 ? 'ponto-hora-ent' : 'ponto-hora-null'}">${p.entrada1 || '--:--'}</span>
+          ${badgeEnt}
+        </td>
+        <td>
+          <span class="${p.saidaAlmoco ? 'ponto-hora-alm' : 'ponto-hora-null'}">${p.saidaAlmoco || '--:--'}</span>
+          ${badgeAlmSai}
+        </td>
+        <td>
+          <span class="${p.voltaAlmoco ? 'ponto-hora-vol' : 'ponto-hora-null'}">${p.voltaAlmoco || '--:--'}</span>
+          ${badgeAlmVol}
+        </td>
+        <td>
+          ${saidaFinalBadge}
+          ${badgeSai2}
         </td>
         <td>
           ${(p.minutosNegativos && p.minutosNegativos > 0) 
-            ? `<span class="ponto-badge-negativa" style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:11.5px;font-weight:800;background:rgba(239,68,68,0.18);color:#f87171;border:1px solid rgba(239,68,68,0.35);" title="Atraso além da tolerância de 5min">${p.horaNegativa}<br><span style="font-size:10px;color:#fca5a5;">${p.descontoNegativoFormatado}</span></span>` 
+            ? `<span class="ponto-badge-negativa" style="display:inline-block;padding:4px 8px;border-radius:8px;font-size:12px;font-weight:800;background:rgba(239,68,68,0.2);color:#f87171;border:1.5px solid rgba(239,68,68,0.45);text-align:center;" title="Atraso além da tolerância de 5min">${p.horaNegativa}<br><span style="font-size:10.5px;color:#fca5a5;font-weight:700;">${p.descontoNegativoFormatado}</span></span>` 
             : `<span style="font-size:11.5px;color:#94a3b8;font-weight:600;">00h 00m</span>`}
         </td>
         <td>
           <div class="ponto-salario-val" style="font-weight:900;color:#4ade80;font-size:14px;letter-spacing:0.3px;white-space:nowrap;">${p.valorSalario || 'R$ 0,00'}</div>
-          ${vhInfo ? `<div class="ponto-salario-sub" style="font-size:10.5px;color:#94a3b8;margin-top:2px;white-space:nowrap;">${esc(vhInfo)}</div>` : ''}
+          ${vhInfo ? `<div class="ponto-salario-sub" style="font-size:10px;color:#94a3b8;margin-top:2px;white-space:nowrap;">${esc(vhInfo)}</div>` : ''}
+          ${(p.descontoNegativoValor && p.descontoNegativoValor > 0) ? `<div style="font-size:10px;color:#f87171;font-weight:700;margin-top:2px;">Desc. H.Neg: ${p.descontoNegativoFormatado}</div>` : ''}
+        </td>
+        <td>
+          ${badgeTempo}
         </td>
         <td style="text-align:center;white-space:nowrap;">
           <div style="display:flex;gap:4px;justify-content:center;">
@@ -6730,6 +6760,16 @@ function renderEspelhoPonto() {
             <button type="button" class="btn btn-sec btn-sm" onclick="abrirModalLancamentoPonto(${p.id})" title="Editar Batidas" style="padding:4px 8px;font-size:12px;">✏️</button>
             <button type="button" class="btn btn-danger btn-sm" onclick="excluirPonto(${p.id})" title="Excluir Registro" style="padding:4px 8px;font-size:12px;">🗑️</button>
           </div>
+        </td>
+      </tr>
+      <!-- Linha informativa visível no celular mostrando a Hora Negativa e Desconto Salarial -->
+      <tr class="ponto-subrow-mobile" style="background:rgba(255,255,255,0.015);border-bottom:1.5px solid rgba(255,255,255,0.08);">
+        <td colspan="10" style="padding:6px 12px;font-size:11.5px;color:var(--text2);text-align:left;">
+          <span style="font-weight:700;color:var(--text);margin-right:8px;">${esc(nomeColab)} (${esc(p.data || '')}):</span>
+          ${(p.minutosNegativos && p.minutosNegativos > 0)
+            ? `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,0.2);color:#f87171;padding:2px 8px;border-radius:6px;font-weight:800;border:1px solid rgba(239,68,68,0.4);margin-right:8px;">⏳ HORA NEGATIVA: ${p.horaNegativa} ${p.descontoNegativoFormatado}</span>`
+            : `<span style="color:#94a3b8;margin-right:8px;">⏳ Hora Negativa: 00h 00m</span>`}
+          <span style="font-weight:700;color:#4ade80;">Ganho Líquido: ${p.valorSalario || 'R$ 0,00'}</span>
         </td>
       </tr>
     `;
@@ -6971,67 +7011,93 @@ function recalcularHorasPonto(p, colab) {
 
   let emAndamento = false;
 
+  // Calcula o valor hora do colaborador primeiro para descontos proporcionais
+  let vHora = 0;
+  if (colab && colab.valorHora && Number(colab.valorHora) > 0) {
+    vHora = Number(colab.valorHora);
+  } else if (colab && colab.salario && Number(colab.salario) > 0) {
+    const jornadaStr = colab.jornada || '44';
+    const horasSem = parseInt(String(jornadaStr).replace(/\D/g, '')) || 44;
+    const horasMes = horasSem * 4.545;
+    vHora = Number(colab.salario) / (horasMes || 200);
+  } else if (p.valorHora && Number(p.valorHora) > 0) {
+    vHora = Number(p.valorHora);
+  }
+
   // ═══════════════════════════════════════════════════════
   // REGRA DE TOLERÂNCIA DE 5 MINUTOS E HORAS NEGATIVAS
   // ═══════════════════════════════════════════════════════
-  // Se registrar até 5min após o previsto (ex: até 08:05): NÃO desconta e não vira hora negativa.
-  // Se passar de 5min (ex: 08:30): os 30 minutos INTEGRAIS viram HORA NEGATIVA com desconto.
   let minutosNegativos = 0;
 
   // 1. 1ª Entrada
+  let atrasoEntradaMin = 0;
   let mEntradaEfetivo = mEntrada;
   if (mEntrada !== null) {
     if (mEntrada > expEnt) {
       const diff = mEntrada - expEnt;
       if (diff <= 5) {
-        // Tolerância atendida: considera entrada no horário previsto (08:00), sem desconto
-        mEntradaEfetivo = expEnt;
+        mEntradaEfetivo = expEnt; // Tolerância 5min atendida
       } else {
-        // Tolerância excedida: desconta integralmente na hora negativa
+        atrasoEntradaMin = diff;
         minutosNegativos += diff;
       }
     }
   }
 
-  // 2. Saída Almoço
+  // 2. Saída Almoço (saída antecipada)
+  let antecipadoAlmocoMin = 0;
   let mAlmocoSaiEfetivo = mAlmocoSai;
   if (mAlmocoSai !== null) {
     if (mAlmocoSai < expAlmSai) {
       const diff = expAlmSai - mAlmocoSai;
       if (diff <= 5) {
-        mAlmocoSaiEfetivo = expAlmSai; // dentro dos 5min de tolerância
+        mAlmocoSaiEfetivo = expAlmSai;
       } else {
-        minutosNegativos += diff; // saiu mais de 5min antes do almoço
+        antecipadoAlmocoMin = diff;
+        minutosNegativos += diff;
       }
     }
   }
 
-  // 3. Volta Almoço
+  // 3. Volta Almoço (retorno com atraso)
+  let atrasoVoltaAlmocoMin = 0;
   let mAlmocoVoltaEfetivo = mAlmocoVolta;
   if (mAlmocoVolta !== null) {
     const targetVolta = mAlmocoSai !== null ? Math.max(expAlmVol, mAlmocoSai + 60) : expAlmVol;
     if (mAlmocoVolta > targetVolta) {
       const diff = mAlmocoVolta - targetVolta;
       if (diff <= 5) {
-        mAlmocoVoltaEfetivo = targetVolta; // dentro dos 5min de tolerância
+        mAlmocoVoltaEfetivo = targetVolta;
       } else {
-        minutosNegativos += diff; // atrasou mais de 5min no retorno do almoço
+        atrasoVoltaAlmocoMin = diff;
+        minutosNegativos += diff;
       }
     }
   }
 
   // 4. Saída Final (saída antecipada)
+  let antecipadoSaidaMin = 0;
   let mSaidaEfetivo = mSaida;
   if (mSaida !== null) {
     if (mSaida < expSai) {
       const diff = expSai - mSaida;
       if (diff <= 5) {
-        mSaidaEfetivo = expSai; // tolerância de até 5min
+        mSaidaEfetivo = expSai;
       } else {
+        antecipadoSaidaMin = diff;
         minutosNegativos += diff;
       }
     }
   }
+
+  p.atrasoEntradaMin = atrasoEntradaMin;
+  p.atrasoEntradaDesconto = (atrasoEntradaMin / 60) * vHora;
+  p.antecipadoAlmocoMin = antecipadoAlmocoMin;
+  p.antecipadoAlmocoDesconto = (antecipadoAlmocoMin / 60) * vHora;
+  p.atrasoVoltaAlmocoMin = atrasoVoltaAlmocoMin;
+  p.atrasoVoltaAlmocoDesconto = (atrasoVoltaAlmocoMin / 60) * vHora;
+  p.antecipadoSaidaMin = antecipadoSaidaMin;
+  p.antecipadoSaidaDesconto = (antecipadoSaidaMin / 60) * vHora;
 
   // ═══════════════════════════════════════════════════════
   // CÁLCULO DO TEMPO TRABALHADO
@@ -7081,19 +7147,6 @@ function recalcularHorasPonto(p, colab) {
   p.totalMinutos = totalMin;
   p.emAndamento = emAndamento;
   p.tempoTrabalhado = `${String(hTot).padStart(2, '0')}h ${String(mTot).padStart(2, '0')}m`;
-
-  // Calcula o valor hora
-  let vHora = 0;
-  if (colab && colab.valorHora && Number(colab.valorHora) > 0) {
-    vHora = Number(colab.valorHora);
-  } else if (colab && colab.salario && Number(colab.salario) > 0) {
-    const jornadaStr = colab.jornada || '44';
-    const horasSem = parseInt(String(jornadaStr).replace(/\D/g, '')) || 44;
-    const horasMes = horasSem * 4.545;
-    vHora = Number(colab.salario) / (horasMes || 200);
-  } else if (p.valorHora && Number(p.valorHora) > 0) {
-    vHora = Number(p.valorHora);
-  }
 
   const vMinuto = vHora > 0 ? (vHora / 60) : 0;
   const valorDia = (totalMin / 60) * vHora;

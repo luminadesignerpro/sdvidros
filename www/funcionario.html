@@ -6246,21 +6246,37 @@ function mudarAba(tab) {
 
       let emAndamento = false;
 
-      // Tolerância de 5 minutos e cálculo de horas negativas
+      let vHora = 0;
+      if (colab && colab.valorHora && Number(colab.valorHora) > 0) {
+        vHora = Number(colab.valorHora);
+      } else if (colab && colab.salario && Number(colab.salario) > 0) {
+        const jornadaStr = colab.jornada || '44';
+        const horasSem = parseInt(String(jornadaStr).replace(/\D/g, '')) || 44;
+        const horasMes = horasSem * 4.545;
+        vHora = Number(colab.salario) / (horasMes || 200);
+      } else if (p.valorHora && Number(p.valorHora) > 0) {
+        vHora = Number(p.valorHora);
+      } else {
+        vHora = 25.50;
+      }
+
       let minutosNegativos = 0;
 
+      let atrasoEntradaMin = 0;
       let mEntradaEfetivo = mEntrada;
       if (mEntrada !== null) {
         if (mEntrada > expEnt) {
           const diff = mEntrada - expEnt;
           if (diff <= 5) {
-            mEntradaEfetivo = expEnt; // Tolerância concedida
+            mEntradaEfetivo = expEnt;
           } else {
-            minutosNegativos += diff; // Desconto integral dos minutos
+            atrasoEntradaMin = diff;
+            minutosNegativos += diff;
           }
         }
       }
 
+      let antecipadoAlmocoMin = 0;
       let mAlmocoSaiEfetivo = mAlmocoSai;
       if (mAlmocoSai !== null) {
         if (mAlmocoSai < expAlmSai) {
@@ -6268,11 +6284,13 @@ function mudarAba(tab) {
           if (diff <= 5) {
             mAlmocoSaiEfetivo = expAlmSai;
           } else {
+            antecipadoAlmocoMin = diff;
             minutosNegativos += diff;
           }
         }
       }
 
+      let atrasoVoltaAlmocoMin = 0;
       let mAlmocoVoltaEfetivo = mAlmocoVolta;
       if (mAlmocoVolta !== null) {
         const targetVolta = mAlmocoSai !== null ? Math.max(expAlmVol, mAlmocoSai + 60) : expAlmVol;
@@ -6281,11 +6299,13 @@ function mudarAba(tab) {
           if (diff <= 5) {
             mAlmocoVoltaEfetivo = targetVolta;
           } else {
+            atrasoVoltaAlmocoMin = diff;
             minutosNegativos += diff;
           }
         }
       }
 
+      let antecipadoSaidaMin = 0;
       let mSaidaEfetivo = mSaida;
       if (mSaida !== null) {
         if (mSaida < expSai) {
@@ -6293,14 +6313,23 @@ function mudarAba(tab) {
           if (diff <= 5) {
             mSaidaEfetivo = expSai;
           } else {
+            antecipadoSaidaMin = diff;
             minutosNegativos += diff;
           }
         }
       }
 
+      p.atrasoEntradaMin = atrasoEntradaMin;
+      p.atrasoEntradaDesconto = (atrasoEntradaMin / 60) * vHora;
+      p.antecipadoAlmocoMin = antecipadoAlmocoMin;
+      p.antecipadoAlmocoDesconto = (antecipadoAlmocoMin / 60) * vHora;
+      p.atrasoVoltaAlmocoMin = atrasoVoltaAlmocoMin;
+      p.atrasoVoltaAlmocoDesconto = (atrasoVoltaAlmocoMin / 60) * vHora;
+      p.antecipadoSaidaMin = antecipadoSaidaMin;
+      p.antecipadoSaidaDesconto = (antecipadoSaidaMin / 60) * vHora;
+
       let totalMin = 0;
 
-      // 1. Manhã
       if (mEntradaEfetivo !== null) {
         if (mAlmocoSaiEfetivo !== null && mAlmocoSaiEfetivo >= mEntradaEfetivo) {
           totalMin += (mAlmocoSaiEfetivo - mEntradaEfetivo);
@@ -6314,7 +6343,6 @@ function mudarAba(tab) {
         }
       }
 
-      // 2. Tarde
       if (mAlmocoVoltaEfetivo !== null) {
         if (mSaidaEfetivo !== null && mSaidaEfetivo >= mAlmocoVoltaEfetivo) {
           totalMin += (mSaidaEfetivo - mAlmocoVoltaEfetivo);
@@ -6326,7 +6354,6 @@ function mudarAba(tab) {
         }
       }
 
-      // 3. Extras
       if (mHEIni !== null) {
         if (mHEFim !== null && mHEFim >= mHEIni) {
           totalMin += (mHEFim - mHEIni);
@@ -6343,20 +6370,6 @@ function mudarAba(tab) {
       p.totalMinutos = totalMin;
       p.emAndamento = emAndamento;
       p.tempoTrabalhado = `${String(hTot).padStart(2, '0')}h ${String(mTot).padStart(2, '0')}m`;
-
-      let vHora = 0;
-      if (colab && colab.valorHora && Number(colab.valorHora) > 0) {
-        vHora = Number(colab.valorHora);
-      } else if (colab && colab.salario && Number(colab.salario) > 0) {
-        const jornadaStr = colab.jornada || '44';
-        const horasSem = parseInt(String(jornadaStr).replace(/\D/g, '')) || 44;
-        const horasMes = horasSem * 4.545;
-        vHora = Number(colab.salario) / (horasMes || 200);
-      } else if (p.valorHora && Number(p.valorHora) > 0) {
-        vHora = Number(p.valorHora);
-      } else {
-        vHora = 25.50;
-      }
 
       const vMinuto = vHora > 0 ? (vHora / 60) : 0;
       const valorDia = (totalMin / 60) * vHora;
@@ -8500,20 +8513,55 @@ function mudarAba(tab) {
           ? `<span class="ponto-hora-sai">${p.saidaFinal}</span>`
           : (p.emAndamento ? `<span style="color:#4ade80;font-size:11px;font-weight:800;background:rgba(34,197,94,0.12);padding:2px 6px;border-radius:6px;border:1px solid rgba(34,197,94,0.3);">🟢 Em Aberto</span>` : `<span class="ponto-hora-null">--:--</span>`);
 
+        const badgeEntCli = (p.entrada1 && p.atrasoEntradaMin > 0)
+          ? `<div style="font-size:10px;color:#f87171;font-weight:800;background:rgba(239,68,68,0.22);padding:1px 5px;border-radius:4px;margin-top:2px;display:inline-block;border:1px solid rgba(239,68,68,0.4);">-${p.atrasoEntradaMin}m (-R$ ${(p.atrasoEntradaDesconto||0).toFixed(2).replace('.', ',')})</div>`
+          : (p.entrada1 === '08:05' || (p.entrada1 && p.entrada1 > '08:00' && p.entrada1 <= '08:05') ? `<div style="font-size:9.5px;color:#34d399;font-weight:700;margin-top:2px;">Tolerância 5m ✓</div>` : '');
+
+        const badgeAlmSaiCli = (p.saidaAlmoco && p.antecipadoAlmocoMin > 0)
+          ? `<div style="font-size:10px;color:#f87171;font-weight:800;background:rgba(239,68,68,0.22);padding:1px 5px;border-radius:4px;margin-top:2px;display:inline-block;border:1px solid rgba(239,68,68,0.4);">-${p.antecipadoAlmocoMin}m (-R$ ${(p.antecipadoAlmocoDesconto||0).toFixed(2).replace('.', ',')})</div>`
+          : '';
+
+        const badgeAlmVolCli = (p.voltaAlmoco && p.atrasoVoltaAlmocoMin > 0)
+          ? `<div style="font-size:10px;color:#f87171;font-weight:800;background:rgba(239,68,68,0.22);padding:1px 5px;border-radius:4px;margin-top:2px;display:inline-block;border:1px solid rgba(239,68,68,0.4);">-${p.atrasoVoltaAlmocoMin}m (-R$ ${(p.atrasoVoltaAlmocoDesconto||0).toFixed(2).replace('.', ',')})</div>`
+          : '';
+
         return `<tr data-ponto-id="${p.id}">
           <td><strong>${dFormat}</strong></td>
-          <td><span class="${p.entrada1 ? 'ponto-hora-ent' : 'ponto-hora-null'}">${p.entrada1 || '--:--'}</span></td>
-          <td><span class="${p.saidaAlmoco ? 'ponto-hora-alm' : 'ponto-hora-null'}">${p.saidaAlmoco || '--:--'}</span></td>
-          <td><span class="${p.voltaAlmoco ? 'ponto-hora-vol' : 'ponto-hora-null'}">${p.voltaAlmoco || '--:--'}</span></td>
+          <td>
+            <span class="${p.entrada1 ? 'ponto-hora-ent' : 'ponto-hora-null'}">${p.entrada1 || '--:--'}</span>
+            ${badgeEntCli}
+          </td>
+          <td>
+            <span class="${p.saidaAlmoco ? 'ponto-hora-alm' : 'ponto-hora-null'}">${p.saidaAlmoco || '--:--'}</span>
+            ${badgeAlmSaiCli}
+          </td>
+          <td>
+            <span class="${p.voltaAlmoco ? 'ponto-hora-vol' : 'ponto-hora-null'}">${p.voltaAlmoco || '--:--'}</span>
+            ${badgeAlmVolCli}
+          </td>
           <td>${saidaFinalBadge}</td>
-          <td>${badgeTempo}</td>
+          <td>
+            ${(p.minutosNegativos && p.minutosNegativos > 0) 
+              ? `<span class="ponto-badge-negativa" style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:11.5px;font-weight:800;background:rgba(239,68,68,0.18);color:#f87171;border:1px solid rgba(239,68,68,0.35);" title="Atraso além da tolerância de 5min">${p.horaNegativa}<br><span style="font-size:10px;color:#fca5a5;">${p.descontoNegativoFormatado}</span></span>` 
+              : `<span style="font-size:11.5px;color:#94a3b8;font-weight:600;">00h 00m</span>`}
+          </td>
           <td>
             <div class="ponto-salario-val" style="font-weight:900;color:#4ade80;font-size:14px;letter-spacing:0.3px;white-space:nowrap;">${p.valorSalario || 'R$ 0,00'}</div>
-            ${p.valorHoraInfo ? `<div class="ponto-salario-sub" style="font-size:10.5px;color:#94a3b8;margin-top:2px;white-space:nowrap;">${p.valorHoraInfo}</div>` : ''}
+            ${p.valorHoraInfo ? `<div class="ponto-salario-sub" style="font-size:10px;color:#94a3b8;margin-top:2px;white-space:nowrap;">${p.valorHoraInfo}</div>` : ''}
+            ${(p.descontoNegativoValor && p.descontoNegativoValor > 0) ? `<div style="font-size:10px;color:#f87171;font-weight:700;margin-top:2px;">Desc. H.Neg: ${p.descontoNegativoFormatado}</div>` : ''}
           </td>
+          <td>${badgeTempo}</td>
           <td><span style="background:${stBg};color:${stCor};padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800;">${p.status || 'Presente'}</span></td>
           <td style="text-align:center;">
             <button type="button" onclick="abrirModalLancamentoPontoCliente(${p.id})" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#38bdf8;padding:5px 10px;border-radius:8px;font-size:11px;cursor:pointer;font-weight:700;" title="Ajustar horário">✏️ Ajustar</button>
+          </td>
+        </tr>
+        <tr class="ponto-subrow-mobile" style="background:rgba(255,255,255,0.015);border-bottom:1.5px solid rgba(255,255,255,0.08);">
+          <td colspan="10" style="padding:6px 12px;font-size:11.5px;color:var(--text2);text-align:left;">
+            ${(p.minutosNegativos && p.minutosNegativos > 0)
+              ? `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,0.2);color:#f87171;padding:2px 8px;border-radius:6px;font-weight:800;border:1px solid rgba(239,68,68,0.4);margin-right:8px;">⏳ HORA NEGATIVA: ${p.horaNegativa} ${p.descontoNegativoFormatado}</span>`
+              : `<span style="color:#94a3b8;margin-right:8px;">⏳ Hora Negativa: 00h 00m</span>`}
+            <span style="font-weight:700;color:#4ade80;">Ganho Líquido: ${p.valorSalario || 'R$ 0,00'}</span>
           </td>
         </tr>`;
       }).join('');
