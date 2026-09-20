@@ -6738,7 +6738,7 @@ function registrarBatidaPontoComJustificativa() {
     return;
   }
   const colab = funcionariosLista.find(f => f.id === idColab);
-  const motivo = prompt(`Informe o motivo / justificativa da falta para ${colab ? colab.nome : 'o funcionário'}:`, 'Atestado Médico / Consulta');
+  const motivo = prompt(`Informe o motivo / justificativa da falta para ${colab ? colab.nome : 'o funcionário'}:`, '');
   if (motivo === null) return;
 
   const dataHoje = getHojeFormatado();
@@ -6763,7 +6763,7 @@ function registrarBatidaPontoComJustificativa() {
   }
 
   p.status = 'Falta Justificada';
-  p.justificativa = motivo || 'Falta Justificada';
+  p.justificativa = (motivo && motivo.trim()) ? motivo.trim() : 'Falta Justificada';
   if (colab) colab.status = 'Falta Justificada';
 
   recalcularHorasPonto(p, colab);
