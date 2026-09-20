@@ -4087,8 +4087,10 @@ function salvarOrdem() {
   const btn = document.getElementById('btn-salvar-os');
   const orig = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Salvando...';
+  btn.innerHTML = '<span class="spinner"></span> Atualizando todos os dados...';
+
   setTimeout(() => {
+    // 1. Atualiza lista de produtos com novos itens
     (o.itens || []).forEach(it => {
       if (it.desc && !produtos.some(p => p.nome.toLowerCase() === it.desc.toLowerCase())) {
         produtos.push({
@@ -4104,13 +4106,56 @@ function salvarOrdem() {
     updateDatalistProdutos();
     renderProdutos();
 
-    if (editandoOsId) {
-      const idx = historico.findIndex(x => x.id===editandoOsId);
-      if (idx!==-1) {
-        const ordAntiga = historico[idx];
-        const novoStatus = statusEdicaoSelecionado || 'reajustar';
+    // 2. Atualiza ou cadastra cliente na base de clientes (K.clients)
+    if (o.nome) {
+      const telLimpo = String(o.tel || '').replace(/\D/g, '');
+      let cli = clientes.find(c => {
+        const cTel = String(c.whatsapp || '').replace(/\D/g, '');
+        return (telLimpo && cTel && (cTel === telLimpo || cTel.includes(telLimpo) || telLimpo.includes(cTel))) ||
+               (c.nome && c.nome.toLowerCase().trim() === o.nome.toLowerCase().trim());
+      });
+      if (cli) {
+        cli.nome = o.nome;
+        if (o.tel) cli.whatsapp = o.tel;
+        if (o.cnpj) cli.cnpj = o.cnpj;
+        if (o.bairro) cli.bairro = o.bairro;
+        if (o.end) cli.endereco = o.end;
+        if (o.num) cli.numero = o.num;
+        if (o.apto) cli.complemento = o.apto;
+      } else {
+        clientes.push({
+          id: Date.now(),
+          nome: o.nome,
+          whatsapp: o.tel || '',
+          cnpj: o.cnpj || '',
+          bairro: o.bairro || '',
+          endereco: o.end || '',
+          numero: o.num || '',
+          complemento: o.apto || '',
+          data_cadastro: new Date().toLocaleDateString('pt-BR')
+        });
+      }
+      save(K.clients, clientes);
+      renderCli();
+    }
 
-        // 🛡️ PRESERVAÇÃO DE VERSÕES: Nunca apaga o primeiro PDF assinado!
+    const licAtiva = (typeof obterLicencaAtiva === 'function' && obterLicencaAtiva()) ? obterLicencaAtiva() : { id: 'sdvidros', nome: 'SD Vidros' };
+
+    // 3. Atualiza ou cria a Ordem de Serviço
+    if (editandoOsId) {
+      // Busca flexível para garantir que encontra mesmo se ID for número ou string
+      const idx = historico.findIndex(x => 
+        String(x.id) === String(editandoOsId) || 
+        String(x.numero) === String(editandoOsId) || 
+        (o.numero && String(x.numero) === String(o.numero))
+      );
+
+      const novoStatus = statusEdicaoSelecionado || 'reajustar';
+
+      if (idx !== -1) {
+        const ordAntiga = historico[idx];
+
+        // 🛡️ PRESERVAÇÃO DE VERSÕES
         if (!ordAntiga.versoes_pdf || !ordAntiga.versoes_pdf.length) {
           ordAntiga.versoes_pdf = [{
             versao: 1,
@@ -4124,11 +4169,10 @@ function salvarOrdem() {
           }];
         }
 
-        // Registra nova versão com as modificações
         const proximaVersao = ordAntiga.versoes_pdf.length + 1;
         ordAntiga.versoes_pdf.push({
           versao: proximaVersao,
-          titulo: `v${proximaVersao} (${novoStatus === 'modificacao_aprovada' ? 'Modificação Aprovada' : 'Modificações'} - ${o.data})`,
+          titulo: `v${proximaVersao} (${novoStatus === 'modificacao_aprovada' ? 'Modificação Aprovada' : (novoStatus === 'pendente' ? 'Aguardando Resposta' : 'Modificações')} - ${o.data})`,
           data: o.data,
           total: o.total,
           status: novoStatus,
@@ -4137,27 +4181,100 @@ function salvarOrdem() {
 
         historico[idx] = {
           ...ordAntiga,
+          numero: o.numero || ordAntiga.numero,
           nome: o.nome,
           total: o.total,
           data_orc: o.data,
           dados: o,
           status: novoStatus,
+          empresaId: licAtiva.id || 'sdvidros',
+          empresaNome: licAtiva.nome || 'SD Vidros',
           versoes_pdf: ordAntiga.versoes_pdf
         };
 
         if (novoStatus === 'reajustar') {
           historico[idx].assinado_por = 'Aguardando Nova Assinatura';
+        } else if (novoStatus === 'pendente') {
+          historico[idx].assinado_por = '';
+          historico[idx].assinado_em = '';
+          historico[idx].assinatura_digital = '';
+          const numLimpo = String(o.numero || '').replace(/\D/g, '');
+          localStorage.removeItem('sdv_assinatura_' + numLimpo);
         } else if (novoStatus === 'modificacao_aprovada') {
           historico[idx].assinado_por = (historico[idx].assinado_por && !historico[idx].assinado_por.includes('Modificação'))
             ? historico[idx].assinado_por + ' (Modificação Aprovada)'
             : 'Modificação Aprovada pelo Cliente';
         }
+
+        // Notifica sincronização em tempo real do Portal do Cliente
+        notificarNovaOrdemGerada(historico[idx]);
+      } else {
+        // Se por algum motivo o id não foi encontrado no array, atualiza criando ou atualizando por numero
+        const ordNova = {
+          id: Date.now(),
+          numero: o.numero,
+          nome: o.nome,
+          total: o.total,
+          data_orc: o.data,
+          dados: o,
+          status: novoStatus,
+          empresaId: licAtiva.id,
+          empresaNome: licAtiva.nome,
+          versoes_pdf: [{
+            versao: 1,
+            titulo: 'v1 (Atualizado)',
+            data: o.data,
+            total: o.total,
+            status: novoStatus,
+            dados: JSON.parse(JSON.stringify(o))
+          }]
+        };
+        historico.push(ordNova);
+        notificarNovaOrdemGerada(ordNova);
       }
+
       save(K.orders, historico);
-      alert('✅ Ordem ' + o.numero + ' atualizada com sucesso!\n🛡️ Histórico protegido: o PDF original assinado continua arquivado, e a nova versão com modificações foi gerada.');
+
+      // 4. Atualiza o contrato digital correspondente com os dados revisados
+      try {
+        const textoContratoAtualizado = (typeof montarTextoContrato === 'function') ? montarTextoContrato(o) : '';
+        if (textoContratoAtualizado) {
+          const numOsLimpo = String(o.numero || '').replace(/\D/g, '');
+          let ct = listaContratosCache.find(c => 
+            String(c.numero_os || '').replace(/\D/g, '') === numOsLimpo ||
+            String(c.numero_os || '') === String(o.numero || '')
+          );
+          if (ct) {
+            ct.cliente_nome = o.nome;
+            ct.cliente_tel = o.tel;
+            ct.texto = textoContratoAtualizado;
+            if (novoStatus === 'reajustar' || novoStatus === 'pendente') {
+              ct.assinado = false;
+              ct.assinante_nome = '';
+              ct.assinatura_base64 = '';
+            }
+            save('sdv_contratos', listaContratosCache);
+            renderListaContratos();
+          }
+
+          // Envia versão atualizada do contrato para o banco Supabase
+          fetch('/api/criar-contrato', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              numero_os: o.numero,
+              cliente_nome: o.nome,
+              cliente_tel: o.tel,
+              texto: textoContratoAtualizado
+            })
+          }).catch(() => {});
+        }
+      } catch (_) {}
+
+      alert('✅ Todos os dados da Ordem ' + o.numero + ' foram atualizados com sucesso!\n• Cliente, valores, itens e contrato sincronizados.');
       cancelarEdicaoOs();
     } else {
-      const licAtiva = obterLicencaAtiva();
+      // Nova Ordem
       const ord = {
         id: Date.now(),
         numero: o.numero,
@@ -4182,12 +4299,14 @@ function salvarOrdem() {
       notificarNovaOrdemGerada(ord);
       proxNumero++;
       save(K.nextNum, proxNumero);
-      alert('✅ Ordem '+o.numero+' salva com sucesso!');
+      alert('✅ Ordem ' + o.numero + ' salva com sucesso!');
       cancelarEdicaoOs();
     }
 
-    renderHist(); renderSelectContratos();
-    btn.disabled = false; btn.innerHTML = orig;
+    renderHist(); 
+    renderSelectContratos();
+    btn.disabled = false; 
+    btn.innerHTML = orig;
     goTab('historico');
   }, 300);
 }
