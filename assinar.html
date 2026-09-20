@@ -606,41 +606,71 @@
     const urlParams = new URLSearchParams(window.location.search);
     const empParam = (urlParams.get('empresa') || urlParams.get('lic') || '').toLowerCase().trim();
 
-    if (empParam.includes('moveis') || empParam === 'sdmoveis') {
+    // Se o texto do contrato já foi carregado, verifica o conteúdo do contrato
+    const textoContrato = (contratoCache && contratoCache.texto) ? contratoCache.texto.toLowerCase() : '';
+    const ehContratoVidros = textoContrato.includes('vidraçaria') || textoContrato.includes('vidros') || textoContrato.includes('esquadrias') || textoContrato.includes('box') || textoContrato.includes('@sdvidros');
+    const ehContratoMoveis = (textoContrato.includes('móveis') || textoContrato.includes('moveis') || textoContrato.includes('marcenaria')) && !ehContratoVidros;
+
+    if (ehContratoVidros || empParam === 'sdvidros' || empParam.includes('vidros')) {
+      return {
+        id: 'sdvidros',
+        nome: 'SD Vidros',
+        segmento: 'Alumínio, Vidros & Esquadrias',
+        slogan: 'Box, Espelhos, Portas, Janelas & Guarda-Corpo',
+        telefone: '(85) 99611-9824',
+        cidade: 'Itaitinga - CE',
+        pix: '85996119824',
+        tipoContrato: 'vidros'
+      };
+    }
+
+    if (empParam.includes('moveis') || empParam === 'sdmoveis' || empParam === 'sd-moveis' || ehContratoMoveis) {
       return {
         id: 'sdmoveis',
-        nome: 'SD Móveis Projetados',
+        nome: 'SD Vidros',
         segmento: 'Móveis Planejados & Ambientes Sob Medida',
         slogan: 'Cozinhas Planejadas, Closets & Ambientes Sob Medida',
         telefone: '(85) 99611-9824',
         cidade: 'Itaitinga - CE',
-        pix: '85996119824'
+        pix: '85996119824',
+        tipoContrato: 'moveis'
       };
     }
 
     try {
       const lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
-      const idAtivo = empParam || localStorage.getItem('sdv_licenca_ativa') || 'sdmoveis';
+      const idAtivo = empParam || localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
       if (Array.isArray(lista) && lista.length) {
         const encontrada = lista.find(l => l.id === idAtivo || (empParam && (l.id.toLowerCase() === empParam || l.nome.toLowerCase().includes(empParam))));
-        if (encontrada) return encontrada;
+        if (encontrada) {
+          if (encontrada.id === 'samuel-david' || encontrada.nome === 'Samuel David') {
+            encontrada.id = 'sdvidros';
+            encontrada.nome = 'SD Vidros';
+          }
+          return encontrada;
+        }
       }
     } catch (_) {}
 
-    if (empParam && empParam !== 'sdvidros') {
+    if (empParam && empParam !== 'sdvidros' && empParam !== 'sdmoveis') {
       return {
         id: empParam,
         nome: empParam.toUpperCase(),
-        segmento: 'Ambientes Sob Medida & Design',
-        telefone: '(85) 99611-9824'
+        segmento: 'Alumínio, Vidros & Esquadrias',
+        telefone: '(85) 99611-9824',
+        tipoContrato: 'vidros'
       };
     }
 
     return {
-      id: 'sdmoveis',
-      nome: 'SD Móveis Projetados',
-      segmento: 'Móveis Planejados & Ambientes Sob Medida',
-      telefone: '(85) 99611-9824'
+      id: 'sdvidros',
+      nome: 'SD Vidros',
+      segmento: 'Alumínio, Vidros & Esquadrias',
+      slogan: 'Box, Espelhos, Portas, Janelas & Guarda-Corpo',
+      telefone: '(85) 99611-9824',
+      cidade: 'Itaitinga - CE',
+      pix: '85996119824',
+      tipoContrato: 'vidros'
     };
   }
 
@@ -685,6 +715,7 @@
     if (cliNome && cliNome !== 'Não informado') params.set('nome', cliNome);
     params.set('auto', '1');
 
+    params.set('empresa', lic.id || 'sdvidros');
     const urlRelativa = 'cliente.html?' + params.toString();
     const urlCompleta = window.location.origin + '/' + urlRelativa;
 
@@ -812,6 +843,7 @@
 
   function renderizarProposta(data) {
     contratoCache = data;
+    try { aplicarBrandingLicenca(); } catch (_) {}
 
     if (data.assinado) {
       if (telaLoading) telaLoading.classList.add('hidden');
@@ -860,7 +892,7 @@
     const btnAjustar = document.getElementById('btn-ajustar-zap');
     if (btnAjustar) {
       const licAtivaAjuste = obterLicencaAtiva();
-    const zapMsg = 'Olá ' + (licAtivaAjuste.nome || 'SD Móveis Projetados') + '! Recebi a proposta ' + numOs + ' (' + cliNome + '), mas gostaria de tirar algumas dúvidas e falar sobre ajustes antes de aprovar.';
+    const zapMsg = 'Olá ' + (licAtivaAjuste.nome || 'SD Vidros') + '! Recebi a proposta ' + numOs + ' (' + cliNome + '), mas gostaria de tirar algumas dúvidas e falar sobre ajustes antes de aprovar.';
       btnAjustar.href = 'https://wa.me/5585996119824?text=' + encodeURIComponent(zapMsg);
     }
 
@@ -913,7 +945,7 @@ Itaitinga - CE, ${hoje}
 ══════════════════════════════════════════════════════════════
 
 CONTRATADA:
-Razão Social.....: ${(obterLicencaAtiva().nome || 'SD Móveis Projetados')}
+Razão Social.....: ${(obterLicencaAtiva().nome || 'SD Vidros')}
 WhatsApp.........: (85) 99611-9824
 Instagram........: @sdvidros
 Cidade...........: Itaitinga - CE
@@ -973,7 +1005,7 @@ Itaitinga - CE, ${hoje}
 
 
 _________________________________________________
-CONTRATADA: ${(obterLicencaAtiva().nome || 'SD Móveis Projetados')}
+CONTRATADA: ${(obterLicencaAtiva().nome || 'SD Vidros')}
 WhatsApp: (85) 99611-9824
 
 

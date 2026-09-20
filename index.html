@@ -3959,7 +3959,7 @@ function abrirWhats(tel, msg) {
 }
 
 function gerarLinkAprovacaoWhats(numero, total, aprovado) {
-  const lic = (typeof obterLicencaAtiva === "function") ? obterLicencaAtiva() : { nome: "SD Móveis Projetados", telefone: "(85) 99611-9824" };
+  const lic = (typeof obterLicencaAtiva === "function") ? obterLicencaAtiva() : { id: "sdvidros", nome: "SD Vidros", telefone: "(85) 99611-9824" };
   const zapNumLimpo = String(lic.telefone || "85996119824").replace(/\D/g, "");
   const numDestinoZap = zapNumLimpo.startsWith("55") ? zapNumLimpo : ("55" + zapNumLimpo);
   const texto = aprovado
@@ -4013,7 +4013,7 @@ function gerarParametroD(d) {
 }
 
 function gerarMensagemWhatsAppAprovacao(o) {
-  const lic = (typeof obterLicencaAtiva === "function") ? obterLicencaAtiva() : { id: "sdmoveis", nome: "SD Móveis Projetados", telefone: "(85) 99611-9824" };
+  const lic = (typeof obterLicencaAtiva === "function") ? obterLicencaAtiva() : { id: "sdvidros", nome: "SD Vidros", telefone: "(85) 99611-9824" };
   const numOs = o.numero || "";
   const totalVal = o.total || "";
   const nomeCli = o.nome || "";
@@ -4032,7 +4032,7 @@ function gerarMensagemWhatsAppAprovacao(o) {
   const numDestinoZap = zapNumLimpo.startsWith("55") ? zapNumLimpo : ("55" + zapNumLimpo);
 
   const iconeEmpresa = (lic.tipoContrato === "moveis" || lic.id === "sdmoveis" || (lic.nome && lic.nome.toLowerCase().includes("moveis"))) ? "🛋️" : "🪟";
-  let m = `*${(lic.nome || "SD MÓVEIS PROJETADOS").toUpperCase()}* ${iconeEmpresa}\n`;
+  let m = `*${(lic.nome || "SD VIDROS").toUpperCase()}* ${iconeEmpresa}\n`;
   m += `Orçamento *${numOs}* em anexo (PDF).\n\n`;
   if (nomeCli) m += `👤 Cliente: *${nomeCli}*\n`;
   if (totalVal) m += `💰 Valor Total: *${totalVal}*\n\n`;
@@ -5663,7 +5663,7 @@ function enviarLinkAssinarComDedo(id) {
   const o = historico.find(x => String(x.id) === String(id));
   if (!o) return;
   const numLimpo = String(o.numero || "").replace(/\D/g, "");
-  const lic = (typeof obterLicencaAtiva === "function") ? obterLicencaAtiva() : { id: "sdmoveis", nome: "SD Móveis Projetados" };
+  const lic = (typeof obterLicencaAtiva === "function") ? obterLicencaAtiva() : { id: "sdvidros", nome: "SD Vidros" };
   const empId = lic.id || "sdmoveis";
   const urlAssinatura = `https://sdvidros.vercel.app/assinar.html?os=${numLimpo}&empresa=${encodeURIComponent(empId)}`;
   const msg = `*${lic.nome} - Assinatura Digital da O.S.*\n\nOlá, *${o.nome || "Cliente"}*!\nPara assinar sua Ordem de Serviço *#${o.numero}* desenhando com o dedo na tela do seu celular, toque no link seguro abaixo:\n\n👉 ${urlAssinatura}\n\nSua assinatura será registrada e anexada automaticamente!`;
@@ -7368,7 +7368,8 @@ function enviarParaAssinatura() {
     .then(async r => {
       const data = await r.json().catch(() => ({}));
       if (r.ok && data.id) {
-        return window.location.origin + '/assinar.html?id=' + data.id;
+        const idLicAtiva = (typeof obterLicencaAtiva === 'function' && obterLicencaAtiva()) ? (obterLicencaAtiva().id || 'sdvidros') : 'sdvidros';
+        return window.location.origin + '/assinar.html?id=' + data.id + '&empresa=' + encodeURIComponent(idLicAtiva);
       }
       return gerarLinkDireto();
     })
@@ -7788,7 +7789,8 @@ function renderListaContratos() {
 
   container.innerHTML = listaContratosCache.map(c => {
     const assinadoEmStr = c.assinado_em ? new Date(c.assinado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
-    const linkAssinatura = window.location.origin + '/assinar.html?id=' + c.id;
+    const idLicAtiva = (typeof obterLicencaAtiva === 'function' && obterLicencaAtiva()) ? (obterLicencaAtiva().id || 'sdvidros') : 'sdvidros';
+    const linkAssinatura = window.location.origin + '/assinar.html?id=' + c.id + '&empresa=' + encodeURIComponent(idLicAtiva);
 
     return `
       <div class="hist-card">
@@ -7855,7 +7857,8 @@ function copiarLinkAssinatura(link) {
 function reenviarLinkAssinatura(id) {
   const c = listaContratosCache.find(x => String(x.id) === String(id));
   if (!c || !c.cliente_tel) { alert('WhatsApp do cliente não cadastrado.'); return; }
-  const link = window.location.origin + '/assinar.html?id=' + c.id;
+  const idLicAtiva = (typeof obterLicencaAtiva === 'function' && obterLicencaAtiva()) ? (obterLicencaAtiva().id || 'sdvidros') : 'sdvidros';
+  const link = window.location.origin + '/assinar.html?id=' + c.id + '&empresa=' + encodeURIComponent(idLicAtiva);
   const msg = '*SD VIDROS — ASSINATURA DIGITAL* ✍️\n\n'
     + 'Olá' + (c.cliente_nome ? ', ' + c.cliente_nome : '') + '! Segue o link para revisar e assinar seu contrato ' + (c.numero_os || '') + ':\n\n'
     + link + '\n\n'
@@ -8308,7 +8311,7 @@ async function gerarPdfOrcamentoDoc(dados) {
     page.drawText('Chave Celular: (85) 99760-2237 (Itaú - Samuel David)', { x: MARGIN_X + 16, y: pixBoxY + 9, size: 6.8, font: fontRegular, color: DARK });
   } else {
     const pixChave = lic.pix || lic.cnpj || lic.telefone || '85996119824';
-    const titularPix = lic.nome || 'SD Móveis Projetados';
+    const titularPix = lic.nome || 'SD Vidros';
     page.drawText(sanitizePdf(`Chave PIX: ${pixChave} (${titularPix})`), { x: MARGIN_X + 16, y: pixBoxY + 20, size: 6.8, font: fontBold, color: DARK });
     page.drawText(sanitizePdf(`WhatsApp / Contato: ${lic.telefone || '(85) 99611-9824'}`), { x: MARGIN_X + 16, y: pixBoxY + 9, size: 6.8, font: fontRegular, color: DARK });
   }
