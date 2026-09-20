@@ -6232,6 +6232,29 @@ function mudarAba(tab) {
       return false;
     }
 
+    function ehFimDeSemanaPonto(dataStr) {
+      if (!dataStr) return false;
+      const partes = String(dataStr).trim().split(/[-/]/);
+      let d, m, y;
+      if (partes.length === 3) {
+        if (partes[0].length === 4) {
+          y = parseInt(partes[0], 10);
+          m = parseInt(partes[1], 10) - 1;
+          d = parseInt(partes[2], 10);
+        } else {
+          d = parseInt(partes[0], 10);
+          m = parseInt(partes[1], 10) - 1;
+          y = parseInt(partes[2], 10);
+        }
+        const dt = new Date(y, m, d);
+        if (!isNaN(dt.getTime())) {
+          const day = dt.getDay(); // 0 = Domingo, 6 = Sábado
+          return day === 0 || day === 6;
+        }
+      }
+      return false;
+    }
+
     function recalcularHorasPontoCliente(p, colab) {
       if (!p) return;
       if (!colab) colab = obterFuncionarioAtivoPonto();
@@ -6279,61 +6302,65 @@ function mudarAba(tab) {
         vHora = 25.50;
       }
 
+      // Sábado e Domingo NÃO entram na hora negativa. Contabiliza unicamente o horário que trabalhar.
+      const ehFds = ehFimDeSemanaPonto(p.data);
       let minutosNegativos = 0;
-
       let atrasoEntradaMin = 0;
-      let mEntradaEfetivo = mEntrada;
-      if (mEntrada !== null) {
-        if (mEntrada > expEnt) {
-          const diff = mEntrada - expEnt;
-          if (diff <= 5) {
-            mEntradaEfetivo = expEnt;
-          } else {
-            atrasoEntradaMin = diff;
-            minutosNegativos += diff;
-          }
-        }
-      }
-
       let antecipadoAlmocoMin = 0;
-      let mAlmocoSaiEfetivo = mAlmocoSai;
-      if (mAlmocoSai !== null) {
-        if (mAlmocoSai < expAlmSai) {
-          const diff = expAlmSai - mAlmocoSai;
-          if (diff <= 5) {
-            mAlmocoSaiEfetivo = expAlmSai;
-          } else {
-            antecipadoAlmocoMin = diff;
-            minutosNegativos += diff;
-          }
-        }
-      }
-
       let atrasoVoltaAlmocoMin = 0;
+      let antecipadoSaidaMin = 0;
+      let mEntradaEfetivo = mEntrada;
+      let mAlmocoSaiEfetivo = mAlmocoSai;
       let mAlmocoVoltaEfetivo = mAlmocoVolta;
-      if (mAlmocoVolta !== null) {
-        const targetVolta = mAlmocoSai !== null ? Math.max(expAlmVol, mAlmocoSai + 60) : expAlmVol;
-        if (mAlmocoVolta > targetVolta) {
-          const diff = mAlmocoVolta - targetVolta;
-          if (diff <= 5) {
-            mAlmocoVoltaEfetivo = targetVolta;
-          } else {
-            atrasoVoltaAlmocoMin = diff;
-            minutosNegativos += diff;
+      let mSaidaEfetivo = mSaida;
+
+      if (!ehFds) {
+        if (mEntrada !== null) {
+          if (mEntrada > expEnt) {
+            const diff = mEntrada - expEnt;
+            if (diff <= 5) {
+              mEntradaEfetivo = expEnt;
+            } else {
+              atrasoEntradaMin = diff;
+              minutosNegativos += diff;
+            }
           }
         }
-      }
 
-      let antecipadoSaidaMin = 0;
-      let mSaidaEfetivo = mSaida;
-      if (mSaida !== null) {
-        if (mSaida < expSai) {
-          const diff = expSai - mSaida;
-          if (diff <= 5) {
-            mSaidaEfetivo = expSai;
-          } else {
-            antecipadoSaidaMin = diff;
-            minutosNegativos += diff;
+        if (mAlmocoSai !== null) {
+          if (mAlmocoSai < expAlmSai) {
+            const diff = expAlmSai - mAlmocoSai;
+            if (diff <= 5) {
+              mAlmocoSaiEfetivo = expAlmSai;
+            } else {
+              antecipadoAlmocoMin = diff;
+              minutosNegativos += diff;
+            }
+          }
+        }
+
+        if (mAlmocoVolta !== null) {
+          const targetVolta = mAlmocoSai !== null ? Math.max(expAlmVol, mAlmocoSai + 60) : expAlmVol;
+          if (mAlmocoVolta > targetVolta) {
+            const diff = mAlmocoVolta - targetVolta;
+            if (diff <= 5) {
+              mAlmocoVoltaEfetivo = targetVolta;
+            } else {
+              atrasoVoltaAlmocoMin = diff;
+              minutosNegativos += diff;
+            }
+          }
+        }
+
+        if (mSaida !== null) {
+          if (mSaida < expSai) {
+            const diff = expSai - mSaida;
+            if (diff <= 5) {
+              mSaidaEfetivo = expSai;
+            } else {
+              antecipadoSaidaMin = diff;
+              minutosNegativos += diff;
+            }
           }
         }
       }
@@ -6422,9 +6449,10 @@ function mudarAba(tab) {
       if (p) {
         recalcularHorasPontoCliente(p, colab);
         msgEl.style.display = 'block';
+        const ehFdsCli = ehFimDeSemanaPonto(p.data);
         const txtHNegCli = (p.minutosNegativos && p.minutosNegativos > 0)
           ? `<strong style="color:#f87171;">⏳ H. Negativa: ${p.horaNegativa} (${p.descontoNegativoFormatado})</strong>`
-          : `<span style="color:#94a3b8;">⏳ H. Negativa: 00h 00m</span>`;
+          : (ehFdsCli ? `<span style="color:#38bdf8;font-weight:700;">🌴 Fim de Semana (Sem H. Negativa)</span>` : `<span style="color:#94a3b8;">⏳ H. Negativa: 00h 00m</span>`);
         msgEl.innerHTML = `<span style="color:var(--gold-light);">Status hoje (${p.data}): Ent: ${p.entrada1||'--'} · Almoço: ${p.saidaAlmoco||'--'} / ${p.voltaAlmoco||'--'} · Saída: ${p.saidaFinal||'--'} | <strong>Tempo: ${p.tempoTrabalhado||'00h 00m'}</strong> · ${txtHNegCli} · <strong style="color:#4ade80;">Ganho: ${p.valorSalario||'R$ 0,00'}</strong></span>`;
 
         const totEl = document.getElementById('cliente-ponto-total-horas');
@@ -8532,15 +8560,16 @@ function mudarAba(tab) {
           ? `<span class="ponto-hora-sai">${p.saidaFinal}</span>`
           : (p.emAndamento ? `<span style="color:#4ade80;font-size:11px;font-weight:800;background:rgba(34,197,94,0.12);padding:2px 6px;border-radius:6px;border:1px solid rgba(34,197,94,0.3);">🟢 Em Aberto</span>` : `<span class="ponto-hora-null">--:--</span>`);
 
-        const badgeEntCli = (p.entrada1 && p.atrasoEntradaMin > 0)
+        const ehFdsP = ehFimDeSemanaPonto(p.data);
+        const badgeEntCli = (!ehFdsP && p.entrada1 && p.atrasoEntradaMin > 0)
           ? `<div style="font-size:10px;color:#f87171;font-weight:800;background:rgba(239,68,68,0.22);padding:1px 5px;border-radius:4px;margin-top:2px;display:inline-block;border:1px solid rgba(239,68,68,0.4);">-${p.atrasoEntradaMin}m (-R$ ${(p.atrasoEntradaDesconto||0).toFixed(2).replace('.', ',')})</div>`
-          : (p.entrada1 === '08:05' || (p.entrada1 && p.entrada1 > '08:00' && p.entrada1 <= '08:05') ? `<div style="font-size:9.5px;color:#34d399;font-weight:700;margin-top:2px;">Tolerância 5m ✓</div>` : '');
+          : (!ehFdsP && (p.entrada1 === '08:05' || (p.entrada1 && p.entrada1 > '08:00' && p.entrada1 <= '08:05')) ? `<div style="font-size:9.5px;color:#34d399;font-weight:700;margin-top:2px;">Tolerância 5m ✓</div>` : '');
 
-        const badgeAlmSaiCli = (p.saidaAlmoco && p.antecipadoAlmocoMin > 0)
+        const badgeAlmSaiCli = (!ehFdsP && p.saidaAlmoco && p.antecipadoAlmocoMin > 0)
           ? `<div style="font-size:10px;color:#f87171;font-weight:800;background:rgba(239,68,68,0.22);padding:1px 5px;border-radius:4px;margin-top:2px;display:inline-block;border:1px solid rgba(239,68,68,0.4);">-${p.antecipadoAlmocoMin}m (-R$ ${(p.antecipadoAlmocoDesconto||0).toFixed(2).replace('.', ',')})</div>`
           : '';
 
-        const badgeAlmVolCli = (p.voltaAlmoco && p.atrasoVoltaAlmocoMin > 0)
+        const badgeAlmVolCli = (!ehFdsP && p.voltaAlmoco && p.atrasoVoltaAlmocoMin > 0)
           ? `<div style="font-size:10px;color:#f87171;font-weight:800;background:rgba(239,68,68,0.22);padding:1px 5px;border-radius:4px;margin-top:2px;display:inline-block;border:1px solid rgba(239,68,68,0.4);">-${p.atrasoVoltaAlmocoMin}m (-R$ ${(p.atrasoVoltaAlmocoDesconto||0).toFixed(2).replace('.', ',')})</div>`
           : '';
 
@@ -8562,7 +8591,7 @@ function mudarAba(tab) {
           <td>
             ${(p.minutosNegativos && p.minutosNegativos > 0) 
               ? `<span class="ponto-badge-negativa" style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:11.5px;font-weight:800;background:rgba(239,68,68,0.18);color:#f87171;border:1px solid rgba(239,68,68,0.35);" title="Atraso além da tolerância de 5min">${p.horaNegativa}<br><span style="font-size:10px;color:#fca5a5;">${p.descontoNegativoFormatado}</span></span>` 
-              : `<span style="font-size:11.5px;color:#94a3b8;font-weight:600;">00h 00m</span>`}
+              : (ehFdsP ? `<span style="font-size:11.5px;color:#38bdf8;font-weight:700;">00h 00m<br><small style="font-size:9.5px;color:#7dd3fc;">Fim de Semana</small></span>` : `<span style="font-size:11.5px;color:#94a3b8;font-weight:600;">00h 00m</span>`)}
           </td>
           <td>
             <div class="ponto-salario-val" style="font-weight:900;color:#4ade80;font-size:14px;letter-spacing:0.3px;white-space:nowrap;">${p.valorSalario || 'R$ 0,00'}</div>
@@ -8579,7 +8608,7 @@ function mudarAba(tab) {
           <td colspan="10" style="padding:6px 12px;font-size:11.5px;color:var(--text2);text-align:left;">
             ${(p.minutosNegativos && p.minutosNegativos > 0)
               ? `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,0.2);color:#f87171;padding:2px 8px;border-radius:6px;font-weight:800;border:1px solid rgba(239,68,68,0.4);margin-right:8px;">⏳ HORA NEGATIVA: ${p.horaNegativa} ${p.descontoNegativoFormatado}</span>`
-              : `<span style="color:#94a3b8;margin-right:8px;">⏳ Hora Negativa: 00h 00m</span>`}
+              : (ehFdsP ? `<span style="color:#38bdf8;margin-right:8px;font-weight:700;">🌴 Fim de Semana (Sem H. Negativa)</span>` : `<span style="color:#94a3b8;margin-right:8px;">⏳ Hora Negativa: 00h 00m</span>`)}
             <span style="font-weight:700;color:#4ade80;">Ganho Líquido: ${p.valorSalario || 'R$ 0,00'}</span>
           </td>
         </tr>`;

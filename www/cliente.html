@@ -5890,6 +5890,29 @@
       return false;
     }
 
+    function ehFimDeSemanaPonto(dataStr) {
+      if (!dataStr) return false;
+      const partes = String(dataStr).trim().split(/[-/]/);
+      let d, m, y;
+      if (partes.length === 3) {
+        if (partes[0].length === 4) {
+          y = parseInt(partes[0], 10);
+          m = parseInt(partes[1], 10) - 1;
+          d = parseInt(partes[2], 10);
+        } else {
+          d = parseInt(partes[0], 10);
+          m = parseInt(partes[1], 10) - 1;
+          y = parseInt(partes[2], 10);
+        }
+        const dt = new Date(y, m, d);
+        if (!isNaN(dt.getTime())) {
+          const day = dt.getDay();
+          return day === 0 || day === 6;
+        }
+      }
+      return false;
+    }
+
     function recalcularHorasPontoCliente(p, colab) {
       if (!p) return;
       if (!colab) colab = obterFuncionarioAtivoPonto();
