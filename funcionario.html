@@ -2671,6 +2671,23 @@
             </div>
 
             <!-- Grade de Botões de Batida Oficial -->
+
+            <!-- Box Superior: Horário de Trabalho e Opção de Ajuste -->
+            <div id="cliente-ponto-info-horario-box" style="margin:10px 0 14px;background:rgba(212,175,55,0.07);border:1px solid rgba(212,175,55,0.3);border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:18px;">⏰</span>
+                <div>
+                  <div style="font-size:10px;color:var(--gold-light);text-transform:uppercase;font-weight:800;letter-spacing:0.5px;">Seu Horário de Trabalho</div>
+                  <div id="cliente-ponto-horario-texto" style="font-size:13px;font-weight:800;color:#fff;margin-top:2px;">
+                    Entrada: 08:00 · Almoço: 12:00 às 13:00 · Saída: 18:00 (44h/sem)
+                  </div>
+                </div>
+              </div>
+              <button type="button" onclick="abrirModalEditarHorarioCliente()" style="background:rgba(212,175,55,0.18);border:1px solid rgba(212,175,55,0.45);color:#fef08a;font-size:11.5px;font-weight:800;padding:6px 12px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                ✏️ Editar Horário
+              </button>
+            </div>
+
             <div class="ponto-grid-actions">
               <button type="button" id="btn-ponto-ent1" class="ponto-btn-action ponto-act-entrada" onclick="baterPontoNoCliente('entrada1')">
                 <span class="ponto-act-icon">➔]</span>
@@ -2807,6 +2824,53 @@
         </div> <!-- FIM #conteudo-ponto-funcionario -->
 
         
+
+<!-- ══ MODAL EDITAR HORÁRIO CLIENTE / FUNCIONÁRIO ══ -->
+<div id="modal-cliente-editar-horario" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);z-index:999999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:linear-gradient(145deg,#111322,#1a1d33);border:1.5px solid rgba(250,204,21,0.4);border-radius:18px;max-width:440px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.85);padding:22px;color:#fff;box-sizing:border-box;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:22px;">⏰</span>
+        <div style="font-size:16px;font-weight:900;color:#facc15;">Editar Horário de Trabalho</div>
+      </div>
+      <button type="button" onclick="fecharModalEditarHorarioCliente()" style="background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">✕</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div>
+        <label style="display:block;font-size:11px;font-weight:800;color:#34d399;text-transform:uppercase;margin-bottom:4px;">1ª Entrada</label>
+        <input type="time" id="cl-edit-ent1" style="width:100%;box-sizing:border-box;padding:9px;background:#090a14;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:13px;outline:none;" />
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;font-weight:800;color:#f59e0b;text-transform:uppercase;margin-bottom:4px;">Saída Almoço</label>
+        <input type="time" id="cl-edit-almsai" style="width:100%;box-sizing:border-box;padding:9px;background:#090a14;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:13px;outline:none;" />
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;font-weight:800;color:#38bdf8;text-transform:uppercase;margin-bottom:4px;">Volta Almoço</label>
+        <input type="time" id="cl-edit-almvol" style="width:100%;box-sizing:border-box;padding:9px;background:#090a14;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:13px;outline:none;" />
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;font-weight:800;color:#ef4444;text-transform:uppercase;margin-bottom:4px;">Saída Final</label>
+        <input type="time" id="cl-edit-sai2" style="width:100%;box-sizing:border-box;padding:9px;background:#090a14;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:13px;outline:none;" />
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label style="display:block;font-size:11px;font-weight:800;color:var(--gold-light);text-transform:uppercase;margin-bottom:4px;">Jornada Semanal</label>
+      <input type="text" id="cl-edit-jornada" placeholder="Ex: 44h/sem" style="width:100%;box-sizing:border-box;padding:9px;background:#090a14;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:13px;outline:none;" />
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button type="button" onclick="fecharModalEditarHorarioCliente()" style="flex:1;padding:10px;background:rgba(255,255,255,0.08);border:none;border-radius:8px;color:#fff;font-weight:700;font-size:12px;cursor:pointer;">
+        Cancelar
+      </button>
+      <button type="button" onclick="salvarHorarioTrabalhoCliente()" style="flex:1.5;padding:11px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:8px;color:#000;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(245,158,11,0.35);">
+        💾 Salvar Horário
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MODAL CLIENTE JUSTIFICAR SAÍDA FINAL ANTECIPADA ══ -->
 <div id="modal-cliente-saida-final" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);z-index:999999;align-items:center;justify-content:center;padding:16px;">
   <div style="background:linear-gradient(145deg,#111322,#1a1d33);border:1.5px solid rgba(250,204,21,0.4);border-radius:18px;max-width:440px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.85);padding:22px;color:#fff;box-sizing:border-box;">
@@ -6499,9 +6563,21 @@ function mudarAba(tab) {
       const msgEl = document.getElementById('cliente-ponto-msg');
       if (!msgEl) return;
 
+      // Atualiza texto do horário de trabalho do funcionário
+      const hTxt = document.getElementById('cliente-ponto-horario-texto');
+      if (hTxt) {
+        const ent = colab.horarioEntrada || '08:00';
+        const almS = colab.horarioAlmocoSai || '12:00';
+        const almV = colab.horarioAlmocoVolta || '13:00';
+        const sai = colab.horarioSaida || '18:00';
+        const jor = colab.jornada || '44h/sem';
+        hTxt.textContent = `Entrada: ${ent} · Almoço: ${almS} às ${almV} · Saída: ${sai} (${jor})`;
+      }
+
       const dataHoje = getHojeFormatadoPonto();
       const pontos = carregarPontosDoStorage();
       let p = pontos.find(x => (x.colaboradorId === colab.id || (x.colaboradorNome && x.colaboradorNome.toLowerCase() === colab.nome.toLowerCase())) && ehDataHojePonto(x.data));
+      atualizarTravaHoraExtraCliente(p);
 
       if (p) {
         recalcularHorasPontoCliente(p, colab);
@@ -6731,6 +6807,82 @@ function mudarAba(tab) {
     }
 
 
+
+    function abrirModalEditarHorarioCliente() {
+      const colab = obterFuncionarioAtivoPonto();
+      if (!colab) return;
+      document.getElementById('cl-edit-ent1').value = colab.horarioEntrada || '08:00';
+      document.getElementById('cl-edit-almsai').value = colab.horarioAlmocoSai || '12:00';
+      document.getElementById('cl-edit-almvol').value = colab.horarioAlmocoVolta || '13:00';
+      document.getElementById('cl-edit-sai2').value = colab.horarioSaida || '18:00';
+      document.getElementById('cl-edit-jornada').value = colab.jornada || '44h/sem';
+      const m = document.getElementById('modal-cliente-editar-horario');
+      if (m) m.style.display = 'flex';
+    }
+
+    function fecharModalEditarHorarioCliente() {
+      const m = document.getElementById('modal-cliente-editar-horario');
+      if (m) m.style.display = 'none';
+    }
+
+    function salvarHorarioTrabalhoCliente() {
+      const colab = obterFuncionarioAtivoPonto();
+      if (!colab) return;
+
+      colab.horarioEntrada = document.getElementById('cl-edit-ent1').value || '08:00';
+      colab.horarioAlmocoSai = document.getElementById('cl-edit-almsai').value || '12:00';
+      colab.horarioAlmocoVolta = document.getElementById('cl-edit-almvol').value || '13:00';
+      colab.horarioSaida = document.getElementById('cl-edit-sai2').value || '18:00';
+      colab.jornada = document.getElementById('cl-edit-jornada').value.trim() || '44h/sem';
+
+      let funcionarios = carregarFuncionariosDoStorage();
+      const idx = funcionarios.findIndex(f => f.id === colab.id);
+      if (idx !== -1) funcionarios[idx] = colab;
+      localStorage.setItem('sdv_funcionarios', JSON.stringify(funcionarios));
+
+      fecharModalEditarHorarioCliente();
+      atualizarStatusBatidaPontoCliente();
+      mostrarToastPontoCliente('✅ Horário de trabalho atualizado com sucesso!', true);
+    }
+
+    function atualizarTravaHoraExtraCliente(reg) {
+      const btnHeIni = document.getElementById('btn-ponto-he-ini');
+      const btnHeFim = document.getElementById('btn-ponto-he-fim');
+      if (!btnHeIni || !btnHeFim) return;
+
+      const temSaida = !!(reg && reg.saidaFinal);
+      const temHeIni = !!(reg && reg.horaExtraInicial);
+
+      if (!temSaida) {
+        btnHeIni.style.opacity = '0.38';
+        btnHeIni.style.filter = 'grayscale(1)';
+        btnHeIni.style.cursor = 'not-allowed';
+        btnHeIni.title = '🔒 Hora Extra Travada: Só destrava após registrar a Saída Final.';
+
+        btnHeFim.style.opacity = '0.38';
+        btnHeFim.style.filter = 'grayscale(1)';
+        btnHeFim.style.cursor = 'not-allowed';
+        btnHeFim.title = '🔒 Hora Extra Travada: Só destrava após registrar a Saída Final.';
+      } else {
+        btnHeIni.style.opacity = '1';
+        btnHeIni.style.filter = 'none';
+        btnHeIni.style.cursor = 'pointer';
+        btnHeIni.title = 'Registrar início de Hora Extra';
+
+        if (temHeIni) {
+          btnHeFim.style.opacity = '1';
+          btnHeFim.style.filter = 'none';
+          btnHeFim.style.cursor = 'pointer';
+          btnHeFim.title = 'Registrar término de Hora Extra';
+        } else {
+          btnHeFim.style.opacity = '0.45';
+          btnHeFim.style.filter = 'grayscale(1)';
+          btnHeFim.style.cursor = 'not-allowed';
+          btnHeFim.title = 'Inicie a Hora Extra primeiro.';
+        }
+      }
+    }
+
     let _saidaFinalCliPendente = null;
 
     function abrirModalSaidaFinalCliente(horaStr) {
@@ -6763,6 +6915,19 @@ function mudarAba(tab) {
     }
 
     function baterPontoNoCliente(tipo) {
+      const dataHoje = getHojeFormatadoPonto();
+      const pontos = carregarPontosDoStorage();
+      const colab = obterFuncionarioAtivoPonto();
+      const regHoje = pontos.find(x => (x.colaboradorId === colab.id || (x.colaboradorNome && x.colaboradorNome.toLowerCase() === colab.nome.toLowerCase())) && x.data === dataHoje);
+
+      if ((tipo === 'horaExtraInicial' || tipo === 'horaExtraFinal') && (!regHoje || !regHoje.saidaFinal)) {
+        mostrarToastPontoCliente('🔒 Hora Extra travada! É necessário registrar a Saída Final primeiro.', false);
+        return;
+      }
+      if (tipo === 'horaExtraFinal' && (!regHoje || !regHoje.horaExtraInicial)) {
+        mostrarToastPontoCliente('⚠️ Inicie a Hora Extra primeiro (H. Extra Inicial).', false);
+        return;
+      }
       if (tipo === 'saidaFinal') {
         const agora = new Date();
         const hh = String(agora.getHours()).padStart(2, '0');
