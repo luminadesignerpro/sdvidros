@@ -7534,22 +7534,91 @@ function mudarAba(tab) {
     }
 
     function abrirSeletorTrocaOs() {
-      const ordens = carregarOrdensDoStorage();
-      if (!ordens.length) {
-        alert('Nenhuma Ordem de Serviço cadastrada ainda.');
+      const m = document.getElementById('modal-seletor-ordens');
+      if (!m) return;
+      m.style.display = 'flex';
+      const inp = document.getElementById('input-busca-seletor-os');
+      if (inp) {
+        inp.value = '';
+        setTimeout(() => inp.focus(), 100);
+      }
+      renderizarListaModalOrdens('');
+    }
+
+    function fecharModalSeletorOrdens() {
+      const m = document.getElementById('modal-seletor-ordens');
+      if (m) m.style.display = 'none';
+    }
+
+    function filtrarModalOrdens(termo) {
+      renderizarListaModalOrdens(termo);
+    }
+
+    function renderizarListaModalOrdens(filtro) {
+      const container = document.getElementById('lista-seletor-ordens-container');
+      if (!container) return;
+
+      const ordens = (typeof carregarOrdensDoStorage === 'function') ? carregarOrdensDoStorage() : [];
+      const fLimpo = (filtro || '').trim().toLowerCase();
+
+      let filtradas = ordens;
+      if (fLimpo) {
+        filtradas = ordens.filter(o => 
+          String(o.numero || '').toLowerCase().includes(fLimpo) ||
+          String(o.nome || '').toLowerCase().includes(fLimpo) ||
+          String(o.servico || o.descricao || '').toLowerCase().includes(fLimpo)
+        );
+      }
+
+      if (!filtradas.length) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:30px 10px;color:#94a3b8;">
+            <div style="font-size:32px;margin-bottom:8px;">🔍</div>
+            <div style="font-size:14px;font-weight:700;color:#fff;">Nenhuma Ordem de Serviço encontrada</div>
+            <div style="font-size:12px;margin-top:4px;">Nenhuma O.S. corresponde ao termo pesquisado.</div>
+          </div>
+        `;
         return;
       }
-      const promptTxt = ordens.map((o, i) => `${i+1}. ${o.numero} - ${o.nome || 'Cliente'}`).join('\n');
-      const sel = prompt('Digite o número da O.S. que deseja visualizar (ex: #0001, #0002):\n\n' + promptTxt, clienteSessao ? clienteSessao.os : '#0001');
-      if (sel) {
-        const limpo = sel.trim().toLowerCase();
-        const encontrada = ordens.find(o => String(o.numero).toLowerCase().includes(limpo));
-        if (encontrada) {
-          selecionarOsNoPortal(encontrada.numero, encontrada.nome || 'Cliente');
-        } else {
-          alert('Ordem não encontrada.');
-        }
-      }
+
+      const osAtual = clienteSessao ? String(clienteSessao.os).replace(/\D/g, '') : '';
+
+      container.innerHTML = filtradas.map(o => {
+        const numOs = o.numero || '#0001';
+        const numLimpo = String(numOs).replace(/\D/g, '');
+        const isAtiva = (osAtual && osAtual === numLimpo);
+        const nome = o.nome || 'Cliente';
+        const serv = o.servico || o.descricao || 'Projeto / Instalação sob medida';
+        const st = o.status || 'Em Andamento';
+        const val = o.valorTotal ? (typeof o.valorTotal === 'number' ? 'R$ ' + o.valorTotal.toFixed(2).replace('.', ',') : o.valorTotal) : '';
+
+        return `
+          <div class="card-ordem-clicavel" onclick="selecionarOsNoPortal('${numOs}', '${(nome||'').replace(/'/g, "\\'")}'); fecharModalSeletorOrdens();" style="background:${isAtiva ? 'linear-gradient(135deg,rgba(212,175,55,0.22),rgba(20,20,35,0.95))' : 'rgba(255,255,255,0.035)'};border:${isAtiva ? '1.5px solid var(--gold)' : '1px solid rgba(255,255,255,0.1)'};border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;transition:all 0.2s ease;box-shadow:0 4px 14px rgba(0,0,0,0.35);">
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                <span style="font-size:12px;font-weight:900;color:#facc15;background:rgba(250,204,21,0.15);padding:3px 8px;border-radius:6px;border:1px solid rgba(250,204,21,0.3);letter-spacing:0.5px;">
+                  ${numOs}
+                </span>
+                <strong style="font-size:14px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  ${nome}
+                </strong>
+                ${isAtiva ? '<span style="font-size:10px;background:#10b981;color:#000;font-weight:900;padding:2px 6px;border-radius:4px;">ABERTA AGORA</span>' : ''}
+              </div>
+              <div style="font-size:11.5px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                ${serv} ${val ? `· <span style="color:#4ade80;font-weight:700;">${val}</span>` : ''}
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+              <span style="font-size:10.5px;font-weight:800;color:#38bdf8;background:rgba(56,189,248,0.15);padding:3px 8px;border-radius:999px;border:1px solid rgba(56,189,248,0.3);white-space:nowrap;">
+                ${st}
+              </span>
+              <button type="button" style="background:${isAtiva ? 'linear-gradient(135deg,#10b981,#059669)' : 'linear-gradient(135deg,#eab308,#ca8a04)'};color:#000;border:none;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;gap:4px;margin-top:2px;">
+                ${isAtiva ? '✓ Aberta' : 'Abrir ➔'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     // ══════════════════════════════════════════════
@@ -8654,7 +8723,43 @@ function mudarAba(tab) {
               Contratante (Autorizado Digitalmente)
             </div>
           </div>
-        </body>
+        
+<!-- ══ MODAL SELETOR DE ORDENS DE SERVIÇO (CLICAR E ABRIR) ══ -->
+<div id="modal-seletor-ordens" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);z-index:9999999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:linear-gradient(145deg,#0e111d,#161b2c);border:1.5px solid rgba(212,175,55,0.4);border-radius:20px;max-width:480px;width:100%;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 25px 60px rgba(0,0,0,0.9);overflow:hidden;box-sizing:border-box;">
+    
+    <!-- Header do Modal -->
+    <div style="padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.02);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:22px;">📋</span>
+        <div>
+          <div style="font-size:16px;font-weight:900;color:#facc15;">Ordens de Serviço</div>
+          <div style="font-size:11px;color:#94a3b8;">Toque na ordem para abrir e acompanhar</div>
+        </div>
+      </div>
+      <button type="button" onclick="fecharModalSeletorOrdens()" style="background:rgba(255,255,255,0.08);border:none;color:#94a3b8;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+
+    <!-- Campo de Busca Rápida -->
+    <div style="padding:12px 20px;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.2);">
+      <input type="text" id="input-busca-seletor-os" placeholder="🔍 Buscar por cliente ou número (ex: 0003)..." oninput="filtrarModalOrdens(this.value)" style="width:100%;box-sizing:border-box;padding:10px 14px;background:#090a14;border:1px solid rgba(212,175,55,0.25);border-radius:10px;color:#fff;font-size:13px;outline:none;" />
+    </div>
+
+    <!-- Lista de Ordens Clicáveis (Scroll) -->
+    <div id="lista-seletor-ordens-container" style="padding:14px 20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:10px;">
+      <!-- Injetado dinamicamente -->
+    </div>
+
+    <!-- Footer -->
+    <div style="padding:12px 20px;border-top:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);display:flex;justify-content:flex-end;">
+      <button type="button" onclick="fecharModalSeletorOrdens()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:8px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+        Fechar
+      </button>
+    </div>
+  </div>
+</div>
+
+</body>
         </html>
       `);
       janela.document.close();
