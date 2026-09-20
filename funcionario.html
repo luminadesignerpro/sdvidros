@@ -6228,6 +6228,11 @@ function mudarAba(tab) {
         return parts[0] * 60 + parts[1];
       };
 
+      const expEnt = parseMin(colab?.horarioEntrada || '08:00') || 480;
+      const expAlmSai = parseMin(colab?.horarioAlmocoSai || '12:00') || 720;
+      const expAlmVol = parseMin(colab?.horarioAlmocoVolta || '13:00') || 780;
+      const expSai = parseMin(colab?.horarioSaida || '18:00') || 1080;
+
       const mEntrada = parseMin(p.entrada1);
       const mAlmocoSai = parseMin(p.saidaAlmoco);
       const mAlmocoVolta = parseMin(p.voltaAlmoco);
@@ -6235,40 +6240,93 @@ function mudarAba(tab) {
       const mHEIni = parseMin(p.horaExtraInicial);
       const mHEFim = parseMin(p.horaExtraFinal);
 
-      let totalMin = 0;
       const hoje = ehDataHojePonto(p.data);
       const agora = new Date();
       const minAgora = agora.getHours() * 60 + agora.getMinutes();
 
       let emAndamento = false;
 
-      // 1. Primeiro Turno (Manhã)
+      // Tolerância de 5 minutos e cálculo de horas negativas
+      let minutosNegativos = 0;
+
+      let mEntradaEfetivo = mEntrada;
       if (mEntrada !== null) {
-        if (mAlmocoSai !== null && mAlmocoSai >= mEntrada) {
-          totalMin += (mAlmocoSai - mEntrada);
-        } else if (mSaida !== null && mAlmocoSai === null && mSaida >= mEntrada) {
-          totalMin += (mSaida - mEntrada);
-        } else if (mAlmocoSai === null && mSaida === null && hoje) {
-          if (minAgora >= mEntrada) {
-            totalMin += (minAgora - mEntrada);
-            emAndamento = true;
+        if (mEntrada > expEnt) {
+          const diff = mEntrada - expEnt;
+          if (diff <= 5) {
+            mEntradaEfetivo = expEnt; // Tolerância concedida
+          } else {
+            minutosNegativos += diff; // Desconto integral dos minutos
           }
         }
       }
 
-      // 2. Segundo Turno (Tarde)
+      let mAlmocoSaiEfetivo = mAlmocoSai;
+      if (mAlmocoSai !== null) {
+        if (mAlmocoSai < expAlmSai) {
+          const diff = expAlmSai - mAlmocoSai;
+          if (diff <= 5) {
+            mAlmocoSaiEfetivo = expAlmSai;
+          } else {
+            minutosNegativos += diff;
+          }
+        }
+      }
+
+      let mAlmocoVoltaEfetivo = mAlmocoVolta;
       if (mAlmocoVolta !== null) {
-        if (mSaida !== null && mSaida >= mAlmocoVolta) {
-          totalMin += (mSaida - mAlmocoVolta);
-        } else if (mSaida === null && hoje) {
-          if (minAgora >= mAlmocoVolta) {
-            totalMin += (minAgora - mAlmocoVolta);
+        const targetVolta = mAlmocoSai !== null ? Math.max(expAlmVol, mAlmocoSai + 60) : expAlmVol;
+        if (mAlmocoVolta > targetVolta) {
+          const diff = mAlmocoVolta - targetVolta;
+          if (diff <= 5) {
+            mAlmocoVoltaEfetivo = targetVolta;
+          } else {
+            minutosNegativos += diff;
+          }
+        }
+      }
+
+      let mSaidaEfetivo = mSaida;
+      if (mSaida !== null) {
+        if (mSaida < expSai) {
+          const diff = expSai - mSaida;
+          if (diff <= 5) {
+            mSaidaEfetivo = expSai;
+          } else {
+            minutosNegativos += diff;
+          }
+        }
+      }
+
+      let totalMin = 0;
+
+      // 1. Manhã
+      if (mEntradaEfetivo !== null) {
+        if (mAlmocoSaiEfetivo !== null && mAlmocoSaiEfetivo >= mEntradaEfetivo) {
+          totalMin += (mAlmocoSaiEfetivo - mEntradaEfetivo);
+        } else if (mSaidaEfetivo !== null && mAlmocoSaiEfetivo === null && mSaidaEfetivo >= mEntradaEfetivo) {
+          totalMin += (mSaidaEfetivo - mEntradaEfetivo);
+        } else if (mAlmocoSaiEfetivo === null && mSaidaEfetivo === null && hoje) {
+          if (minAgora >= mEntradaEfetivo) {
+            totalMin += (minAgora - mEntradaEfetivo);
             emAndamento = true;
           }
         }
       }
 
-      // 3. Horas Extras
+      // 2. Tarde
+      if (mAlmocoVoltaEfetivo !== null) {
+        if (mSaidaEfetivo !== null && mSaidaEfetivo >= mAlmocoVoltaEfetivo) {
+          totalMin += (mSaidaEfetivo - mAlmocoVoltaEfetivo);
+        } else if (mSaidaEfetivo === null && hoje) {
+          if (minAgora >= mAlmocoVoltaEfetivo) {
+            totalMin += (minAgora - mAlmocoVoltaEfetivo);
+            emAndamento = true;
+          }
+        }
+      }
+
+      // 3. Extras
       if (mHEIni !== null) {
         if (mHEFim !== null && mHEFim >= mHEIni) {
           totalMin += (mHEFim - mHEIni);
@@ -6297,11 +6355,18 @@ function mudarAba(tab) {
       } else if (p.valorHora && Number(p.valorHora) > 0) {
         vHora = Number(p.valorHora);
       } else {
-        vHora = 25.00; // Padrão líder
+        vHora = 25.50;
       }
 
       const vMinuto = vHora > 0 ? (vHora / 60) : 0;
       const valorDia = (totalMin / 60) * vHora;
+
+      p.minutosNegativos = minutosNegativos;
+      const hNeg = Math.floor(minutosNegativos / 60);
+      const mNeg = minutosNegativos % 60;
+      p.horaNegativa = minutosNegativos > 0 ? `-${String(hNeg).padStart(2, '0')}h ${String(mNeg).padStart(2, '0')}m` : '00h 00m';
+      p.descontoNegativoValor = (minutosNegativos / 60) * vHora;
+      p.descontoNegativoFormatado = p.descontoNegativoValor > 0 ? `-R$ ${p.descontoNegativoValor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'R$ 0,00';
 
       p.valorSalario = 'R$ ' + valorDia.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       if (vHora > 0) {
@@ -6310,7 +6375,7 @@ function mudarAba(tab) {
         p.valorHoraInfo = '';
       }
 
-      return { totalMin, hTot, mTot, vHora, vMinuto, valorDia, emAndamento };
+      return { totalMin, hTot, mTot, vHora, vMinuto, valorDia, emAndamento, minutosNegativos };
     }
 
     function atualizarStatusBatidaPontoCliente() {
@@ -6325,7 +6390,10 @@ function mudarAba(tab) {
       if (p) {
         recalcularHorasPontoCliente(p, colab);
         msgEl.style.display = 'block';
-        msgEl.innerHTML = `<span style="color:var(--gold-light);">Status hoje (${p.data}): Ent: ${p.entrada1||'--'} · Almoço: ${p.saidaAlmoco||'--'} / ${p.voltaAlmoco||'--'} · Saída: ${p.saidaFinal||'--'} | <strong>Tempo: ${p.tempoTrabalhado||'00h 00m'}</strong> · <strong style="color:#4ade80;">Ganho: ${p.valorSalario||'R$ 0,00'}</strong></span>`;
+        const txtHNegCli = (p.minutosNegativos && p.minutosNegativos > 0)
+          ? `<strong style="color:#f87171;">⏳ H. Negativa: ${p.horaNegativa} (${p.descontoNegativoFormatado})</strong>`
+          : `<span style="color:#94a3b8;">⏳ H. Negativa: 00h 00m</span>`;
+        msgEl.innerHTML = `<span style="color:var(--gold-light);">Status hoje (${p.data}): Ent: ${p.entrada1||'--'} · Almoço: ${p.saidaAlmoco||'--'} / ${p.voltaAlmoco||'--'} · Saída: ${p.saidaFinal||'--'} | <strong>Tempo: ${p.tempoTrabalhado||'00h 00m'}</strong> · ${txtHNegCli} · <strong style="color:#4ade80;">Ganho: ${p.valorSalario||'R$ 0,00'}</strong></span>`;
 
         const totEl = document.getElementById('cliente-ponto-total-horas');
         if (totEl) {

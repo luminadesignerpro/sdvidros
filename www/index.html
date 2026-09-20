@@ -1534,6 +1534,7 @@
               <th style="width:95px">VOLTA ALMOÇO</th>
               <th style="width:90px">SAÍDA FINAL</th>
               <th style="min-width:110px">TEMPO TRABALHADO</th>
+              <th style="min-width:115px">HORA NEGATIVA</th>
               <th style="min-width:130px">VALOR DO SALÁRIO</th>
               <th style="width:110px;text-align:center">AÇÕES</th>
             </tr>
@@ -5058,6 +5059,27 @@ function editarOs(id) {
 
 let osIdEditandoStatus = null;
 
+
+function avisarStatusTravadoAguardando(id) {
+  mostrarToastAprovacao('🔒 Esta opção está travada. A atualização ocorrerá quando o cliente fizer a escolha no link (aprovar e assinar digitalmente ou solicitar ajustes).');
+}
+
+// Sincronização em tempo real quando o cliente assina em outra aba/dispositivo
+window.addEventListener('storage', function(e) {
+  if (!e.key || e.key === 'sdv_ordens' || e.key === 'sdv_assinaturas_map' || e.key.startsWith('sdv_assinatura_')) {
+    try {
+      historico = load(K.orders, []);
+      renderHist();
+    } catch (_) {}
+  }
+});
+window.addEventListener('focus', function() {
+  try {
+    historico = load(K.orders, []);
+    renderHist();
+  } catch (_) {}
+});
+
 function abrirModalSeletorStatus(id) {
   const o = historico.find(x => String(x.id) === String(id) || String(x.numero) === String(id));
   if (!o) return;
@@ -5958,11 +5980,11 @@ function renderHist() {
       ? `<button class="btn btn-gold btn-sm" onclick="abrirModalVersoesPdf('${o.id}')" title="Ver e visualizar ${numVersoes} versões do PDF">📑 PDFs (${numVersoes} versões)</button>`
       : `<button class="btn btn-gold btn-sm" onclick="visualizarPdfOs('${o.id}')" title="Visualizar e ler PDF na tela">👁️ Visualizar PDF</button>`;
 
+    // A opção de aprovar manual na primeira imagem foi excluída a pedido do usuário.
+    // A aprovação ocorre exclusivamente quando o cliente assina digitalmente no link da proposta.
     let btnAcaoAprovacao = '';
     if (st === 'reajustar') {
       btnAcaoAprovacao = `<button class="btn btn-sm" onclick="aprovarModificacaoDireto('${o.id}')" style="background:rgba(16,185,129,0.18);border:1.5px solid #10b981;color:#34d399;font-weight:800;" title="Aprovar modificações da O.S.">✓ Aprovar Modificação</button>`;
-    } else if (st === 'pendente') {
-      btnAcaoAprovacao = `<button class="btn btn-sm" onclick="aprovarOsDireto('${o.id}')" style="background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.6);color:#25D366;font-weight:700;" title="Aprovar com 1 toque">✅ Aprovar</button>`;
     }
 
     let btnVerAssinatura = '';
@@ -5975,7 +5997,9 @@ function renderHist() {
       <div class="hist-top">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <span class="hist-num">${esc(o.numero)}</span>
-          <span class="status-pill ${st}" onclick="abrirModalSeletorStatus('${o.id}')" style="cursor:pointer;" title="Clique para alterar o status">${statusLabels[st] || '🟡 Aguardando'} ▾</span>
+          ${st === 'pendente'
+            ? `<span class="status-pill pendente status-bloqueada" onclick="avisarStatusTravadoAguardando('${o.id}')" style="cursor:not-allowed; opacity:0.95; user-select:none; border:1.2px dashed rgba(234,179,8,0.5);" title="Opção travada: aguardando o cliente aprovar e assinar pelo link ou solicitar ajustes">${statusLabels[st] || '🟡 Aguardando Resposta'}</span>`
+            : `<span class="status-pill ${st}" onclick="abrirModalSeletorStatus('${o.id}')" style="cursor:pointer;" title="Clique para alterar o status">${statusLabels[st] || '🟡 Aguardando'} ▾</span>`}
         </div>
         <span class="hist-date">${esc(o.data_orc || '')}</span>
       </div>
@@ -6692,6 +6716,11 @@ function renderEspelhoPonto() {
           ${badgeTempo}
         </td>
         <td>
+          ${(p.minutosNegativos && p.minutosNegativos > 0) 
+            ? `<span class="ponto-badge-negativa" style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:11.5px;font-weight:800;background:rgba(239,68,68,0.18);color:#f87171;border:1px solid rgba(239,68,68,0.35);" title="Atraso além da tolerância de 5min">${p.horaNegativa}<br><span style="font-size:10px;color:#fca5a5;">${p.descontoNegativoFormatado}</span></span>` 
+            : `<span style="font-size:11.5px;color:#94a3b8;font-weight:600;">00h 00m</span>`}
+        </td>
+        <td>
           <div class="ponto-salario-val" style="font-weight:900;color:#4ade80;font-size:14px;letter-spacing:0.3px;white-space:nowrap;">${p.valorSalario || 'R$ 0,00'}</div>
           ${vhInfo ? `<div class="ponto-salario-sub" style="font-size:10.5px;color:#94a3b8;margin-top:2px;white-space:nowrap;">${esc(vhInfo)}</div>` : ''}
         </td>
@@ -6733,7 +6762,10 @@ function atualizarStatusBatidaColaborador() {
   const p = pontosLista.find(x => (x.colaboradorId === id || (x.colaboradorNome && x.colaboradorNome.toLowerCase() === colab.nome.toLowerCase())) && ehDataHoje(x.data));
   if (msgEl) {
     if (p) {
-      msgEl.innerHTML = `<span style="color:var(--gold-light);">Status hoje (${p.data}): Ent: ${p.entrada1||'--'} · Almoço: ${p.saidaAlmoco||'--'} / ${p.voltaAlmoco||'--'} · Saída: ${p.saidaFinal||'--'} | <strong>Tempo: ${p.tempoTrabalhado||'00h 00m'}</strong> · <strong style="color:#4ade80;">Ganho: ${p.valorSalario||'R$ 0,00'}</strong></span>`;
+      const txtHNeg = (p.minutosNegativos && p.minutosNegativos > 0)
+        ? `<strong style="color:#f87171;" title="Tolerância de 5min excedida. Descontado como hora negativa">⏳ H. Negativa: ${p.horaNegativa} (${p.descontoNegativoFormatado})</strong>`
+        : `<span style="color:#94a3b8;">⏳ H. Negativa: 00h 00m</span>`;
+      msgEl.innerHTML = `<span style="color:var(--gold-light);">Status hoje (${p.data}): Ent: ${p.entrada1||'--'} · Almoço: ${p.saidaAlmoco||'--'} / ${p.voltaAlmoco||'--'} · Saída: ${p.saidaFinal||'--'} | <strong>Tempo: ${p.tempoTrabalhado||'00h 00m'}</strong> · ${txtHNeg} · <strong style="color:#4ade80;">Ganho: ${p.valorSalario||'R$ 0,00'}</strong></span>`;
     } else {
       msgEl.innerHTML = `<span style="color:var(--text2);">Pronto para registrar batida de ponto para ${colab.nome}.</span>`;
     }
@@ -6920,7 +6952,12 @@ function recalcularHorasPonto(p, colab) {
     return parts[0] * 60 + parts[1];
   };
 
-  let totalMin = 0;
+  // Horários previstos de jornada (padrão: 08:00 - 12:00 / 13:00 - 18:00)
+  const expEnt = parseMin(colab?.horarioEntrada || '08:00') || 480;
+  const expAlmSai = parseMin(colab?.horarioAlmocoSai || '12:00') || 720;
+  const expAlmVol = parseMin(colab?.horarioAlmocoVolta || '13:00') || 780;
+  const expSai = parseMin(colab?.horarioSaida || '18:00') || 1080;
+
   const mEntrada = parseMin(p.entrada1);
   const mAlmocoSai = parseMin(p.saidaAlmoco);
   const mAlmocoVolta = parseMin(p.voltaAlmoco);
@@ -6934,33 +6971,100 @@ function recalcularHorasPonto(p, colab) {
 
   let emAndamento = false;
 
-  // 1. Primeiro Turno (Manhã)
+  // ═══════════════════════════════════════════════════════
+  // REGRA DE TOLERÂNCIA DE 5 MINUTOS E HORAS NEGATIVAS
+  // ═══════════════════════════════════════════════════════
+  // Se registrar até 5min após o previsto (ex: até 08:05): NÃO desconta e não vira hora negativa.
+  // Se passar de 5min (ex: 08:30): os 30 minutos INTEGRAIS viram HORA NEGATIVA com desconto.
+  let minutosNegativos = 0;
+
+  // 1. 1ª Entrada
+  let mEntradaEfetivo = mEntrada;
   if (mEntrada !== null) {
-    if (mAlmocoSai !== null && mAlmocoSai >= mEntrada) {
-      totalMin += (mAlmocoSai - mEntrada);
-    } else if (mSaida !== null && mAlmocoSai === null && mSaida >= mEntrada) {
-      totalMin += (mSaida - mEntrada);
-    } else if (mAlmocoSai === null && mSaida === null && hoje) {
-      if (minAgora >= mEntrada) {
-        totalMin += (minAgora - mEntrada);
-        emAndamento = true;
+    if (mEntrada > expEnt) {
+      const diff = mEntrada - expEnt;
+      if (diff <= 5) {
+        // Tolerância atendida: considera entrada no horário previsto (08:00), sem desconto
+        mEntradaEfetivo = expEnt;
+      } else {
+        // Tolerância excedida: desconta integralmente na hora negativa
+        minutosNegativos += diff;
       }
     }
   }
 
-  // 2. Segundo Turno (Tarde)
+  // 2. Saída Almoço
+  let mAlmocoSaiEfetivo = mAlmocoSai;
+  if (mAlmocoSai !== null) {
+    if (mAlmocoSai < expAlmSai) {
+      const diff = expAlmSai - mAlmocoSai;
+      if (diff <= 5) {
+        mAlmocoSaiEfetivo = expAlmSai; // dentro dos 5min de tolerância
+      } else {
+        minutosNegativos += diff; // saiu mais de 5min antes do almoço
+      }
+    }
+  }
+
+  // 3. Volta Almoço
+  let mAlmocoVoltaEfetivo = mAlmocoVolta;
   if (mAlmocoVolta !== null) {
-    if (mSaida !== null && mSaida >= mAlmocoVolta) {
-      totalMin += (mSaida - mAlmocoVolta);
-    } else if (mSaida === null && hoje) {
-      if (minAgora >= mAlmocoVolta) {
-        totalMin += (minAgora - mAlmocoVolta);
+    const targetVolta = mAlmocoSai !== null ? Math.max(expAlmVol, mAlmocoSai + 60) : expAlmVol;
+    if (mAlmocoVolta > targetVolta) {
+      const diff = mAlmocoVolta - targetVolta;
+      if (diff <= 5) {
+        mAlmocoVoltaEfetivo = targetVolta; // dentro dos 5min de tolerância
+      } else {
+        minutosNegativos += diff; // atrasou mais de 5min no retorno do almoço
+      }
+    }
+  }
+
+  // 4. Saída Final (saída antecipada)
+  let mSaidaEfetivo = mSaida;
+  if (mSaida !== null) {
+    if (mSaida < expSai) {
+      const diff = expSai - mSaida;
+      if (diff <= 5) {
+        mSaidaEfetivo = expSai; // tolerância de até 5min
+      } else {
+        minutosNegativos += diff;
+      }
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // CÁLCULO DO TEMPO TRABALHADO
+  // ═══════════════════════════════════════════════════════
+  let totalMin = 0;
+
+  // Turno Manhã
+  if (mEntradaEfetivo !== null) {
+    if (mAlmocoSaiEfetivo !== null && mAlmocoSaiEfetivo >= mEntradaEfetivo) {
+      totalMin += (mAlmocoSaiEfetivo - mEntradaEfetivo);
+    } else if (mSaidaEfetivo !== null && mAlmocoSaiEfetivo === null && mSaidaEfetivo >= mEntradaEfetivo) {
+      totalMin += (mSaidaEfetivo - mEntradaEfetivo);
+    } else if (mAlmocoSaiEfetivo === null && mSaidaEfetivo === null && hoje) {
+      if (minAgora >= mEntradaEfetivo) {
+        totalMin += (minAgora - mEntradaEfetivo);
         emAndamento = true;
       }
     }
   }
 
-  // 3. Horas Extras
+  // Turno Tarde
+  if (mAlmocoVoltaEfetivo !== null) {
+    if (mSaidaEfetivo !== null && mSaidaEfetivo >= mAlmocoVoltaEfetivo) {
+      totalMin += (mSaidaEfetivo - mAlmocoVoltaEfetivo);
+    } else if (mSaidaEfetivo === null && hoje) {
+      if (minAgora >= mAlmocoVoltaEfetivo) {
+        totalMin += (minAgora - mAlmocoVoltaEfetivo);
+        emAndamento = true;
+      }
+    }
+  }
+
+  // Horas Extras
   if (mHEIni !== null) {
     if (mHEFim !== null && mHEFim >= mHEIni) {
       totalMin += (mHEFim - mHEIni);
@@ -6978,7 +7082,7 @@ function recalcularHorasPonto(p, colab) {
   p.emAndamento = emAndamento;
   p.tempoTrabalhado = `${String(hTot).padStart(2, '0')}h ${String(mTot).padStart(2, '0')}m`;
 
-  // Calcula o valor hora e valor proporcional por minuto trabalhado
+  // Calcula o valor hora
   let vHora = 0;
   if (colab && colab.valorHora && Number(colab.valorHora) > 0) {
     vHora = Number(colab.valorHora);
@@ -6994,6 +7098,14 @@ function recalcularHorasPonto(p, colab) {
   const vMinuto = vHora > 0 ? (vHora / 60) : 0;
   const valorDia = (totalMin / 60) * vHora;
 
+  // Registra as Horas Negativas de forma separada
+  p.minutosNegativos = minutosNegativos;
+  const hNeg = Math.floor(minutosNegativos / 60);
+  const mNeg = minutosNegativos % 60;
+  p.horaNegativa = minutosNegativos > 0 ? `-${String(hNeg).padStart(2, '0')}h ${String(mNeg).padStart(2, '0')}m` : '00h 00m';
+  p.descontoNegativoValor = (minutosNegativos / 60) * vHora;
+  p.descontoNegativoFormatado = p.descontoNegativoValor > 0 ? `-R$ ${p.descontoNegativoValor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'R$ 0,00';
+
   p.valorSalario = 'R$ ' + valorDia.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   if (vHora > 0) {
     p.valorHoraInfo = `R$ ${vHora.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/h · R$ ${vMinuto.toFixed(3).replace('.', ',')}/min`;
@@ -7001,7 +7113,7 @@ function recalcularHorasPonto(p, colab) {
     p.valorHoraInfo = '';
   }
 
-  return { totalMin, hTot, mTot, vHora, vMinuto, valorDia, emAndamento };
+  return { totalMin, hTot, mTot, vHora, vMinuto, valorDia, emAndamento, minutosNegativos };
 }
 
 function calcularValorHoraFuncionario() {

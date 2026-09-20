@@ -697,6 +697,22 @@
     if (btnAjustar) {
       btnAjustar.href = zapHref;
       btnAjustar.textContent = `💬 Falar com ${lic.nome} / Solicitar Ajustes`;
+
+    if (btnAjustar) {
+      btnAjustar.addEventListener('click', function() {
+        try {
+          const numLimpo = String(numeroOs || '').replace(/\D/g, '');
+          const ordens = JSON.parse(localStorage.getItem('sdv_ordens') || '[]');
+          const idx = ordens.findIndex(x => String(x.numero || '').replace(/\D/g, '') === numLimpo);
+          if (idx !== -1 && ordens[idx].status !== 'aprovado') {
+            ordens[idx].status = 'reajustar';
+            ordens[idx].reajuste_solicitado_em = new Date().toISOString();
+            localStorage.setItem('sdv_ordens', JSON.stringify(ordens));
+          }
+        } catch (_) {}
+      });
+    }
+
     }
     document.title = `Aprovação & Assinatura Digital — ${lic.nome}`;
   }
