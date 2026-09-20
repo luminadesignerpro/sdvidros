@@ -977,7 +977,7 @@
     <button id="tab-ponto" class="tab" data-tab="ponto" onclick="goTab('ponto')">👷 Funcionários & Ponto</button>
     <button id="tab-contratos" class="tab" data-tab="contratos" onclick="goTab('contratos')">📄 Contratos</button>
     <button id="tab-usuarios" class="tab" data-tab="usuarios" onclick="goTab('usuarios')">👥 Usuários</button>
-    <button type="button" id="tab-portal-cliente" class="tab" onclick="window.open('cliente.html','_blank')" title="Acessar Portal do Cliente">🌐 Portal do Cliente</button>
+    <button type="button" id="tab-portal-cliente" class="tab" onclick="abrirPortalCliente()" title="Acessar Portal do Cliente">🌐 Portal do Cliente</button>
     <button type="button" id="tab-portal-funcionario" class="tab" onclick="abrirPortalFuncionario()" title="Acessar Portal do Funcionário">👷 Portal do Funcionário</button>
     <button type="button" id="btn-central-mensagens" class="tab" onclick="abrirModalCentralMensagens()" title="Central de Mensagens com Clientes">💬 Mensagens <span id="badge-msg-clientes" style="display:none;background:#ef4444;color:#fff;font-size:9.5px;padding:1px 6px;border-radius:999px;font-weight:900;margin-left:4px;">0</span></button>
   </div>
@@ -4211,6 +4211,14 @@ function cancelarEdicaoOs() {
   itemId = 0; addItem();
   selChip(document.querySelector('.chip'),'À vista');
   atualizarNumeroDisplay();
+}
+
+function abrirPortalCliente() {
+  const lic = (typeof obterLicencaAtiva === 'function') ? obterLicencaAtiva() : null;
+  const empId = (lic && lic.id) ? lic.id : (localStorage.getItem('sdv_licenca_ativa') || 'sdvidros');
+  const empNome = (lic && lic.nome) ? lic.nome : 'SD Vidros';
+  localStorage.setItem('sdv_licenca_ativa', empId);
+  window.open('cliente.html?empresa=' + encodeURIComponent(empId) + '&nome=' + encodeURIComponent(empNome), '_blank');
 }
 
 function abrirPortalFuncionario() {

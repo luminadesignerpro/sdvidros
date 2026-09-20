@@ -13,7 +13,11 @@
         var p = new URLSearchParams(window.location.search);
         var emp = (p.get('empresa') || p.get('emp') || localStorage.getItem('sdv_licenca_ativa') || '').toLowerCase();
         var nome = (p.get('nome') || p.get('empNome') || '').toLowerCase();
-        var isMoveis = emp === 'sdmoveis' || emp.includes('moveis') || nome.includes('móveis') || nome.includes('moveis');
+        if (emp === 'samuel-david' || emp === 'samuel' || nome === 'samuel david' || nome === 'samuel') {
+          emp = 'sdvidros';
+          nome = 'sd vidros';
+        }
+        var isMoveis = (emp === 'sdmoveis' || emp === 'sd-moveis' || emp.includes('moveis') || nome.includes('móveis') || nome.includes('moveis')) && !emp.includes('vidros') && !nome.includes('vidros');
         var manifestHref = isMoveis ? 'manifest-moveis.json' : 'manifest.json';
         var logoSrc = isMoveis ? 'logo_moveis.jpg' : 'logo.jpg';
         var appTitle = isMoveis ? 'SD Móveis Projetados' : 'SD Vidros';
@@ -3477,11 +3481,16 @@
         let empUrl = (params.get('empresa') || params.get('emp') || '').toLowerCase().trim();
         let nomeUrl = params.get('nome') || params.get('empNome');
 
-        // Mapeamento automático de rotas e nomes para as empresas correspondentes
+        if (empUrl === 'samuel-david' || empUrl === 'samuel') {
+          empUrl = 'sdvidros';
+          nomeUrl = 'SD Vidros';
+        }
         if (!empUrl && nomeUrl) {
           const nl = nomeUrl.toLowerCase();
-          if (nl.includes('samuel')) empUrl = 'samuel-david';
-          else if (nl.includes('tc')) empUrl = 'tcmoveis';
+          if (nl.includes('samuel') && !nl.includes('moveis') && !nl.includes('móveis')) {
+            empUrl = 'sdvidros';
+            nomeUrl = 'SD Vidros';
+          } else if (nl.includes('tc')) empUrl = 'tcmoveis';
           else if (nl.includes('sd móveis') || nl.includes('sd moveis') || nl === 'sd-moveis') empUrl = 'sd-moveis';
           else if (nl.includes('vidros')) empUrl = 'sdvidros';
         }
@@ -3490,29 +3499,28 @@
           localStorage.setItem('sdv_licenca_ativa', empUrl);
           let lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
           let enc = lista.find(l => l.id === empUrl || 
-            (empUrl.includes('samuel') && (l.id.includes('samuel') || (l.nome && l.nome.toLowerCase().includes('samuel')))) ||
-            (empUrl.includes('tc') && (l.id.includes('tc') || (l.nome && l.nome.toLowerCase().includes('tc')))) ||
             ((empUrl.includes('moveis') || empUrl === 'sdmoveis' || empUrl === 'sd-moveis') && (l.id.includes('moveis') || (l.nome && l.nome.toLowerCase().includes('moveis')))) ||
-            (empUrl === 'sdvidros' && l.id === 'sdvidros'));
+            (empUrl === 'sdvidros' && (l.id === 'sdvidros' || l.id === 'samuel-david')));
 
-          const ehMoveis = (nomeUrl && (nomeUrl.toLowerCase().includes('móveis') || nomeUrl.toLowerCase().includes('moveis') || nomeUrl.toLowerCase().includes('samuel') || nomeUrl.toLowerCase().includes('tc'))) || 
-                           (enc && enc.nome && (enc.nome.toLowerCase().includes('móveis') || enc.nome.toLowerCase().includes('moveis') || enc.nome.toLowerCase().includes('samuel') || enc.nome.toLowerCase().includes('tc'))) || 
-                           empUrl === 'sdmoveis' || empUrl.includes('samuel') || empUrl.includes('tc');
+          const ehMoveis = ((nomeUrl && (nomeUrl.toLowerCase().includes('móveis') || nomeUrl.toLowerCase().includes('moveis'))) || 
+                           (enc && enc.nome && (enc.nome.toLowerCase().includes('móveis') || enc.nome.toLowerCase().includes('moveis'))) || 
+                           empUrl === 'sdmoveis' || empUrl === 'sd-moveis' || empUrl.includes('moveis') || empUrl.includes('tc')) && 
+                           !empUrl.includes('vidros') && !(nomeUrl && nomeUrl.toLowerCase().includes('vidros'));
 
           const nomePadrao = (empUrl === 'sdvidros') ? 'SD Vidros' :
-                             (empUrl.includes('samuel')) ? 'Samuel David' :
                              (empUrl.includes('tc')) ? 'Tc móveis' :
-                             (empUrl.includes('moveis') || empUrl === 'sdmoveis' || empUrl === 'sd-moveis') ? 'SD móveis' : 'Empresa';
+                             (empUrl.includes('moveis') || empUrl === 'sdmoveis' || empUrl === 'sd-moveis') ? 'SD móveis' : 'SD Vidros';
 
           if (!enc) {
             enc = {
               id: empUrl,
               nome: nomeUrl || nomePadrao,
-              segmento: ehMoveis ? (empUrl.includes('tc') ? 'Móveis planejados' : 'Móveis Planejados & Ambientes Sob Medida') : (params.get('seg') || 'Alumínio, Vidros & Esquadrias'),
+              segmento: ehMoveis ? (empUrl.includes('tc') ? 'Móveis planejados' : 'Móveis Planejados & Ambientes Sob Medida') : 'Alumínio, Vidros & Esquadrias',
               telefone: params.get('tel') || '(85) 99611-9824',
-              slogan: ehMoveis ? 'Ambientes Sob Medida' : 'Acompanhamento de Serviços',
-              logo: ehMoveis ? 'logo_moveis.jpg' : (params.get('logo') || 'logo.jpg'),
-              banner: ehMoveis ? 'banner_ia_moveis.jpg' : 'banner.jpg'
+              slogan: ehMoveis ? 'Ambientes Sob Medida' : 'Box, Espelhos, Portas, Janelas & Guarda-Corpo',
+              logo: ehMoveis ? 'logo_moveis.jpg' : 'logo.jpg',
+              banner: ehMoveis ? 'banner_moveis.jpg' : 'banner.jpg',
+              tipoContrato: ehMoveis ? 'moveis' : 'vidros'
             };
             lista.push(enc);
             localStorage.setItem('sdv_licencas', JSON.stringify(lista));
@@ -3525,16 +3533,36 @@
               enc.segmento = enc.segmento || (empUrl.includes('tc') ? 'Móveis planejados' : 'Móveis Planejados & Ambientes Sob Medida');
               if (!enc.logo || enc.logo === 'logo.jpg') enc.logo = 'logo_moveis.jpg';
               if (!enc.banner || enc.banner === 'banner.jpg' || enc.banner === 'banner_ia_vidros.jpg') enc.banner = 'banner_ia_moveis.jpg';
+            } else {
+              if (!enc.logo || enc.logo === 'logo_moveis.jpg') enc.logo = 'logo.jpg';
+              if (!enc.banner || enc.banner === 'banner_moveis.jpg' || enc.banner === 'banner_ia_moveis.jpg') enc.banner = 'banner.jpg';
+              if (enc.id === 'samuel-david' || enc.nome === 'Samuel David') {
+                enc.nome = 'SD Vidros';
+                enc.id = 'sdvidros';
+              }
             }
             localStorage.setItem('sdv_licencas', JSON.stringify(lista));
             return enc;
           }
         }
-        const lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
-        const idAtivo = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+        let lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]');
+        let idAtivo = localStorage.getItem('sdv_licenca_ativa') || 'sdvidros';
+        if (idAtivo === 'samuel-david' || idAtivo === 'samuel') {
+          idAtivo = 'sdvidros';
+          localStorage.setItem('sdv_licenca_ativa', 'sdvidros');
+        }
         if (Array.isArray(lista) && lista.length) {
           let encontrada = lista.find(l => l.id === idAtivo);
-          if (encontrada) return encontrada;
+          if (encontrada) {
+            if (encontrada.id === 'sdvidros' || encontrada.id === 'samuel-david' || (encontrada.slogan && encontrada.slogan.toLowerCase().includes('box'))) {
+              encontrada.nome = 'SD Vidros';
+              encontrada.logo = 'logo.jpg';
+              encontrada.banner = 'banner.jpg';
+              encontrada.segmento = 'Alumínio, Vidros & Esquadrias';
+              encontrada.slogan = 'Box, Espelhos, Portas, Janelas & Guarda-Corpo';
+            }
+            return encontrada;
+          }
         }
       } catch(_) {}
       return {

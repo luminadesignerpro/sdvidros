@@ -19,11 +19,11 @@
     },
     {
       "source": "/samuel-david",
-      "destination": "/cliente.html?empresa=samuel-david&nome=Samuel%20David&instalar=1&auto=1"
+      "destination": "/cliente.html?empresa=sdvidros&nome=SD%20Vidros&instalar=1&auto=1"
     },
     {
       "source": "/samuel",
-      "destination": "/cliente.html?empresa=samuel-david&nome=Samuel%20David&instalar=1&auto=1"
+      "destination": "/cliente.html?empresa=sdvidros&nome=SD%20Vidros&instalar=1&auto=1"
     },
     {
       "source": "/tc-moveis",
