@@ -1456,7 +1456,7 @@
           <div>
             <div style="font-size:10px;color:var(--gold-light);text-transform:uppercase;font-weight:800;letter-spacing:0.5px;">Horário de Trabalho Previsto</div>
             <div id="ponto-horario-texto" style="font-size:13px;font-weight:800;color:#fff;margin-top:2px;">
-              Entrada: 08:00 · Almoço: 12:00 às 13:00 · Saída: 18:00 (44h/sem)
+              Entrada: 08:00 · Almoço: 12:00 às 13:00 · Saída: 17:30 (44h/sem)
             </div>
           </div>
         </div>
@@ -7068,7 +7068,7 @@ function abrirModalEditarHorarioTrabalho() {
   document.getElementById('edit-horario-ent1').value = colab.horarioEntrada || '08:00';
   document.getElementById('edit-horario-almsai').value = colab.horarioAlmocoSai || '12:00';
   document.getElementById('edit-horario-almvol').value = colab.horarioAlmocoVolta || '13:00';
-  document.getElementById('edit-horario-sai2').value = colab.horarioSaida || '18:00';
+  document.getElementById('edit-horario-sai2').value = colab.horarioSaida || '17:30';
   document.getElementById('edit-horario-jornada').value = colab.jornada || '44h/sem';
   const m = document.getElementById('modal-editar-horario-trabalho');
   if (m) m.style.display = 'flex';
@@ -7087,7 +7087,7 @@ function salvarHorarioTrabalhoColaborador() {
   colab.horarioEntrada = document.getElementById('edit-horario-ent1').value || '08:00';
   colab.horarioAlmocoSai = document.getElementById('edit-horario-almsai').value || '12:00';
   colab.horarioAlmocoVolta = document.getElementById('edit-horario-almvol').value || '13:00';
-  colab.horarioSaida = document.getElementById('edit-horario-sai2').value || '18:00';
+  colab.horarioSaida = document.getElementById('edit-horario-sai2').value || '17:30';
   colab.jornada = document.getElementById('edit-horario-jornada').value.trim() || '44h/sem';
 
   save(K.employees, funcionariosLista);
@@ -7110,22 +7110,39 @@ function atualizarTravaHoraExtraIndex(p) {
   const btnHeFim = document.querySelector('.ponto-act-he-fim');
   if (!btnHeIni || !btnHeFim) return;
 
+  const sel = document.getElementById('ponto-sel-colaborador');
+  const id = sel ? parseInt(sel.value) : 0;
+  const colab = funcionariosLista.find(f => f.id === id) || (p && funcionariosLista.find(f => f.id === p.colaboradorId));
+
+  const parseMin = (s) => (s && s.includes(':')) ? s.split(':').map(Number)[0]*60 + s.split(':').map(Number)[1] : null;
+  const horaSaidaPrevista = colab?.horarioSaida || '17:30';
+  const expSaiMin = parseMin(horaSaidaPrevista) || 1050; // 17:30 = 1050 min
+
+  const agora = new Date();
+  const minAgora = agora.getHours() * 60 + agora.getMinutes();
+
   const temSaida = !!(p && p.saidaFinal);
   const temHeIni = !!(p && p.horaExtraInicial);
+  const passouHorarioPrevisto = minAgora >= expSaiMin;
 
-  if (!temSaida) {
-    // Hora Extra Travada enquanto não registrar Saída Final
+  if (!temSaida || !passouHorarioPrevisto) {
+    // Hora Extra Travada (só destrava se tiver saída final E se horário atual já passou do horário previsto de saída)
     btnHeIni.style.opacity = '0.38';
     btnHeIni.style.filter = 'grayscale(1)';
     btnHeIni.style.cursor = 'not-allowed';
-    btnHeIni.title = '🔒 Hora Extra Travada: Só destrava após registrar a Saída Final.';
+
+    if (!temSaida) {
+      btnHeIni.title = `🔒 Hora Extra Travada: Registre a Saída Final primeiro.`;
+    } else {
+      btnHeIni.title = `🔒 Hora Extra Travada: Só pode ser iniciada após as ${horaSaidaPrevista} (horário final previsto de saída).`;
+    }
     
     btnHeFim.style.opacity = '0.38';
     btnHeFim.style.filter = 'grayscale(1)';
     btnHeFim.style.cursor = 'not-allowed';
-    btnHeFim.title = '🔒 Hora Extra Travada: Só destrava após registrar a Saída Final.';
+    btnHeFim.title = '🔒 Hora Extra Travada.';
   } else {
-    // Saída Final já foi registrada -> destrava início de Hora Extra
+    // Destravado: tem Saída Final E horário atual >= horário previsto de saída
     btnHeIni.style.opacity = '1';
     btnHeIni.style.filter = 'none';
     btnHeIni.style.cursor = 'pointer';
@@ -7162,7 +7179,7 @@ function atualizarStatusBatidaColaborador() {
     const ent = colab.horarioEntrada || '08:00';
     const almS = colab.horarioAlmocoSai || '12:00';
     const almV = colab.horarioAlmocoVolta || '13:00';
-    const sai = colab.horarioSaida || '18:00';
+    const sai = colab.horarioSaida || '17:30';
     const jor = colab.jornada || '44h/sem';
     hTxt.textContent = `Entrada: ${ent} · Almoço: ${almS} às ${almV} · Saída: ${sai} (${jor})`;
   }
@@ -7340,13 +7357,24 @@ function registrarBatidaPonto(tipo) {
     pontosLista.unshift(p);
   }
 
-  if ((tipo === 'horaExtraInicial' || tipo === 'horaExtraFinal') && (!p || !p.saidaFinal)) {
-    mostrarMsgPonto('🔒 A Hora Extra está travada! É necessário registrar a Saída Final antes de iniciar hora extra.', false);
-    return;
-  }
-  if (tipo === 'horaExtraFinal' && (!p || !p.horaExtraInicial)) {
-    mostrarMsgPonto('⚠️ Registre primeiro o início da Hora Extra (H. Extra Inicial).', false);
-    return;
+  if (tipo === 'horaExtraInicial' || tipo === 'horaExtraFinal') {
+    const parseMin = (s) => (s && s.includes(':')) ? s.split(':').map(Number)[0]*60 + s.split(':').map(Number)[1] : null;
+    const horaSaidaPrevista = colab.horarioSaida || '17:30';
+    const expSaiMin = parseMin(horaSaidaPrevista) || 1050;
+    const minAgora = agora.getHours() * 60 + agora.getMinutes();
+
+    if (!p || !p.saidaFinal) {
+      mostrarMsgPonto('🔒 A Hora Extra está travada! É necessário registrar a Saída Final antes de iniciar hora extra.', false);
+      return;
+    }
+    if (minAgora < expSaiMin) {
+      mostrarMsgPonto(`🔒 Hora Extra Bloqueada! A Hora Extra só pode ser iniciada após as ${horaSaidaPrevista} (horário final previsto de saída). Horário atual: ${horaStr}.`, false);
+      return;
+    }
+    if (tipo === 'horaExtraFinal' && !p.horaExtraInicial) {
+      mostrarMsgPonto('⚠️ Registre primeiro o início da Hora Extra (H. Extra Inicial).', false);
+      return;
+    }
   }
 
   let labelTipo = '';
@@ -7368,7 +7396,7 @@ function registrarBatidaPonto(tipo) {
   } else if (tipo === 'saidaFinal') {
     // Horário previsto de encerramento da jornada
     const parseMin = (s) => (s && s.includes(':')) ? s.split(':').map(Number)[0]*60 + s.split(':').map(Number)[1] : null;
-    const expSaiMin = parseMin(colab?.horarioSaida || '18:00') || 1080;
+    const expSaiMin = parseMin(colab?.horarioSaida || '17:30') || 1050;
     const horaAgoraMin = agora.getHours() * 60 + agora.getMinutes();
     const ehFds = ehFimDeSemanaPonto(p.data);
 
@@ -7483,7 +7511,7 @@ function recalcularHorasPonto(p, colab) {
   const expEnt = parseMin(colab?.horarioEntrada || '08:00') || 480;
   const expAlmSai = parseMin(colab?.horarioAlmocoSai || '12:00') || 720;
   const expAlmVol = parseMin(colab?.horarioAlmocoVolta || '13:00') || 780;
-  const expSai = parseMin(colab?.horarioSaida || '18:00') || 1080;
+  const expSai = parseMin(colab?.horarioSaida || '17:30') || 1050;
 
   const mEntrada = parseMin(p.entrada1);
   const mAlmocoSai = parseMin(p.saidaAlmoco);
