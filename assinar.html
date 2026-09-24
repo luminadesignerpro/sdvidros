@@ -530,7 +530,120 @@
     color: #64748b;
     line-height: 1.4;
   }
-  /* Card / Credito detail panel */
+  /* ===== DADOS DO RECEBEDOR ===== */
+  .recebedor-box {
+    background: linear-gradient(145deg, rgba(20,27,39,0.95), rgba(15,21,33,0.98));
+    border: 1px solid rgba(201,160,56,0.35);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    position: relative;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .recebedor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding-bottom: 8px;
+  }
+  .recebedor-badge {
+    font-size: 10px;
+    font-weight: 800;
+    color: #c9a038;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .recebedor-nome {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin-top: 2px;
+  }
+  .btn-editar-recebedor {
+    background: rgba(201,160,56,0.12);
+    border: 1px solid rgba(201,160,56,0.4);
+    color: #f3c760;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-editar-recebedor:hover {
+    background: rgba(201,160,56,0.25);
+    border-color: #f3c760;
+  }
+  .recebedor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+  }
+  .recebedor-item {
+    display: flex;
+    flex-direction: column;
+  }
+  .rec-label {
+    font-size: 10px;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .rec-val {
+    font-size: 12px;
+    font-weight: 600;
+    color: #cbd5e1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Modal Recebedor */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 16px;
+  }
+  .modal-card {
+    background: #141b27;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 460px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #243046;
+    padding-bottom: 10px;
+  }
+  .modal-close {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+  }
+  .modal-close:hover { color: #f1f5f9; }
+
+  /* ===== VIRTUAL CARD MOCKUP & INPUTS ===== */
   .card-detail-panel {
     background: #0f1521;
     border: 1px solid #243046;
@@ -540,25 +653,167 @@
     display: none;
   }
   .card-detail-panel.visible { display: block; }
-  .card-machine-info {
+
+  .credit-card-mockup {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e1b4b 100%);
+    border: 1.5px solid rgba(201,160,56,0.5);
+    border-radius: 14px;
+    padding: 18px 20px;
+    color: #fff;
+    margin-bottom: 18px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5), inset 0 0 20px rgba(201,160,56,0.08);
+    position: relative;
+    overflow: hidden;
+  }
+  .credit-card-mockup::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(201,160,56,0.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .cc-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .cc-chip {
+    width: 38px;
+    height: 28px;
+    background: linear-gradient(135deg, #e5c07b, #c9a038);
+    border-radius: 6px;
+    position: relative;
+    border: 1px solid #997316;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 3px;
+    box-shadow: inset 0 0 3px rgba(0,0,0,0.3);
+  }
+  .cc-chip-line {
+    height: 1px;
+    background: rgba(0,0,0,0.25);
+    width: 100%;
+  }
+  .cc-brand-badge {
+    font-size: 13px;
+    font-weight: 900;
+    color: #f3c760;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(0,0,0,0.4);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(201,160,56,0.3);
+  }
+  .cc-number {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #f8fafc;
+    margin-bottom: 16px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .cc-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .cc-label {
+    font-size: 9px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+  }
+  .cc-val {
+    font-size: 12px;
+    font-weight: 700;
+    color: #f1f5f9;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    max-width: 190px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .card-form-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .badge-tipo-cartao {
+    background: rgba(201,160,56,0.15);
+    color: #f3c760;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(201,160,56,0.3);
+    text-transform: uppercase;
+  }
+  .card-inputs-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .input-with-icon {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid #334155;
-    margin-bottom: 10px;
   }
-  .card-machine-icon {
-    font-size: 32px;
-    flex-shrink: 0;
+  .input-with-icon input {
+    margin-bottom: 0 !important;
+    padding-right: 70px;
   }
-  .card-machine-text {
+  .card-brand-icon {
+    position: absolute;
+    right: 12px;
     font-size: 13px;
-    color: #cbd5e1;
-    line-height: 1.45;
+    font-weight: 700;
+    color: #f3c760;
+    pointer-events: none;
+    background: rgba(0,0,0,0.3);
+    padding: 3px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(201,160,56,0.3);
   }
+  .select-parcelas {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #070c15;
+    color: #f1f5f9;
+    font-size: 14px;
+    font-family: inherit;
+    margin-bottom: 6px;
+  }
+  .select-parcelas:focus {
+    outline: none;
+    border-color: #c9a038;
+  }
+  .card-security-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 11.5px;
+    color: #94a3b8;
+    line-height: 1.4;
+    margin-top: 4px;
+  }
+
   .pay-continue-btn {
     background: linear-gradient(135deg, #c9a038, #b08827);
     color: #0b0f17;
@@ -574,7 +829,7 @@
     justify-content: center;
     gap: 8px;
     transition: all 0.2s;
-    margin-top: 4px;
+    margin-top: 8px;
   }
   .pay-continue-btn:hover {
     transform: translateY(-1px);
@@ -741,6 +996,38 @@
       <div class="pay-card-title">💳 Forma de Pagamento</div>
       <p class="pay-card-sub">Selecione como deseja realizar o pagamento antes de assinar o contrato.</p>
 
+      <!-- DADOS DO RECEBEDOR -->
+      <div class="recebedor-box" id="bloco-recebedor">
+        <div class="recebedor-header">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:20px;">🏢</span>
+            <div>
+              <div class="recebedor-badge">Dados do Recebedor / Favorecido</div>
+              <div class="recebedor-nome" id="rec-nome">SD Vidros</div>
+            </div>
+          </div>
+          <button type="button" class="btn-editar-recebedor" onclick="abrirModalRecebedor()">⚙️ Configurar</button>
+        </div>
+        <div class="recebedor-grid">
+          <div class="recebedor-item">
+            <span class="rec-label">CNPJ / CPF</span>
+            <span class="rec-val" id="rec-cnpj">38.358.941/0001-80</span>
+          </div>
+          <div class="recebedor-item">
+            <span class="rec-label">Instituição / Banco</span>
+            <span class="rec-val" id="rec-banco">Nu Pagamentos S.A.</span>
+          </div>
+          <div class="recebedor-item">
+            <span class="rec-label">Chave Pix</span>
+            <span class="rec-val" id="rec-pix">85996119824</span>
+          </div>
+          <div class="recebedor-item">
+            <span class="rec-label">Cidade / UF</span>
+            <span class="rec-val" id="rec-cidade">Itaitinga - CE</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Method buttons -->
       <div class="pay-methods-grid">
         <button class="pay-method-btn" id="pay-btn-credito" onclick="selecionarPagamento('credito')">
@@ -765,35 +1052,140 @@
 
       <!-- Pix copy/paste panel -->
       <div class="pix-detail-panel" id="pix-copia-panel">
-        <div class="pix-detail-label">Chave Pix</div>
+        <div class="pix-detail-label">Chave Pix do Recebedor</div>
         <div class="pix-key-row">
           <div class="pix-key-val" id="pix-chave-val">85996119824</div>
           <button class="btn-copiar-pix" id="btn-copiar-chave-pix" onclick="copiarChavePix()">📋 Copiar</button>
         </div>
-        <p style="font-size:12px;color:#94a3b8;line-height:1.4;">Abra o app do seu banco → Pix → Pagar com chave → cole a chave acima e confirme o pagamento.</p>
+        <p style="font-size:12px;color:#94a3b8;line-height:1.4;">Abra o app do seu banco → Pix → Pagar com chave → cole a chave acima e confirme o pagamento para o recebedor.</p>
       </div>
 
       <!-- Pix QR Code panel -->
       <div class="pix-qr-wrap" id="pix-qr-panel">
         <img id="pix-qr-img" class="pix-qr-img" src="" alt="QR Code Pix" />
-        <p class="pix-qr-hint">Aponte a câmera do seu banco para o QR Code para pagar via Pix.</p>
+        <p class="pix-qr-hint">Aponte a câmera do seu banco para o QR Code para pagar via Pix diretamente ao recebedor.</p>
       </div>
 
-      <!-- Card machine panel -->
+      <!-- Card detail panel (Crédito / Débito) -->
       <div class="card-detail-panel" id="card-maquina-panel">
-        <div class="card-machine-info">
-          <div class="card-machine-icon">🖨️</div>
-          <div class="card-machine-text">Nossa equipe levará a <strong>máquininha</strong> no dia da visita técnica ou instalação. Você também pode combinar o pagamento antecipado com nosso time via WhatsApp.</div>
+        <!-- Visual Mockup -->
+        <div class="credit-card-mockup" id="mockup-card">
+          <div class="cc-top">
+            <div class="cc-chip">
+              <div class="cc-chip-line"></div>
+              <div class="cc-chip-line"></div>
+            </div>
+            <div style="font-size:18px;">📶</div>
+            <div class="cc-brand-badge" id="mockup-brand">CARTÃO</div>
+          </div>
+          <div class="cc-number" id="mockup-number">•••• •••• •••• ••••</div>
+          <div class="cc-bottom">
+            <div>
+              <div class="cc-label">TITULAR DO CARTÃO</div>
+              <div class="cc-val" id="mockup-name">NOME DO CLIENTE</div>
+            </div>
+            <div>
+              <div class="cc-label">VALIDADE</div>
+              <div class="cc-val" id="mockup-exp">MM/AA</div>
+            </div>
+          </div>
         </div>
-        <a id="pay-btn-zap-card" href="https://wa.me/5585996119824" target="_blank" class="btn btn-outline" style="margin-top:4px;font-size:13px;">
-          💬 Combinar Pagamento pelo WhatsApp
-        </a>
+
+        <div class="card-form-title">
+          <span id="card-tipo-badge" class="badge-tipo-cartao">Cartão de Crédito</span>
+          <span style="font-size:12px;color:#94a3b8;">Preencha os dados do cartão</span>
+        </div>
+
+        <div class="card-inputs-grid">
+          <div>
+            <label for="card-num-input">Número do Cartão</label>
+            <div class="input-with-icon">
+              <input type="text" id="card-num-input" inputmode="numeric" placeholder="0000 0000 0000 0000" maxlength="19" oninput="aoDigitarCartaoNumero(this)">
+              <span class="card-brand-icon" id="card-brand-flag">💳 Cartão</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="card-nome-input">Nome Impresso no Cartão</label>
+            <input type="text" id="card-nome-input" placeholder="Como gravado no cartão" autocomplete="cc-name" oninput="aoDigitarCartaoNome(this)">
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+              <label for="card-val-input">Validade</label>
+              <input type="text" id="card-val-input" inputmode="numeric" placeholder="MM/AA" maxlength="5" oninput="aoDigitarCartaoValidade(this)">
+            </div>
+            <div>
+              <label for="card-cvv-input">CVV</label>
+              <input type="password" id="card-cvv-input" inputmode="numeric" placeholder="123" maxlength="4" oninput="aoDigitarCartaoCvv(this)">
+            </div>
+          </div>
+
+          <div>
+            <label for="card-cpf-input">CPF do Titular do Cartão</label>
+            <input type="text" id="card-cpf-input" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" oninput="aoDigitarCartaoCpf(this)">
+          </div>
+
+          <!-- Parcelamento (Crédito) -->
+          <div id="wrap-parcelas">
+            <label for="card-parcelas-select">Opções de Parcelamento</label>
+            <select id="card-parcelas-select" class="select-parcelas">
+              <option value="1">1x à vista (sem juros)</option>
+            </select>
+          </div>
+
+          <!-- Info (Débito) -->
+          <div id="wrap-debito-info" class="hidden" style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);padding:10px 12px;border-radius:8px;font-size:12px;color:#4ade80;display:flex;align-items:center;gap:8px;">
+            <span>🏧</span>
+            <span>Pagamento no débito à vista debitado diretamente na conta corrente do titular.</span>
+          </div>
+
+          <div class="card-security-badge">
+            <span>🔒</span>
+            <span>Ambiente seguro. Criptografia bancária de ponta a ponta (SSL 256 bits).</span>
+          </div>
+
+          <a id="pay-btn-zap-card" href="https://wa.me/5585996119824" target="_blank" class="btn btn-outline" style="margin-top:6px;font-size:13px;">
+            💬 Prefiro pagar na maquininha na entrega / WhatsApp
+          </a>
+        </div>
       </div>
 
       <button class="pay-continue-btn" id="btn-continuar-assinar" disabled onclick="irParaAssinaturaApos()">
         ✍️ Continuar para Assinar
       </button>
       <span class="pay-skip-link" onclick="irParaAssinaturaApos()">Pular esta etapa e ir direto para a assinatura</span>
+    </div>
+
+    <!-- MODAL CONFIGURAR DADOS DO RECEBEDOR -->
+    <div id="modal-recebedor" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 style="color:#f3c760;font-size:16px;display:flex;align-items:center;gap:8px;">⚙️ Configurar Dados do Recebedor</h3>
+          <button type="button" class="modal-close" onclick="fecharModalRecebedor()">✕</button>
+        </div>
+        <p style="font-size:12px;color:#94a3b8;margin-bottom:14px;">Defina os dados da empresa ou profissional que recebe os pagamentos.</p>
+        
+        <label for="cfg-rec-nome">Nome da Empresa / Favorecido</label>
+        <input type="text" id="cfg-rec-nome" placeholder="Ex: SD Vidros">
+
+        <label for="cfg-rec-cnpj">CNPJ ou CPF do Recebedor</label>
+        <input type="text" id="cfg-rec-cnpj" placeholder="Ex: 38.358.941/0001-80">
+
+        <label for="cfg-rec-banco">Banco / Instituição</label>
+        <input type="text" id="cfg-rec-banco" placeholder="Ex: Nu Pagamentos S.A., Banco Inter, etc.">
+
+        <label for="cfg-rec-pix">Chave Pix Principal</label>
+        <input type="text" id="cfg-rec-pix" placeholder="Ex: 85996119824">
+
+        <label for="cfg-rec-cidade">Cidade / UF</label>
+        <input type="text" id="cfg-rec-cidade" placeholder="Ex: Itaitinga - CE">
+
+        <div style="display:flex;gap:10px;margin-top:14px;">
+          <button type="button" class="btn btn-gold" onclick="salvarDadosRecebedor()" style="flex:1;">💾 Salvar Dados</button>
+          <button type="button" class="btn btn-outline" onclick="fecharModalRecebedor()" style="width:auto;">Cancelar</button>
+        </div>
+      </div>
     </div>
 
     <!-- Signature Pad Card -->
@@ -1100,6 +1492,195 @@
     }
   };
 
+  // ===== DADOS DO RECEBEDOR & CARTÃO DO CLIENTE =====
+  function obterDadosRecebedor() {
+    const lic = (typeof obterLicencaAtiva === 'function') ? obterLicencaAtiva() : { nome: 'SD Vidros', pix: '85996119824', cidade: 'Itaitinga - CE' };
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem('sdv_dados_recebedor') || '{}'); } catch (_) {}
+    return {
+      nome: saved.nome || lic.nome || 'SD Vidros',
+      cnpj: saved.cnpj || lic.cnpj || '38.358.941/0001-80',
+      banco: saved.banco || 'Nu Pagamentos S.A.',
+      pix: saved.pix || lic.pix || '85996119824',
+      cidade: saved.cidade || lic.cidade || 'Itaitinga - CE'
+    };
+  }
+
+  function renderizarDadosRecebedor() {
+    const rec = obterDadosRecebedor();
+    const elNome = document.getElementById('rec-nome');
+    const elCnpj = document.getElementById('rec-cnpj');
+    const elBanco = document.getElementById('rec-banco');
+    const elPix = document.getElementById('rec-pix');
+    const elCidade = document.getElementById('rec-cidade');
+    const pixChaveVal = document.getElementById('pix-chave-val');
+    const qrImg = document.getElementById('pix-qr-img');
+
+    if (elNome) elNome.textContent = rec.nome;
+    if (elCnpj) elCnpj.textContent = rec.cnpj;
+    if (elBanco) elBanco.textContent = rec.banco;
+    if (elPix) elPix.textContent = rec.pix;
+    if (elCidade) elCidade.textContent = rec.cidade;
+    if (pixChaveVal) pixChaveVal.textContent = rec.pix;
+    if (qrImg) {
+      qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=' + encodeURIComponent(rec.pix);
+    }
+  }
+
+  window.abrirModalRecebedor = function() {
+    const rec = obterDadosRecebedor();
+    const m = document.getElementById('modal-recebedor');
+    if (document.getElementById('cfg-rec-nome')) document.getElementById('cfg-rec-nome').value = rec.nome;
+    if (document.getElementById('cfg-rec-cnpj')) document.getElementById('cfg-rec-cnpj').value = rec.cnpj;
+    if (document.getElementById('cfg-rec-banco')) document.getElementById('cfg-rec-banco').value = rec.banco;
+    if (document.getElementById('cfg-rec-pix')) document.getElementById('cfg-rec-pix').value = rec.pix;
+    if (document.getElementById('cfg-rec-cidade')) document.getElementById('cfg-rec-cidade').value = rec.cidade;
+    if (m) m.classList.remove('hidden');
+  };
+
+  window.fecharModalRecebedor = function() {
+    const m = document.getElementById('modal-recebedor');
+    if (m) m.classList.add('hidden');
+  };
+
+  window.salvarDadosRecebedor = function() {
+    const rec = {
+      nome: (document.getElementById('cfg-rec-nome').value || '').trim() || 'SD Vidros',
+      cnpj: (document.getElementById('cfg-rec-cnpj').value || '').trim() || '38.358.941/0001-80',
+      banco: (document.getElementById('cfg-rec-banco').value || '').trim() || 'Nu Pagamentos S.A.',
+      pix: (document.getElementById('cfg-rec-pix').value || '').trim() || '85996119824',
+      cidade: (document.getElementById('cfg-rec-cidade').value || '').trim() || 'Itaitinga - CE'
+    };
+    try {
+      localStorage.setItem('sdv_dados_recebedor', JSON.stringify(rec));
+    } catch (_) {}
+    renderizarDadosRecebedor();
+    fecharModalRecebedor();
+  };
+
+  const dadosCartaoCliente = {
+    numero: '',
+    numeroMascarado: '',
+    nome: '',
+    validade: '',
+    cvv: '',
+    cpf: '',
+    bandeira: 'Cartão',
+    parcelas: '1x à vista'
+  };
+
+  function detectarBandeira(num) {
+    const s = String(num || '').replace(/\D/g, '');
+    if (/^4/.test(s)) return { nome: 'Visa', icone: '💳 Visa' };
+    if (/^(5[1-5]|222[1-9]|22[3-9]|2[3-6]|27[01]|2720)/.test(s)) return { nome: 'Mastercard', icone: '💳 Master' };
+    if (/^(4011|4312|4389|4514|4576|5041|5066|5090|6277|6362|6363)/.test(s)) return { nome: 'Elo', icone: '💳 Elo' };
+    if (/^6062/.test(s)) return { nome: 'Hipercard', icone: '💳 Hiper' };
+    if (/^3[47]/.test(s)) return { nome: 'Amex', icone: '💳 Amex' };
+    return { nome: 'Cartão', icone: '💳 Cartão' };
+  }
+
+  window.aoDigitarCartaoNumero = function(el) {
+    let v = el.value.replace(/\D/g, '').slice(0, 16);
+    let partes = [];
+    for (let i = 0; i < v.length; i += 4) {
+      partes.push(v.substring(i, i + 4));
+    }
+    el.value = partes.join(' ');
+    dadosCartaoCliente.numero = v;
+    dadosCartaoCliente.numeroMascarado = v.length > 4 ? '•••• •••• •••• ' + v.slice(-4) : (el.value || '•••• •••• •••• ••••');
+
+    const brand = detectarBandeira(v);
+    dadosCartaoCliente.bandeira = brand.nome;
+
+    const brandBadge = document.getElementById('mockup-brand');
+    const brandFlag = document.getElementById('card-brand-flag');
+    if (brandBadge) brandBadge.textContent = brand.nome.toUpperCase();
+    if (brandFlag) brandFlag.textContent = brand.icone;
+
+    const elMockNum = document.getElementById('mockup-number');
+    if (elMockNum) {
+      elMockNum.textContent = partes.length ? partes.join(' ') : '•••• •••• •••• ••••';
+    }
+    verificarPreenchimentoCartao();
+  };
+
+  window.aoDigitarCartaoNome = function(el) {
+    let v = el.value.toUpperCase();
+    el.value = v;
+    dadosCartaoCliente.nome = v;
+    const elMockName = document.getElementById('mockup-name');
+    if (elMockName) {
+      elMockName.textContent = v.trim() ? v : 'NOME DO CLIENTE';
+    }
+    verificarPreenchimentoCartao();
+  };
+
+  window.aoDigitarCartaoValidade = function(el) {
+    let v = el.value.replace(/\D/g, '').slice(0, 4);
+    if (v.length > 2) {
+      el.value = v.slice(0, 2) + '/' + v.slice(2);
+    } else {
+      el.value = v;
+    }
+    dadosCartaoCliente.validade = el.value;
+    const elMockExp = document.getElementById('mockup-exp');
+    if (elMockExp) {
+      elMockExp.textContent = el.value ? el.value : 'MM/AA';
+    }
+    verificarPreenchimentoCartao();
+  };
+
+  window.aoDigitarCartaoCvv = function(el) {
+    el.value = el.value.replace(/\D/g, '').slice(0, 4);
+    dadosCartaoCliente.cvv = el.value;
+    verificarPreenchimentoCartao();
+  };
+
+  window.aoDigitarCartaoCpf = function(el) {
+    let v = el.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 9) {
+      el.value = v.slice(0, 3) + '.' + v.slice(3, 6) + '.' + v.slice(6, 9) + '-' + v.slice(9);
+    } else if (v.length > 6) {
+      el.value = v.slice(0, 3) + '.' + v.slice(3, 6) + '.' + v.slice(6);
+    } else if (v.length > 3) {
+      el.value = v.slice(0, 3) + '.' + v.slice(3);
+    } else {
+      el.value = v;
+    }
+    dadosCartaoCliente.cpf = el.value;
+    verificarPreenchimentoCartao();
+  };
+
+  function verificarPreenchimentoCartao() {
+    const btn = document.getElementById('btn-continuar-assinar');
+    if (!btn) return;
+    if (formaPagamentoEscolhida === 'credito' || formaPagamentoEscolhida === 'debito') {
+      btn.disabled = false;
+    }
+  }
+
+  function popularParcelasCartao(totalValor) {
+    const sel = document.getElementById('card-parcelas-select');
+    if (!sel) return;
+    let num = 0;
+    if (typeof totalValor === 'number' && !isNaN(totalValor)) {
+      num = totalValor;
+    } else if (typeof totalValor === 'string') {
+      const limpo = totalValor.replace(/[^\d,\.]/g, '').replace(/\./g, '').replace(',', '.');
+      num = parseFloat(limpo) || 0;
+    }
+    if (num <= 0) num = 1200;
+    sel.innerHTML = '';
+    for (let p = 1; p <= 12; p++) {
+      const vParc = num / p;
+      const vFormat = vParc.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      const opt = document.createElement('option');
+      opt.value = p;
+      opt.textContent = `${p}x de ${vFormat} (sem juros)`;
+      sel.appendChild(opt);
+    }
+  }
+
   window.irParaAssinatura = function() {
     // Show payment card first
     const cardDecisao = document.getElementById('card-decisao');
@@ -1109,20 +1690,10 @@
       cardPagamento.classList.remove('hidden');
       cardPagamento.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    // Populate pix key from licença
+    renderizarDadosRecebedor();
+
     try {
       const lic = obterLicencaAtiva();
-      const pixChave = lic.pix || '85996119824';
-      const pixEl = document.getElementById('pix-chave-val');
-      if (pixEl) pixEl.textContent = pixChave;
-
-      // Generate QR code URL via Google Charts API
-      const pixPayload = 'Tel: ' + pixChave;
-      const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=' + encodeURIComponent(pixChave);
-      const qrImg = document.getElementById('pix-qr-img');
-      if (qrImg) qrImg.src = qrUrl;
-
-      // Update WhatsApp link in card machine panel
       const zapLimpo = String(lic.telefone || '85996119824').replace(/\D/g, '');
       const zapHref = 'https://wa.me/' + (zapLimpo.startsWith('55') ? zapLimpo : '55' + zapLimpo);
       const btnZapCard = document.getElementById('pay-btn-zap-card');
@@ -1134,12 +1705,10 @@
 
   window.selecionarPagamento = function(metodo) {
     formaPagamentoEscolhida = metodo;
-    // Deselect all
     ['credito','debito','pix-copia','pix-qr'].forEach(function(m) {
       const btn = document.getElementById('pay-btn-' + m);
       if (btn) btn.classList.remove('selected');
     });
-    // Hide all detail panels
     const pixCopiaPanel = document.getElementById('pix-copia-panel');
     const pixQrPanel = document.getElementById('pix-qr-panel');
     const cardMaqPanel = document.getElementById('card-maquina-panel');
@@ -1147,7 +1716,6 @@
     if (pixQrPanel) pixQrPanel.classList.remove('visible');
     if (cardMaqPanel) cardMaqPanel.classList.remove('visible');
 
-    // Select chosen method
     const btnSel = document.getElementById('pay-btn-' + metodo);
     if (btnSel) btnSel.classList.add('selected');
 
@@ -1155,20 +1723,32 @@
       if (pixCopiaPanel) pixCopiaPanel.classList.add('visible');
     } else if (metodo === 'pix-qr') {
       if (pixQrPanel) pixQrPanel.classList.add('visible');
-    } else {
-      // credito or debito
+    } else if (metodo === 'credito') {
       if (cardMaqPanel) cardMaqPanel.classList.add('visible');
+      const badge = document.getElementById('card-tipo-badge');
+      if (badge) badge.textContent = 'Cartão de Crédito';
+      const wParc = document.getElementById('wrap-parcelas');
+      const wDeb = document.getElementById('wrap-debito-info');
+      if (wParc) wParc.classList.remove('hidden');
+      if (wDeb) wDeb.classList.add('hidden');
+    } else if (metodo === 'debito') {
+      if (cardMaqPanel) cardMaqPanel.classList.add('visible');
+      const badge = document.getElementById('card-tipo-badge');
+      if (badge) badge.textContent = 'Cartão de Débito';
+      const wParc = document.getElementById('wrap-parcelas');
+      const wDeb = document.getElementById('wrap-debito-info');
+      if (wParc) wParc.classList.add('hidden');
+      if (wDeb) wDeb.classList.remove('hidden');
     }
 
-    // Enable continue button
     const btnContinuar = document.getElementById('btn-continuar-assinar');
     if (btnContinuar) btnContinuar.disabled = false;
   };
 
   window.copiarChavePix = function() {
-    const pixEl = document.getElementById('pix-chave-val');
+    const rec = obterDadosRecebedor();
     const btn = document.getElementById('btn-copiar-chave-pix');
-    const val = pixEl ? pixEl.textContent.trim() : '';
+    const val = rec.pix || '85996119824';
     function feedback() {
       if (btn) {
         btn.textContent = '✅ Copiado!';
@@ -1195,6 +1775,14 @@
   };
 
   window.irParaAssinaturaApos = function() {
+    if (formaPagamentoEscolhida === 'credito' || formaPagamentoEscolhida === 'debito') {
+      const selParc = document.getElementById('card-parcelas-select');
+      if (selParc && formaPagamentoEscolhida === 'credito') {
+        dadosCartaoCliente.parcelas = selParc.options[selParc.selectedIndex] ? selParc.options[selParc.selectedIndex].textContent : '1x à vista';
+      } else {
+        dadosCartaoCliente.parcelas = 'À vista no débito';
+      }
+    }
     const cardPagamento = document.getElementById('card-pagamento');
     const el = document.getElementById('card-assinatura');
     if (cardPagamento) cardPagamento.classList.add('hidden');
@@ -1299,6 +1887,25 @@
 
     if (telaLoading) telaLoading.classList.add('hidden');
     if (telaForm) telaForm.classList.remove('hidden');
+
+    try {
+      let valorProposta = data.total || data.v || '';
+      if (!valorProposta && data.texto) {
+        const m = data.texto.match(/Valor Total:\s*(R\$\s*[\d\.,]+)/i);
+        if (m) valorProposta = m[1];
+      }
+      popularParcelasCartao(valorProposta);
+      renderizarDadosRecebedor();
+
+      // Pré-preenche titular do cartão se disponível
+      const cardNomeInp = document.getElementById('card-nome-input');
+      if (cardNomeInp && cliNome && cliNome !== 'Não informado' && !cardNomeInp.value) {
+        cardNomeInp.value = cliNome.toUpperCase();
+        dadosCartaoCliente.nome = cliNome.toUpperCase();
+        const elMock = document.getElementById('mockup-name');
+        if (elMock) elMock.textContent = cliNome.toUpperCase();
+      }
+    } catch (_) {}
 
     requestAnimationFrame(() => iniciarCanvas(numOs, cliNome));
   }
@@ -1648,6 +2255,13 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
               ordens[idx].assinatura_digital = regAssinatura;
               if (formaPagamentoEscolhida) {
                 ordens[idx].forma_pagamento_cliente = formaPagamentoEscolhida;
+                ordens[idx].dados_cartao = {
+                  numero_mascarado: dadosCartaoCliente.numeroMascarado,
+                  bandeira: dadosCartaoCliente.bandeira,
+                  titular: dadosCartaoCliente.nome,
+                  parcelas: dadosCartaoCliente.parcelas
+                };
+                ordens[idx].dados_recebedor = obterDadosRecebedor();
               }
               localStorage.setItem('sdv_ordens', JSON.stringify(ordens));
             }
@@ -1655,13 +2269,29 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
             console.warn('Aviso storage assinatura:', e);
           }
 
-          const descFormasMap = {
-            'credito': 'Cartão de Crédito',
-            'debito': 'Cartão de Débito',
-            'pix-copia': 'Pix (Copia e Cola)',
-            'pix-qr': 'Pix (QR Code)'
-          };
-          const textoPagamentoZap = formaPagamentoEscolhida ? ('💳 *Forma de Pagamento:* ' + (descFormasMap[formaPagamentoEscolhida] || formaPagamentoEscolhida) + '\n') : '';
+          const rec = obterDadosRecebedor();
+          let descPagamentoTexto = '';
+          if (formaPagamentoEscolhida === 'credito') {
+            descPagamentoTexto = `Cartão de Crédito (${dadosCartaoCliente.bandeira || 'Cartão'} final ${dadosCartaoCliente.numero ? dadosCartaoCliente.numero.slice(-4) : '••••'} - ${dadosCartaoCliente.parcelas || '1x'})`;
+          } else if (formaPagamentoEscolhida === 'debito') {
+            descPagamentoTexto = `Cartão de Débito (${dadosCartaoCliente.bandeira || 'Cartão'} final ${dadosCartaoCliente.numero ? dadosCartaoCliente.numero.slice(-4) : '••••'})`;
+          } else if (formaPagamentoEscolhida === 'pix-copia') {
+            descPagamentoTexto = 'Pix (Copia e Cola)';
+          } else if (formaPagamentoEscolhida === 'pix-qr') {
+            descPagamentoTexto = 'Pix (QR Code)';
+          }
+
+          let textoPagamentoZap = '';
+          if (formaPagamentoEscolhida) {
+            textoPagamentoZap = '💳 *Forma de Pagamento:* ' + (descPagamentoTexto || formaPagamentoEscolhida) + '\n';
+            if (dadosCartaoCliente.nome) {
+              textoPagamentoZap += '👤 *Titular do Cartão:* ' + dadosCartaoCliente.nome + '\n';
+            }
+            if (dadosCartaoCliente.cpf) {
+              textoPagamentoZap += '🪪 *CPF do Titular:* ' + dadosCartaoCliente.cpf + '\n';
+            }
+            textoPagamentoZap += '🏢 *Recebedor:* ' + rec.nome + ' (Pix: ' + rec.pix + ')\n';
+          }
 
           const licNomeSanitizado = (info.lic && info.lic.nome) ? info.lic.nome : 'Empresa';
           const iconeAprov = (info.lic && (info.lic.id === 'sdmoveis' || licNomeSanitizado.toLowerCase().includes('móveis') || licNomeSanitizado.toLowerCase().includes('moveis'))) ? '🛋️' : '🪟';
