@@ -1114,9 +1114,9 @@
               <span>📦</span> Valor Produtos
             </label>
             <input type="text" id="o-val-produtos" inputmode="decimal" placeholder="0,00" value="0,00"
-              onfocus="this.select()"
+              onfocus="limparAoFocar(this)"
               oninput="aoModificarValoresResumoFinanceiro('produtos')"
-              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro('produtos')"
+              onblur="restaurarCampoMoeda(this, 'produtos')"
               style="font-weight:800;color:#fff;background:#0d0d15;border:1px solid rgba(255,255,255,0.12);padding:9px 10px;font-size:13px;border-radius:8px;">
           </div>
 
@@ -1126,9 +1126,9 @@
               <span>🛠️</span> Valor Serviço
             </label>
             <input type="text" id="o-val-servico" inputmode="decimal" placeholder="0,00" value="0,00"
-              onfocus="this.select()"
+              onfocus="limparAoFocar(this)"
               oninput="aoModificarValoresResumoFinanceiro('servico')"
-              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro('servico')"
+              onblur="restaurarCampoMoeda(this, 'servico')"
               style="font-weight:800;color:#fff;background:#0d0d15;border:1px solid rgba(255,255,255,0.12);padding:9px 10px;font-size:13px;border-radius:8px;">
           </div>
 
@@ -1142,9 +1142,9 @@
             </div>
             <div style="display:flex;align-items:center;gap:4px;margin-top:4px;">
               <input type="text" id="o-taxa-acrescimo" inputmode="decimal" placeholder="0,00" value="0,00"
-                onfocus="this.select()"
+                onfocus="limparAoFocar(this)"
                 oninput="aoModificarValoresResumoFinanceiro('taxa')"
-                onblur="formatarCampoTaxa(this);aoModificarValoresResumoFinanceiro('taxa')"
+                onblur="restaurarCampoTaxa(this, 'taxa')"
                 style="font-weight:800;color:var(--gold-light);background:#0d0d15;border:1px solid rgba(201,168,76,0.4);text-align:right;padding:7px 8px;font-size:13px;border-radius:6px;width:100%;">
               <span style="font-size:13px;font-weight:800;color:var(--gold-light);">%</span>
             </div>
@@ -1162,22 +1162,32 @@
               <span>🚚</span> Frete
             </label>
             <input type="text" id="o-val-frete" inputmode="decimal" placeholder="0,00" value="0,00"
-              onfocus="this.select()"
+              onfocus="limparAoFocar(this)"
               oninput="aoModificarValoresResumoFinanceiro('frete')"
-              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro('frete')"
+              onblur="restaurarCampoMoeda(this, 'frete')"
               style="font-weight:800;color:#fff;background:#0d0d15;border:1px solid rgba(255,255,255,0.12);padding:9px 10px;font-size:13px;border-radius:8px;">
           </div>
 
-          <!-- 5. Desconto -->
+          <!-- 5. Desconto com toggle R$/% -->
           <div class="field" style="margin:0;">
-            <label style="font-size:11px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:4px;">
-              <span>🏷️</span> Desconto
-            </label>
-            <input type="text" id="o-val-desconto" inputmode="decimal" placeholder="0,00" value="0,00"
-              onfocus="this.select()"
-              oninput="aoModificarValoresResumoFinanceiro('desconto')"
-              onblur="formatarCampoMoeda(this);aoModificarValoresResumoFinanceiro('desconto')"
-              style="font-weight:800;color:#ff7878;background:#0d0d15;border:1px solid rgba(239,68,68,0.25);padding:9px 10px;font-size:13px;border-radius:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <label style="font-size:11px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:4px;margin:0;">
+                <span>🏷️</span> Desconto
+              </label>
+              <div style="display:flex;border:1px solid rgba(239,68,68,0.35);border-radius:6px;overflow:hidden;">
+                <button type="button" id="btn-desc-rs" onclick="alternarTipoDesconto('moeda')" style="padding:2px 8px;font-size:10px;font-weight:800;border:none;cursor:pointer;background:rgba(239,68,68,0.55);color:#fff;transition:all 0.15s;">R$</button>
+                <button type="button" id="btn-desc-pc" onclick="alternarTipoDesconto('percent')" style="padding:2px 8px;font-size:10px;font-weight:800;border:none;cursor:pointer;background:transparent;color:#f87171;transition:all 0.15s;">%</button>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:4px;">
+              <input type="text" id="o-val-desconto" inputmode="decimal" placeholder="0,00" value="0,00"
+                onfocus="limparAoFocar(this)"
+                oninput="aoModificarValoresResumoFinanceiro('desconto')"
+                onblur="restaurarCampoDesconto(this)"
+                style="font-weight:800;color:#ff7878;background:#0d0d15;border:1px solid rgba(239,68,68,0.25);padding:9px 10px;font-size:13px;border-radius:8px;width:100%;">
+              <span id="desc-sufixo" style="font-size:13px;font-weight:800;color:#f87171;white-space:nowrap;"></span>
+            </div>
+            <div id="desc-calc-info" style="font-size:10px;color:#f87171;margin-top:3px;text-align:right;font-weight:700;"></div>
           </div>
         </div>
 
@@ -3908,15 +3918,25 @@ function formatarValorPtBr(val) {
 }
 
 function formatarCampoMoeda(el) {
-  if (!el) return;
-  const n = parseNum(el.value);
-  el.value = formatarValorPtBr(n);
+  if (!el) return '0,00';
+  const val = (typeof el === 'object' && el !== null && 'value' in el) ? el.value : el;
+  const n = parseNum(val);
+  const formatted = formatarValorPtBr(n);
+  if (typeof el === 'object' && el !== null && 'value' in el) {
+    el.value = formatted;
+  }
+  return formatted;
 }
 
 function formatarCampoTaxa(el) {
-  if (!el) return;
-  const n = parseNum(el.value);
-  el.value = n > 0 ? n.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) : '0,00';
+  if (!el) return '0,00';
+  const val = (typeof el === 'object' && el !== null && 'value' in el) ? el.value : el;
+  const n = parseNum(val);
+  const formatted = n > 0 ? n.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) : '0,00';
+  if (typeof el === 'object' && el !== null && 'value' in el) {
+    el.value = formatted;
+  }
+  return formatted;
 }
 
 function parseNum(val) {
@@ -4121,26 +4141,32 @@ function addItem(desc='', qtd='1', cor='', alt='', larg='', v_m2='', v_unit='', 
       <input placeholder="Ex: Incolor" value="${esc(cor)}">
     </td>
     <td>
-      <input type="text" inputmode="decimal" placeholder="1,00" value="${esc(alt)}" oninput="calcItem(${id})">
+      <input type="text" inputmode="decimal" placeholder="1,00" value="${esc(alt)}"
+        onfocus="limparAoFocar(this)"
+        onblur="restaurarCampoTabela(this, ${id})"
+        oninput="calcItem(${id})">
     </td>
     <td>
-      <input type="text" inputmode="decimal" placeholder="1,50" value="${esc(larg)}" oninput="calcItem(${id})">
+      <input type="text" inputmode="decimal" placeholder="1,50" value="${esc(larg)}"
+        onfocus="limparAoFocar(this)"
+        onblur="restaurarCampoTabela(this, ${id})"
+        oninput="calcItem(${id})">
     </td>
     <td>
       <input id="m2-${id}" readonly value="0,00 m²" style="text-align:center">
     </td>
     <td>
       <input type="text" inputmode="decimal" placeholder="0,00" value="${v_m2_formatado}"
-        onfocus="this.select()"
+        onfocus="limparAoFocar(this)"
         oninput="calcItem(${id})"
-        onblur="if(this.value.trim()){this.value=formatarValorPtBr(this.value);}calcItem(${id})"
+        onblur="restaurarCampoTabelaMoeda(this, ${id})"
         style="text-align:right;">
     </td>
     <td>
       <input type="text" inputmode="decimal" placeholder="0,00" value="${v_unit_formatado}"
-        onfocus="this.select()"
+        onfocus="limparAoFocar(this)"
         oninput="calcItem(${id})"
-        onblur="if(this.value.trim()){this.value=formatarValorPtBr(this.value);}calcItem(${id})"
+        onblur="restaurarCampoTabelaMoeda(this, ${id})"
         style="text-align:right;">
     </td>
     <td>
@@ -4194,6 +4220,94 @@ function calcItem(id) {
 }
 
 let valoresResumoEditadosManualmente = false;
+let tipoDesconto = 'moeda'; // 'moeda' ou 'percent'
+
+function limparAoFocar(el) {
+  if (!el) return;
+  el.dataset.prevVal = el.value;
+  el.value = '';
+}
+
+function limparSeZero(el) {
+  limparAoFocar(el);
+}
+
+function restaurarCampoMoeda(el, campoOrigem) {
+  if (!el) return;
+  if (!el.value || el.value.trim() === '') {
+    el.value = el.dataset.prevVal || '0,00';
+  } else {
+    formatarCampoMoeda(el);
+  }
+  aoModificarValoresResumoFinanceiro(campoOrigem);
+}
+
+function restaurarCampoTaxa(el, campoOrigem) {
+  if (!el) return;
+  if (!el.value || el.value.trim() === '') {
+    el.value = el.dataset.prevVal || '0,00';
+  } else {
+    formatarCampoTaxa(el);
+  }
+  aoModificarValoresResumoFinanceiro(campoOrigem);
+}
+
+function restaurarCampoDesconto(el) {
+  if (!el) return;
+  if (!el.value || el.value.trim() === '') {
+    el.value = el.dataset.prevVal || '0,00';
+  } else {
+    if (tipoDesconto === 'percent') {
+      formatarCampoTaxa(el);
+    } else {
+      formatarCampoMoeda(el);
+    }
+  }
+  aoModificarValoresResumoFinanceiro('desconto');
+}
+
+function restaurarCampoQtd(el, id) {
+  if (!el) return;
+  if (!el.value.trim() || parseNum(el.value) <= 0) {
+    el.value = el.dataset.prevVal || '1';
+  }
+  calcItem(id);
+}
+
+function restaurarCampoTabela(el, id) {
+  if (!el) return;
+  if (!el.value.trim()) {
+    el.value = el.dataset.prevVal || '';
+  }
+  calcItem(id);
+}
+
+function restaurarCampoTabelaMoeda(el, id) {
+  if (!el) return;
+  if (!el.value.trim()) {
+    el.value = el.dataset.prevVal || '';
+  } else {
+    el.value = formatarValorPtBr(el.value);
+  }
+  calcItem(id);
+}
+
+function alternarTipoDesconto(tipo) {
+  tipoDesconto = tipo;
+  const btnRs = document.getElementById('btn-desc-rs');
+  const btnPc = document.getElementById('btn-desc-pc');
+  const sufixo = document.getElementById('desc-sufixo');
+  if (tipo === 'moeda') {
+    if (btnRs) { btnRs.style.background = 'rgba(239,68,68,0.55)'; btnRs.style.color = '#fff'; }
+    if (btnPc) { btnPc.style.background = 'transparent'; btnPc.style.color = '#f87171'; }
+    if (sufixo) sufixo.textContent = '';
+  } else {
+    if (btnPc) { btnPc.style.background = 'rgba(239,68,68,0.55)'; btnPc.style.color = '#fff'; }
+    if (btnRs) { btnRs.style.background = 'transparent'; btnRs.style.color = '#f87171'; }
+    if (sufixo) sufixo.textContent = '%';
+  }
+  recalcularTotaisGerais('desconto');
+}
 
 function aoModificarValoresResumoFinanceiro(campoOrigem = '') {
   valoresResumoEditadosManualmente = true;
@@ -4251,7 +4365,22 @@ function recalcularTotaisGerais(campoOrigem = '') {
   }
 
   // Total do Orçamento = Produtos + Serviço (Mão de Obra) + Frete - Desconto
-  const totalFinal = Math.max(0, valProd + valServ + valFrete - valDesc);
+  const subtotalAntesDesc = valProd + valServ + valFrete;
+  let valDescontoFinal = 0;
+  if (tipoDesconto === 'percent') {
+    valDescontoFinal = subtotalAntesDesc * (valDesc / 100);
+    const elDescCalc = document.getElementById('desc-calc-info');
+    if (elDescCalc && valDesc > 0) {
+      elDescCalc.textContent = `= R$ ${formatarValorPtBr(valDescontoFinal)} de desconto`;
+    } else if (elDescCalc) {
+      elDescCalc.textContent = '';
+    }
+  } else {
+    valDescontoFinal = valDesc;
+    const elDescCalc = document.getElementById('desc-calc-info');
+    if (elDescCalc) elDescCalc.textContent = '';
+  }
+  const totalFinal = Math.max(0, subtotalAntesDesc - valDescontoFinal);
   const elTotal = document.getElementById('total');
   if (elTotal) {
     elTotal.textContent = 'R$ ' + formatarValorPtBr(totalFinal);
@@ -4374,7 +4503,9 @@ function getOrc() {
     taxaAcrescimo: taxaAcrescimo,
     valAcrescimo: valAcrescimo,
     valFrete: valFrete,
-    valDesconto: valDesconto,
+    valDesconto: tipoDesconto === 'percent' ? ((valProdutos + valServico + valFrete) * (valDesconto / 100)) : valDesconto,
+    tipoDesconto: tipoDesconto,
+    valDescontoOrig: valDesconto,
     itens:  getItens(),
     data:   new Date().toLocaleDateString('pt-BR')
   };
@@ -5506,7 +5637,13 @@ function editarOs(id) {
     elServ.value = formatarValorPtBr(parseNum(d.valProdutos) * (parseNum(d.taxaAcrescimo) / 100));
   }
   if (elFrete && d.valFrete != null) elFrete.value = formatarValorPtBr(d.valFrete);
-  if (elDesc && d.valDesconto != null) elDesc.value = formatarValorPtBr(d.valDesconto);
+  if (d.tipoDesconto === 'percent') {
+    alternarTipoDesconto('percent');
+    if (elDesc) elDesc.value = formatarCampoTaxa(d.valDescontoOrig != null ? d.valDescontoOrig : d.valDesconto);
+  } else {
+    alternarTipoDesconto('moeda');
+    if (elDesc && d.valDesconto != null) elDesc.value = formatarValorPtBr(d.valDesconto);
+  }
   recalcularTotaisGerais('edicao');
 
   // Configurações do modo de edição de O.S. com modificações
