@@ -388,6 +388,215 @@
     gap: 10px;
     margin-top: 14px;
   }
+
+  /* ===== PAYMENT SCREEN ===== */
+  .pay-card {
+    background: #141b27;
+    border: 1px solid #243046;
+    border-radius: 14px;
+    padding: 20px 18px;
+    margin-bottom: 16px;
+  }
+  .pay-card-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #f3c760;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .pay-card-sub {
+    font-size: 12.5px;
+    color: #94a3b8;
+    margin-bottom: 18px;
+    line-height: 1.4;
+  }
+  .pay-methods-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .pay-method-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 16px 10px;
+    border-radius: 12px;
+    border: 2px solid #334155;
+    background: #0f1521;
+    color: #cbd5e1;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    line-height: 1.2;
+  }
+  .pay-method-btn .pay-icon {
+    font-size: 28px;
+  }
+  .pay-method-btn:hover,
+  .pay-method-btn.selected {
+    border-color: #c9a038;
+    background: rgba(201,160,56,0.1);
+    color: #f3c760;
+    box-shadow: 0 0 0 2px rgba(201,160,56,0.25);
+  }
+  .pay-method-btn.selected {
+    background: rgba(201,160,56,0.15);
+  }
+  /* Pix full-width row */
+  .pay-pix-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  /* Pix details panel */
+  .pix-detail-panel {
+    background: #0f1521;
+    border: 1px solid #243046;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .pix-detail-panel.visible { display: block; }
+  .pix-detail-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .pix-key-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .pix-key-val {
+    flex: 1;
+    background: #070c15;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13.5px;
+    font-family: monospace;
+    color: #f3c760;
+    letter-spacing: 0.04em;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .btn-copiar-pix {
+    background: rgba(201,160,56,0.15);
+    border: 1px solid #c9a038;
+    color: #f3c760;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn-copiar-pix:hover {
+    background: rgba(201,160,56,0.3);
+  }
+  .pix-qr-wrap {
+    text-align: center;
+    display: none;
+  }
+  .pix-qr-wrap.visible { display: block; }
+  .pix-qr-img {
+    width: 170px;
+    height: 170px;
+    border-radius: 12px;
+    border: 3px solid #c9a038;
+    background: #fff;
+    margin: 0 auto 10px;
+    display: block;
+  }
+  .pix-qr-hint {
+    font-size: 11.5px;
+    color: #64748b;
+    line-height: 1.4;
+  }
+  /* Card / Credito detail panel */
+  .card-detail-panel {
+    background: #0f1521;
+    border: 1px solid #243046;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .card-detail-panel.visible { display: block; }
+  .card-machine-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid #334155;
+    margin-bottom: 10px;
+  }
+  .card-machine-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+  }
+  .card-machine-text {
+    font-size: 13px;
+    color: #cbd5e1;
+    line-height: 1.45;
+  }
+  .pay-continue-btn {
+    background: linear-gradient(135deg, #c9a038, #b08827);
+    color: #0b0f17;
+    font-size: 15px;
+    font-weight: 800;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+  .pay-continue-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(201,160,56,0.4);
+  }
+  .pay-continue-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .pay-skip-link {
+    display: block;
+    text-align: center;
+    color: #64748b;
+    font-size: 12px;
+    margin-top: 10px;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s;
+  }
+  .pay-skip-link:hover { color: #94a3b8; }
 </style>
 </head>
 <body>
@@ -527,8 +736,68 @@
       </div>
     </div>
 
+    <!-- Payment Selection Card -->
+    <div class="pay-card hidden" id="card-pagamento">
+      <div class="pay-card-title">💳 Forma de Pagamento</div>
+      <p class="pay-card-sub">Selecione como deseja realizar o pagamento antes de assinar o contrato.</p>
+
+      <!-- Method buttons -->
+      <div class="pay-methods-grid">
+        <button class="pay-method-btn" id="pay-btn-credito" onclick="selecionarPagamento('credito')">
+          <span class="pay-icon">💳</span>
+          Cartão de<br>Crédito
+        </button>
+        <button class="pay-method-btn" id="pay-btn-debito" onclick="selecionarPagamento('debito')">
+          <span class="pay-icon">🏧</span>
+          Cartão de<br>Débito
+        </button>
+      </div>
+      <div class="pay-pix-row">
+        <button class="pay-method-btn" id="pay-btn-pix-copia" onclick="selecionarPagamento('pix-copia')">
+          <span class="pay-icon">📋</span>
+          Pix<br>Copiar/Colar
+        </button>
+        <button class="pay-method-btn" id="pay-btn-pix-qr" onclick="selecionarPagamento('pix-qr')">
+          <span class="pay-icon">📲</span>
+          Pix<br>QR Code
+        </button>
+      </div>
+
+      <!-- Pix copy/paste panel -->
+      <div class="pix-detail-panel" id="pix-copia-panel">
+        <div class="pix-detail-label">Chave Pix</div>
+        <div class="pix-key-row">
+          <div class="pix-key-val" id="pix-chave-val">85996119824</div>
+          <button class="btn-copiar-pix" id="btn-copiar-chave-pix" onclick="copiarChavePix()">📋 Copiar</button>
+        </div>
+        <p style="font-size:12px;color:#94a3b8;line-height:1.4;">Abra o app do seu banco → Pix → Pagar com chave → cole a chave acima e confirme o pagamento.</p>
+      </div>
+
+      <!-- Pix QR Code panel -->
+      <div class="pix-qr-wrap" id="pix-qr-panel">
+        <img id="pix-qr-img" class="pix-qr-img" src="" alt="QR Code Pix" />
+        <p class="pix-qr-hint">Aponte a câmera do seu banco para o QR Code para pagar via Pix.</p>
+      </div>
+
+      <!-- Card machine panel -->
+      <div class="card-detail-panel" id="card-maquina-panel">
+        <div class="card-machine-info">
+          <div class="card-machine-icon">🖨️</div>
+          <div class="card-machine-text">Nossa equipe levará a <strong>máquininha</strong> no dia da visita técnica ou instalação. Você também pode combinar o pagamento antecipado com nosso time via WhatsApp.</div>
+        </div>
+        <a id="pay-btn-zap-card" href="https://wa.me/5585996119824" target="_blank" class="btn btn-outline" style="margin-top:4px;font-size:13px;">
+          💬 Combinar Pagamento pelo WhatsApp
+        </a>
+      </div>
+
+      <button class="pay-continue-btn" id="btn-continuar-assinar" disabled onclick="irParaAssinaturaApos()">
+        ✍️ Continuar para Assinar
+      </button>
+      <span class="pay-skip-link" onclick="irParaAssinaturaApos()">Pular esta etapa e ir direto para a assinatura</span>
+    </div>
+
     <!-- Signature Pad Card -->
-    <div class="signature-card" id="card-assinatura">
+    <div class="signature-card hidden" id="card-assinatura">
       <h3 style="font-size:16px;color:#f3c760;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
         ✍️ Assinatura do Cliente
       </h3>
@@ -832,11 +1101,111 @@
   };
 
   window.irParaAssinatura = function() {
+    // Show payment card first
+    const cardDecisao = document.getElementById('card-decisao');
+    const cardPagamento = document.getElementById('card-pagamento');
+    if (cardDecisao) cardDecisao.classList.add('hidden');
+    if (cardPagamento) {
+      cardPagamento.classList.remove('hidden');
+      cardPagamento.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    // Populate pix key from licença
+    try {
+      const lic = obterLicencaAtiva();
+      const pixChave = lic.pix || '85996119824';
+      const pixEl = document.getElementById('pix-chave-val');
+      if (pixEl) pixEl.textContent = pixChave;
+
+      // Generate QR code URL via Google Charts API
+      const pixPayload = 'Tel: ' + pixChave;
+      const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=' + encodeURIComponent(pixChave);
+      const qrImg = document.getElementById('pix-qr-img');
+      if (qrImg) qrImg.src = qrUrl;
+
+      // Update WhatsApp link in card machine panel
+      const zapLimpo = String(lic.telefone || '85996119824').replace(/\D/g, '');
+      const zapHref = 'https://wa.me/' + (zapLimpo.startsWith('55') ? zapLimpo : '55' + zapLimpo);
+      const btnZapCard = document.getElementById('pay-btn-zap-card');
+      if (btnZapCard) btnZapCard.href = zapHref;
+    } catch (_) {}
+  };
+
+  let formaPagamentoEscolhida = '';
+
+  window.selecionarPagamento = function(metodo) {
+    formaPagamentoEscolhida = metodo;
+    // Deselect all
+    ['credito','debito','pix-copia','pix-qr'].forEach(function(m) {
+      const btn = document.getElementById('pay-btn-' + m);
+      if (btn) btn.classList.remove('selected');
+    });
+    // Hide all detail panels
+    const pixCopiaPanel = document.getElementById('pix-copia-panel');
+    const pixQrPanel = document.getElementById('pix-qr-panel');
+    const cardMaqPanel = document.getElementById('card-maquina-panel');
+    if (pixCopiaPanel) pixCopiaPanel.classList.remove('visible');
+    if (pixQrPanel) pixQrPanel.classList.remove('visible');
+    if (cardMaqPanel) cardMaqPanel.classList.remove('visible');
+
+    // Select chosen method
+    const btnSel = document.getElementById('pay-btn-' + metodo);
+    if (btnSel) btnSel.classList.add('selected');
+
+    if (metodo === 'pix-copia') {
+      if (pixCopiaPanel) pixCopiaPanel.classList.add('visible');
+    } else if (metodo === 'pix-qr') {
+      if (pixQrPanel) pixQrPanel.classList.add('visible');
+    } else {
+      // credito or debito
+      if (cardMaqPanel) cardMaqPanel.classList.add('visible');
+    }
+
+    // Enable continue button
+    const btnContinuar = document.getElementById('btn-continuar-assinar');
+    if (btnContinuar) btnContinuar.disabled = false;
+  };
+
+  window.copiarChavePix = function() {
+    const pixEl = document.getElementById('pix-chave-val');
+    const btn = document.getElementById('btn-copiar-chave-pix');
+    const val = pixEl ? pixEl.textContent.trim() : '';
+    function feedback() {
+      if (btn) {
+        btn.textContent = '✅ Copiado!';
+        btn.style.background = 'rgba(74,222,128,0.2)';
+        btn.style.borderColor = '#4ade80';
+        btn.style.color = '#4ade80';
+        setTimeout(function() {
+          btn.textContent = '📋 Copiar';
+          btn.style.background = '';
+          btn.style.borderColor = '';
+          btn.style.color = '';
+        }, 2500);
+      }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(val).then(feedback).catch(function() {
+        prompt('Copie a chave Pix:', val);
+        feedback();
+      });
+    } else {
+      prompt('Copie a chave Pix:', val);
+      feedback();
+    }
+  };
+
+  window.irParaAssinaturaApos = function() {
+    const cardPagamento = document.getElementById('card-pagamento');
     const el = document.getElementById('card-assinatura');
+    if (cardPagamento) cardPagamento.classList.add('hidden');
     if (el) {
+      el.classList.remove('hidden');
       el.scrollIntoView({ behavior: 'smooth' });
       const inp = document.getElementById('nome-input');
       if (inp && !inp.value) inp.focus();
+      setTimeout(function() {
+        window.dispatchEvent(new Event('resize'));
+      }, 60);
     }
   };
 
@@ -1277,17 +1646,29 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
               ordens[idx].assinado_por = nomeFinal;
               ordens[idx].assinado_em = new Date().toISOString();
               ordens[idx].assinatura_digital = regAssinatura;
+              if (formaPagamentoEscolhida) {
+                ordens[idx].forma_pagamento_cliente = formaPagamentoEscolhida;
+              }
               localStorage.setItem('sdv_ordens', JSON.stringify(ordens));
             }
           } catch (e) {
             console.warn('Aviso storage assinatura:', e);
           }
 
+          const descFormasMap = {
+            'credito': 'Cartão de Crédito',
+            'debito': 'Cartão de Débito',
+            'pix-copia': 'Pix (Copia e Cola)',
+            'pix-qr': 'Pix (QR Code)'
+          };
+          const textoPagamentoZap = formaPagamentoEscolhida ? ('💳 *Forma de Pagamento:* ' + (descFormasMap[formaPagamentoEscolhida] || formaPagamentoEscolhida) + '\n') : '';
+
           const licNomeSanitizado = (info.lic && info.lic.nome) ? info.lic.nome : 'Empresa';
           const iconeAprov = (info.lic && (info.lic.id === 'sdmoveis' || licNomeSanitizado.toLowerCase().includes('móveis') || licNomeSanitizado.toLowerCase().includes('moveis'))) ? '🛋️' : '🪟';
           const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* ' + iconeAprov + '\n\n'
             + 'Olá ' + licNomeSanitizado + '! Acabei de aprovar e assinar a Ordem de Serviço ' + info.osFormatada + '!\n'
-            + '👤 *Assinado por:* ' + nomeFinal + '\n\n'
+            + '👤 *Assinado por:* ' + nomeFinal + '\n'
+            + textoPagamentoZap + '\n'
             + '🔗 *Área Exclusiva do Cliente:* ' + info.urlCompleta + '\n'
             + '💡 _Acompanhamento em tempo real da produção, fotos e pagamentos._\n\n'
             + 'A Ordem de Serviço está autorizada. Podemos iniciar a produção!';
