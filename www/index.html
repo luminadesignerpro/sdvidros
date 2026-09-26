@@ -3657,10 +3657,8 @@ function compartilharLinkInstalacaoClienteIndex(id) {
   const emp = lista.find(e => e.id === id) || lista[0];
   const slug = obterSlugEmpresa(emp);
   const host = window.location.host;
-  const isVercel = host.includes('vercel.app') || window.location.protocol === 'https:';
-  const urlInst = isVercel
-    ? `https://${host || 'sdvidros.vercel.app'}/${slug}`
-    : `${window.location.origin}${window.location.pathname.replace(/\/index\.html$/i, '').replace(/\/$/, '')}/cliente.html?empresa=${encodeURIComponent(slug)}&nome=${encodeURIComponent(emp.nome)}&instalar=1`;
+  const urlPadrao = (slug === 'sdvidros') ? 'https://sdvidros.vercel.app' : `https://${slug}.vercel.app`;
+  const urlInst = emp.linkPersonalizado || urlPadrao;
 
   const msg = `📲 *INSTALAR APLICATIVO OFICIAL*\n🏢 *${emp.nome.toUpperCase()}*\n${emp.segmento ? `_${emp.segmento}_\n` : ''}\nOlá! Você recebeu a opção de instalar o aplicativo oficial da *${emp.nome}* no seu celular para acompanhar seus orçamentos e serviços.\n\n👉 *Toque para Instalar:*\n${urlInst}\n\n*(Basta abrir e tocar em "Confirmar" para acessar imediatamente!)*`;
 

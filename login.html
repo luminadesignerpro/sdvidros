@@ -1856,9 +1856,9 @@
     const isVercel = host.includes('vercel.app') || window.location.protocol === 'https:';
 
     // Link curto específico e exclusivo para a empresa selecionada
-    const urlPadrao = isVercel 
-      ? `https://${host || 'sdvidros.vercel.app'}/${slug}`
-      : `${window.location.origin}${window.location.pathname.replace(/\/login\.html$/i, '').replace(/\/$/, '')}/cliente.html?empresa=${encodeURIComponent(slug)}&nome=${encodeURIComponent(emp.nome)}&instalar=1&auto=1`;
+    const urlPadrao = (slug === 'sdvidros') 
+      ? 'https://sdvidros.vercel.app' 
+      : `https://${slug}.vercel.app`;
     const urlCurta = emp.linkPersonalizado || urlPadrao;
 
     const titEl = document.getElementById('modal-link-inst-titulo');
