@@ -654,12 +654,17 @@
         <input id="gestao-empresa-pix" type="text" placeholder="Chave PIX para pagamentos">
       </div>
     <div class="field">
-      <label>LINK / DOMÍNIO PRÓPRIO (OPCIONAL)</label>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <label style="margin-bottom:0;">LINK / DOMÍNIO PRÓPRIO (OPCIONAL)</label>
+        <button type="button" onclick="gerarDominioVercelAutomatico()" style="background:none;border:none;color:#38bdf8;font-size:11.5px;font-weight:800;cursor:pointer;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+          ✨ Gerar Domínio Automático
+        </button>
+      </div>
       <div class="input-wrap">
-        <input id="gestao-empresa-link" type="text" placeholder="Ex: https://sdmoveis.vercel.app ou deixe em branco">
+        <input id="gestao-empresa-link" type="text" placeholder="Ex: https://jsservicos.vercel.app ou link do APK no Supabase">
       </div>
       <div style="font-size:10px;color:var(--muted);margin-top:4px;">
-        💡 Se desejar usar outro link ou domínio cadastrado (ex: sdmoveis.vercel.app), digite aqui.
+        💡 O aplicativo gera e vincula o link exclusivo de cada marca automaticamente (ex: jsservicos.vercel.app).
       </div>
     </div>
     </div>
@@ -1974,6 +1979,32 @@
 
     abrirModalLinkInstalacaoCliente(empId);
     alert(`✅ Link da empresa "${empNome}" atualizado com sucesso!\n\nLink de envio agora:\n${linkFinal || 'Link Padrão do Sistema'}`);
+  }
+
+  async function gerarDominioVercelAutomatico() {
+    const inpLink = document.getElementById('gestao-empresa-link');
+    const inpNome = document.getElementById('gestao-empresa-nome');
+    const nome = (inpNome ? inpNome.value : '').trim() || 'Empresa';
+
+    const slug = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'app';
+    const autoUrl = `https://${slug}.vercel.app`;
+
+    try {
+      const res = await fetch('/api/criar-dominio-vercel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome: nome, slug: slug })
+      });
+      const data = await res.json();
+      if (data && data.domain) {
+        if (inpLink) inpLink.value = data.domain;
+        alert(`✨ Domínio Vercel automático gerado e vinculado para "${nome}":\n\n${data.domain}`);
+        return;
+      }
+    } catch (_) {}
+
+    if (inpLink) inpLink.value = autoUrl;
+    alert(`✨ Domínio Vercel automático gerado e vinculado para "${nome}":\n\n${autoUrl}`);
   }
 
   function carregarPainelGestao(forcarId = null) {
