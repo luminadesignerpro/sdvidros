@@ -1786,6 +1786,9 @@
       return;
     }
 
+    const slugAuto = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'app';
+    const autoLink = `https://${slugAuto}.vercel.app`;
+
     const novoId = 'emp_' + Date.now();
     const nova = {
       id: novoId,
@@ -1799,8 +1802,17 @@
       chaveLicenca: 'LIC-' + Date.now(),
       logo: _novaEmpresaLogoBase64 || 'logo.jpg',
       banner: 'banner_ia_vidros.jpg',
-      tipoContrato: 'vidros'
+      tipoContrato: 'vidros',
+      linkPersonalizado: autoLink
     };
+
+    try {
+      fetch('/api/criar-dominio-vercel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome: nome, slug: slugAuto })
+      }).catch(() => {});
+    } catch (_) {}
 
     let lista = obterLicencasLogin();
     lista.push(nova);
