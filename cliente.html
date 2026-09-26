@@ -11,19 +11,34 @@
     (function() {
       try {
         var p = new URLSearchParams(window.location.search);
-        var emp = (p.get('empresa') || p.get('emp') || localStorage.getItem('sdv_licenca_ativa') || '').toLowerCase();
-        var nome = (p.get('nome') || p.get('empNome') || '').toLowerCase();
-        if (emp === 'samuel-david' || emp === 'samuel' || nome === 'samuel david' || nome === 'samuel') {
-          emp = 'sdvidros';
-          nome = 'sd vidros';
-        }
-        var isMoveis = (emp === 'sdmoveis' || emp === 'sd-moveis' || emp.includes('moveis') || nome.includes('móveis') || nome.includes('moveis')) && !emp.includes('vidros') && !nome.includes('vidros');
-        var manifestHref = isMoveis ? 'manifest-moveis.json' : 'manifest.json';
-        var logoSrc = isMoveis ? 'logo_moveis.jpg' : 'logo.jpg';
-        var appTitle = isMoveis ? 'SD Móveis Projetados' : 'SD Vidros';
-        var shortTitle = isMoveis ? 'SD Móveis' : 'SD Vidros';
+        var empId = (p.get('empresa') || p.get('emp') || localStorage.getItem('sdv_licenca_ativa') || '').toLowerCase();
+        var nomeParam = p.get('nome') || p.get('empNome') || '';
+        var logoParam = p.get('logo') || p.get('empLogo') || '';
 
-        document.write('<link id="dynamic-manifest" rel="manifest" href="' + manifestHref + '">');
+        var lista = [];
+        try { lista = JSON.parse(localStorage.getItem('sdv_licencas') || '[]'); } catch(_) {}
+        var empObj = lista.find(function(e) {
+          if (!e) return false;
+          var idLow = String(e.id || '').toLowerCase();
+          var nomeLow = String(e.nome || '').toLowerCase();
+          return idLow === empId || (empId && idLow.includes(empId)) || (empId && nomeLow.includes(empId));
+        });
+
+        var appTitle = nomeParam || (empObj && empObj.nome) || '';
+        var logoSrc = logoParam || (empObj && empObj.logo) || '';
+
+        if (!appTitle) {
+          var isMoveis = (empId === 'sdmoveis' || empId === 'sd-moveis' || empId.includes('moveis')) && !empId.includes('vidros');
+          appTitle = isMoveis ? 'SD Móveis Projetados' : 'SD Vidros';
+        }
+        if (!logoSrc) {
+          var isMoveis = (empId === 'sdmoveis' || empId === 'sd-moveis' || empId.includes('moveis')) && !empId.includes('vidros');
+          logoSrc = isMoveis ? 'logo_moveis.jpg' : 'logo.jpg';
+        }
+
+        var shortTitle = appTitle;
+
+        document.write('<link id="dynamic-manifest" rel="manifest" href="manifest.json">');
         document.write('<link id="dynamic-favicon" rel="icon" type="image/jpeg" href="' + logoSrc + '">');
         document.write('<link id="dynamic-apple-icon" rel="apple-touch-icon" sizes="192x192" href="' + logoSrc + '">');
         document.write('<link id="dynamic-apple-icon-512" rel="apple-touch-icon" sizes="512x512" href="' + logoSrc + '">');
