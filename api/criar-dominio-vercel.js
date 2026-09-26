@@ -1,3 +1,5 @@
+const https = require('https');
+
 module.exports = async (req, res) => {
   // Configuração de cabeçalhos CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -9,16 +11,16 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const body = req.body || {};
+    let body = req.body;
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch (_) { body = {}; }
+    }
+    body = body || {};
+
     const nomeEmpresa = body.nome || req.query.nome || '';
     const slugDesejado = body.slug || req.query.slug || '';
-    
-    if (!nomeEmpresa && !slugDesejado) {
-      return res.status(400).json({ error: 'Informe o nome ou slug da empresa.' });
-    }
 
-    // Gera o slug limpo (ex: "jS serviços" -> "jsservicos")
-    let slug = (slugDesejado || nomeEmpresa)
+    let slug = (slugDesejado || nomeEmpresa || '')
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
@@ -32,40 +34,42 @@ module.exports = async (req, res) => {
     const vercelToken = process.env.VERCEL_AUTH_TOKEN || process.env.VERCEL_TOKEN;
     const projectId = process.env.VERCEL_PROJECT_ID || 'sdvidros';
 
-    // Tenta registrar automaticamente o domínio via API da Vercel se VERCEL_AUTH_TOKEN estiver configurado
     if (vercelToken) {
       try {
-        const response = await fetch(`https://api.vercel.com/v9/projects/${projectId}/domains`, {
+        const postData = JSON.stringify({ name: domainName });
+        const options = {
+          hostname: 'api.vercel.com',
+          path: `/v9/projects/${projectId}/domains`,
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${vercelToken}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ name: domainName })
-        });
-        const data = await response.json();
-        if (response.ok || (data.error && (data.error.code === 'domain_already_in_use' || data.error.code === 'domain_already_exists'))) {
-          return res.json({
-            ok: true,
-            domain: `https://${domainName}`,
-            slug: slug,
-            createdViaApi: true
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(postData)
+          }
+        };
+
+        await new Promise((resolve) => {
+          const apiReq = https.request(options, (apiRes) => {
+            let data = '';
+            apiRes.on('data', (chunk) => { data += chunk; });
+            apiRes.on('end', () => { resolve(data); });
           });
-        }
+          apiReq.on('error', () => { resolve(null); });
+          apiReq.write(postData);
+          apiReq.end();
+        });
       } catch (e) {
         console.warn('Alerta Vercel API:', e.message);
       }
     }
 
-    // Retorna a URL formatada automaticamente para a empresa
     return res.json({
       ok: true,
       domain: `https://${domainName}`,
-      slug: slug,
-      createdViaApi: false
+      slug: slug
     });
 
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message || 'Erro interno' });
   }
 };
