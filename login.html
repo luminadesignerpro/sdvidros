@@ -1806,13 +1806,7 @@
       linkPersonalizado: autoLink
     };
 
-    try {
-      fetch('/api/criar-dominio-vercel', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome: nome, slug: slugAuto })
-      }).catch(() => {});
-    } catch (_) {}
+    // Domínio gerado localmente (sem API externa)
 
     let lista = obterLicencasLogin();
     lista.push(nova);
@@ -1993,7 +1987,7 @@
     alert(`✅ Link da empresa "${empNome}" atualizado com sucesso!\n\nLink de envio agora:\n${linkFinal || 'Link Padrão do Sistema'}`);
   }
 
-  async function gerarDominioVercelAutomatico() {
+  function gerarDominioVercelAutomatico() {
     const inpLink = document.getElementById('gestao-empresa-link');
     const inpNome = document.getElementById('gestao-empresa-nome');
     const nome = (inpNome ? inpNome.value : '').trim() || 'Empresa';
@@ -2001,22 +1995,8 @@
     const slug = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'app';
     const autoUrl = `https://${slug}.vercel.app`;
 
-    try {
-      const res = await fetch('/api/criar-dominio-vercel', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome: nome, slug: slug })
-      });
-      const data = await res.json();
-      if (data && data.domain) {
-        if (inpLink) inpLink.value = data.domain;
-        alert(`✨ Domínio Vercel automático gerado e vinculado para "${nome}":\n\n${data.domain}`);
-        return;
-      }
-    } catch (_) {}
-
     if (inpLink) inpLink.value = autoUrl;
-    alert(`✨ Domínio Vercel automático gerado e vinculado para "${nome}":\n\n${autoUrl}`);
+    alert(`✨ Domínio Vercel gerado para "${nome}":\n\n${autoUrl}`);
   }
 
   function carregarPainelGestao(forcarId = null) {
