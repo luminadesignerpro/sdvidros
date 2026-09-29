@@ -1016,9 +1016,11 @@
     <button id="tab-agenda" class="tab" data-tab="agenda" onclick="goTab('agenda')">📅 Agenda</button>
     <button id="tab-produtos" class="tab" data-tab="produtos" onclick="goTab('produtos')">📦 Produtos & Serviços</button>
     <button id="tab-clientes" class="tab" data-tab="clientes" onclick="goTab('clientes')">👤 Clientes</button>
-    <button id="tab-ponto" class="tab" data-tab="ponto" onclick="goTab('ponto')">👷 Funcionários & Ponto</button>
-    <button id="tab-camera" class="tab" data-tab="camera" onclick="goTab('camera')">📷 Câmera</button>\n    <button id="tab-contratos" class="tab" data-tab="contratos" onclick="goTab('contratos')">📄 Contratos</button>
+    <button id="tab-ponto" class="tab" data-tab="ponto" onclick="goTab('ponto')">👷 Funcionários & Ponto <span id="badge-vales-tab-ponto" style="display:none;background:#f59e0b;color:#000;font-size:10px;padding:2px 7px;border-radius:999px;font-weight:900;margin-left:4px;">💸 0</span></button>
+    <button id="tab-camera" class="tab" data-tab="camera" onclick="goTab('camera')">📷 Câmera</button>
+    <button id="tab-contratos" class="tab" data-tab="contratos" onclick="goTab('contratos')">📄 Contratos</button>
     <button id="tab-usuarios" class="tab" data-tab="usuarios" onclick="goTab('usuarios')">👥 Usuários</button>
+    <button id="tab-material" class="tab" data-tab="material" onclick="goTab('material')">🛒 Pedido de Material <span id="badge-pedido-material" style="display:none;background:#6366f1;color:#fff;font-size:10px;padding:2px 7px;border-radius:999px;font-weight:900;margin-left:4px;">0</span></button>
     <button type="button" id="tab-portal-cliente" class="tab" onclick="abrirPortalCliente()" title="Acessar Portal do Cliente">🌐 Portal do Cliente</button>
     <button type="button" id="tab-portal-funcionario" class="tab" onclick="abrirPortalFuncionario()" title="Acessar Portal do Funcionário">👷 Portal do Funcionário</button>
     <button type="button" id="btn-central-mensagens" class="tab" onclick="abrirModalCentralMensagens()" title="Central de Mensagens com Clientes">💬 Mensagens <span id="badge-msg-clientes" style="display:none;background:#ef4444;color:#fff;font-size:9.5px;padding:1px 6px;border-radius:999px;font-weight:900;margin-left:4px;">0</span></button>
@@ -1582,6 +1584,43 @@
       </div>
     </div>
 
+    <!-- Card: Solicitações de Vales & Adiantamentos dos Funcionários -->
+    <div class="card" id="card-vales-solicitados-admin" style="margin-top:16px;border:1.5px solid rgba(245,158,11,0.35);box-shadow:0 8px 30px rgba(0,0,0,0.5);">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:26px;">💸</span>
+          <div>
+            <div class="card-title" style="margin-bottom:2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span>Solicitações de Adiantamento / Vale</span>
+              <span id="badge-vales-pendentes-admin" style="background:#f59e0b;color:#000;font-size:11px;font-weight:900;padding:2px 8px;border-radius:999px;">0 Pendentes</span>
+            </div>
+            <div style="font-size:12px;color:var(--text2);">
+              Pedidos enviados pelos funcionários · Avaliação no final do expediente (alerta automático 10 min antes)
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button type="button" class="btn btn-sec btn-sm" onclick="dispararTesteAlarmeFimExpediente()" title="Testar som e popup da notificação de 10 min antes do final do expediente" style="font-size:11px;">
+            🔔 Testar Notificação (10 min)
+          </button>
+          <button type="button" class="btn btn-sec btn-sm" onclick="renderizarValesAdmin()">🔄 Atualizar</button>
+        </div>
+      </div>
+
+      <!-- Aviso da Notificação de 10 min antes do fim do expediente -->
+      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#fef08a;">
+          <span>⏰</span>
+          <span><strong>Notificação Programada:</strong> O sistema alertará automaticamente com alarme sonoro <strong>10 minutos antes do término da jornada</strong> caso haja vales pendentes para você aprovar ou recusar com 1 clique.</span>
+        </div>
+      </div>
+
+      <!-- Container da Tabela / Lista de Vales -->
+      <div id="lista-vales-admin-container">
+        <!-- Injetado dinamicamente via JS -->
+      </div>
+    </div>
+
     <!-- Card: Espelho de Ponto Eletrônico -->
     <div class="card" style="margin-top:16px;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
@@ -1699,7 +1738,107 @@
   </div>
 
   <!-- ══════════════════════════════════════════ -->
-  
+  <!-- PANEL: PEDIDO DE MATERIAL + SD COMPARATIVO -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="panel-material" class="panel">
+
+    <!-- CABEÇALHO -->
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:220px;">
+        <h2 style="margin:0;font-size:22px;font-weight:900;color:var(--accent);">🛒 Pedido de Material</h2>
+        <p style="margin:4px 0 0;color:var(--muted);font-size:13px;">Solicite materiais e compare preços entre fornecedores antes de aprovar a compra.</p>
+      </div>
+      <button class="btn btn-primary" onclick="abrirModalNovoPedidoMaterial()" style="padding:10px 20px;font-size:13px;font-weight:800;">➕ Novo Pedido</button>
+    </div>
+
+    <!-- FILTROS DE STATUS -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+      <button id="filtro-mat-todos" class="btn btn-primary" onclick="filtrarPedidosMaterial('todos')" style="font-size:12px;padding:6px 14px;">📋 Todos</button>
+      <button id="filtro-mat-pendente" class="btn btn-sec" onclick="filtrarPedidosMaterial('pendente')" style="font-size:12px;padding:6px 14px;">⏳ Pendentes</button>
+      <button id="filtro-mat-aprovado" class="btn btn-sec" onclick="filtrarPedidosMaterial('aprovado')" style="font-size:12px;padding:6px 14px;">✅ Aprovados</button>
+      <button id="filtro-mat-recusado" class="btn btn-sec" onclick="filtrarPedidosMaterial('recusado')" style="font-size:12px;padding:6px 14px;">❌ Recusados</button>
+      <button id="filtro-mat-comprado" class="btn btn-sec" onclick="filtrarPedidosMaterial('comprado')" style="font-size:12px;padding:6px 14px;">🏷️ Comprados</button>
+    </div>
+
+    <!-- LISTA DE PEDIDOS -->
+    <div id="lista-pedidos-material"></div>
+
+    <!-- ── SD COMPARATIVO ── -->
+    <div class="card" style="margin-top:22px;">
+      <div class="card-title" style="margin-bottom:14px;">📊 SD Comparativo — Análise de Preços por Fornecedor</div>
+
+      <!-- Seletor de pedido para comparativo -->
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+        <label style="font-size:13px;color:var(--muted);">Selecione o pedido:</label>
+        <select id="select-pedido-comparativo" onchange="carregarComparativoMaterial()" style="flex:1;min-width:200px;padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:13px;">
+          <option value="">— Nenhum —</option>
+        </select>
+        <button class="btn btn-sec" onclick="exportarComparativoPDF()" style="font-size:12px;padding:7px 14px;">📄 Exportar PDF</button>
+      </div>
+
+      <!-- Tabela comparativa -->
+      <div style="overflow-x:auto;">
+        <table id="tabela-sd-comparativo" style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead>
+            <tr style="background:var(--bg);">
+              <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-weight:700;">Item / Material</th>
+              <th style="padding:10px 12px;text-align:center;border-bottom:2px solid var(--border);color:var(--muted);font-weight:700;">Qtd.</th>
+              <th style="padding:10px 12px;text-align:center;border-bottom:2px solid var(--border);color:#6366f1;font-weight:700;">🏪 Fornecedor A</th>
+              <th style="padding:10px 12px;text-align:center;border-bottom:2px solid var(--border);color:#f59e0b;font-weight:700;">🏪 Fornecedor B</th>
+              <th style="padding:10px 12px;text-align:center;border-bottom:2px solid var(--border);color:#10b981;font-weight:700;">🏪 Fornecedor C</th>
+              <th style="padding:10px 12px;text-align:center;border-bottom:2px solid var(--border);color:#22d3ee;font-weight:700;">💰 Menor Preço</th>
+              <th style="padding:10px 12px;text-align:center;border-bottom:2px solid var(--border);color:var(--muted);font-weight:700;">Economia</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-sd-comparativo">
+            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">Selecione um pedido para ver o comparativo.</td></tr>
+          </tbody>
+          <tfoot id="tfoot-sd-comparativo"></tfoot>
+        </table>
+      </div>
+
+      <!-- Painel de fornecedores do pedido -->
+      <div id="painel-fornecedores-comparativo" style="display:none;margin-top:18px;">
+        <div style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:10px;">DADOS DOS FORNECEDORES</div>
+        <div id="cards-fornecedores-comparativo" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVO PEDIDO DE MATERIAL -->
+  <div id="modal-novo-pedido-material" class="modal-overlay" style="display:none;z-index:9999990;background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);">
+    <div class="modal-box" style="max-width:780px;width:96%;border-radius:20px;padding:28px;position:relative;max-height:90vh;overflow-y:auto;">
+      <button onclick="fecharModalNovoPedidoMaterial()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;">✕</button>
+      <h3 style="margin:0 0 18px;font-size:18px;font-weight:900;">🛒 Novo Pedido de Material</h3>
+
+      <div class="field-row">
+        <div class="field"><label>Título do Pedido *</label><input id="pm-titulo" placeholder="ex: Tintas para obra João" /></div>
+        <div class="field"><label>Solicitante *</label><input id="pm-solicitante" placeholder="Nome do funcionário" /></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Data necessária</label><input id="pm-data" type="date" /></div>
+        <div class="field"><label>Centro de Custo / OS</label><input id="pm-os" placeholder="ex: OS-0042" /></div>
+      </div>
+      <div class="field"><label>Observações</label><textarea id="pm-obs" rows="2" placeholder="Detalhes adicionais..." style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:13px;resize:vertical;"></textarea></div>
+
+      <!-- Itens do pedido -->
+      <div style="margin:16px 0 8px;font-size:13px;font-weight:700;">📦 Itens Solicitados</div>
+      <div id="pm-itens-container"></div>
+      <button class="btn btn-sec" onclick="adicionarItemPedidoMaterial()" style="margin-top:8px;font-size:12px;padding:7px 14px;">➕ Adicionar Item</button>
+
+      <!-- SD Comparativo inline -->
+      <div style="margin:18px 0 8px;font-size:13px;font-weight:700;">📊 Cotação por Fornecedor (SD Comparativo)</div>
+      <div id="pm-comparativo-container" style="overflow-x:auto;"></div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-primary" onclick="salvarPedidoMaterial()" style="flex:1;padding:13px;font-size:14px;font-weight:900;">💾 Salvar Pedido</button>
+        <button class="btn btn-sec" onclick="fecharModalNovoPedidoMaterial()" style="flex:0.4;padding:13px;">Cancelar</button>
+      </div>
+      <div id="pm-msg" style="margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
   <!-- ══════════════════════════════════════════ -->
   <!-- PANEL: CÂMERA ULTRA ZOOM HD (ALCANCE 200M) -->
   <!-- ══════════════════════════════════════════ -->
@@ -2927,6 +3066,42 @@
           🚀 Bater Ponto
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL NOTIFICAÇÃO FIM DE EXPEDIENTE (10 MIN ANTES - APROVAÇÃO DE VALES) ══ -->
+<div id="modal-notificacao-fim-expediente-vale" class="modal-overlay" style="display:none;z-index:9999999;background:rgba(0,0,0,0.92);backdrop-filter:blur(10px);">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:480px;text-align:center;border:2px solid #f59e0b;box-shadow:0 0 60px rgba(245,158,11,0.55);padding:26px 20px;">
+    <div style="font-size:52px;line-height:1;margin-bottom:10px;">
+      ⏰ 💸
+    </div>
+    <div style="font-size:12px;font-weight:900;color:#f59e0b;letter-spacing:0.12em;text-transform:uppercase;">
+      Notificação Final de Expediente (Faltam 10 Minutos)
+    </div>
+    <h2 id="notif-vale-expediente-titulo" style="font-size:21px;font-weight:900;color:#fff;margin:8px 0 4px 0;">
+      Vales Aguardando Decisão
+    </h2>
+    <div style="display:inline-block;font-size:12px;padding:4px 14px;border-radius:999px;background:rgba(245,158,11,0.2);color:#fef08a;font-weight:900;margin-bottom:14px;border:1px solid rgba(245,158,11,0.4);">
+      ⏳ Avaliação no Encerramento do Dia
+    </div>
+
+    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;margin-bottom:16px;text-align:left;font-size:12.5px;">
+      <div style="font-size:11.5px;color:#94a3b8;margin-bottom:8px;">
+        O expediente está a <strong>10 minutos de encerrar</strong>. Conforme a regra da empresa, defina se cada adiantamento está <strong>Aprovado</strong> ou <strong>Não Aprovado</strong> para que o colaborador seja notificado:
+      </div>
+      <div id="notif-vales-expediente-lista" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;">
+        <!-- Injetado dinamicamente -->
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button type="button" class="btn btn-sec" onclick="fecharModalNotificacaoFimExpediente()" style="flex:1;padding:12px;font-size:12.5px;font-weight:700;">
+        Decidir Mais Tarde
+      </button>
+      <button type="button" class="btn btn-primary" onclick="irParaAbaPontoEVales()" style="flex:1.2;padding:12px;font-size:12.5px;font-weight:900;background:linear-gradient(135deg,#f59e0b,#d97706);border-color:#fbbf24;color:#000;">
+        📋 Ver Todos os Vales
+      </button>
     </div>
   </div>
 </div>
@@ -7248,10 +7423,13 @@ function atualizarRelogioDisplay() {
   if (elHora) elHora.textContent = strHora;
 
   // Atualização em tempo real: a cada 5 segundos recalcula minutos trabalhados e valores ao vivo na tela
-  if (pontosLista && pontosLista.some(p => ehDataHoje(p.data) && (p.entrada1 || p.voltaAlmoco || p.horaExtraInicial) && !p.saidaFinal)) {
-    if (agora.getSeconds() % 5 === 0) {
+  if (agora.getSeconds() % 5 === 0) {
+    if (pontosLista && pontosLista.some(p => ehDataHoje(p.data) && (p.entrada1 || p.voltaAlmoco || p.horaExtraInicial) && !p.saidaFinal)) {
       atualizarEspelhoPontoTempoReal();
       atualizarStatusBatidaColaborador();
+    }
+    if (typeof verificarAlarmeFimExpedienteVales === 'function') {
+      verificarAlarmeFimExpedienteVales();
     }
   }
 }
@@ -7288,6 +7466,9 @@ function renderPontoView() {
   renderFuncionarios();
   inicializarPontoHojeSeNecessario();
   renderEspelhoPonto();
+  if (typeof renderizarValesAdmin === 'function') {
+    renderizarValesAdmin();
+  }
 }
 
 function atualizarSelectColaboradoresPonto() {
@@ -8509,7 +8690,299 @@ function imprimirFolhaPonto() {
   }
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════
+//  GESTÃO DE VALES & ADIANTAMENTOS DOS FUNCIONÁRIOS (COM AVISO DE FIM DE EXPEDIENTE)
+// ══════════════════════════════════════════════════════════════════════════
+
+function carregarValesDoStorage() {
+  try {
+    var raw = localStorage.getItem('sdv_pedidos_vale');
+    if (raw) return JSON.parse(raw);
+  } catch(_) {}
+  return [];
+}
+
+function salvarValesNoStorage(lista) {
+  try {
+    localStorage.setItem('sdv_pedidos_vale', JSON.stringify(lista));
+  } catch(_) {}
+}
+
+function renderizarValesAdmin() {
+  var container = document.getElementById('lista-vales-admin-container');
+  var badgePendente = document.getElementById('badge-vales-pendentes-admin');
+  var badgeTab = document.getElementById('badge-vales-tab-ponto');
+  var vales = carregarValesDoStorage();
+
+  var pendentes = vales.filter(function(v) { return v.status === 'Pendente'; });
+
+  if (badgePendente) {
+    badgePendente.textContent = pendentes.length + ' Pendente' + (pendentes.length !== 1 ? 's' : '');
+    badgePendente.style.background = pendentes.length > 0 ? '#f59e0b' : '#64748b';
+  }
+  if (badgeTab) {
+    if (pendentes.length > 0) {
+      badgeTab.style.display = 'inline-block';
+      badgeTab.textContent = '💸 ' + pendentes.length;
+    } else {
+      badgeTab.style.display = 'none';
+    }
+  }
+
+  if (!container) return;
+
+  if (!vales.length) {
+    container.innerHTML = '<div style="text-align:center;padding:24px 10px;color:#94a3b8;background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.08);border-radius:12px;">' +
+      '<div style="font-size:26px;margin-bottom:6px;">💸</div>' +
+      '<div style="font-size:13px;font-weight:700;color:#fff;">Nenhuma solicitação de vale registrada</div>' +
+      '<div style="font-size:11px;margin-top:2px;">Quando um funcionário solicitar pelo portal, o pedido aparecerá aqui.</div>' +
+    '</div>';
+    return;
+  }
+
+  // Ordenar: primeiro os pendentes, depois por data mais recente
+  vales.sort(function(a, b) {
+    if (a.status === 'Pendente' && b.status !== 'Pendente') return -1;
+    if (a.status !== 'Pendente' && b.status === 'Pendente') return 1;
+    return new Date(b.dataIso || b.data) - new Date(a.dataIso || a.data);
+  });
+
+  var html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+
+  vales.forEach(function(v) {
+    var isPendente = v.status === 'Pendente';
+    var isAprovado = v.status === 'Aprovado' || v.status === 'Pago';
+    var isRecusado = v.status === 'Recusado';
+
+    var corBorda = isPendente ? 'rgba(245,158,11,0.45)' : isAprovado ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.35)';
+    var corStatus = isPendente ? '#f59e0b' : isAprovado ? '#10b981' : '#ef4444';
+    var bgStatus = isPendente ? 'rgba(245,158,11,0.15)' : isAprovado ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)';
+    var txtStatus = isPendente ? '⏳ Aguardando Decisão (Fim do Expediente)' : isAprovado ? '✅ Aprovado' : '❌ Não Aprovado';
+
+    var valNum = Number(v.valor || 0);
+
+    html += '<div style="background:rgba(255,255,255,0.025);border:1px solid ' + corBorda + ';border-radius:12px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">' +
+      '<div style="flex:1;min-width:240px;">' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
+          '<strong style="font-size:15px;color:#fff;">' + esc(v.colaboradorNome || 'Colaborador') + '</strong>' +
+          '<strong style="font-size:16px;color:#facc15;font-weight:900;">R$ ' + valNum.toFixed(2).replace('.', ',') + '</strong>' +
+          '<span style="font-size:10px;font-weight:800;color:' + corStatus + ';background:' + bgStatus + ';padding:2px 8px;border-radius:6px;border:1px solid ' + corStatus + '40;">' +
+            txtStatus +
+          '</span>' +
+        '</div>' +
+        '<div style="font-size:11.5px;color:#cbd5e1;margin-top:4px;">' +
+          '📅 <strong>' + v.data + ' às ' + (v.hora || '12:00') + '</strong>' +
+          (v.motivo ? ' · Motivo: <em>' + esc(v.motivo) + '</em>' : '') +
+        '</div>' +
+        '<div style="font-size:11px;color:#94a3b8;margin-top:2px;">' +
+          '🔑 Chave Pix: <strong style="color:#38bdf8;">' + esc(v.pix || '--') + '</strong>' +
+          (v.dataAprovacao ? ' · <span style="color:#4ade80;">Aprovado em ' + v.dataAprovacao + '</span>' : '') +
+          (v.motivoRecusa ? ' · <span style="color:#f87171;">Motivo recusa: ' + esc(v.motivoRecusa) + '</span>' : '') +
+        '</div>' +
+      '</div>';
+
+    if (isPendente) {
+      html += '<div style="display:flex;gap:8px;align-items:center;">' +
+        '<button type="button" class="btn btn-primary btn-sm" onclick="aprovarValeAdmin(\'' + v.id + '\')" style="background:linear-gradient(135deg,#10b981,#059669);border-color:#10b981;font-weight:900;padding:8px 14px;box-shadow:0 3px 12px rgba(16,185,129,0.3);">' +
+          '✅ Aprovar' +
+        '</button>' +
+        '<button type="button" class="btn btn-sec btn-sm" onclick="recusarValeAdmin(\'' + v.id + '\')" style="background:rgba(239,68,68,0.15);border-color:#ef4444;color:#fca5a5;font-weight:800;padding:8px 12px;">' +
+          '❌ Não' +
+        '</button>' +
+      '</div>';
+    } else {
+      html += '<div>' +
+        '<button type="button" onclick="excluirValeAdmin(\'' + v.id + '\')" style="background:none;border:none;color:#64748b;font-size:13px;cursor:pointer;padding:6px;" title="Remover histórico">' +
+          '🗑️' +
+        '</button>' +
+      '</div>';
+    }
+
+    html += '</div>';
+  });
+
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function aprovarValeAdmin(valeId) {
+  var vales = carregarValesDoStorage();
+  var v = vales.find(function(x) { return x.id === valeId; });
+  if (!v) return;
+
+  v.status = 'Aprovado';
+  var agora = new Date();
+  v.dataAprovacao = agora.toLocaleDateString('pt-BR') + ' às ' + String(agora.getHours()).padStart(2,'0') + ':' + String(agora.getMinutes()).padStart(2,'0');
+  v.aprovadoPor = 'Administração';
+  v.notificadoAoColab = false; // ativa notificação no portal do colaborador!
+
+  salvarValesNoStorage(vales);
+  renderizarValesAdmin();
+  fecharModalNotificacaoFimExpediente();
+
+  alert('✅ VALE APROVADO COM SUCESSO!\n\nColaborador: ' + v.colaboradorNome + '\nValor: R$ ' + Number(v.valor).toFixed(2).replace('.', ',') + '\nChave Pix: ' + v.pix + '\n\nO colaborador receberá a notificação de aprovação no portal dele.');
+}
+
+function recusarValeAdmin(valeId) {
+  var vales = carregarValesDoStorage();
+  var v = vales.find(function(x) { return x.id === valeId; });
+  if (!v) return;
+
+  var motivo = prompt('Informe o motivo da não aprovação (opcional):', 'Política de adiantamento da semana');
+  if (motivo === null) return; // cancelou o prompt
+
+  v.status = 'Recusado';
+  var agora = new Date();
+  v.dataRecusa = agora.toLocaleDateString('pt-BR') + ' às ' + String(agora.getHours()).padStart(2,'0') + ':' + String(agora.getMinutes()).padStart(2,'0');
+  v.motivoRecusa = motivo.trim() || 'Não autorizado nesta data';
+  v.recusadoPor = 'Administração';
+  v.notificadoAoColab = false; // ativa notificação no portal do colaborador!
+
+  salvarValesNoStorage(vales);
+  renderizarValesAdmin();
+  fecharModalNotificacaoFimExpediente();
+
+  alert('❌ VALE NÃO APROVADO.\n\nO colaborador ' + v.colaboradorNome + ' foi notificado no portal dele com o motivo informado.');
+}
+
+function excluirValeAdmin(valeId) {
+  if (!confirm('Deseja remover este registro de vale do histórico?')) return;
+  var vales = carregarValesDoStorage();
+  vales = vales.filter(function(x) { return x.id !== valeId; });
+  salvarValesNoStorage(vales);
+  renderizarValesAdmin();
+}
+
+// ── Notificação Automática 10 Minutos Antes do Final do Expediente ──
+var _ultimoAlertaExpedienteDia = '';
+
+function verificarAlarmeFimExpedienteVales() {
+  var vales = carregarValesDoStorage();
+  var pendentes = vales.filter(function(v) { return v.status === 'Pendente'; });
+  if (!pendentes.length) return;
+
+  var agora = new Date();
+  var hojeKey = agora.getFullYear() + '-' + (agora.getMonth()+1) + '-' + agora.getDate();
+  if (_ultimoAlertaExpedienteDia === hojeKey) return; // Já alertou hoje
+
+  // Obter hora de saída da jornada (config alarme ou padrão 17:00)
+  var cfg = (typeof obterConfigAlarmePonto === 'function') ? obterConfigAlarmePonto() : { sai: '17:00' };
+  var horaSaidaStr = cfg.sai || '17:00';
+  var partes = horaSaidaStr.split(':');
+  var horaSai = parseInt(partes[0]) || 17;
+  var minSai = parseInt(partes[1]) || 0;
+
+  var saidaEmMinutos = horaSai * 60 + minSai;
+  var agoraEmMinutos = agora.getHours() * 60 + agora.getMinutes();
+
+  var dif = saidaEmMinutos - agoraEmMinutos;
+
+  // Se faltam entre 0 e 10 minutos para o término da jornada (ou até 30 min após):
+  if (dif <= 10 && dif >= -30) {
+    _ultimoAlertaExpedienteDia = hojeKey;
+    abrirModalNotificacaoFimExpediente(pendentes, horaSaidaStr);
+  }
+}
+
+function abrirModalNotificacaoFimExpediente(pendentes, horaSaidaStr) {
+  if (!pendentes) {
+    var vales = carregarValesDoStorage();
+    pendentes = vales.filter(function(v) { return v.status === 'Pendente'; });
+  }
+  if (!pendentes.length) {
+    alert('Nenhum pedido de vale pendente no momento!');
+    return;
+  }
+
+  var m = document.getElementById('modal-notificacao-fim-expediente-vale');
+  var listaEl = document.getElementById('notif-vales-expediente-lista');
+  if (!m || !listaEl) return;
+
+  tocarSomAlarmeValeExpediente();
+
+  var html = '';
+  pendentes.forEach(function(v) {
+    var valNum = Number(v.valor || 0);
+    html += '<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(245,158,11,0.4);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">' +
+      '<div>' +
+        '<div style="font-weight:900;font-size:13.5px;color:#fff;">' + esc(v.colaboradorNome || 'Colaborador') + ' · <span style="color:#facc15;">R$ ' + valNum.toFixed(2).replace('.', ',') + '</span></div>' +
+        '<div style="font-size:11px;color:#cbd5e1;margin-top:2px;">🔑 Pix: <strong>' + esc(v.pix || '--') + '</strong>' + (v.motivo ? ' · ' + esc(v.motivo) : '') + '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:6px;">' +
+        '<button type="button" class="btn btn-primary btn-sm" onclick="aprovarValeAdmin(\'' + v.id + '\')" style="background:linear-gradient(135deg,#10b981,#059669);border-color:#10b981;font-weight:900;padding:6px 12px;font-size:11px;">' +
+          '✅ Aprovar' +
+        '</button>' +
+        '<button type="button" class="btn btn-sec btn-sm" onclick="recusarValeAdmin(\'' + v.id + '\')" style="background:rgba(239,68,68,0.2);border-color:#ef4444;color:#fca5a5;font-weight:800;padding:6px 10px;font-size:11px;">' +
+          '❌ Não' +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  });
+
+  listaEl.innerHTML = html;
+  m.style.display = 'flex';
+}
+
+function fecharModalNotificacaoFimExpediente() {
+  var m = document.getElementById('modal-notificacao-fim-expediente-vale');
+  if (m) m.style.display = 'none';
+}
+
+function irParaAbaPontoEVales() {
+  fecharModalNotificacaoFimExpediente();
+  goTab('ponto');
+  setTimeout(function() {
+    var card = document.getElementById('card-vales-solicitados-admin');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+}
+
+function dispararTesteAlarmeFimExpediente() {
+  var vales = carregarValesDoStorage();
+  var pendentes = vales.filter(function(v) { return v.status === 'Pendente'; });
+  if (!pendentes.length) {
+    pendentes = [{
+      id: 'vale_teste_' + Date.now(),
+      colaboradorNome: 'Samuel David',
+      valor: 300,
+      pix: '(85) 99611-9824',
+      motivo: 'Adiantamento salarial semanal',
+      data: new Date().toLocaleDateString('pt-BR'),
+      hora: '17:00',
+      status: 'Pendente'
+    }];
+  }
+  abrirModalNotificacaoFimExpediente(pendentes, '17:00');
+}
+
+function tocarSomAlarmeValeExpediente() {
+  try {
+    var AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    var ctx = new AudioCtx();
+    [523.25, 659.25, 783.99, 1046.50].forEach(function(freq, i) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime + i * 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.3);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.12);
+      osc.stop(ctx.currentTime + i * 0.12 + 0.35);
+    });
+  } catch(_) {}
+}
+
+window.addEventListener('storage', function(e) {
+  if (e.key === 'sdv_pedidos_vale') {
+    renderizarValesAdmin();
+  }
+});
+
+// Executa na inicialização
+setTimeout(renderizarValesAdmin, 500);
 //  CONTRACTS
 // ══════════════════════════════════════════════
 function renderSelectContratos() {
@@ -12059,6 +12532,452 @@ function limparHistoricoLiberacoesFin() {
     }, { passive: false });
   }
 })();
+
+/* ═══════════════════════════════════════════════════════
+   MÓDULO: PEDIDO DE MATERIAL + SD COMPARATIVO
+   ═══════════════════════════════════════════════════════ */
+(function() {
+  var PM_KEY = 'sdv_pedidos_material';
+  var _filtroAtual = 'todos';
+  var _editId = null;
+  var _itensPedido = [];   // [{desc, unidade, qtd, precoA, precoB, precoC}]
+
+  // ── Helpers ──────────────────────────────────────────
+  function pmGet() {
+    try { return JSON.parse(localStorage.getItem(PM_KEY) || '[]'); } catch(e) { return []; }
+  }
+  function pmSet(data) {
+    localStorage.setItem(PM_KEY, JSON.stringify(data));
+    _atualizarBadgeMaterial();
+  }
+  function fmtMoeda(v) {
+    v = parseFloat(v) || 0;
+    return 'R$ ' + v.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+  function gerarIdPM() {
+    return 'PM' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2,5).toUpperCase();
+  }
+
+  // ── Badge ─────────────────────────────────────────────
+  function _atualizarBadgeMaterial() {
+    var lista = pmGet();
+    var pendentes = lista.filter(function(p){ return p.status === 'pendente'; }).length;
+    var badge = document.getElementById('badge-pedido-material');
+    if (!badge) return;
+    if (pendentes > 0) {
+      badge.style.display = 'inline';
+      badge.textContent = pendentes;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+  window._atualizarBadgeMaterial = _atualizarBadgeMaterial;
+
+  // ── Renderizar lista ──────────────────────────────────
+  function renderListaPedidos() {
+    var container = document.getElementById('lista-pedidos-material');
+    if (!container) return;
+    var lista = pmGet();
+    if (_filtroAtual !== 'todos') {
+      lista = lista.filter(function(p){ return p.status === _filtroAtual; });
+    }
+    lista = lista.slice().reverse();
+    if (!lista.length) {
+      container.innerHTML = '<div class="empty" style="padding:32px;text-align:center;color:var(--muted);">Nenhum pedido' + (_filtroAtual !== 'todos' ? ' com esse status' : '') + '. Clique em <strong>➕ Novo Pedido</strong> para começar.</div>';
+      return;
+    }
+    var statusLabels = { pendente:'⏳ Pendente', aprovado:'✅ Aprovado', recusado:'❌ Recusado', comprado:'🏷️ Comprado' };
+    var statusColors = { pendente:'#f59e0b', aprovado:'#10b981', recusado:'#ef4444', comprado:'#6366f1' };
+    container.innerHTML = lista.map(function(p) {
+      var cor = statusColors[p.status] || '#888';
+      var label = statusLabels[p.status] || p.status;
+      var totalItens = (p.itens||[]).length;
+      // Calcular melhor total
+      var melhorTotal = 0;
+      if (p.itens && p.itens.length) {
+        melhorTotal = p.itens.reduce(function(acc, it) {
+          var qtd = parseFloat(it.qtd)||1;
+          var precos = [parseFloat(it.precoA)||0, parseFloat(it.precoB)||0, parseFloat(it.precoC)||0].filter(function(x){ return x > 0; });
+          return acc + (precos.length ? Math.min.apply(null, precos) * qtd : 0);
+        }, 0);
+      }
+      return '<div class="card" style="margin-bottom:10px;border-left:4px solid ' + cor + ';">' +
+        '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">' +
+          '<div style="flex:1;min-width:180px;">' +
+            '<div style="font-size:15px;font-weight:800;">' + _esc(p.titulo) + '</div>' +
+            '<div style="font-size:12px;color:var(--muted);margin:3px 0;">' +
+              '📅 ' + (p.dataNecessaria || 'sem data') + ' · 👷 ' + _esc(p.solicitante) +
+              (p.os ? ' · 🗂️ ' + _esc(p.os) : '') +
+            '</div>' +
+            (p.obs ? '<div style="font-size:12px;color:var(--muted);">' + _esc(p.obs) + '</div>' : '') +
+          '</div>' +
+          '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">' +
+            '<span style="background:' + cor + '22;color:' + cor + ';font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;border:1px solid ' + cor + ';">' + label + '</span>' +
+            '<span style="font-size:12px;color:var(--muted);">' + totalItens + ' item(s)</span>' +
+            (melhorTotal > 0 ? '<span style="font-size:13px;font-weight:700;color:#22d3ee;">Melhor: ' + fmtMoeda(melhorTotal) + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;">' +
+          '<button class="btn btn-sec" onclick="editarPedidoMaterial(\'' + p.id + '\')" style="font-size:11px;padding:5px 12px;">✏️ Editar</button>' +
+          (p.status === 'pendente' ? '<button class="btn" onclick="mudarStatusPedidoMaterial(\'' + p.id + '\',\'aprovado\')" style="font-size:11px;padding:5px 12px;background:rgba(16,185,129,0.15);border:1.5px solid #10b981;color:#10b981;">✅ Aprovar</button>' : '') +
+          (p.status === 'pendente' ? '<button class="btn" onclick="mudarStatusPedidoMaterial(\'' + p.id + '\',\'recusado\')" style="font-size:11px;padding:5px 12px;background:rgba(239,68,68,0.12);border:1.5px solid #ef4444;color:#ef4444;">❌ Recusar</button>' : '') +
+          (p.status === 'aprovado' ? '<button class="btn" onclick="mudarStatusPedidoMaterial(\'' + p.id + '\',\'comprado\')" style="font-size:11px;padding:5px 12px;background:rgba(99,102,241,0.15);border:1.5px solid #6366f1;color:#6366f1;">🏷️ Marcar Comprado</button>' : '') +
+          '<button class="btn btn-sec" onclick="verComparativoPedido(\'' + p.id + '\')" style="font-size:11px;padding:5px 12px;">📊 SD Comparativo</button>' +
+          '<button class="btn btn-sec" onclick="excluirPedidoMaterial(\'' + p.id + '\')" style="font-size:11px;padding:5px 12px;color:#ef4444;border-color:#ef4444;">🗑️</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    // Atualizar select do comparativo
+    _popularSelectComparativo();
+  }
+
+  function _esc(str) {
+    return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Filtros ───────────────────────────────────────────
+  window.filtrarPedidosMaterial = function(status) {
+    _filtroAtual = status;
+    var ids = ['todos','pendente','aprovado','recusado','comprado'];
+    ids.forEach(function(id) {
+      var btn = document.getElementById('filtro-mat-' + id);
+      if (!btn) return;
+      btn.className = 'btn ' + (id === status ? 'btn-primary' : 'btn-sec');
+    });
+    renderListaPedidos();
+  };
+
+  // ── Status ────────────────────────────────────────────
+  window.mudarStatusPedidoMaterial = function(id, novoStatus) {
+    var lista = pmGet();
+    var idx = lista.findIndex(function(p){ return p.id === id; });
+    if (idx < 0) return;
+    lista[idx].status = novoStatus;
+    pmSet(lista);
+    renderListaPedidos();
+  };
+
+  // ── Excluir ───────────────────────────────────────────
+  window.excluirPedidoMaterial = function(id) {
+    if (!confirm('Excluir este pedido?')) return;
+    var lista = pmGet().filter(function(p){ return p.id !== id; });
+    pmSet(lista);
+    renderListaPedidos();
+  };
+
+  // ── Modal: abrir ──────────────────────────────────────
+  window.abrirModalNovoPedidoMaterial = function() {
+    _editId = null;
+    _itensPedido = [];
+    var modal = document.getElementById('modal-novo-pedido-material');
+    if (!modal) return;
+    document.getElementById('pm-titulo').value = '';
+    document.getElementById('pm-solicitante').value = '';
+    document.getElementById('pm-data').value = '';
+    document.getElementById('pm-os').value = '';
+    document.getElementById('pm-obs').value = '';
+    document.getElementById('pm-msg').innerHTML = '';
+    _renderItensPedidoModal();
+    _renderComparativoModal();
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    // Adicionar 1 item padrão
+    adicionarItemPedidoMaterial();
+  };
+
+  window.fecharModalNovoPedidoMaterial = function() {
+    var modal = document.getElementById('modal-novo-pedido-material');
+    if (modal) modal.style.display = 'none';
+  };
+
+  // ── Modal: editar ─────────────────────────────────────
+  window.editarPedidoMaterial = function(id) {
+    var lista = pmGet();
+    var p = lista.find(function(x){ return x.id === id; });
+    if (!p) return;
+    _editId = id;
+    _itensPedido = JSON.parse(JSON.stringify(p.itens || []));
+    var modal = document.getElementById('modal-novo-pedido-material');
+    document.getElementById('pm-titulo').value = p.titulo || '';
+    document.getElementById('pm-solicitante').value = p.solicitante || '';
+    document.getElementById('pm-data').value = p.dataNecessaria || '';
+    document.getElementById('pm-os').value = p.os || '';
+    document.getElementById('pm-obs').value = p.obs || '';
+    document.getElementById('pm-msg').innerHTML = '';
+    _renderItensPedidoModal();
+    _renderComparativoModal();
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+  };
+
+  // ── Itens dinâmicos no modal ──────────────────────────
+  window.adicionarItemPedidoMaterial = function() {
+    _itensPedido.push({ desc:'', unidade:'un', qtd:1, precoA:'', precoB:'', precoC:'' });
+    _renderItensPedidoModal();
+    _renderComparativoModal();
+  };
+
+  function _renderItensPedidoModal() {
+    var c = document.getElementById('pm-itens-container');
+    if (!c) return;
+    if (!_itensPedido.length) {
+      c.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px 0;">Nenhum item. Clique em ➕ Adicionar Item.</div>';
+      return;
+    }
+    c.innerHTML = _itensPedido.map(function(it, i) {
+      return '<div style="display:grid;grid-template-columns:2fr 80px 70px repeat(3,100px) 32px;gap:6px;align-items:center;margin-bottom:7px;background:var(--bg);padding:8px 10px;border-radius:10px;">' +
+        '<input placeholder="Descrição do item *" value="' + _esc(it.desc) + '" oninput="_pmItemChange(' + i + ',\'desc\',this.value)" style="padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:12px;" />' +
+        '<input placeholder="Unid." value="' + _esc(it.unidade) + '" oninput="_pmItemChange(' + i + ',\'unidade\',this.value)" style="padding:7px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:12px;text-align:center;" />' +
+        '<input type="number" placeholder="Qtd" value="' + (it.qtd||1) + '" min="0.001" step="0.001" oninput="_pmItemChange(' + i + ',\'qtd\',this.value)" style="padding:7px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:12px;text-align:center;" />' +
+        '<input type="number" placeholder="R$ Forn.A" value="' + (it.precoA||'') + '" min="0" step="0.01" oninput="_pmItemChange(' + i + ',\'precoA\',this.value)" style="padding:7px 8px;border-radius:8px;border:1.5px solid #6366f144;background:var(--card);color:#a5b4fc;font-size:12px;text-align:right;" />' +
+        '<input type="number" placeholder="R$ Forn.B" value="' + (it.precoB||'') + '" min="0" step="0.01" oninput="_pmItemChange(' + i + ',\'precoB\',this.value)" style="padding:7px 8px;border-radius:8px;border:1.5px solid #f59e0b44;background:var(--card);color:#fcd34d;font-size:12px;text-align:right;" />' +
+        '<input type="number" placeholder="R$ Forn.C" value="' + (it.precoC||'') + '" min="0" step="0.01" oninput="_pmItemChange(' + i + ',\'precoC\',this.value)" style="padding:7px 8px;border-radius:8px;border:1.5px solid #10b98144;background:var(--card);color:#6ee7b7;font-size:12px;text-align:right;" />' +
+        '<button onclick="_pmRemoverItem(' + i + ')" style="background:none;border:none;color:#ef4444;font-size:16px;cursor:pointer;padding:0;">✕</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  window._pmItemChange = function(i, campo, valor) {
+    if (_itensPedido[i]) {
+      _itensPedido[i][campo] = valor;
+      _renderComparativoModal();
+    }
+  };
+
+  window._pmRemoverItem = function(i) {
+    _itensPedido.splice(i, 1);
+    _renderItensPedidoModal();
+    _renderComparativoModal();
+  };
+
+  // ── Comparativo inline no modal ───────────────────────
+  function _renderComparativoModal() {
+    var c = document.getElementById('pm-comparativo-container');
+    if (!c) return;
+    var itens = _itensPedido.filter(function(it){ return it.desc; });
+    if (!itens.length) {
+      c.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px 0;">Preencha os itens acima para ver o comparativo.</div>';
+      return;
+    }
+    var totA=0, totB=0, totC=0;
+    var rows = itens.map(function(it) {
+      var qtd = parseFloat(it.qtd)||1;
+      var a = parseFloat(it.precoA)||0, b = parseFloat(it.precoB)||0, cv = parseFloat(it.precoC)||0;
+      var tA=a*qtd, tB=b*qtd, tC=cv*qtd;
+      totA+=tA; totB+=tB; totC+=tC;
+      var precos = [a,b,cv].filter(function(x){ return x>0; });
+      var menor = precos.length ? Math.min.apply(null,precos) : 0;
+      var maior = precos.length > 1 ? Math.max.apply(null,precos) : 0;
+      var economia = precos.length > 1 ? (maior - menor) * qtd : 0;
+      function destaque(v) { return (menor > 0 && v === menor) ? 'color:#22d3ee;font-weight:900;' : ''; }
+      return '<tr style="border-bottom:1px solid var(--border);">' +
+        '<td style="padding:8px 12px;">' + _esc(it.desc) + '</td>' +
+        '<td style="padding:8px 12px;text-align:center;">' + qtd + ' ' + _esc(it.unidade||'un') + '</td>' +
+        '<td style="padding:8px 12px;text-align:right;' + destaque(a) + '">' + (a > 0 ? fmtMoeda(a) : '—') + '</td>' +
+        '<td style="padding:8px 12px;text-align:right;' + destaque(b) + '">' + (b > 0 ? fmtMoeda(b) : '—') + '</td>' +
+        '<td style="padding:8px 12px;text-align:right;' + destaque(cv) + '">' + (cv > 0 ? fmtMoeda(cv) : '—') + '</td>' +
+        '<td style="padding:8px 12px;text-align:center;color:#22d3ee;font-weight:800;">' + (menor > 0 ? fmtMoeda(menor*qtd) : '—') + '</td>' +
+        '<td style="padding:8px 12px;text-align:center;color:#4ade80;font-weight:700;">' + (economia > 0 ? fmtMoeda(economia) : '—') + '</td>' +
+      '</tr>';
+    }).join('');
+    var totsArr = [totA,totB,totC].filter(function(x){ return x>0; });
+    var menorTot = totsArr.length ? Math.min.apply(null,totsArr) : 0;
+    var maiorTot = totsArr.length > 1 ? Math.max.apply(null,totsArr) : 0;
+    function totDest(v) { return (menorTot > 0 && v === menorTot) ? 'color:#22d3ee;font-weight:900;' : 'color:var(--muted);'; }
+    c.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+      '<thead><tr style="background:var(--bg);">' +
+        '<th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);">Item</th>' +
+        '<th style="padding:8px 12px;text-align:center;border-bottom:2px solid var(--border);color:var(--muted);">Qtd</th>' +
+        '<th style="padding:8px 12px;text-align:right;border-bottom:2px solid var(--border);color:#a5b4fc;">Forn.A</th>' +
+        '<th style="padding:8px 12px;text-align:right;border-bottom:2px solid var(--border);color:#fcd34d;">Forn.B</th>' +
+        '<th style="padding:8px 12px;text-align:right;border-bottom:2px solid var(--border);color:#6ee7b7;">Forn.C</th>' +
+        '<th style="padding:8px 12px;text-align:center;border-bottom:2px solid var(--border);color:#22d3ee;">Menor Total</th>' +
+        '<th style="padding:8px 12px;text-align:center;border-bottom:2px solid var(--border);color:#4ade80;">Economia</th>' +
+      '</tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+      '<tfoot><tr style="background:var(--bg);font-weight:900;">' +
+        '<td colspan="2" style="padding:10px 12px;font-size:13px;">TOTAL</td>' +
+        '<td style="padding:10px 12px;text-align:right;' + totDest(totA) + '">' + (totA > 0 ? fmtMoeda(totA) : '—') + '</td>' +
+        '<td style="padding:10px 12px;text-align:right;' + totDest(totB) + '">' + (totB > 0 ? fmtMoeda(totB) : '—') + '</td>' +
+        '<td style="padding:10px 12px;text-align:right;' + totDest(totC) + '">' + (totC > 0 ? fmtMoeda(totC) : '—') + '</td>' +
+        '<td style="padding:10px 12px;text-align:center;color:#22d3ee;font-size:14px;">' + (menorTot > 0 ? fmtMoeda(menorTot) : '—') + '</td>' +
+        '<td style="padding:10px 12px;text-align:center;color:#4ade80;">' + (maiorTot > menorTot ? fmtMoeda(maiorTot - menorTot) : '—') + '</td>' +
+      '</tr></tfoot></table>';
+  }
+
+  // ── Salvar pedido ─────────────────────────────────────
+  window.salvarPedidoMaterial = function() {
+    var titulo = (document.getElementById('pm-titulo').value||'').trim();
+    var solicitante = (document.getElementById('pm-solicitante').value||'').trim();
+    if (!titulo) { document.getElementById('pm-msg').innerHTML = '<div style="color:#ef4444;font-size:12px;">Informe o título do pedido.</div>'; return; }
+    if (!solicitante) { document.getElementById('pm-msg').innerHTML = '<div style="color:#ef4444;font-size:12px;">Informe o solicitante.</div>'; return; }
+    if (!_itensPedido.filter(function(it){ return it.desc; }).length) {
+      document.getElementById('pm-msg').innerHTML = '<div style="color:#ef4444;font-size:12px;">Adicione pelo menos 1 item.</div>'; return;
+    }
+    var lista = pmGet();
+    if (_editId) {
+      var idx = lista.findIndex(function(p){ return p.id === _editId; });
+      if (idx >= 0) {
+        lista[idx].titulo = titulo;
+        lista[idx].solicitante = solicitante;
+        lista[idx].dataNecessaria = document.getElementById('pm-data').value;
+        lista[idx].os = document.getElementById('pm-os').value;
+        lista[idx].obs = document.getElementById('pm-obs').value;
+        lista[idx].itens = JSON.parse(JSON.stringify(_itensPedido));
+        lista[idx].updatedAt = new Date().toISOString();
+      }
+    } else {
+      lista.push({
+        id: gerarIdPM(),
+        titulo: titulo,
+        solicitante: solicitante,
+        dataNecessaria: document.getElementById('pm-data').value,
+        os: document.getElementById('pm-os').value,
+        obs: document.getElementById('pm-obs').value,
+        status: 'pendente',
+        itens: JSON.parse(JSON.stringify(_itensPedido)),
+        criadoEm: new Date().toISOString()
+      });
+    }
+    pmSet(lista);
+    renderListaPedidos();
+    fecharModalNovoPedidoMaterial();
+    _popularSelectComparativo();
+  };
+
+  // ── Comparativo na aba principal ──────────────────────
+  function _popularSelectComparativo() {
+    var sel = document.getElementById('select-pedido-comparativo');
+    if (!sel) return;
+    var lista = pmGet();
+    var val = sel.value;
+    sel.innerHTML = '<option value="">— Nenhum —</option>' +
+      lista.map(function(p) {
+        return '<option value="' + p.id + '">' + _esc(p.titulo) + ' [' + p.status + ']</option>';
+      }).join('');
+    sel.value = val;
+  }
+
+  window.carregarComparativoMaterial = function() {
+    var sel = document.getElementById('select-pedido-comparativo');
+    if (!sel) return;
+    var id = sel.value;
+    var tbody = document.getElementById('tbody-sd-comparativo');
+    var tfoot = document.getElementById('tfoot-sd-comparativo');
+    var painelForn = document.getElementById('painel-fornecedores-comparativo');
+    if (!id || !tbody) { if(tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">Selecione um pedido para ver o comparativo.</td></tr>'; if(tfoot) tfoot.innerHTML=''; if(painelForn) painelForn.style.display='none'; return; }
+    var lista = pmGet();
+    var p = lista.find(function(x){ return x.id === id; });
+    if (!p || !p.itens || !p.itens.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">Este pedido não tem itens com cotação.</td></tr>'; if(tfoot) tfoot.innerHTML=''; if(painelForn) painelForn.style.display='none'; return; }
+    var totA=0, totB=0, totC=0;
+    tbody.innerHTML = p.itens.filter(function(it){ return it.desc; }).map(function(it) {
+      var qtd = parseFloat(it.qtd)||1;
+      var a = parseFloat(it.precoA)||0, b = parseFloat(it.precoB)||0, cv = parseFloat(it.precoC)||0;
+      var tA=a*qtd, tB=b*qtd, tC=cv*qtd;
+      totA+=tA; totB+=tB; totC+=tC;
+      var precos = [a,b,cv].filter(function(x){ return x>0; });
+      var menor = precos.length ? Math.min.apply(null,precos) : 0;
+      var maior = precos.length > 1 ? Math.max.apply(null,precos) : 0;
+      var economia = precos.length > 1 ? (maior - menor) * qtd : 0;
+      function d(v){ return (menor>0&&v===menor)?'color:#22d3ee;font-weight:900;background:rgba(34,211,238,0.07);':''; }
+      return '<tr style="border-bottom:1px solid var(--border);">' +
+        '<td style="padding:10px 12px;">' + _esc(it.desc) + '</td>' +
+        '<td style="padding:10px 12px;text-align:center;">' + qtd + ' ' + _esc(it.unidade||'un') + '</td>' +
+        '<td style="padding:10px 12px;text-align:right;' + d(a) + '">' + (a>0?fmtMoeda(a):'—') + '</td>' +
+        '<td style="padding:10px 12px;text-align:right;' + d(b) + '">' + (b>0?fmtMoeda(b):'—') + '</td>' +
+        '<td style="padding:10px 12px;text-align:right;' + d(cv) + '">' + (cv>0?fmtMoeda(cv):'—') + '</td>' +
+        '<td style="padding:10px 12px;text-align:center;color:#22d3ee;font-weight:800;">' + (menor>0?fmtMoeda(menor*qtd):'—') + '</td>' +
+        '<td style="padding:10px 12px;text-align:center;color:#4ade80;font-weight:700;">' + (economia>0?fmtMoeda(economia):'—') + '</td>' +
+      '</tr>';
+    }).join('');
+    var totsArr = [totA,totB,totC].filter(function(x){ return x>0; });
+    var menorTot = totsArr.length ? Math.min.apply(null,totsArr) : 0;
+    var maiorTot = totsArr.length > 1 ? Math.max.apply(null,totsArr) : 0;
+    function td2(v){ return (menorTot>0&&v===menorTot)?'color:#22d3ee;font-weight:900;':'color:var(--muted);'; }
+    if (tfoot) tfoot.innerHTML = '<tr style="background:var(--bg);font-weight:900;font-size:14px;">' +
+      '<td colspan="2" style="padding:11px 12px;">TOTAL GERAL</td>' +
+      '<td style="padding:11px 12px;text-align:right;' + td2(totA) + '">' + (totA>0?fmtMoeda(totA):'—') + '</td>' +
+      '<td style="padding:11px 12px;text-align:right;' + td2(totB) + '">' + (totB>0?fmtMoeda(totB):'—') + '</td>' +
+      '<td style="padding:11px 12px;text-align:right;' + td2(totC) + '">' + (totC>0?fmtMoeda(totC):'—') + '</td>' +
+      '<td style="padding:11px 12px;text-align:center;color:#22d3ee;font-size:16px;">' + (menorTot>0?fmtMoeda(menorTot):'—') + '</td>' +
+      '<td style="padding:11px 12px;text-align:center;color:#4ade80;">' + (maiorTot>menorTot?fmtMoeda(maiorTot-menorTot):'—') + '</td>' +
+    '</tr>';
+    if (painelForn) painelForn.style.display = 'block';
+  };
+
+  // ── Ver comparativo de um pedido específico ───────────
+  window.verComparativoPedido = function(id) {
+    goTab('material');
+    setTimeout(function() {
+      var sel = document.getElementById('select-pedido-comparativo');
+      if (sel) { sel.value = id; carregarComparativoMaterial(); }
+      var el = document.querySelector('.card:has(#select-pedido-comparativo)') || document.getElementById('tabela-sd-comparativo');
+      if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+    }, 100);
+  };
+
+  // ── Exportar PDF do comparativo ───────────────────────
+  window.exportarComparativoPDF = function() {
+    var sel = document.getElementById('select-pedido-comparativo');
+    if (!sel || !sel.value) { alert('Selecione um pedido para exportar.'); return; }
+    var lista = pmGet();
+    var p = lista.find(function(x){ return x.id === sel.value; });
+    if (!p) return;
+    var win = window.open('', '_blank');
+    if (!win) { alert('Permita pop-ups para exportar PDF.'); return; }
+    var itens = (p.itens||[]).filter(function(it){ return it.desc; });
+    var totA=0,totB=0,totC=0;
+    var rows = itens.map(function(it) {
+      var qtd=parseFloat(it.qtd)||1, a=parseFloat(it.precoA)||0, b=parseFloat(it.precoB)||0, cv=parseFloat(it.precoC)||0;
+      totA+=a*qtd; totB+=b*qtd; totC+=cv*qtd;
+      var precos=[a,b,cv].filter(function(x){return x>0;}), menor=precos.length?Math.min.apply(null,precos):0;
+      function d(v){ return menor>0&&v===menor?'background:#e0f7fa;font-weight:bold;':''; }
+      return '<tr><td>' + _esc(it.desc) + '</td><td style="text-align:center;">' + qtd + ' ' + _esc(it.unidade||'un') + '</td>' +
+        '<td style="text-align:right;' + d(a) + '">' + (a>0?fmtMoeda(a):'—') + '</td>' +
+        '<td style="text-align:right;' + d(b) + '">' + (b>0?fmtMoeda(b):'—') + '</td>' +
+        '<td style="text-align:right;' + d(cv) + '">' + (cv>0?fmtMoeda(cv):'—') + '</td>' +
+        '<td style="text-align:center;font-weight:bold;color:#0097a7;">' + (menor>0?fmtMoeda(menor*qtd):'—') + '</td></tr>';
+    }).join('');
+    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>SD Comparativo - ' + _esc(p.titulo) + '</title>' +
+      '<style>body{font-family:Arial,sans-serif;padding:24px;color:#222;}h1{font-size:20px;}table{width:100%;border-collapse:collapse;margin-top:16px;}th,td{padding:8px 12px;border:1px solid #ddd;font-size:13px;}th{background:#f5f5f5;}tfoot td{font-weight:bold;background:#fafafa;}@media print{button{display:none}}</style>' +
+      '</head><body><h1>📊 SD Comparativo — ' + _esc(p.titulo) + '</h1>' +
+      '<p>Solicitante: <strong>' + _esc(p.solicitante) + '</strong> · Data: ' + (p.dataNecessaria||'—') + (p.os?' · OS: '+_esc(p.os):'') + '</p>' +
+      '<table><thead><tr><th>Item</th><th>Qtd</th><th>Forn. A</th><th>Forn. B</th><th>Forn. C</th><th>Menor Total</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+      '<tfoot><tr><td colspan="2">TOTAL</td>' +
+        '<td style="text-align:right;">' + (totA>0?fmtMoeda(totA):'—') + '</td>' +
+        '<td style="text-align:right;">' + (totB>0?fmtMoeda(totB):'—') + '</td>' +
+        '<td style="text-align:right;">' + (totC>0?fmtMoeda(totC):'—') + '</td>' +
+        '<td style="text-align:center;color:#0097a7;">' + fmtMoeda(Math.min(totA||Infinity,totB||Infinity,totC||Infinity)===Infinity?0:Math.min(totA||Infinity,totB||Infinity,totC||Infinity)) + '</td>' +
+      '</tr></tfoot></table>' +
+      '<br><button onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>' +
+      '</body></html>');
+    win.document.close();
+  };
+
+  // ── Inicialização quando a aba é aberta ───────────────
+  var _goTabOriginal = window.goTab;
+  window.goTab = function(tab) {
+    if (_goTabOriginal) _goTabOriginal(tab);
+    if (tab === 'material') {
+      setTimeout(function() {
+        renderListaPedidos();
+        _popularSelectComparativo();
+      }, 50);
+    }
+  };
+
+  // Iniciar badge ao carregar
+  document.addEventListener('DOMContentLoaded', function() {
+    _atualizarBadgeMaterial();
+  });
+  // Segurança: também chamar imediatamente
+  setTimeout(_atualizarBadgeMaterial, 500);
+
+})();
+/* ═══════════════════════════════════════════════════════ */
 </script>
 
 <!-- ══ MODAL DE AUTORIZAÇÃO DE EDIÇÃO (FINANCEIRO PESSOAL DOS COLABORADORES) ══ -->
