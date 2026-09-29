@@ -340,6 +340,26 @@
       .total-val { font-size: 22px; }
       .field-row { grid-template-columns: 1fr; gap: 9px; }
       .tab { font-size: 10.5px; padding: 9px 4px; min-width: 65px; }
+
+      /* Responsividade Pedido de Material & SD Comparativo */
+      #modal-novo-pedido-material .modal-box {
+        padding: 16px 12px !important;
+        width: 96% !important;
+        max-width: 96vw !important;
+        border-radius: 16px !important;
+      }
+      #panel-material .field-row {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+      }
+      #tabela-sd-comparativo th, #tabela-sd-comparativo td {
+        padding: 8px 8px !important;
+        font-size: 11.5px !important;
+        white-space: nowrap !important;
+      }
+      .pm-item-card {
+        padding: 10px 8px !important;
+      }
     }
 
     /* ── STATUS PILL ── */
@@ -1752,12 +1772,12 @@
     </div>
 
     <!-- FILTROS DE STATUS -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-      <button id="filtro-mat-todos" class="btn btn-primary" onclick="filtrarPedidosMaterial('todos')" style="font-size:12px;padding:6px 14px;">📋 Todos</button>
-      <button id="filtro-mat-pendente" class="btn btn-sec" onclick="filtrarPedidosMaterial('pendente')" style="font-size:12px;padding:6px 14px;">⏳ Pendentes</button>
-      <button id="filtro-mat-aprovado" class="btn btn-sec" onclick="filtrarPedidosMaterial('aprovado')" style="font-size:12px;padding:6px 14px;">✅ Aprovados</button>
-      <button id="filtro-mat-recusado" class="btn btn-sec" onclick="filtrarPedidosMaterial('recusado')" style="font-size:12px;padding:6px 14px;">❌ Recusados</button>
-      <button id="filtro-mat-comprado" class="btn btn-sec" onclick="filtrarPedidosMaterial('comprado')" style="font-size:12px;padding:6px 14px;">🏷️ Comprados</button>
+    <div style="display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px;margin-bottom:14px;">
+      <button id="filtro-mat-todos" class="btn btn-primary" onclick="filtrarPedidosMaterial('todos')" style="font-size:12px;padding:6px 14px;white-space:nowrap;flex-shrink:0;">📋 Todos</button>
+      <button id="filtro-mat-pendente" class="btn btn-sec" onclick="filtrarPedidosMaterial('pendente')" style="font-size:12px;padding:6px 14px;white-space:nowrap;flex-shrink:0;">⏳ Pendentes</button>
+      <button id="filtro-mat-aprovado" class="btn btn-sec" onclick="filtrarPedidosMaterial('aprovado')" style="font-size:12px;padding:6px 14px;white-space:nowrap;flex-shrink:0;">✅ Aprovados</button>
+      <button id="filtro-mat-recusado" class="btn btn-sec" onclick="filtrarPedidosMaterial('recusado')" style="font-size:12px;padding:6px 14px;white-space:nowrap;flex-shrink:0;">❌ Recusados</button>
+      <button id="filtro-mat-comprado" class="btn btn-sec" onclick="filtrarPedidosMaterial('comprado')" style="font-size:12px;padding:6px 14px;white-space:nowrap;flex-shrink:0;">🏷️ Comprados</button>
     </div>
 
     <!-- LISTA DE PEDIDOS -->
@@ -1770,15 +1790,20 @@
       <!-- Seletor de pedido para comparativo -->
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
         <label style="font-size:13px;color:var(--muted);">Selecione o pedido:</label>
-        <select id="select-pedido-comparativo" onchange="carregarComparativoMaterial()" style="flex:1;min-width:200px;padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:13px;">
+        <select id="select-pedido-comparativo" onchange="carregarComparativoMaterial()" style="flex:1;min-width:180px;padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:13px;">
           <option value="">— Nenhum —</option>
         </select>
-        <button class="btn btn-sec" onclick="exportarComparativoPDF()" style="font-size:12px;padding:7px 14px;">📄 Exportar PDF</button>
+        <button class="btn btn-sec" onclick="exportarComparativoPDF()" style="font-size:12px;padding:7px 14px;white-space:nowrap;">📄 Exportar PDF</button>
+      </div>
+
+      <!-- Dica visual no celular -->
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:4px;">
+        <span>👉</span> <span>Arraste para o lado para ver todos os fornecedores (A, B e C)</span>
       </div>
 
       <!-- Tabela comparativa -->
-      <div style="overflow-x:auto;">
-        <table id="tabela-sd-comparativo" style="width:100%;border-collapse:collapse;font-size:13px;">
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;border-radius:10px;border:1px solid var(--border);">
+        <table id="tabela-sd-comparativo" style="width:100%;border-collapse:collapse;font-size:13px;min-width:620px;">
           <thead>
             <tr style="background:var(--bg);">
               <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-weight:700;">Item / Material</th>
@@ -1867,6 +1892,9 @@
             <span style="width:7px;height:7px;border-radius:50%;background:#34d399;display:inline-block;animation:pulseCamDot 1s infinite alternate;"></span>
             Sensor: Pronto
           </span>
+          <button type="button" class="btn btn-primary btn-sm" onclick="capturarFotoUltraHD()" style="font-weight:900;font-size:12px;padding:7px 16px;background:linear-gradient(135deg,#10b981,#059669);border:1.5px solid #34d399;color:#fff;box-shadow:0 0 14px rgba(16,185,129,0.4);display:inline-flex;align-items:center;gap:6px;border-radius:999px;cursor:pointer;">
+            <span>📸</span> <span>Capturar</span>
+          </button>
           <button type="button" class="btn btn-gold btn-sm" onclick="alternarTelaCheiaCamera()" style="font-weight:800;font-size:12px;padding:7px 14px;">
             <span>⛶</span> <span>Tela Cheia Sniper</span>
           </button>
@@ -12727,14 +12755,47 @@ function limparHistoricoLiberacoesFin() {
       return;
     }
     c.innerHTML = _itensPedido.map(function(it, i) {
-      return '<div style="display:grid;grid-template-columns:2fr 80px 70px repeat(3,100px) 32px;gap:6px;align-items:center;margin-bottom:7px;background:var(--bg);padding:8px 10px;border-radius:10px;">' +
-        '<input placeholder="Descrição do item *" value="' + _esc(it.desc) + '" oninput="_pmItemChange(' + i + ',\'desc\',this.value)" style="padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:12px;" />' +
-        '<input placeholder="Unid." value="' + _esc(it.unidade) + '" oninput="_pmItemChange(' + i + ',\'unidade\',this.value)" style="padding:7px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:12px;text-align:center;" />' +
-        '<input type="number" placeholder="Qtd" value="' + (it.qtd||1) + '" min="0.001" step="0.001" oninput="_pmItemChange(' + i + ',\'qtd\',this.value)" style="padding:7px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:12px;text-align:center;" />' +
-        '<input type="number" placeholder="R$ Forn.A" value="' + (it.precoA||'') + '" min="0" step="0.01" oninput="_pmItemChange(' + i + ',\'precoA\',this.value)" style="padding:7px 8px;border-radius:8px;border:1.5px solid #6366f144;background:var(--card);color:#a5b4fc;font-size:12px;text-align:right;" />' +
-        '<input type="number" placeholder="R$ Forn.B" value="' + (it.precoB||'') + '" min="0" step="0.01" oninput="_pmItemChange(' + i + ',\'precoB\',this.value)" style="padding:7px 8px;border-radius:8px;border:1.5px solid #f59e0b44;background:var(--card);color:#fcd34d;font-size:12px;text-align:right;" />' +
-        '<input type="number" placeholder="R$ Forn.C" value="' + (it.precoC||'') + '" min="0" step="0.01" oninput="_pmItemChange(' + i + ',\'precoC\',this.value)" style="padding:7px 8px;border-radius:8px;border:1.5px solid #10b98144;background:var(--card);color:#6ee7b7;font-size:12px;text-align:right;" />' +
-        '<button onclick="_pmRemoverItem(' + i + ')" style="background:none;border:none;color:#ef4444;font-size:16px;cursor:pointer;padding:0;">✕</button>' +
+      var a = parseFloat(it.precoA) || 0, b = parseFloat(it.precoB) || 0, cv = parseFloat(it.precoC) || 0;
+      var precos = [a, b, cv].filter(function(x){ return x > 0; });
+      var menor = precos.length ? Math.min.apply(null, precos) : 0;
+      var qtd = parseFloat(it.qtd) || 1;
+      return '<div class="pm-item-card" style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;box-sizing:border-box;width:100%;">' +
+        '<!-- Linha 1: Descrição e Botão Excluir -->' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
+          '<span style="font-size:11px;font-weight:900;color:var(--gold);background:rgba(201,168,76,0.15);padding:2px 8px;border-radius:6px;flex-shrink:0;">#' + (i+1) + '</span>' +
+          '<input placeholder="Descrição do item / material *" value="' + _esc(it.desc) + '" oninput="_pmItemChange(' + i + ',\'desc\',this.value)" style="flex:1;min-width:0;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:13px;font-weight:700;" />' +
+          '<button type="button" onclick="_pmRemoverItem(' + i + ')" title="Remover Item" style="background:rgba(239,68,68,0.15);border:1px solid #ef4444;color:#ef4444;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>' +
+        '</div>' +
+        '<!-- Linha 2: Quantidade, Unidade e Menor Preço Badge -->' +
+        '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">' +
+          '<div style="flex:1;min-width:80px;">' +
+            '<label style="display:block;font-size:10px;color:var(--muted);font-weight:700;margin-bottom:3px;text-transform:uppercase;">Qtd</label>' +
+            '<input type="number" placeholder="1" value="' + (it.qtd||1) + '" min="0.001" step="0.001" oninput="_pmItemChange(' + i + ',\'qtd\',this.value)" style="width:100%;box-sizing:border-box;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:13px;text-align:center;font-weight:700;" />' +
+          '</div>' +
+          '<div style="flex:1;min-width:80px;">' +
+            '<label style="display:block;font-size:10px;color:var(--muted);font-weight:700;margin-bottom:3px;text-transform:uppercase;">Unid.</label>' +
+            '<input placeholder="un" value="' + _esc(it.unidade) + '" oninput="_pmItemChange(' + i + ',\'unidade\',this.value)" style="width:100%;box-sizing:border-box;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:13px;text-align:center;" />' +
+          '</div>' +
+          '<div style="flex:1.5;min-width:130px;background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.3);border-radius:8px;padding:6px 10px;text-align:right;">' +
+            '<div style="font-size:9.5px;color:var(--muted);font-weight:700;text-transform:uppercase;">Melhor Cotação</div>' +
+            '<div style="font-size:13px;font-weight:900;color:#22d3ee;">' + (menor > 0 ? fmtMoeda(menor * qtd) : '—') + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<!-- Linha 3: Preços Fornecedor A, B, C -->' +
+        '<div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:6px;">' +
+          '<div>' +
+            '<label style="display:block;font-size:10px;color:#a5b4fc;font-weight:800;margin-bottom:3px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;">🏪 Forn. A</label>' +
+            '<input type="number" placeholder="R$ 0,00" value="' + (it.precoA||'') + '" min="0" step="0.01" oninput="_pmItemChange(' + i + ',\'precoA\',this.value)" style="width:100%;box-sizing:border-box;padding:7px 6px;border-radius:8px;border:1.5px solid #6366f144;background:var(--card);color:#a5b4fc;font-size:12px;text-align:right;font-weight:700;' + (menor > 0 && a === menor ? 'border-color:#22d3ee;box-shadow:0 0 8px rgba(34,211,238,0.3);' : '') + '" />' +
+          '</div>' +
+          '<div>' +
+            '<label style="display:block;font-size:10px;color:#fcd34d;font-weight:800;margin-bottom:3px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;">🏪 Forn. B</label>' +
+            '<input type="number" placeholder="R$ 0,00" value="' + (it.precoB||'') + '" min="0" step="0.01" oninput="_pmItemChange(' + i + ',\'precoB\',this.value)" style="width:100%;box-sizing:border-box;padding:7px 6px;border-radius:8px;border:1.5px solid #f59e0b44;background:var(--card);color:#fcd34d;font-size:12px;text-align:right;font-weight:700;' + (menor > 0 && b === menor ? 'border-color:#22d3ee;box-shadow:0 0 8px rgba(34,211,238,0.3);' : '') + '" />' +
+          '</div>' +
+          '<div>' +
+            '<label style="display:block;font-size:10px;color:#6ee7b7;font-weight:800;margin-bottom:3px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;">🏪 Forn. C</label>' +
+            '<input type="number" placeholder="R$ 0,00" value="' + (it.precoC||'') + '" min="0" step="0.01" oninput="_pmItemChange(' + i + ',\'precoC\',this.value)" style="width:100%;box-sizing:border-box;padding:7px 6px;border-radius:8px;border:1.5px solid #10b98144;background:var(--card);color:#6ee7b7;font-size:12px;text-align:right;font-weight:700;' + (menor > 0 && cv === menor ? 'border-color:#22d3ee;box-shadow:0 0 8px rgba(34,211,238,0.3);' : '') + '" />' +
+          '</div>' +
+        '</div>' +
       '</div>';
     }).join('');
   }
@@ -12786,7 +12847,9 @@ function limparHistoricoLiberacoesFin() {
     var menorTot = totsArr.length ? Math.min.apply(null,totsArr) : 0;
     var maiorTot = totsArr.length > 1 ? Math.max.apply(null,totsArr) : 0;
     function totDest(v) { return (menorTot > 0 && v === menorTot) ? 'color:#22d3ee;font-weight:900;' : 'color:var(--muted);'; }
-    c.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+    c.innerHTML = '<div style="font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:4px;">👉 <span>Arraste para o lado para ver todos os fornecedores</span></div>' +
+      '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;border-radius:10px;border:1px solid var(--border);">' +
+      '<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:540px;">' +
       '<thead><tr style="background:var(--bg);">' +
         '<th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);">Item</th>' +
         '<th style="padding:8px 12px;text-align:center;border-bottom:2px solid var(--border);color:var(--muted);">Qtd</th>' +
@@ -12804,7 +12867,7 @@ function limparHistoricoLiberacoesFin() {
         '<td style="padding:10px 12px;text-align:right;' + totDest(totC) + '">' + (totC > 0 ? fmtMoeda(totC) : '—') + '</td>' +
         '<td style="padding:10px 12px;text-align:center;color:#22d3ee;font-size:14px;">' + (menorTot > 0 ? fmtMoeda(menorTot) : '—') + '</td>' +
         '<td style="padding:10px 12px;text-align:center;color:#4ade80;">' + (maiorTot > menorTot ? fmtMoeda(maiorTot - menorTot) : '—') + '</td>' +
-      '</tr></tfoot></table>';
+      '</tr></tfoot></table></div>';
   }
 
   // ── Salvar pedido ─────────────────────────────────────
