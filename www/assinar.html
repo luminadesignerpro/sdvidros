@@ -1001,6 +1001,140 @@
     transition: color 0.2s;
   }
   .pay-skip-link:hover { color: #94a3b8; }
+
+  /* ===== COMPROVANTE DE PAGAMENTO & AVISO 24H ===== */
+  .comprovante-wrap {
+    margin-top: 18px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 16px;
+    animation: fadeIn 0.3s ease;
+  }
+  .comprovante-box {
+    background: #0f1521;
+    border: 1px solid #243046;
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .comprovante-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .comprovante-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #f1f5f9;
+  }
+  .comprovante-subtitle {
+    font-size: 11.5px;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+  .comprovante-dropzone {
+    border: 2px dashed rgba(201,160,56,0.45);
+    background: rgba(201,160,56,0.04);
+    border-radius: 12px;
+    padding: 18px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .comprovante-dropzone:hover {
+    border-color: #f3c760;
+    background: rgba(201,160,56,0.08);
+  }
+  .comprovante-dropzone.has-file {
+    border-color: #22c55e;
+    background: rgba(34,197,94,0.06);
+  }
+  .btn-remover-comp {
+    background: transparent;
+    border: 1px solid #ef4444;
+    color: #f87171;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .comprovante-divisor {
+    position: relative;
+    text-align: center;
+    margin: 16px 0 14px 0;
+  }
+  .comprovante-divisor::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; top: 50%;
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+  }
+  .comprovante-divisor span {
+    position: relative;
+    background: #0f1521;
+    padding: 0 12px;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+  .aviso-24hs-box {
+    background: linear-gradient(145deg, rgba(245,158,11,0.13), rgba(20,27,39,0.92));
+    border: 1px solid rgba(245,158,11,0.4);
+    border-radius: 12px;
+    padding: 13px 14px;
+    margin-bottom: 14px;
+    text-align: left;
+  }
+  .aviso-24hs-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fbbf24;
+    font-size: 12.5px;
+    font-weight: 800;
+    margin-bottom: 5px;
+  }
+  .aviso-24hs-texto {
+    font-size: 11.8px;
+    color: #cbd5e1;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .pay-continue-btn-sec {
+    background: transparent;
+    border: 1.5px solid rgba(201,160,56,0.6);
+    color: #f3c760;
+    font-size: 13.5px;
+    font-weight: 700;
+    padding: 13px;
+    border-radius: 12px;
+    width: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    margin-top: 8px;
+    font-family: inherit;
+  }
+  .pay-continue-btn-sec:hover {
+    background: rgba(201,160,56,0.18);
+    border-color: #f3c760;
+    transform: translateY(-1px);
+  }
+  .card-aviso-pendente-24h {
+    background: linear-gradient(145deg, rgba(245,158,11,0.16), rgba(18,24,38,0.98));
+    border: 1.5px solid rgba(245,158,11,0.5);
+    border-radius: 14px;
+    padding: 16px;
+    margin: 16px 0;
+    text-align: left;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
 </style>
 </head>
 <body>
@@ -1038,7 +1172,40 @@
       Nossa equipe já foi notificada para iniciar os preparativos e a produção.
     </p>
 
-    <!-- CARD VIP: LINK PARA A ÁREA DO CLIENTE -->
+    <!-- ALERTA: COMPROVANTE PENDENTE (PRAZO: 24 HORAS) -->
+    <div class="card-aviso-pendente-24h hidden" id="card-aviso-comp-24h">
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+        <span style="font-size:30px;line-height:1;">⏳</span>
+        <div>
+          <div style="color:#f59e0b;font-weight:800;font-size:14.5px;text-transform:uppercase;letter-spacing:0.04em;">Aviso: Envio do Comprovante Pendente</div>
+          <div style="color:#fcd34d;font-size:12px;margin-top:2px;">Prazo máximo de envio: <strong>24 horas</strong></div>
+        </div>
+      </div>
+      <p style="font-size:12.5px;color:#cbd5e1;line-height:1.5;margin-bottom:12px;">
+        Sua assinatura digital foi registrada com validade jurídica. Para que sua Ordem de Serviço seja liberada para produção na fábrica, favor <strong>enviar o comprovante de pagamento em até 24 horas</strong>.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a id="btn-enviar-comp-zap" href="#" target="_blank" class="btn btn-whats" style="font-size:13.5px;padding:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;">
+          📤 Enviar Comprovante no WhatsApp Agora
+        </a>
+        <div style="background:rgba(255,255,255,0.04);border:1px dashed rgba(201,160,56,0.45);border-radius:10px;padding:10px;text-align:center;">
+          <input type="file" id="input-comp-pos-sucesso" accept="image/*,application/pdf" style="display:none;" onchange="aoEnviarComprovantePosSucesso(this)">
+          <button type="button" onclick="document.getElementById('input-comp-pos-sucesso').click()" style="background:transparent;border:none;color:#f3c760;font-size:12.5px;font-weight:700;cursor:pointer;">
+            📎 Ou clique aqui para anexar o comprovante agora mesmo
+          </button>
+          <div id="status-comp-pos-sucesso" style="font-size:11.5px;margin-top:4px;color:#94a3b8;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALERTA: COMPROVANTE RECEBIDO / CONFIRMADO -->
+    <div class="hidden" id="card-aviso-comp-ok" style="background:rgba(34,197,94,0.12);border:1.5px solid rgba(34,197,94,0.45);border-radius:12px;padding:14px;margin:16px 0;text-align:left;display:flex;align-items:center;gap:12px;">
+      <span style="font-size:28px;">🧾</span>
+      <div>
+        <div style="color:#4ade80;font-weight:800;font-size:14px;">Comprovante de Pagamento Anexado!</div>
+        <div style="color:#cbd5e1;font-size:12px;margin-top:2px;">Seu comprovante foi recebido e vinculado com sucesso à sua Ordem de Serviço.</div>
+      </div>
+    </div>
     <div class="portal-promo-card" id="card-link-portal">
       <div class="portal-promo-header">
         <div class="portal-promo-icon">👤</div>
@@ -1300,10 +1467,64 @@
         </div>
       </div>
 
-      <button class="pay-continue-btn" id="btn-continuar-assinar" disabled onclick="irParaAssinaturaApos()">
-        ✍️ Continuar para Assinar
-      </button>
-      <span class="pay-skip-link" onclick="irParaAssinaturaApos()">Pular esta etapa e ir direto para a assinatura</span>
+      <!-- SEÇÃO DO COMPROVANTE DE PAGAMENTO & OPÇÕES DE ASSINATURA -->
+      <div id="bloco-comprovante-pagamento" class="comprovante-wrap hidden">
+        <div class="comprovante-box">
+          <div class="comprovante-header">
+            <span style="font-size:22px;">🧾</span>
+            <div>
+              <div class="comprovante-title">Comprovante de Pagamento</div>
+              <div class="comprovante-subtitle">Anexe a foto/print do pagamento agora ou assine e envie depois</div>
+            </div>
+          </div>
+
+          <!-- OPÇÃO 1: ANEXAR AGORA -->
+          <div class="comprovante-dropzone" id="dropzone-comprovante" onclick="document.getElementById('input-arquivo-comprovante').click()">
+            <input type="file" id="input-arquivo-comprovante" accept="image/*,application/pdf" style="display:none;" onchange="aoSelecionarComprovante(this)">
+            <div id="comprovante-vazio">
+              <span style="font-size:26px;display:block;margin-bottom:6px;">📎</span>
+              <strong style="color:#f3c760;font-size:13.5px;">Clique aqui para anexar o Comprovante</strong>
+              <div style="font-size:11.5px;color:#94a3b8;margin-top:4px;">Foto, print do Pix, comprovante bancário ou PDF</div>
+            </div>
+            <div id="comprovante-preview-wrap" class="hidden">
+              <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">
+                <span id="comprovante-thumb-icon" style="font-size:24px;">📄</span>
+                <img id="comprovante-preview-img" src="" alt="Preview" style="max-height:80px;border-radius:6px;display:none;border:1px solid #c9a038;">
+                <div style="text-align:left;">
+                  <div id="comprovante-nome-arq" style="font-size:13px;font-weight:700;color:#4ade80;">comprovante.jpg</div>
+                  <div style="font-size:11px;color:#94a3b8;">✅ Comprovante pronto para envio</div>
+                </div>
+              </div>
+              <button type="button" class="btn-remover-comp" onclick="event.stopPropagation(); removerComprovante();">✕ Remover / Trocar Arquivo</button>
+            </div>
+          </div>
+
+          <!-- BOTÃO SE JÁ ANEXOU COMPROVANTE -->
+          <button class="pay-continue-btn hidden" id="btn-continuar-com-comp" onclick="irParaAssinaturaComComprovante(true)">
+            ✍️ Continuar para Assinar (Comprovante Anexado)
+          </button>
+
+          <!-- DIVISOR OU -->
+          <div class="comprovante-divisor">
+            <span>OU</span>
+          </div>
+
+          <!-- OPÇÃO 2: ASSINAR AGORA E ENVIAR DEPOIS (COM AVISO DE 24HS) -->
+          <div class="aviso-24hs-box">
+            <div class="aviso-24hs-header">
+              <span>⏳</span>
+              <span>Finalizar assinatura agora e enviar comprovante depois</span>
+            </div>
+            <p class="aviso-24hs-texto">
+              ⚠️ <strong>Atenção:</strong> Você pode assinar seu contrato agora e enviar o comprovante em até <strong>24 horas</strong>. Se o comprovante não for enviado em 24h, o início da produção na fábrica permanecerá suspenso aguardando confirmação.
+            </p>
+          </div>
+
+          <button class="pay-continue-btn-sec" id="btn-assinar-enviar-depois" onclick="irParaAssinaturaComComprovante(false)">
+            ✍️ Assinar Agora e Enviar Comprovante Depois (Prazo: 24h)
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- MODAL CONFIGURAR DADOS DO RECEBEDOR -->
@@ -2060,6 +2281,116 @@
 
     const btnContinuar = document.getElementById('btn-continuar-assinar');
     if (btnContinuar) btnContinuar.disabled = false;
+
+    // Exibe seção de comprovante e opções de avanço
+    const blocoComp = document.getElementById('bloco-comprovante-pagamento');
+    if (blocoComp) {
+      blocoComp.classList.remove('hidden');
+      setTimeout(function() {
+        blocoComp.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    }
+  };
+
+  // ===== GESTÃO DE COMPROVANTE DE PAGAMENTO =====
+  let comprovanteArquivo = null;
+  let comprovantePendente = false;
+
+  window.aoSelecionarComprovante = function(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      comprovanteArquivo = {
+        nome: file.name,
+        tipo: file.type,
+        base64: e.target.result,
+        tamanho: file.size,
+        enviado_em: new Date().toISOString()
+      };
+      comprovantePendente = false;
+      atualizarUiComprovante();
+    };
+    reader.readAsDataURL(file);
+  };
+
+  function atualizarUiComprovante() {
+    const vazio = document.getElementById('comprovante-vazio');
+    const prev = document.getElementById('comprovante-preview-wrap');
+    const drop = document.getElementById('dropzone-comprovante');
+    const nomeEl = document.getElementById('comprovante-nome-arq');
+    const imgEl = document.getElementById('comprovante-preview-img');
+    const iconEl = document.getElementById('comprovante-thumb-icon');
+    const btnComComp = document.getElementById('btn-continuar-com-comp');
+
+    if (comprovanteArquivo) {
+      if (vazio) vazio.classList.add('hidden');
+      if (prev) prev.classList.remove('hidden');
+      if (drop) drop.classList.add('has-file');
+      if (nomeEl) nomeEl.textContent = comprovanteArquivo.nome;
+      if (comprovanteArquivo.tipo && comprovanteArquivo.tipo.startsWith('image/')) {
+        if (imgEl) { imgEl.src = comprovanteArquivo.base64; imgEl.style.display = 'block'; }
+        if (iconEl) iconEl.style.display = 'none';
+      } else {
+        if (imgEl) imgEl.style.display = 'none';
+        if (iconEl) { iconEl.style.display = 'block'; iconEl.textContent = '📄'; }
+      }
+      if (btnComComp) {
+        btnComComp.classList.remove('hidden');
+        btnComComp.innerHTML = '✍️ Continuar para Assinar (Comprovante Anexado)';
+      }
+    } else {
+      if (vazio) vazio.classList.remove('hidden');
+      if (prev) prev.classList.add('hidden');
+      if (drop) drop.classList.remove('has-file');
+      if (btnComComp) {
+        btnComComp.classList.add('hidden');
+      }
+    }
+  }
+
+  window.removerComprovante = function() {
+    comprovanteArquivo = null;
+    const inp = document.getElementById('input-arquivo-comprovante');
+    if (inp) inp.value = '';
+    atualizarUiComprovante();
+  };
+
+  window.irParaAssinaturaComComprovante = function(comprovanteAnexado) {
+    if (comprovanteAnexado && !comprovanteArquivo) {
+      document.getElementById('input-arquivo-comprovante').click();
+      return;
+    }
+    comprovantePendente = !comprovanteAnexado;
+    irParaAssinaturaApos();
+  };
+
+  window.aoEnviarComprovantePosSucesso = function(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const base64 = e.target.result;
+      const numLimpo = String(numeroOs || '').replace(/\D/g, '');
+      try {
+        localStorage.setItem('sdv_comp_' + numLimpo, base64);
+        const ordens = JSON.parse(localStorage.getItem('sdv_ordens') || '[]');
+        const idx = ordens.findIndex(x => String(x.numero || '').replace(/\D/g, '') === numLimpo);
+        if (idx !== -1) {
+          ordens[idx].comprovante_status = 'anexado';
+          ordens[idx].comprovante_enviado_em = new Date().toISOString();
+          ordens[idx].comprovante_dados = { nome: file.name, tipo: file.type };
+          localStorage.setItem('sdv_ordens', JSON.stringify(ordens));
+        }
+      } catch (_) {}
+      const st = document.getElementById('status-comp-pos-sucesso');
+      if (st) st.innerHTML = '<span style="color:#4ade80;font-weight:700;">✅ Comprovante anexado com sucesso!</span>';
+      const c24 = document.getElementById('card-aviso-comp-24h');
+      const cOk = document.getElementById('card-aviso-comp-ok');
+      if (c24) c24.classList.add('hidden');
+      if (cOk) cOk.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
   };
 
   window.copiarChavePix = function() {
@@ -2570,6 +2901,15 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
               ordens[idx].assinado_por = nomeFinal;
               ordens[idx].assinado_em = new Date().toISOString();
               ordens[idx].assinatura_digital = regAssinatura;
+              ordens[idx].comprovante_status = comprovanteArquivo ? 'anexado' : 'pendente_24h';
+              ordens[idx].comprovante_prazo_24h = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
+              if (comprovanteArquivo) {
+                ordens[idx].comprovante_enviado_em = comprovanteArquivo.enviado_em;
+                ordens[idx].comprovante_dados = { nome: comprovanteArquivo.nome, tipo: comprovanteArquivo.tipo };
+                try {
+                  localStorage.setItem('sdv_comp_' + numLimpo, comprovanteArquivo.base64);
+                } catch (_) {}
+              }
               if (formaPagamentoEscolhida) {
                 ordens[idx].forma_pagamento_cliente = formaPagamentoEscolhida;
                 ordens[idx].dados_cartao = {
@@ -2584,6 +2924,24 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
             }
           } catch (e) {
             console.warn('Aviso storage assinatura:', e);
+          }
+
+          // Atualiza cards de aviso de comprovante na tela de sucesso
+          const cardComp24h = document.getElementById('card-aviso-comp-24h');
+          const cardCompOk = document.getElementById('card-aviso-comp-ok');
+          const btnCompZap = document.getElementById('btn-enviar-comp-zap');
+
+          if (comprovanteArquivo) {
+            if (cardComp24h) cardComp24h.classList.add('hidden');
+            if (cardCompOk) cardCompOk.classList.remove('hidden');
+          } else {
+            if (cardComp24h) cardComp24h.classList.remove('hidden');
+            if (cardCompOk) cardCompOk.classList.add('hidden');
+            if (btnCompZap) {
+              const telEmpresa = (info.lic && info.lic.telefone ? info.lic.telefone.replace(/\D/g, '') : '5585996119824');
+              const zapCompMsg = 'Olá ' + ((info.lic && info.lic.nome) || 'SD Vidros') + '! Acabei de assinar a Ordem de Serviço ' + info.osFormatada + ' (' + nomeFinal + ') e estou enviando aqui o meu comprovante de pagamento dentro do prazo de 24 horas para liberação do pedido na fábrica!';
+              btnCompZap.href = 'https://wa.me/' + (telEmpresa.startsWith('55') ? telEmpresa : '55' + telEmpresa) + '?text=' + encodeURIComponent(zapCompMsg);
+            }
           }
 
           const rec = obterDadosRecebedor();
@@ -2610,15 +2968,24 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
             textoPagamentoZap += '🏢 *Recebedor:* ' + rec.nome + ' (Pix: ' + rec.pix + ')\n';
           }
 
+          let textoComprovanteZap = '';
+          if (comprovanteArquivo) {
+            textoComprovanteZap = '🧾 *Comprovante:* Anexado digitalmente ✅\n';
+          } else {
+            textoComprovanteZap = '⏳ *Comprovante:* A enviar pelo cliente (Prazo: 24 horas) ⚠️\n';
+          }
+
           const licNomeSanitizado = (info.lic && info.lic.nome) ? info.lic.nome : 'Empresa';
           const iconeAprov = (info.lic && (info.lic.id === 'sdmoveis' || licNomeSanitizado.toLowerCase().includes('móveis') || licNomeSanitizado.toLowerCase().includes('moveis'))) ? '🛋️' : '🪟';
           const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* ' + iconeAprov + '\n\n'
             + 'Olá ' + licNomeSanitizado + '! Acabei de aprovar e assinar a Ordem de Serviço ' + info.osFormatada + '!\n'
             + '👤 *Assinado por:* ' + nomeFinal + '\n'
-            + textoPagamentoZap + '\n'
+            + textoPagamentoZap
+            + textoComprovanteZap
+            + (comprovanteArquivo ? '' : '⚠️ _Lembrete: O comprovante de pagamento deve ser enviado em até 24 horas para liberação da produção na fábrica._\n\n')
             + '🔗 *Área Exclusiva do Cliente:* ' + info.urlCompleta + '\n'
             + '💡 _Acompanhamento em tempo real da produção, fotos e pagamentos._\n\n'
-            + 'A Ordem de Serviço está autorizada. Podemos iniciar a produção!';
+            + 'A Ordem de Serviço está autorizada!';
 
           const btnNotif = document.getElementById('btn-notificar-sdv');
           if (btnNotif) {
