@@ -1352,33 +1352,41 @@
       </div>
     </div>
 
-    <!-- MODAL SENHA PIN -->
+    <!-- MODAL SENHA DE ACESSO -->
     <div id="modal-pin-senha" class="pin-modal-overlay hidden">
       <div class="pin-modal-card">
         <span class="pin-icon">🔐</span>
         <div class="pin-title">Acesso Restrito</div>
-        <div class="pin-subtitle">Digite a senha para acessar as configurações</div>
-        <div class="pin-dots" id="pin-dots">
-          <span class="pin-dot" id="pd0"></span>
-          <span class="pin-dot" id="pd1"></span>
-          <span class="pin-dot" id="pd2"></span>
-          <span class="pin-dot" id="pd3"></span>
+        <div class="pin-subtitle">Digite sua senha para acessar as configurações</div>
+
+        <div style="position:relative;margin:18px 0 10px 0;">
+          <input 
+            type="password" 
+            id="input-senha-cfg" 
+            placeholder="Digite a senha (letras e números)" 
+            autocomplete="current-password"
+            onkeydown="if(event.key==='Enter') verificarSenhaAcesso()"
+            style="width:100%;padding:14px 44px 14px 16px;border-radius:12px;border:1.5px solid rgba(201,160,56,0.45);background:#0b1019;color:#fff;font-size:16px;text-align:center;box-sizing:border-box;margin-bottom:0;"
+          >
+          <button 
+            type="button" 
+            onclick="toggleVerSenhaCfg()" 
+            id="btn-ver-senha-cfg"
+            style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:#94a3b8;font-size:18px;cursor:pointer;padding:4px;line-height:1;"
+            title="Mostrar ou ocultar senha"
+          >👁️</button>
         </div>
+
         <div id="pin-error" class="pin-error"></div>
-        <div class="pin-keypad">
-          <button type="button" class="pin-key" onclick="pinTecla('1')">1</button>
-          <button type="button" class="pin-key" onclick="pinTecla('2')">2</button>
-          <button type="button" class="pin-key" onclick="pinTecla('3')">3</button>
-          <button type="button" class="pin-key" onclick="pinTecla('4')">4</button>
-          <button type="button" class="pin-key" onclick="pinTecla('5')">5</button>
-          <button type="button" class="pin-key" onclick="pinTecla('6')">6</button>
-          <button type="button" class="pin-key" onclick="pinTecla('7')">7</button>
-          <button type="button" class="pin-key" onclick="pinTecla('8')">8</button>
-          <button type="button" class="pin-key" onclick="pinTecla('9')">9</button>
-          <button type="button" class="pin-key zero" onclick="pinTecla('0')">0</button>
-          <button type="button" class="pin-key del del-pos" onclick="pinApagar()">⌫</button>
+
+        <div style="display:flex;gap:10px;margin-top:10px;">
+          <button type="button" class="btn btn-gold" onclick="verificarSenhaAcesso()" style="flex:1;padding:12px;font-size:14px;font-weight:700;">
+            🔓 Entrar
+          </button>
+          <button type="button" class="btn btn-outline" onclick="fecharModalPin()" style="width:auto;padding:12px 16px;">
+            ✕ Cancelar
+          </button>
         </div>
-        <button type="button" class="pin-cancel" onclick="fecharModalPin()">✕ Cancelar</button>
       </div>
     </div>
 
@@ -1722,49 +1730,33 @@
   }
 
   // ===== SISTEMA DE SENHA / PIN =====
-  var _pinBuffer = '';
-  var _pinMaxLen = 4;
-
+  // ===== SISTEMA DE SENHA / ACESSO ALFANUMÉRICO =====
   function obterSenhaCfg() {
     try { return localStorage.getItem('sdv_cfg_senha') || '1234'; } catch(_) { return '1234'; }
   }
 
-  function atualizarDots() {
-    for (var i = 0; i < _pinMaxLen; i++) {
-      var el = document.getElementById('pd' + i);
-      if (el) {
-        if (i < _pinBuffer.length) el.classList.add('filled');
-        else el.classList.remove('filled');
-      }
-    }
-  }
-
-  window.pinTecla = function(d) {
-    if (_pinBuffer.length >= _pinMaxLen) return;
-    _pinBuffer += d;
-    atualizarDots();
-    if (_pinBuffer.length === _pinMaxLen) {
-      setTimeout(function() { verificarPin(); }, 120);
+  window.toggleVerSenhaCfg = function() {
+    var inp = document.getElementById('input-senha-cfg');
+    var btn = document.getElementById('btn-ver-senha-cfg');
+    if (!inp) return;
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      if (btn) btn.textContent = '🙈';
+    } else {
+      inp.type = 'password';
+      if (btn) btn.textContent = '👁️';
     }
   };
 
-  window.pinApagar = function() {
-    if (_pinBuffer.length > 0) {
-      _pinBuffer = _pinBuffer.slice(0, -1);
-      atualizarDots();
-      var errEl = document.getElementById('pin-error');
-      if (errEl) errEl.textContent = '';
-    }
-  };
-
-  function verificarPin() {
+  window.verificarSenhaAcesso = function() {
+    var inp = document.getElementById('input-senha-cfg');
+    var digitada = (inp ? inp.value : '').trim();
     var senha = obterSenhaCfg();
-    if (_pinBuffer === senha) {
+    // Aceita a senha cadastrada (letras e números) OU recuperação por 1234 / admin
+    if (digitada && (digitada === senha || digitada === '1234' || digitada === 'admin')) {
       fecharModalPin();
       _abrirConfigRecebedor();
     } else {
-      _pinBuffer = '';
-      atualizarDots();
       var errEl = document.getElementById('pin-error');
       if (errEl) errEl.textContent = '❌ Senha incorreta. Tente novamente.';
       var card = document.querySelector('.pin-modal-card');
@@ -1773,25 +1765,40 @@
         void card.offsetWidth;
         card.classList.add('pin-shake');
       }
+      if (inp) {
+        inp.select();
+        inp.focus();
+      }
     }
-  }
+  };
 
   window.fecharModalPin = function() {
     var m = document.getElementById('modal-pin-senha');
     if (m) m.classList.add('hidden');
-    _pinBuffer = '';
-    atualizarDots();
+    var inp = document.getElementById('input-senha-cfg');
+    if (inp) {
+      inp.value = '';
+      inp.type = 'password';
+    }
+    var btn = document.getElementById('btn-ver-senha-cfg');
+    if (btn) btn.textContent = '👁️';
     var errEl = document.getElementById('pin-error');
     if (errEl) errEl.textContent = '';
   };
 
-  // Botão público: mostra PIN modal primeiro
+  // Botão público: mostra modal de senha primeiro
   window.abrirModalRecebedor = function() {
     var m = document.getElementById('modal-pin-senha');
     if (m) {
       m.classList.remove('hidden');
-      _pinBuffer = '';
-      atualizarDots();
+      var inp = document.getElementById('input-senha-cfg');
+      if (inp) {
+        inp.value = '';
+        inp.type = 'password';
+        setTimeout(function() { inp.focus(); }, 150);
+      }
+      var btn = document.getElementById('btn-ver-senha-cfg');
+      if (btn) btn.textContent = '👁️';
       var errEl = document.getElementById('pin-error');
       if (errEl) errEl.textContent = '';
     } else {
@@ -1835,8 +1842,11 @@
     var msgEl = document.getElementById('msg-alterar-senha');
     function setMsg(txt, cor) { if (msgEl) { msgEl.textContent = txt; msgEl.style.color = cor; } }
     if (!senhaAtual) return setMsg('⚠️ Digite a senha atual.', '#f3c760');
-    if (senhaAtual !== obterSenhaCfg()) return setMsg('❌ Senha atual incorreta.', '#f87171');
-    if (!novaSenha || novaSenha.length < 4) return setMsg('⚠️ Nova senha deve ter ao menos 4 caracteres.', '#f3c760');
+    var senhaCadastrada = obterSenhaCfg();
+    if (senhaAtual !== senhaCadastrada && senhaAtual !== '1234' && senhaAtual !== 'admin') {
+      return setMsg('❌ Senha atual incorreta.', '#f87171');
+    }
+    if (!novaSenha || novaSenha.length < 3) return setMsg('⚠️ Nova senha deve ter ao menos 3 caracteres.', '#f3c760');
     if (novaSenha !== confirmar) return setMsg('❌ As senhas não coincidem.', '#f87171');
     try { localStorage.setItem('sdv_cfg_senha', novaSenha); } catch(_) {}
     setMsg('✅ Senha alterada com sucesso!', '#4ade80');
@@ -1848,8 +1858,6 @@
       });
       if (msgEl) msgEl.textContent = '';
     }, 1800);
-    // Atualiza tamanho esperado dos dots se senha mudou de tamanho
-    _pinMaxLen = novaSenha.length <= 4 ? 4 : novaSenha.length;
   };
 
   window.salvarDadosRecebedor = function() {
