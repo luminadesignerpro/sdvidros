@@ -14,6 +14,10 @@
       "destination": "/funcionario.html"
     },
     {
+      "source": "/assinar",
+      "destination": "/assinar.html"
+    },
+    {
       "source": "/sdvidros",
       "destination": "/cliente.html?empresa=sdvidros&nome=SD%20Vidros&instalar=1&auto=1"
     },

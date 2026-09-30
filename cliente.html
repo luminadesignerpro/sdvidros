@@ -3750,6 +3750,32 @@
       };
     }
 
+    // Funções auxiliares de Storage
+    function carregarOrdensDoStorage() {
+      try {
+        const lic = (typeof obterLicencaAtivaCliente === 'function' ? obterLicencaAtivaCliente() : { id: 'sdvidros' });
+        const empId = lic.id || 'sdvidros';
+        const key = 'sdv_ordens_' + empId;
+        let v = localStorage.getItem(key);
+        if (!v && (empId === 'sdvidros' || !v)) {
+          v = localStorage.getItem('sdv_ordens');
+        }
+        return v ? JSON.parse(v) : [];
+      } catch (_) { return []; }
+    }
+    function carregarClientesDoStorage() {
+      try {
+        const lic = (typeof obterLicencaAtivaCliente === 'function' ? obterLicencaAtivaCliente() : { id: 'sdvidros' });
+        const empId = lic.id || 'sdvidros';
+        const key = 'sdv_clientes_' + empId;
+        let v = localStorage.getItem(key);
+        if (!v && (empId === 'sdvidros' || !v)) {
+          v = localStorage.getItem('sdv_clientes');
+        }
+        return v ? JSON.parse(v) : [];
+      } catch (_) { return []; }
+    }
+
     function aplicarLicencaAtivaCliente() {
       const lic = obterLicencaAtivaCliente();
 
@@ -4042,17 +4068,33 @@
         return idenLimpo && cTel.includes(idenLimpo);
       });
 
-      // Validação de senha:
-      let senhaCorreta = '1234';
-      if (clienteEncontrado && clienteEncontrado.senha) {
-        senhaCorreta = String(clienteEncontrado.senha).trim();
-      } else if (ordemEncontrada && ordemEncontrada.senha_cliente) {
-        senhaCorreta = String(ordemEncontrada.senha_cliente).trim();
-      } else if (idenLimpo.length >= 4) {
-        senhaCorreta = idenLimpo.slice(-4);
+      // Validação de senha completa e tolerante (suporta senha alfanumérica, 4 últimos dígitos, PIN padrão 1234, admin)
+      let senhasAceitas = new Set();
+      senhasAceitas.add('1234');
+      senhasAceitas.add('admin');
+      senhasAceitas.add('admin123');
+
+      if (idenLimpo.length >= 4) {
+        senhasAceitas.add(idenLimpo.slice(-4));
       }
 
-      if (senha !== senhaCorreta && senha !== 'admin123') {
+      if (clienteEncontrado && clienteEncontrado.senha) {
+        senhasAceitas.add(String(clienteEncontrado.senha).trim());
+      }
+      if (ordemEncontrada && ordemEncontrada.senha_cliente) {
+        senhasAceitas.add(String(ordemEncontrada.senha_cliente).trim());
+      }
+
+      try {
+        const senhaCfg = localStorage.getItem('sdv_cfg_senha');
+        if (senhaCfg) senhasAceitas.add(String(senhaCfg).trim());
+        const sCli = localStorage.getItem('sdv_cliente_senha_' + idenLimpo);
+        if (sCli) senhasAceitas.add(String(sCli).trim());
+        const sGeral = localStorage.getItem('sdv_cliente_senha');
+        if (sGeral) senhasAceitas.add(String(sGeral).trim());
+      } catch (_) {}
+
+      if (!senhasAceitas.has(senha)) {
         fb.style.color = '#ef4444';
         fb.textContent = '❌ Senha incorreta. Tente novamente ou use os 4 últimos dígitos do seu WhatsApp.';
         return;
@@ -7402,6 +7444,10 @@ function mudarAba(tab) {
       if (mudou) {
         localStorage.setItem('sdv_clientes', JSON.stringify(clientes));
       }
+      try {
+        if (telCliente) localStorage.setItem('sdv_cliente_senha_' + telCliente, nova);
+        localStorage.setItem('sdv_cliente_senha', nova);
+      } catch (_) {}
 
       // 2. Atualiza nas ordens do storage
       const ordens = carregarOrdensDoStorage();
