@@ -576,6 +576,155 @@
     background: rgba(201,160,56,0.25);
     border-color: #f3c760;
   }
+
+  /* ===== MODAL SENHA PIN ===== */
+  .pin-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 16px;
+  }
+  .pin-modal-card {
+    background: linear-gradient(145deg, #141b27, #0f1521);
+    border: 1px solid rgba(201,160,56,0.4);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 320px;
+    padding: 24px 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(201,160,56,0.08);
+    text-align: center;
+  }
+  .pin-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+    display: block;
+  }
+  .pin-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #f3c760;
+    margin-bottom: 4px;
+  }
+  .pin-subtitle {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 20px;
+  }
+  .pin-dots {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .pin-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(201,160,56,0.5);
+    background: transparent;
+    transition: all 0.15s;
+  }
+  .pin-dot.filled {
+    background: #f3c760;
+    border-color: #f3c760;
+    box-shadow: 0 0 8px rgba(243,199,96,0.5);
+  }
+  .pin-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .pin-key {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 10px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #f1f5f9;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pin-key:hover {
+    background: rgba(201,160,56,0.15);
+    border-color: rgba(201,160,56,0.4);
+    color: #f3c760;
+  }
+  .pin-key:active {
+    transform: scale(0.92);
+    background: rgba(201,160,56,0.25);
+  }
+  .pin-key.del {
+    font-size: 16px;
+    color: #94a3b8;
+  }
+  .pin-key.zero {
+    grid-column: 2;
+  }
+  .pin-key.del-pos {
+    grid-column: 3;
+  }
+  .pin-error {
+    font-size: 12px;
+    color: #f87171;
+    min-height: 18px;
+    margin-bottom: 8px;
+    transition: opacity 0.2s;
+  }
+  .pin-cancel {
+    background: transparent;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    border-radius: 10px;
+    padding: 10px;
+    width: 100%;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .pin-cancel:hover { border-color: #475569; color: #f1f5f9; }
+  @keyframes pinShake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+  .pin-shake { animation: pinShake 0.4s ease; }
+
+  /* Alterar senha dentro do modal */
+  .alterar-senha-section {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+  }
+  .alterar-senha-toggle {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-size: 11.5px;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: underline;
+    padding: 0;
+  }
+  .alterar-senha-toggle:hover { color: #94a3b8; }
+  .alterar-senha-form {
+    margin-top: 12px;
+    display: none;
+  }
+  .alterar-senha-form.visible { display: block; }
   .recebedor-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1185,6 +1334,51 @@
           <button type="button" class="btn btn-gold" onclick="salvarDadosRecebedor()" style="flex:1;">💾 Salvar Dados</button>
           <button type="button" class="btn btn-outline" onclick="fecharModalRecebedor()" style="width:auto;">Cancelar</button>
         </div>
+
+        <!-- Alterar Senha -->
+        <div class="alterar-senha-section">
+          <button type="button" class="alterar-senha-toggle" onclick="toggleAlterarSenha()">🔑 Alterar senha de acesso</button>
+          <div class="alterar-senha-form" id="form-alterar-senha">
+            <label for="cfg-senha-atual" style="margin-top:10px;">Senha Atual</label>
+            <input type="password" id="cfg-senha-atual" placeholder="Digite a senha atual" maxlength="10" style="margin-bottom:10px;">
+            <label for="cfg-nova-senha">Nova Senha</label>
+            <input type="password" id="cfg-nova-senha" placeholder="Nova senha (números ou letras)" maxlength="10" style="margin-bottom:10px;">
+            <label for="cfg-confirmar-senha">Confirmar Nova Senha</label>
+            <input type="password" id="cfg-confirmar-senha" placeholder="Repita a nova senha" maxlength="10" style="margin-bottom:10px;">
+            <div id="msg-alterar-senha" style="font-size:12px;min-height:16px;margin-bottom:8px;"></div>
+            <button type="button" class="btn btn-outline btn-sm" onclick="salvarNovaSenha()" style="width:100%;">💾 Salvar Nova Senha</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL SENHA PIN -->
+    <div id="modal-pin-senha" class="pin-modal-overlay hidden">
+      <div class="pin-modal-card">
+        <span class="pin-icon">🔐</span>
+        <div class="pin-title">Acesso Restrito</div>
+        <div class="pin-subtitle">Digite a senha para acessar as configurações</div>
+        <div class="pin-dots" id="pin-dots">
+          <span class="pin-dot" id="pd0"></span>
+          <span class="pin-dot" id="pd1"></span>
+          <span class="pin-dot" id="pd2"></span>
+          <span class="pin-dot" id="pd3"></span>
+        </div>
+        <div id="pin-error" class="pin-error"></div>
+        <div class="pin-keypad">
+          <button type="button" class="pin-key" onclick="pinTecla('1')">1</button>
+          <button type="button" class="pin-key" onclick="pinTecla('2')">2</button>
+          <button type="button" class="pin-key" onclick="pinTecla('3')">3</button>
+          <button type="button" class="pin-key" onclick="pinTecla('4')">4</button>
+          <button type="button" class="pin-key" onclick="pinTecla('5')">5</button>
+          <button type="button" class="pin-key" onclick="pinTecla('6')">6</button>
+          <button type="button" class="pin-key" onclick="pinTecla('7')">7</button>
+          <button type="button" class="pin-key" onclick="pinTecla('8')">8</button>
+          <button type="button" class="pin-key" onclick="pinTecla('9')">9</button>
+          <button type="button" class="pin-key zero" onclick="pinTecla('0')">0</button>
+          <button type="button" class="pin-key del del-pos" onclick="pinApagar()">⌫</button>
+        </div>
+        <button type="button" class="pin-cancel" onclick="fecharModalPin()">✕ Cancelar</button>
       </div>
     </div>
 
@@ -1527,24 +1721,139 @@
     }
   }
 
+  // ===== SISTEMA DE SENHA / PIN =====
+  var _pinBuffer = '';
+  var _pinMaxLen = 4;
+
+  function obterSenhaCfg() {
+    try { return localStorage.getItem('sdv_cfg_senha') || '1234'; } catch(_) { return '1234'; }
+  }
+
+  function atualizarDots() {
+    for (var i = 0; i < _pinMaxLen; i++) {
+      var el = document.getElementById('pd' + i);
+      if (el) {
+        if (i < _pinBuffer.length) el.classList.add('filled');
+        else el.classList.remove('filled');
+      }
+    }
+  }
+
+  window.pinTecla = function(d) {
+    if (_pinBuffer.length >= _pinMaxLen) return;
+    _pinBuffer += d;
+    atualizarDots();
+    if (_pinBuffer.length === _pinMaxLen) {
+      setTimeout(function() { verificarPin(); }, 120);
+    }
+  };
+
+  window.pinApagar = function() {
+    if (_pinBuffer.length > 0) {
+      _pinBuffer = _pinBuffer.slice(0, -1);
+      atualizarDots();
+      var errEl = document.getElementById('pin-error');
+      if (errEl) errEl.textContent = '';
+    }
+  };
+
+  function verificarPin() {
+    var senha = obterSenhaCfg();
+    if (_pinBuffer === senha) {
+      fecharModalPin();
+      _abrirConfigRecebedor();
+    } else {
+      _pinBuffer = '';
+      atualizarDots();
+      var errEl = document.getElementById('pin-error');
+      if (errEl) errEl.textContent = '❌ Senha incorreta. Tente novamente.';
+      var card = document.querySelector('.pin-modal-card');
+      if (card) {
+        card.classList.remove('pin-shake');
+        void card.offsetWidth;
+        card.classList.add('pin-shake');
+      }
+    }
+  }
+
+  window.fecharModalPin = function() {
+    var m = document.getElementById('modal-pin-senha');
+    if (m) m.classList.add('hidden');
+    _pinBuffer = '';
+    atualizarDots();
+    var errEl = document.getElementById('pin-error');
+    if (errEl) errEl.textContent = '';
+  };
+
+  // Botão público: mostra PIN modal primeiro
   window.abrirModalRecebedor = function() {
-    const rec = obterDadosRecebedor();
-    const m = document.getElementById('modal-recebedor');
+    var m = document.getElementById('modal-pin-senha');
+    if (m) {
+      m.classList.remove('hidden');
+      _pinBuffer = '';
+      atualizarDots();
+      var errEl = document.getElementById('pin-error');
+      if (errEl) errEl.textContent = '';
+    } else {
+      _abrirConfigRecebedor();
+    }
+  };
+
+  // Abre o modal de config real (após senha ok)
+  function _abrirConfigRecebedor() {
+    var rec = obterDadosRecebedor();
+    var m = document.getElementById('modal-recebedor');
     if (document.getElementById('cfg-rec-nome')) document.getElementById('cfg-rec-nome').value = rec.nome;
     if (document.getElementById('cfg-rec-cnpj')) document.getElementById('cfg-rec-cnpj').value = rec.cnpj;
     if (document.getElementById('cfg-rec-banco')) document.getElementById('cfg-rec-banco').value = rec.banco;
     if (document.getElementById('cfg-rec-pix')) document.getElementById('cfg-rec-pix').value = rec.pix;
     if (document.getElementById('cfg-rec-cidade')) document.getElementById('cfg-rec-cidade').value = rec.cidade;
+    // Limpa form alterar senha
+    var fa = document.getElementById('form-alterar-senha');
+    if (fa) fa.classList.remove('visible');
+    var campos = ['cfg-senha-atual','cfg-nova-senha','cfg-confirmar-senha'];
+    campos.forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+    var msgEl = document.getElementById('msg-alterar-senha');
+    if (msgEl) msgEl.textContent = '';
     if (m) m.classList.remove('hidden');
-  };
+  }
 
   window.fecharModalRecebedor = function() {
-    const m = document.getElementById('modal-recebedor');
+    var m = document.getElementById('modal-recebedor');
     if (m) m.classList.add('hidden');
   };
 
+  window.toggleAlterarSenha = function() {
+    var fa = document.getElementById('form-alterar-senha');
+    if (fa) fa.classList.toggle('visible');
+  };
+
+  window.salvarNovaSenha = function() {
+    var senhaAtual = (document.getElementById('cfg-senha-atual').value || '').trim();
+    var novaSenha = (document.getElementById('cfg-nova-senha').value || '').trim();
+    var confirmar = (document.getElementById('cfg-confirmar-senha').value || '').trim();
+    var msgEl = document.getElementById('msg-alterar-senha');
+    function setMsg(txt, cor) { if (msgEl) { msgEl.textContent = txt; msgEl.style.color = cor; } }
+    if (!senhaAtual) return setMsg('⚠️ Digite a senha atual.', '#f3c760');
+    if (senhaAtual !== obterSenhaCfg()) return setMsg('❌ Senha atual incorreta.', '#f87171');
+    if (!novaSenha || novaSenha.length < 4) return setMsg('⚠️ Nova senha deve ter ao menos 4 caracteres.', '#f3c760');
+    if (novaSenha !== confirmar) return setMsg('❌ As senhas não coincidem.', '#f87171');
+    try { localStorage.setItem('sdv_cfg_senha', novaSenha); } catch(_) {}
+    setMsg('✅ Senha alterada com sucesso!', '#4ade80');
+    setTimeout(function() {
+      var fa = document.getElementById('form-alterar-senha');
+      if (fa) fa.classList.remove('visible');
+      ['cfg-senha-atual','cfg-nova-senha','cfg-confirmar-senha'].forEach(function(id){
+        var el = document.getElementById(id); if (el) el.value = '';
+      });
+      if (msgEl) msgEl.textContent = '';
+    }, 1800);
+    // Atualiza tamanho esperado dos dots se senha mudou de tamanho
+    _pinMaxLen = novaSenha.length <= 4 ? 4 : novaSenha.length;
+  };
+
   window.salvarDadosRecebedor = function() {
-    const rec = {
+    var rec = {
       nome: (document.getElementById('cfg-rec-nome').value || '').trim() || 'SD Vidros',
       cnpj: (document.getElementById('cfg-rec-cnpj').value || '').trim() || '38.358.941/0001-80',
       banco: (document.getElementById('cfg-rec-banco').value || '').trim() || 'Nu Pagamentos S.A.',
