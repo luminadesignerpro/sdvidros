@@ -339,7 +339,24 @@
       .app { padding: 10px 10px 44px; }
       .total-val { font-size: 22px; }
       .field-row { grid-template-columns: 1fr; gap: 9px; }
-      .tab { font-size: 10.5px; padding: 9px 4px; min-width: 65px; }
+      .tabs {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 6px !important;
+        padding: 8px 6px !important;
+      }
+      .tab {
+        font-size: 10px !important;
+        padding: 8px 3px !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        gap: 3px !important;
+        line-height: 1.15 !important;
+        text-align: center !important;
+      }
 
       /* Responsividade Pedido de Material & SD Comparativo */
       #modal-novo-pedido-material .modal-box {
@@ -4075,7 +4092,7 @@ function getUser() {
 //  TABS
 // ══════════════════════════════════════════════
 function goTab(t) {
-  ['orcamento','historico','financeiro','agenda','produtos','clientes','ponto','contratos','usuarios','licenca','camera'].forEach(p => {
+  ['orcamento','historico','financeiro','agenda','produtos','clientes','ponto','contratos','usuarios','licenca','camera','material'].forEach(p => {
     const pan = document.getElementById('panel-'+p);
     if (pan) pan.classList.toggle('active', p===t);
     const tab = document.getElementById('tab-'+p);
@@ -4091,6 +4108,10 @@ function goTab(t) {
   if (t==='usuarios')   renderUsuarios();
   if (t==='licenca')    renderPainelLicenca();
   if (t==='camera')     inicializarCameraUltraZoom(); else pausarCameraUltraZoom();
+  if (t==='material')   {
+    if (typeof renderListaPedidos === 'function') renderListaPedidos();
+    if (typeof _popularSelectComparativo === 'function') _popularSelectComparativo();
+  }
 }
 
 // ══════════════════════════════════════════════
