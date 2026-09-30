@@ -38,7 +38,7 @@
 
         var shortTitle = appTitle;
 
-        document.write('<link id="dynamic-manifest" rel="manifest" href="manifest.json">');
+        document.write('<link id="dynamic-manifest" rel="manifest" href="manifest_cliente.json">');
         document.write('<link id="dynamic-favicon" rel="icon" type="image/jpeg" href="' + logoSrc + '">');
         document.write('<link id="dynamic-apple-icon" rel="apple-touch-icon" sizes="192x192" href="' + logoSrc + '">');
         document.write('<link id="dynamic-apple-icon-512" rel="apple-touch-icon" sizes="512x512" href="' + logoSrc + '">');
@@ -46,10 +46,17 @@
         document.write('<meta name="application-name" content="' + appTitle + '">');
         document.title = appTitle + ' – Área Oficial';
       } catch (_) {
-        document.write('<link id="dynamic-manifest" rel="manifest" href="manifest.json">');
+        document.write('<link id="dynamic-manifest" rel="manifest" href="manifest_cliente.json">');
       }
     })();
   </script>
+  <link rel="manifest" href="manifest_cliente.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#C9A84C">
   <meta name="description" content="Toque para instalar o aplicativo oficial no celular e acessar seu portal de orçamentos e serviços.">
   <meta property="og:title" content="📲 Instalar Aplicativo Oficial – Área do Cliente">
   <meta property="og:description" content="Toque para instalar o aplicativo oficial no celular e acessar seu portal de orçamentos e serviços.">
@@ -943,20 +950,36 @@
         padding: 0;
       }
       .container {
-        padding: 12px 12px 30px !important;
+        padding: 6px 10px 24px !important;
         max-width: 100% !important;
         box-sizing: border-box;
       }
+      #banner-instalar-app-cliente {
+        max-width: 440px !important;
+        width: 100% !important;
+        margin: 4px auto 14px auto !important;
+        padding: 10px 12px !important;
+        gap: 8px !important;
+        box-sizing: border-box !important;
+        border-radius: 16px !important;
+      }
+      #pwa-inst-nome-app {
+        font-size: 13px !important;
+        white-space: normal !important;
+        word-break: normal !important;
+        line-height: 1.25 !important;
+      }
       .login-container {
-        margin: 12px auto 20px !important;
-        padding: 24px 18px !important;
-        border-radius: 20px !important;
-        max-width: 100% !important;
+        margin: 4px auto 16px !important;
+        padding: 22px 16px !important;
+        border-radius: 22px !important;
+        max-width: 440px !important;
+        width: 100% !important;
         box-shadow: 0 15px 40px rgba(0,0,0,0.75), 0 0 25px rgba(201,168,76,0.18) !important;
       }
       .login-logo {
-        width: 76px !important;
-        height: 76px !important;
+        width: 72px !important;
+        height: 72px !important;
         border-radius: 18px !important;
         margin-bottom: 12px !important;
       }
@@ -965,7 +988,7 @@
       }
       .login-sub {
         font-size: 11px !important;
-        margin-bottom: 18px !important;
+        margin-bottom: 16px !important;
         letter-spacing: 0.08em !important;
       }
       .field-box {
@@ -993,9 +1016,10 @@
         border-radius: 12px !important;
       }
       .login-info-box {
-        margin-top: 16px !important;
+        margin-top: 14px !important;
         padding: 12px !important;
         font-size: 11px !important;
+        line-height: 1.45 !important;
         border-radius: 12px !important;
       }
       .client-actions-bar {
@@ -1010,13 +1034,31 @@
       }
     }
 
-    @media (max-width: 360px) {
+    @media (max-width: 380px) {
       .container {
-        padding: 8px 8px 20px !important;
+        padding: 4px 6px 20px !important;
       }
       .login-container {
         padding: 18px 12px !important;
-        margin: 8px auto 14px !important;
+        margin: 4px auto 12px !important;
+      }
+      #pwa-inst-logo {
+        width: 34px !important;
+        height: 34px !important;
+      }
+      #pwa-inst-nome-app {
+        font-size: 12px !important;
+      }
+      #banner-instalar-app-cliente button {
+        padding: 7px 10px !important;
+        font-size: 11.5px !important;
+      }
+      .login-logo {
+        width: 64px !important;
+        height: 64px !important;
+      }
+      .login-title {
+        font-size: 19px !important;
       }
       .client-actions-bar {
         grid-template-columns: 1fr !important;
@@ -1155,28 +1197,35 @@
       50% { transform: scale(1.18); filter: drop-shadow(0 0 8px var(--gold-light)); }
     }
 
-    /* ─── MODAIS GENÉRICOS (TROCAR SENHA, BIOMETRIA) ─── */
+    /* ─── MODAIS GENÉRICOS (TROCAR SENHA, BIOMETRIA, PWA) ─── */
+    .modal-overlay,
     .portal-modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 999999;
+      background: rgba(0,0,0,0.88);
+      z-index: 9999999;
       align-items: center;
       justify-content: center;
       padding: 16px;
       backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       animation: fadeIn 0.25s ease;
+      box-sizing: border-box;
     }
+    .modal-card,
     .portal-modal-card {
       background: var(--card);
       border: 1.5px solid var(--gold);
       border-radius: var(--r-lg);
-      padding: 26px 22px;
+      padding: 24px 20px;
       width: 100%;
       max-width: 440px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 35px var(--gold-glow);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 35px var(--gold-glow);
       position: relative;
+      box-sizing: border-box;
+      max-height: 90vh;
+      overflow-y: auto;
     }
     .portal-modal-title {
       font-size: 18px;
@@ -2114,16 +2163,16 @@
 
   <div class="container">
 
-    <!-- BANNER TOPO: INSTALAR O APLICATIVO NO CELULAR -->
-    <div id="banner-instalar-app-cliente" style="display:flex;background:linear-gradient(135deg,rgba(37,211,102,0.18),rgba(201,168,76,0.15));border:1.5px solid var(--gold);border-radius:14px;padding:12px 16px;margin-bottom:18px;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 4px 18px rgba(0,0,0,0.4);">
-      <div style="display:flex;align-items:center;gap:12px;min-width:0;">
-        <img id="pwa-inst-logo" src="logo.jpg" style="width:40px;height:40px;border-radius:10px;border:1px solid var(--gold);object-fit:cover;background:#000;" alt="App">
-        <div style="min-width:0;">
-          <div id="pwa-inst-nome-app" style="font-size:13px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Instalar Aplicativo Oficial</div>
-          <div style="font-size:11px;color:var(--text2);">Adicione à tela do celular com 1 toque</div>
+    <!-- BANNER TOPO: INSTALAR O APLICATIVO NO CELULAR (100% RESPONSIVO) -->
+    <div id="banner-instalar-app-cliente" style="display:flex;max-width:440px;margin:4px auto 14px auto;background:linear-gradient(135deg,rgba(37,211,102,0.18),rgba(201,168,76,0.15));border:1.5px solid var(--gold);border-radius:18px;padding:10px 14px;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 6px 20px rgba(0,0,0,0.5);box-sizing:border-box;width:100%;">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
+        <img id="pwa-inst-logo" src="logo.jpg" style="width:38px;height:38px;border-radius:10px;border:1px solid var(--gold);object-fit:cover;background:#000;flex-shrink:0;" alt="App">
+        <div style="min-width:0;flex:1;">
+          <div id="pwa-inst-nome-app" style="font-size:13px;font-weight:900;color:#fff;line-height:1.2;word-break:normal;white-space:normal;">Instalar Aplicativo Oficial</div>
+          <div style="font-size:11px;color:var(--text2);line-height:1.2;margin-top:2px;">Adicione à tela do celular com 1 toque</div>
         </div>
       </div>
-      <button type="button" onclick="acionarInstalacaoPwaCliente()" style="padding:8px 14px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:12px;cursor:pointer;white-space:nowrap;box-shadow:0 3px 12px rgba(34,197,94,0.35);">
+      <button type="button" onclick="acionarInstalacaoPwaCliente()" style="padding:9px 14px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:12.5px;cursor:pointer;white-space:nowrap;box-shadow:0 3px 14px rgba(34,197,94,0.4);flex-shrink:0;display:flex;align-items:center;gap:5px;">
         📲 Instalar
       </button>
     </div>
@@ -2184,29 +2233,45 @@
 
     <!-- MODAL: INSTRUÇÕES VISUAIS DE INSTALAÇÃO NO CELULAR -->
     <div id="modal-instrucoes-pwa" class="modal-overlay" style="display:none;z-index:9999999;" onclick="fecharModalInstrucoesPwa(event)">
-      <div class="modal-card" onclick="event.stopPropagation()" style="max-width:440px;text-align:center;border:1.5px solid var(--gold);box-shadow:0 0 35px rgba(201,168,76,0.35);">
-        <div style="width:58px;height:58px;margin:0 auto 10px;background:rgba(37,211,102,0.15);border:2px solid #22c55e;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;">
+      <div class="modal-card" onclick="event.stopPropagation()" style="max-width:440px;text-align:center;border:1.5px solid var(--gold);box-shadow:0 0 45px rgba(201,168,76,0.45);">
+        <div style="width:62px;height:62px;margin:0 auto 12px;background:rgba(37,211,102,0.15);border:2px solid #22c55e;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:30px;">
           📲
         </div>
-        <h3 id="inst-modal-titulo" style="font-size:17px;font-weight:900;color:var(--gold-light);margin-bottom:4px;">Como Instalar no Celular</h3>
-        <p id="inst-modal-sub" style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.4;">
-          Siga os passos rápidos abaixo para ter o aplicativo da empresa na tela do seu aparelho:
+        <h3 id="inst-modal-titulo" style="font-size:18px;font-weight:900;color:var(--gold-light);margin-bottom:6px;">Instalar Aplicativo Oficial</h3>
+        <p id="inst-modal-sub" style="font-size:12.5px;color:var(--text2);margin-bottom:16px;line-height:1.45;">
+          Adicione o ícone oficial à tela inicial do seu celular para acesso rápido em 1 toque:
         </p>
 
-        <div style="text-align:left;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 14px;margin-bottom:16px;display:flex;flex-direction:column;gap:10px;font-size:12px;line-height:1.4;">
-          <div>
-            <strong style="color:#38bdf8;">🤖 No Android (Google Chrome):</strong><br>
-            Toque nos <strong>3 pontinhos (⋮)</strong> no canto superior direito do navegador e selecione <strong>"Instalar aplicativo"</strong> ou <strong>"Adicionar à tela inicial"</strong>.
+        <div style="text-align:left;display:flex;flex-direction:column;gap:12px;margin-bottom:18px;">
+          <div style="background:rgba(56,189,248,0.08);border:1.5px solid rgba(56,189,248,0.3);border-radius:14px;padding:12px 14px;">
+            <div style="color:#38bdf8;font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <span>🤖</span> No Android (Google Chrome):
+            </div>
+            <div style="font-size:12px;color:#cbd5e1;line-height:1.45;">
+              1. Toque nos <strong>3 pontinhos (⋮)</strong> no canto superior direito do navegador.<br>
+              2. Selecione <strong>"Instalar aplicativo"</strong> ou <strong>"Adicionar à tela inicial"</strong>.
+            </div>
           </div>
-          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:8px;">
-            <strong style="color:#a78bfa;">🍏 No iPhone / iPad (Safari):</strong><br>
-            Toque no botão <strong>Compartilhar (quadrado com seta ⎋)</strong> na barra inferior do Safari e escolha <strong>"Adicionar à Tela de Início (+)"</strong>.
+
+          <div style="background:rgba(167,139,250,0.08);border:1.5px solid rgba(167,139,250,0.3);border-radius:14px;padding:12px 14px;">
+            <div style="color:#a78bfa;font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <span>🍏</span> No iPhone / iPad (Safari):
+            </div>
+            <div style="font-size:12px;color:#cbd5e1;line-height:1.45;">
+              1. Toque no botão de <strong>Compartilhar (quadrado com seta ⎋)</strong> na barra inferior.<br>
+              2. Role e selecione <strong>"Adicionar à Tela de Início (+)"</strong>.
+            </div>
           </div>
         </div>
 
-        <button type="button" onclick="fecharModalInstrucoesPwa()" style="width:100%;padding:11px;background:linear-gradient(135deg,var(--gold-light),var(--gold));border:none;border-radius:10px;color:#000;font-weight:900;font-size:13px;cursor:pointer;">
-          Entendido! 👍
-        </button>
+        <div style="display:flex;gap:10px;">
+          <button type="button" id="btn-tentar-prompt-pwa" onclick="acionarInstalacaoPwaCliente(true)" style="display:none;flex:1;padding:12px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(34,197,94,0.4);">
+            ⚡ Instalar Direto
+          </button>
+          <button type="button" onclick="fecharModalInstrucoesPwa()" style="flex:1;padding:12px;background:linear-gradient(135deg,var(--gold-light),var(--gold));border:none;border-radius:10px;color:#000;font-weight:900;font-size:13.5px;cursor:pointer;">
+            Entendido! 👍
+          </button>
+        </div>
       </div>
     </div>
 
@@ -3617,15 +3682,18 @@
       if (b) b.style.display = 'flex';
     });
 
-    function acionarInstalacaoPwaCliente() {
+    function acionarInstalacaoPwaCliente(tentarDireto = false) {
       if (_deferredPromptCliente) {
         _deferredPromptCliente.prompt();
         _deferredPromptCliente.userChoice.then((choice) => {
           if (choice && choice.outcome === 'accepted') {
             const b = document.getElementById('banner-instalar-app-cliente');
             if (b) b.style.display = 'none';
+            fecharModalInstrucoesPwa();
           }
           _deferredPromptCliente = null;
+        }).catch(() => {
+          abrirModalInstrucoesPwa();
         });
       } else {
         abrirModalInstrucoesPwa();
@@ -3635,9 +3703,15 @@
     function abrirModalInstrucoesPwa() {
       const lic = obterLicencaAtivaCliente();
       const tit = document.getElementById('inst-modal-titulo');
-      if (tit) tit.textContent = `Instalar App ${lic.nome || 'SD Vidros'}`;
+      if (tit) tit.textContent = `Instalar Aplicativo Oficial · ${lic.nome || 'SD Vidros'}`;
       const modal = document.getElementById('modal-instrucoes-pwa');
-      if (modal) modal.style.display = 'flex';
+      if (modal) {
+        modal.style.display = 'flex';
+        const btnPrompt = document.getElementById('btn-tentar-prompt-pwa');
+        if (btnPrompt) {
+          btnPrompt.style.display = _deferredPromptCliente ? 'block' : 'none';
+        }
+      }
     }
 
     function fecharModalInstrucoesPwa(e) {
