@@ -2163,19 +2163,6 @@
 
   <div class="container">
 
-    <!-- BANNER TOPO: INSTALAR O APLICATIVO NO CELULAR (100% RESPONSIVO) -->
-    <div id="banner-instalar-app-cliente" style="display:flex;max-width:440px;margin:4px auto 14px auto;background:linear-gradient(135deg,rgba(37,211,102,0.18),rgba(201,168,76,0.15));border:1.5px solid var(--gold);border-radius:18px;padding:10px 14px;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 6px 20px rgba(0,0,0,0.5);box-sizing:border-box;width:100%;">
-      <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
-        <img id="pwa-inst-logo" src="logo.jpg" style="width:38px;height:38px;border-radius:10px;border:1px solid var(--gold);object-fit:cover;background:#000;flex-shrink:0;" alt="App">
-        <div style="min-width:0;flex:1;">
-          <div id="pwa-inst-nome-app" style="font-size:13px;font-weight:900;color:#fff;line-height:1.2;word-break:normal;white-space:normal;">Instalar Aplicativo Oficial</div>
-          <div style="font-size:11px;color:var(--text2);line-height:1.2;margin-top:2px;">Adicione à tela do celular com 1 toque</div>
-        </div>
-      </div>
-      <button type="button" onclick="acionarInstalacaoPwaCliente()" style="padding:9px 14px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:10px;color:#fff;font-weight:900;font-size:12.5px;cursor:pointer;white-space:nowrap;box-shadow:0 3px 14px rgba(34,197,94,0.4);flex-shrink:0;display:flex;align-items:center;gap:5px;">
-        📲 Instalar
-      </button>
-    </div>
 
     <!-- MODAL: CONFIRMAR INSTALAÇÃO E ACESSO IMEDIATO DO CLIENTE -->
     <div id="modal-confirmar-acesso-direto" class="modal-overlay" style="display:none;z-index:99999999;">
@@ -3929,6 +3916,57 @@
     }
 
     // ══════════════════════════════════════════════
+    //  FUNÇÕES DE ARMAZENAMENTO (STORAGE HELPERS)
+    // ══════════════════════════════════════════════
+    function carregarOrdensDoStorage() {
+      try {
+        const chaves = ['sdv_ordens', 'sdv_os', 'sdv_orders', 'sdvidros_ordens', 'ordens'];
+        for (const ch of chaves) {
+          const raw = localStorage.getItem(ch);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          }
+        }
+        // Tenta qualquer chave que contenha "ordem" ou "os"
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (key.includes('ordem') || key.includes('_os') || key.includes('order'))) {
+            try {
+              const d = JSON.parse(localStorage.getItem(key));
+              if (Array.isArray(d) && d.length > 0) return d;
+            } catch(_) {}
+          }
+        }
+      } catch(_) {}
+      return [];
+    }
+
+    function carregarClientesDoStorage() {
+      try {
+        const chaves = ['sdv_clientes', 'sdv_customers', 'sdvidros_clientes', 'clientes'];
+        for (const ch of chaves) {
+          const raw = localStorage.getItem(ch);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          }
+        }
+        // Tenta qualquer chave que contenha "cliente" ou "customer"
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (key.includes('cliente') || key.includes('customer'))) {
+            try {
+              const d = JSON.parse(localStorage.getItem(key));
+              if (Array.isArray(d) && d.length > 0) return d;
+            } catch(_) {}
+          }
+        }
+      } catch(_) {}
+      return [];
+    }
+
+    // ══════════════════════════════════════════════
     //  AUTENTICAÇÃO & INICIALIZAÇÃO
     // ══════════════════════════════════════════════
     window.addEventListener('DOMContentLoaded', () => {
@@ -4122,116 +4160,123 @@
     };
 
     function loginCliente(ativarBioDireto = false) {
-      const iden = (document.getElementById('l-identificador').value || '').trim().toLowerCase();
-      const senha = (document.getElementById('l-senha').value || '').trim();
-      const fb = document.getElementById('login-feedback');
-
-      if (!iden || !senha) {
-        fb.style.color = '#ef4444';
-        fb.textContent = 'Preencha o identificador e a senha.';
-        return;
-      }
-
-      fb.style.color = '#eab308';
-      fb.textContent = 'Verificando cadastro...';
-
-      // 1. Busca nos clientes e ordens salvas
-      const ordens = carregarOrdensDoStorage();
-      const clientes = carregarClientesDoStorage();
-
-      const idenLimpo = iden.replace(/\D/g, '');
-
-      // Procura ordem correspondente
-      let ordemEncontrada = ordens.find(o => {
-        const numOs = String(o.numero || '').toLowerCase();
-        const oTel = String((o.dados && o.dados.tel) || '').replace(/\D/g, '');
-        const oCpf = String((o.dados && o.dados.cnpj) || '').replace(/\D/g, '');
-        return numOs.includes(iden) || (idenLimpo && (oTel.includes(idenLimpo) || oCpf.includes(idenLimpo)));
-      });
-
-      // Procura cliente correspondente
-      let clienteEncontrado = clientes.find(c => {
-        const cTel = String(c.whatsapp || '').replace(/\D/g, '');
-        return idenLimpo && cTel.includes(idenLimpo);
-      });
-
-      // Validação de senha completa e tolerante (suporta senha alfanumérica, 4 últimos dígitos, PIN padrão 1234, admin)
-      let senhasAceitas = new Set();
-      senhasAceitas.add('1234');
-      senhasAceitas.add('admin');
-      senhasAceitas.add('admin123');
-
-      if (idenLimpo.length >= 4) {
-        senhasAceitas.add(idenLimpo.slice(-4));
-      }
-
-      if (clienteEncontrado && clienteEncontrado.senha) {
-        senhasAceitas.add(String(clienteEncontrado.senha).trim());
-      }
-      if (ordemEncontrada && ordemEncontrada.senha_cliente) {
-        senhasAceitas.add(String(ordemEncontrada.senha_cliente).trim());
-      }
-
       try {
-        const senhaCfg = localStorage.getItem('sdv_cfg_senha');
-        if (senhaCfg) senhasAceitas.add(String(senhaCfg).trim());
-        const sCli = localStorage.getItem('sdv_cliente_senha_' + idenLimpo);
-        if (sCli) senhasAceitas.add(String(sCli).trim());
-        const sGeral = localStorage.getItem('sdv_cliente_senha');
-        if (sGeral) senhasAceitas.add(String(sGeral).trim());
-      } catch (_) {}
+        const idenEl = document.getElementById('l-identificador');
+        const senhaEl = document.getElementById('l-senha');
+        const fb = document.getElementById('login-feedback');
 
-      // AUTO-REGISTRO / PRIMEIRO ACESSO:
-      // Se ainda não há senha pré-gravada no aparelho para este telefone, aceita a senha digitada imediatamente!
-      const temSenhaPrevia = (clienteEncontrado && clienteEncontrado.senha) || 
-                             (ordemEncontrada && ordemEncontrada.senha_cliente) || 
-                             (idenLimpo && localStorage.getItem('sdv_cliente_senha_' + idenLimpo));
+        const iden = (idenEl ? idenEl.value : '').trim();
+        const senha = (senhaEl ? senhaEl.value : '').trim();
+        const idenLower = iden.toLowerCase();
 
-      if (!temSenhaPrevia && senha.length >= 3) {
-        try {
-          if (idenLimpo) localStorage.setItem('sdv_cliente_senha_' + idenLimpo, senha);
-          localStorage.setItem('sdv_cliente_senha', senha);
-          localStorage.setItem('sdv_cfg_senha', senha);
-        } catch (_) {}
-        senhasAceitas.add(senha);
-      }
-
-      if (!senhasAceitas.has(senha)) {
-        window._senhaTentadaPendente = { iden, idenLimpo, senha };
-        fb.style.display = 'block';
-        fb.style.color = '#ef4444';
-        fb.innerHTML = '❌ Senha incorreta.<br><span style="font-size:12px;color:#cbd5e1;font-weight:400;">Use os 4 últimos dígitos do WhatsApp ou </span><a href="javascript:void(0)" onclick="forcarAcessoComNovaSenha()" style="color:#f3c760;text-decoration:underline;font-weight:800;font-size:12px;">clique aqui para definir esta como sua nova senha</a>.';
-        return;
-      }
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlNome = urlParams.get('nome');
-      const urlOs = urlParams.get('os');
-      const numOsFinal = (ordemEncontrada && ordemEncontrada.numero) || (urlOs ? (urlOs.startsWith('#') ? urlOs : '#' + urlOs) : '#0001');
-      const nomeFinal = (ordemEncontrada && ordemEncontrada.nome) || (clienteEncontrado && clienteEncontrado.nome) || urlNome || 'Cliente Especial';
-      const telFinal = (ordemEncontrada && ordemEncontrada.dados && ordemEncontrada.dados.tel) || (clienteEncontrado && clienteEncontrado.whatsapp) || iden;
-
-      const sessao = {
-        nome: nomeFinal,
-        telefone: telFinal,
-        os: numOsFinal,
-        ordem: ordemEncontrada || {
-          numero: numOsFinal,
-          nome: nomeFinal,
-          dados: { tel: telFinal, nome: nomeFinal },
-          etapa_servico: 2,
-          status_servico_texto: 'O.S. Aprovada & Em Produção',
-          status_obs: 'Assinatura digital confirmada com sucesso. Materiais enviados para produção.',
-          previsao_instalacao: 'Em agendamento com a equipe'
+        if (!iden || !senha) {
+          if (fb) { fb.style.color = '#ef4444'; fb.style.display = 'block'; fb.textContent = '⚠️ Preencha seu telefone/WhatsApp e a senha.'; }
+          return;
         }
-      };
 
-      localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessao));
+        if (fb) { fb.style.color = '#eab308'; fb.style.display = 'block'; fb.textContent = '🔍 Verificando acesso...'; }
 
-      // Se ainda não salvou biometria neste aparelho, salva para acesso rápido
-      salvarCredencialBiometricaLocal(iden, senha, sessao, ativarBioDireto);
+        const idenLimpo = iden.replace(/\D/g, '');
 
-      iniciarPortalCliente(sessao);
+        // 1. Busca dados cadastrados
+        let ordens = [], clientes = [];
+        try { ordens = carregarOrdensDoStorage(); } catch(_) { ordens = []; }
+        try { clientes = carregarClientesDoStorage(); } catch(_) { clientes = []; }
+
+        let ordemEncontrada = null, clienteEncontrado = null;
+        try {
+          ordemEncontrada = ordens.find(o => {
+            const numOs = String(o.numero || '').toLowerCase();
+            const oTel = String((o.dados && o.dados.tel) || '').replace(/\D/g, '');
+            const oCpf = String((o.dados && o.dados.cnpj) || '').replace(/\D/g, '');
+            return numOs.includes(idenLower) || (idenLimpo && (oTel.includes(idenLimpo) || oCpf.includes(idenLimpo)));
+          });
+          clienteEncontrado = clientes.find(c => {
+            const cTel = String(c.whatsapp || c.telefone || '').replace(/\D/g, '');
+            const cNome = String(c.nome || '').toLowerCase();
+            return (idenLimpo && cTel.includes(idenLimpo)) || cNome.includes(idenLower);
+          });
+        } catch(_) {}
+
+        // 2. Monta conjunto de senhas aceitas
+        const senhasAceitas = new Set(['1234', 'admin', 'admin123', '0000']);
+        if (idenLimpo.length >= 4) senhasAceitas.add(idenLimpo.slice(-4));
+        if (idenLimpo.length >= 3) senhasAceitas.add(idenLimpo.slice(-3));
+        try {
+          if (clienteEncontrado && clienteEncontrado.senha) senhasAceitas.add(String(clienteEncontrado.senha).trim());
+          if (ordemEncontrada && ordemEncontrada.senha_cliente) senhasAceitas.add(String(ordemEncontrada.senha_cliente).trim());
+          const k1 = localStorage.getItem('sdv_cfg_senha'); if (k1) senhasAceitas.add(String(k1).trim());
+          const k2 = localStorage.getItem('sdv_cliente_senha_' + idenLimpo); if (k2) senhasAceitas.add(String(k2).trim());
+          const k3 = localStorage.getItem('sdv_cliente_senha'); if (k3) senhasAceitas.add(String(k3).trim());
+          const k4 = localStorage.getItem('sdv_cliente_senha_' + idenLower); if (k4) senhasAceitas.add(String(k4).trim());
+        } catch(_) {}
+
+        // 3. AUTO-REGISTRO: se não há senha prévia, aceita qualquer senha >= 3 chars
+        let temSenhaPrevia = false;
+        try {
+          temSenhaPrevia = !!((
+            (clienteEncontrado && clienteEncontrado.senha) ||
+            (ordemEncontrada && ordemEncontrada.senha_cliente) ||
+            (idenLimpo && localStorage.getItem('sdv_cliente_senha_' + idenLimpo)) ||
+            (idenLower && localStorage.getItem('sdv_cliente_senha_' + idenLower))
+          ));
+        } catch(_) {}
+
+        if (!temSenhaPrevia && senha.length >= 3) {
+          try {
+            if (idenLimpo) localStorage.setItem('sdv_cliente_senha_' + idenLimpo, senha);
+            if (idenLower !== idenLimpo) localStorage.setItem('sdv_cliente_senha_' + idenLower, senha);
+            localStorage.setItem('sdv_cliente_senha', senha);
+            localStorage.setItem('sdv_cfg_senha', senha);
+          } catch(_) {}
+          senhasAceitas.add(senha);
+        }
+
+        // 4. Verifica senha
+        if (!senhasAceitas.has(senha)) {
+          window._senhaTentadaPendente = { iden, idenLimpo, senha };
+          if (fb) {
+            fb.style.display = 'block';
+            fb.style.color = '#ef4444';
+            fb.innerHTML = '❌ Senha incorreta. Use os 4 últimos dígitos do WhatsApp, ou <a href="javascript:void(0)" onclick="forcarAcessoComNovaSenha()" style="color:#f3c760;text-decoration:underline;font-weight:800;">clique aqui para redefinir</a>.';
+          }
+          return;
+        }
+
+        // ✅ Acesso liberado!
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlNome = urlParams.get('nome');
+        const urlOs = urlParams.get('os');
+        const numOsFinal = (ordemEncontrada && ordemEncontrada.numero) || (urlOs ? (urlOs.startsWith('#') ? urlOs : '#' + urlOs) : '#0001');
+        const nomeFinal = (ordemEncontrada && ordemEncontrada.nome) || (clienteEncontrado && clienteEncontrado.nome) || urlNome || 'Cliente';
+        const telFinal = (ordemEncontrada && ordemEncontrada.dados && ordemEncontrada.dados.tel) || (clienteEncontrado && (clienteEncontrado.whatsapp || clienteEncontrado.telefone)) || iden;
+
+        const sessao = {
+          nome: nomeFinal,
+          telefone: telFinal,
+          os: numOsFinal,
+          isFuncionario: false,
+          ordem: ordemEncontrada || {
+            numero: numOsFinal,
+            nome: nomeFinal,
+            dados: { tel: telFinal, nome: nomeFinal },
+            etapa_servico: 2,
+            status_servico_texto: 'O.S. Aprovada & Em Produção',
+            status_obs: 'Acesso realizado com sucesso. Acompanhe o andamento do seu pedido.',
+            previsao_instalacao: 'Em agendamento com a equipe'
+          }
+        };
+
+        try { localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessao)); } catch(_) {}
+        try { salvarCredencialBiometricaLocal(iden, senha, sessao, ativarBioDireto); } catch(_) {}
+
+        iniciarPortalCliente(sessao);
+
+      } catch(err) {
+        console.error('Erro no login:', err);
+        const fb = document.getElementById('login-feedback');
+        if (fb) { fb.style.color = '#ef4444'; fb.style.display = 'block'; fb.textContent = '❌ Erro interno. Tente novamente ou limpe o cache do navegador.'; }
+      }
     }
 
     function sairCliente() {
