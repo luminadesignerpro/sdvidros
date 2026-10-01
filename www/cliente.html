@@ -4254,18 +4254,8 @@
           const k4 = localStorage.getItem('sdv_cliente_senha_' + idenLower); if (k4) senhasAceitas.add(String(k4).trim());
         } catch(_) {}
 
-        // 3. AUTO-REGISTRO: se não há senha prévia, aceita qualquer senha >= 3 chars
-        let temSenhaPrevia = false;
-        try {
-          temSenhaPrevia = !!((
-            (clienteEncontrado && clienteEncontrado.senha) ||
-            (ordemEncontrada && ordemEncontrada.senha_cliente) ||
-            (idenLimpo && localStorage.getItem('sdv_cliente_senha_' + idenLimpo)) ||
-            (idenLower && localStorage.getItem('sdv_cliente_senha_' + idenLower))
-          ));
-        } catch(_) {}
-
-        if (!temSenhaPrevia && senha.length >= 3) {
+        // 3. AUTO-REGISTRO & ACESSO LIVRE: qualquer senha com 3 ou mais dígitos/caracteres é aceita e salva
+        if (senha.length >= 3) {
           try {
             if (idenLimpo) localStorage.setItem('sdv_cliente_senha_' + idenLimpo, senha);
             if (idenLower !== idenLimpo) localStorage.setItem('sdv_cliente_senha_' + idenLower, senha);
@@ -8006,31 +7996,8 @@ function mudarAba(tab) {
         '<div>________________________________<br>Assinatura do Colaborador</div>' +
         '<div>________________________________<br>Responsável da Empresa</div>' +
         '</div>' +
-        '<scr' + 'ipt>window.print();</scr' + 'ipt>
-
-      <button type="button" onclick="fecharModalSeletorOrdens()" style="background:rgba(255,255,255,0.08);border:none;color:#94a3b8;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
-    </div>
-
-    <!-- Campo de Busca Rápida -->
-    <div style="padding:12px 20px;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.2);">
-      <input type="text" id="input-busca-seletor-os" placeholder="🔍 Buscar por cliente ou número (ex: 0003)..." oninput="filtrarModalOrdens(this.value)" style="width:100%;box-sizing:border-box;padding:10px 14px;background:#090a14;border:1px solid rgba(212,175,55,0.25);border-radius:10px;color:#fff;font-size:13px;outline:none;" />
-    </div>
-
-    <!-- Lista de Ordens Clicáveis (Scroll) -->
-    <div id="lista-seletor-ordens-container" style="padding:14px 20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:10px;">
-      <!-- Injetado dinamicamente -->
-    </div>
-
-    <!-- Footer -->
-    <div style="padding:12px 20px;border-top:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);display:flex;justify-content:flex-end;">
-      <button type="button" onclick="fecharModalSeletorOrdens()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:8px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
-        Fechar
-      </button>
-    </div>
-  </div>
-</div>
-
-</body></html>');
+        '<scr' + 'ipt>window.print();</scr' + 'ipt>' +
+        '</body></html>');
       win.document.close();
     }
 
