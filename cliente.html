@@ -4108,6 +4108,19 @@
       iniciarPortalCliente(sessao);
     }
 
+    window._senhaTentadaPendente = null;
+
+    window.forcarAcessoComNovaSenha = function() {
+      if (!window._senhaTentadaPendente) return;
+      const { idenLimpo, senha } = window._senhaTentadaPendente;
+      try {
+        if (idenLimpo) localStorage.setItem('sdv_cliente_senha_' + idenLimpo, senha);
+        localStorage.setItem('sdv_cliente_senha', senha);
+        localStorage.setItem('sdv_cfg_senha', senha);
+      } catch (_) {}
+      loginCliente();
+    };
+
     function loginCliente(ativarBioDireto = false) {
       const iden = (document.getElementById('l-identificador').value || '').trim().toLowerCase();
       const senha = (document.getElementById('l-senha').value || '').trim();
@@ -4168,9 +4181,26 @@
         if (sGeral) senhasAceitas.add(String(sGeral).trim());
       } catch (_) {}
 
+      // AUTO-REGISTRO / PRIMEIRO ACESSO:
+      // Se ainda não há senha pré-gravada no aparelho para este telefone, aceita a senha digitada imediatamente!
+      const temSenhaPrevia = (clienteEncontrado && clienteEncontrado.senha) || 
+                             (ordemEncontrada && ordemEncontrada.senha_cliente) || 
+                             (idenLimpo && localStorage.getItem('sdv_cliente_senha_' + idenLimpo));
+
+      if (!temSenhaPrevia && senha.length >= 3) {
+        try {
+          if (idenLimpo) localStorage.setItem('sdv_cliente_senha_' + idenLimpo, senha);
+          localStorage.setItem('sdv_cliente_senha', senha);
+          localStorage.setItem('sdv_cfg_senha', senha);
+        } catch (_) {}
+        senhasAceitas.add(senha);
+      }
+
       if (!senhasAceitas.has(senha)) {
+        window._senhaTentadaPendente = { iden, idenLimpo, senha };
+        fb.style.display = 'block';
         fb.style.color = '#ef4444';
-        fb.textContent = '❌ Senha incorreta. Tente novamente ou use os 4 últimos dígitos do seu WhatsApp.';
+        fb.innerHTML = '❌ Senha incorreta.<br><span style="font-size:12px;color:#cbd5e1;font-weight:400;">Use os 4 últimos dígitos do WhatsApp ou </span><a href="javascript:void(0)" onclick="forcarAcessoComNovaSenha()" style="color:#f3c760;text-decoration:underline;font-weight:800;font-size:12px;">clique aqui para definir esta como sua nova senha</a>.';
         return;
       }
 
@@ -4273,14 +4303,13 @@
       if (tabIcone) tabIcone.textContent = '💳';
       if (contFin) contFin.style.display = 'block';
       if (contPonto) contPonto.style.display = 'none';
-      carregarDadosFinanceiros(sessao);
-
-      carregarDadosStatus(sessao);
-      carregarGaleriaFotos(sessao);
-      carregarMensagensChat(sessao);
-      renderizarOrdensMensagens();
-      conectarRealtimePortal(sessao);
-      atualizarBotaoHeaderBiometria();
+      try { carregarDadosFinanceiros(sessao); } catch(e) { console.warn(e); }
+      try { carregarDadosStatus(sessao); } catch(e) { console.warn(e); }
+      try { carregarGaleriaFotos(sessao); } catch(e) { console.warn(e); }
+      try { carregarMensagensChat(sessao); } catch(e) { console.warn(e); }
+      try { renderizarOrdensMensagens(); } catch(e) { console.warn(e); }
+      try { conectarRealtimePortal(sessao); } catch(e) { console.warn(e); }
+      try { atualizarBotaoHeaderBiometria(); } catch(e) { console.warn(e); }
     }
 
     function inicializarFinanceiroPessoal() {}
@@ -8384,9 +8413,11 @@ function mudarAba(tab) {
 // REGISTRO DE SERVICE WORKER E ALARMES DE PONTO
 // ==========================================
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
+  try {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(reg => {
+      reg.update().catch(() => {});
+    }).catch(() => {});
+  } catch(_) {}
 }
 
 function ativarAlarmePontoCelularSegundoPlano() {
