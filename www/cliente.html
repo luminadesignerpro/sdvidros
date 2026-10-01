@@ -4078,8 +4078,51 @@
         } catch (_) {}
       }
 
-      // Se tiver parâmetros na URL para login automático convencional
-      if ((paramTel || paramOs) && (paramSenha || autoLogin)) {
+      // Se tiver parâmetros na URL para login automático direto (ex: vindo do WhatsApp ou de assinar.html)
+      if (autoLogin && (paramTel || paramOs || paramNome)) {
+        let ordens = [], clientes = [];
+        try { ordens = carregarOrdensDoStorage(); } catch(_) { ordens = []; }
+        try { clientes = carregarClientesDoStorage(); } catch(_) { clientes = []; }
+
+        const idenLimpo = (paramTel || '').replace(/\D/g, '');
+
+        let ordemEncontrada = ordens.find(o => {
+          const numOs = String(o.numero || '').toLowerCase();
+          const oTel = String((o.dados && o.dados.tel) || '').replace(/\D/g, '');
+          return (paramOs && numOs.includes(paramOs.toLowerCase())) || (idenLimpo && oTel.includes(idenLimpo));
+        });
+
+        const numOsFinal = (ordemEncontrada && ordemEncontrada.numero) || (paramOs ? (paramOs.startsWith('#') ? paramOs : '#' + paramOs) : '#0001');
+        const nomeFinal = (ordemEncontrada && ordemEncontrada.nome) || paramNome || 'Cliente';
+        const telFinal = (ordemEncontrada && ordemEncontrada.dados && ordemEncontrada.dados.tel) || paramTel || '';
+
+        const sessao = {
+          nome: nomeFinal,
+          os: numOsFinal,
+          tel: telFinal,
+          telefone: telFinal,
+          empresaId: paramEmpUrl || 'sdvidros',
+          empresaNome: (licAtivaPre && licAtivaPre.nome) || 'SD Vidros',
+          isFuncionario: false,
+          ordem: ordemEncontrada || {
+            numero: numOsFinal,
+            nome: nomeFinal,
+            dados: { tel: telFinal, nome: nomeFinal },
+            etapa_servico: 2,
+            status_servico_texto: 'O.S. Confirmada & Em Produção',
+            status_obs: 'Serviço autorizado. Em acompanhamento pela fábrica.',
+            previsao_instalacao: 'Em agendamento com a equipe'
+          }
+        };
+
+        localStorage.setItem('sdv_cliente_sessao', JSON.stringify(sessao));
+        aplicarLicencaAtivaCliente();
+        iniciarPortalCliente(sessao);
+        return;
+      }
+
+      // Se tiver parâmetros na URL para login convencional
+      if ((paramTel || paramOs) && paramSenha) {
         setTimeout(() => {
           loginCliente();
         }, 120);
@@ -4232,8 +4275,10 @@
           senhasAceitas.add(senha);
         }
 
-        // 4. Verifica senha
-        if (!senhasAceitas.has(senha)) {
+        // 4. Verifica senha (ignora se for acesso autorizado direto via auto=1 ou biometria)
+        const urlParamsP = new URLSearchParams(window.location.search);
+        const ehAcessoDiretoUrl = urlParamsP.get('auto') === '1' || urlParamsP.get('direct') === '1' || ativarBioDireto;
+        if (!ehAcessoDiretoUrl && !senhasAceitas.has(senha)) {
           window._senhaTentadaPendente = { iden, idenLimpo, senha };
           if (fb) {
             fb.style.display = 'block';

@@ -1141,11 +1141,14 @@
 
 <div class="container">
   <!-- Brand Header -->
-  <div class="header-brand">
+  <div class="header-brand" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
     <div class="brand-title" id="header-brand-title">
       <span>🪟</span> SD VIDROS
     </div>
     <div class="brand-badge" id="header-brand-badge">Soluções em Vidros & Esquadrias de Alumínio</div>
+    <a id="btn-top-brand-cliente" href="cliente.html" style="margin-top:4px;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#f3c760;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.4);padding:5px 14px;border-radius:999px;text-decoration:none;transition:all 0.2s;">
+      👤 Acessar Área do Cliente ➔
+    </a>
   </div>
 
   <!-- Loading State -->
@@ -1276,14 +1279,17 @@
         <div style="margin-top:4px;">Documento: <strong id="subtitulo">SD Vidros</strong></div>
       </div>
 
-      <!-- Actions: Download PDF or Review -->
+      <!-- Actions: Download PDF, Review or Client Area -->
       <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
-        <button class="btn btn-outline btn-sm" onclick="baixarPdfAtual()" style="flex:1;">
+        <button class="btn btn-outline btn-sm" onclick="baixarPdfAtual()" style="flex:1;min-width:130px;">
           📄 Baixar Contrato em PDF
         </button>
-        <button class="btn btn-green btn-sm" onclick="irParaAssinatura()" style="flex:1;">
+        <button class="btn btn-green btn-sm" onclick="irParaAssinatura()" style="flex:1;min-width:130px;">
           ✍️ Aprovar & Assinar
         </button>
+        <a id="btn-doc-area-cliente" href="cliente.html" class="btn btn-sm" style="flex:1;min-width:130px;background:linear-gradient(135deg,rgba(201,168,76,0.22),rgba(201,168,76,0.1));border:1.5px solid var(--gold,#c9a84c);color:#f3c760;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;border-radius:10px;padding:8px 12px;">
+          👤 Área do Cliente
+        </a>
       </div>
 
       <!-- Scrollable Contract / Proposal text -->
@@ -1301,6 +1307,9 @@
         <button class="btn btn-green" onclick="irParaAssinatura()">
           ✅ Aprovar e Assinar Orçamento
         </button>
+        <a id="btn-decisao-area-cliente" href="cliente.html" class="btn" style="background:linear-gradient(135deg,rgba(201,168,76,0.25),rgba(201,168,76,0.1));border:1.5px solid var(--gold,#c9a84c);color:#f3c760;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+          👤 Acessar Área do Cliente
+        </a>
         <a id="btn-ajustar-zap" href="https://wa.me/5585996119824" target="_blank" class="btn btn-outline">
           💬 Falar com SD Vidros / Solicitar Ajustes
         </a>
@@ -1356,13 +1365,13 @@
         </button>
       </div>
       <div class="pay-pix-row">
-        <button class="pay-method-btn" id="pay-btn-pix-copia" onclick="selecionarPagamento('pix-copia')">
-          <span class="pay-icon">📋</span>
-          Pix<br>Copiar/Colar
-        </button>
         <button class="pay-method-btn" id="pay-btn-pix-qr" onclick="selecionarPagamento('pix-qr')">
           <span class="pay-icon">📲</span>
           Pix<br>QR Code
+        </button>
+        <button class="pay-method-btn" id="pay-btn-pix-copia" onclick="selecionarPagamento('pix-copia')">
+          <span class="pay-icon">📋</span>
+          Pix<br>Copiar/Colar
         </button>
       </div>
 
@@ -1834,6 +1843,21 @@
     const btnAcessar = document.getElementById('btn-acessar-cliente');
     if (btnAcessar) {
       btnAcessar.href = urlRelativa;
+    }
+
+    const btnDoc = document.getElementById('btn-doc-area-cliente');
+    if (btnDoc) {
+      btnDoc.href = urlRelativa;
+    }
+
+    const btnDecisao = document.getElementById('btn-decisao-area-cliente');
+    if (btnDecisao) {
+      btnDecisao.href = urlRelativa;
+    }
+
+    const btnTopBrand = document.getElementById('btn-top-brand-cliente');
+    if (btnTopBrand) {
+      btnTopBrand.href = urlRelativa;
     }
 
     const inputLink = document.getElementById('input-link-cliente');
@@ -2529,9 +2553,15 @@
     const btnAjustar = document.getElementById('btn-ajustar-zap');
     if (btnAjustar) {
       const licAtivaAjuste = obterLicencaAtiva();
-    const zapMsg = 'Olá ' + (licAtivaAjuste.nome || 'SD Vidros') + '! Recebi a proposta ' + numOs + ' (' + cliNome + '), mas gostaria de tirar algumas dúvidas e falar sobre ajustes antes de aprovar.';
+      const zapMsg = 'Olá ' + (licAtivaAjuste.nome || 'SD Vidros') + '! Recebi a proposta ' + numOs + ' (' + cliNome + '), mas gostaria de tirar algumas dúvidas e falar sobre ajustes antes de aprovar.';
       btnAjustar.href = 'https://wa.me/5585996119824?text=' + encodeURIComponent(zapMsg);
     }
+
+    // Configura botões de acesso à Área do Cliente para o cliente atual
+    try {
+      const telCliInicial = data.cliente_tel || data.tel || data.t || '';
+      atualizarCardPortalCliente(numOs, cliNome, telCliInicial);
+    } catch (_) {}
 
     if (telaLoading) telaLoading.classList.add('hidden');
     if (telaForm) telaForm.classList.remove('hidden');
