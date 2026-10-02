@@ -1,0 +1,14 @@
+{
+  "appId": "com.sdvidros.app",
+  "appName": "SD Vidros",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true,
+    "webContentsDebuggingEnabled": true
+  }
+}

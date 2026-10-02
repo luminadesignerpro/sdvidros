@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SD Vidros – Acesso ao Sistema</title>
   <meta name="description" content="Sistema de Gestão SD Vidros – Orçamentos, Clientes e Contratos. Itaitinga - CE.">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#07070b">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
@@ -2612,6 +2615,8 @@
         btnBio.style.borderColor = 'rgba(201, 168, 76, 0.8)';
         btnBio.style.boxShadow = '0 0 20px rgba(201, 168, 76, 0.2)';
       }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function() {});
     }
   });
 </script>

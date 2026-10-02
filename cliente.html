@@ -328,6 +328,11 @@
         grid-template-columns: repeat(4, 1fr);
       }
     }
+    @media (max-width: 659px) {
+      .portal-tabs > .portal-tab:last-child:nth-child(odd) {
+        grid-column: span 2;
+      }
+    }
     .portal-tab {
       height: 48px;
       min-height: 48px;
@@ -2375,9 +2380,6 @@
           <button type="button" class="portal-tab" id="btn-tab-opiniao" onclick="mudarAba('opiniao')">
             <span>💡</span> <span>Minha Opinião</span>
           </button>
-          <button type="button" class="portal-tab" id="btn-tab-jogos" onclick="mudarAba('jogos')">
-            <span>🎮</span> <span>Jogos</span>
-          </button>
         </div>
       </div>
 
@@ -2786,7 +2788,7 @@
       </div>
 
       <!-- ── ABA 6: JOGOS & ENTRETENIMENTO PRO ── -->
-      <div id="pane-jogos" class="tab-pane">
+      <div id="pane-jogos" class="tab-pane" style="display:none !important;">
         <!-- Botão Flutuante de Sair da Tela Cheia -->
         <button type="button" class="btn-fullscreen-exit-float" onclick="alternarTelaCheiaJogos(false)">
           <span>✕</span> <span>Sair da Tela Cheia</span>

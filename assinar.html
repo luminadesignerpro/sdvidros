@@ -1279,17 +1279,42 @@
         <div style="margin-top:4px;">Documento: <strong id="subtitulo">SD Vidros</strong></div>
       </div>
 
-      <!-- Actions: Download PDF, Review or Client Area -->
-      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+            <!-- Actions: Download PDF, Review or Client Area -->
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;" id="wrap-acoes-doc">
         <button class="btn btn-outline btn-sm" onclick="baixarPdfAtual()" style="flex:1;min-width:130px;">
           📄 Baixar Contrato em PDF
         </button>
-        <button class="btn btn-green btn-sm" onclick="irParaAssinatura()" style="flex:1;min-width:130px;">
+        <button class="btn btn-green btn-sm" id="btn-doc-aprovar-assinar" onclick="irParaAssinatura()" style="flex:1;min-width:130px;">
           ✍️ Aprovar & Assinar
+        </button>
+        <button class="btn btn-sm hidden" id="btn-doc-solicitar-alteracao" onclick="abrirModalSolicitarAlteracao()" style="flex:1;min-width:130px;background:rgba(56,189,248,0.18);border:1.5px solid #38bdf8;color:#38bdf8;font-weight:800;cursor:pointer;">
+          ✏️ Solicitar Alteração
         </button>
         <a id="btn-doc-area-cliente" href="cliente.html" class="btn btn-sm" style="flex:1;min-width:130px;background:linear-gradient(135deg,rgba(201,168,76,0.22),rgba(201,168,76,0.1));border:1.5px solid var(--gold,#c9a84c);color:#f3c760;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;border-radius:10px;padding:8px 12px;">
           👤 Área do Cliente
         </a>
+      </div>
+
+      <!-- Banner de Alerta e Notificação: O.S. Já Assinada & Bloqueada -->
+      <div id="banner-bloqueio-assinado" class="hidden" style="margin-top:14px;background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(2,132,199,0.12));border:1.5px solid #10b981;border-radius:12px;padding:14px;text-align:left;box-shadow:0 4px 18px rgba(0,0,0,0.35);">
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <span style="font-size:28px;line-height:1;">🔒</span>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span style="color:#4ade80;font-weight:900;font-size:14px;text-transform:uppercase;letter-spacing:0.04em;">ORDEM DE SERVIÇO ASSINADA & BLOQUEADA</span>
+              <span style="background:#10b981;color:#042f2e;font-size:10.5px;font-weight:900;padding:2px 7px;border-radius:5px;">Válida Juridicamente</span>
+            </div>
+            <p style="font-size:13px;color:#cbd5e1;line-height:1.5;margin:6px 0 0;" id="texto-alerta-bloqueio-assinado">
+              Esta Ordem de Serviço já foi <strong>aprovada e assinada digitalmente</strong>. Novas assinaturas estão bloqueadas.
+            </p>
+            <div style="margin-top:10px;padding:10px;background:rgba(0,0,0,0.35);border-radius:8px;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+              <span style="font-size:12px;color:#94a3b8;">Deseja fazer alguma alteração nas medidas, itens ou condições?</span>
+              <button type="button" onclick="abrirModalSolicitarAlteracao()" style="background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;border:none;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(2,132,199,0.3);">
+                ✏️ Quero Alterar e Enviar à Empresa
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Scrollable Contract / Proposal text -->
@@ -1297,25 +1322,50 @@
     </div>
 
     <!-- Interactive Decision Area -->
+        <!-- Interactive Decision Area -->
     <div class="card" id="card-decisao" style="text-align:center;">
-      <h3 style="font-size:16px;color:#f1f5f9;margin-bottom:6px;">Deseja autorizar este serviço?</h3>
-      <p style="font-size:13px;color:#94a3b8;margin-bottom:14px;">
-        Ao aprovar, sua proposta será convertida em Ordem de Serviço para início da produção.
-      </p>
+      <div id="decisao-bloco-pendente">
+        <h3 style="font-size:16px;color:#f1f5f9;margin-bottom:6px;">Deseja autorizar este serviço?</h3>
+        <p style="font-size:13px;color:#94a3b8;margin-bottom:14px;">
+          Ao aprovar, sua proposta será convertida em Ordem de Serviço para início da produção.
+        </p>
 
-      <div class="actions-grid">
-        <button class="btn btn-green" onclick="irParaAssinatura()">
-          ✅ Aprovar e Assinar Orçamento
-        </button>
-        <a id="btn-decisao-area-cliente" href="cliente.html" class="btn" style="background:linear-gradient(135deg,rgba(201,168,76,0.25),rgba(201,168,76,0.1));border:1.5px solid var(--gold,#c9a84c);color:#f3c760;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
-          👤 Acessar Área do Cliente
-        </a>
-        <a id="btn-ajustar-zap" href="https://wa.me/5585996119824" target="_blank" class="btn btn-outline">
-          💬 Falar com SD Vidros / Solicitar Ajustes
-        </a>
+        <div class="actions-grid">
+          <button class="btn btn-green" onclick="irParaAssinatura()">
+            ✅ Aprovar e Assinar Orçamento
+          </button>
+          <a id="btn-decisao-area-cliente" href="cliente.html" class="btn" style="background:linear-gradient(135deg,rgba(201,168,76,0.25),rgba(201,168,76,0.1));border:1.5px solid var(--gold,#c9a84c);color:#f3c760;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+            👤 Acessar Área do Cliente
+          </a>
+          <a id="btn-ajustar-zap" href="https://wa.me/5585996119824" target="_blank" class="btn btn-outline">
+            💬 Falar com a Empresa / Solicitar Ajustes
+          </a>
+        </div>
+      </div>
+
+      <div id="decisao-bloco-assinado" class="hidden">
+        <div style="font-size:34px;margin-bottom:6px;">🔒</div>
+        <h3 style="font-size:17px;color:#4ade80;margin-bottom:6px;">Ordem de Serviço Assinada e Aprovada</h3>
+        <p style="font-size:13px;color:#cbd5e1;margin-bottom:14px;line-height:1.5;" id="decisao-assinado-detalhe">
+          Esta proposta foi assinada e convertida em Ordem de Serviço. O documento está bloqueado para novas assinaturas.
+        </p>
+
+        <div class="actions-grid">
+          <button type="button" class="btn" onclick="abrirModalSolicitarAlteracao()" style="background:linear-gradient(135deg,#0284c7,#0369a1);border:none;color:#fff;font-weight:800;font-size:13.5px;box-shadow:0 4px 14px rgba(2,132,199,0.35);padding:12px;">
+            ✏️ Quero Alterar e Enviar à Empresa
+          </button>
+          <a id="btn-decisao-bloq-area-cliente" href="cliente.html" class="btn" style="background:linear-gradient(135deg,rgba(201,168,76,0.25),rgba(201,168,76,0.1));border:1.5px solid var(--gold,#c9a84c);color:#f3c760;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+            👤 Acessar Área do Cliente
+          </a>
+          <button type="button" class="btn btn-outline" onclick="baixarPdfAtual()">
+            📄 Baixar Contrato em PDF
+          </button>
+          <a id="btn-decisao-bloq-zap" href="https://wa.me/5585996119824" target="_blank" class="btn btn-whats">
+            💬 Falar com a Empresa no WhatsApp
+          </a>
+        </div>
       </div>
     </div>
-
     <!-- Payment Selection Card -->
     <div class="pay-card hidden" id="card-pagamento">
       <div class="pay-card-title">💳 Forma de Pagamento</div>
@@ -2244,6 +2294,10 @@
   }
 
   window.irParaAssinatura = function() {
+    if (contratoAssinadoBloqueado) {
+      alert('⚠️ Esta Ordem de Serviço já foi aprovada e assinada com validade jurídica. Novas assinaturas estão bloqueadas.\n\nCaso necessite de alterações no pedido, utilize a opção "Quero Alterar e Enviar à Empresa".');
+      return;
+    }
     // Show payment card first
     const cardDecisao = document.getElementById('card-decisao');
     const cardPagamento = document.getElementById('card-pagamento');
@@ -2475,289 +2529,6 @@
       + '&empNome=' + encodeURIComponent(licParaPdf.nome || '')
       + '&empTipo=' + encodeURIComponent(licParaPdf.tipoContrato || '');
     if (dParam) {
-      window.open('/api/gerar-pdf-orcamento?d=' + encodeURIComponent(dParam) + empParamPdf, '_blank');
-    } else if (contratoId) {
-      window.open('/api/gerar-pdf-orcamento?id=' + encodeURIComponent(contratoId) + empParamPdf, '_blank');
-    } else if (contratoCache && contratoCache.texto) {
-      fetch('/api/gerar-pdf-contrato-texto', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          texto: contratoCache.texto,
-          numero: contratoCache.numero_os || '0001'
-        })
-      })
-        .then(r => { if (!r.ok) throw new Error(); return r.blob(); })
-        .then(blob => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'Contrato-' + (contratoCache.numero_os || '0001').replace('#', '') + '.pdf';
-          a.click();
-          setTimeout(() => URL.revokeObjectURL(url), 2000);
-        })
-        .catch(() => alert('Erro ao gerar PDF do contrato.'));
-    } else {
-      alert('Informações do orçamento não encontradas.');
-    }
-  };
-
-  function renderizarProposta(data) {
-    contratoCache = data;
-    try { aplicarBrandingLicenca(); } catch (_) {}
-
-    if (data.assinado) {
-      if (telaLoading) telaLoading.classList.add('hidden');
-      if (telaSucesso) {
-        telaSucesso.classList.remove('hidden');
-        const msgSuc = telaSucesso.querySelector('#msg-sucesso');
-        if (msgSuc) {
-          msgSuc.innerHTML =
-            'Esta proposta/contrato já foi <strong>aprovada e assinada</strong> por <strong>' + (data.assinante_nome || '') + '</strong>' +
-            (data.assinado_em ? ' em ' + new Date(data.assinado_em).toLocaleDateString('pt-BR') : '') + '.';
-        }
-        const telCli = data.cliente_tel || data.tel || data.t || '';
-        const nomeFinal = data.assinante_nome || data.cliente_nome || 'Cliente';
-        const info = atualizarCardPortalCliente(data.numero_os, nomeFinal, telCli);
-        const btnNotif = document.getElementById('btn-notificar-sdv');
-        if (btnNotif) {
-          const numZap = (info.lic.telefone ? info.lic.telefone.replace(/\D/g, '') : '5585996119824');
-          const licNomeSanitizado = (info.lic && info.lic.nome) ? info.lic.nome : 'Empresa';
-          const iconeAprov = (info.lic && (info.lic.id === 'sdmoveis' || licNomeSanitizado.toLowerCase().includes('móveis') || licNomeSanitizado.toLowerCase().includes('moveis'))) ? '🛋️' : '🪟';
-          const zapMsg = '✅ *ORÇAMENTO APROVADO E AUTORIZADO!* ' + iconeAprov + '\n\n'
-            + 'Olá ' + licNomeSanitizado + '! Já confirmei a aprovação da Ordem de Serviço ' + info.osFormatada + '!\n'
-            + '👤 *Assinado por:* ' + nomeFinal + '\n\n'
-            + '🔗 *Área Exclusiva do Cliente:* ' + info.urlCompleta + '\n'
-            + '💡 _Acesse para acompanhar a produção, fotos e pagamentos._';
-          btnNotif.href = 'https://wa.me/' + (numZap.startsWith('55') ? numZap : '55' + numZap) + '?text=' + encodeURIComponent(zapMsg);
-          btnNotif.style.display = 'inline-flex';
-        }
-      }
-      return;
-    }
-
-    const numOs = data.numero_os || 'Proposta';
-    const cliNome = data.cliente_nome || 'Cliente';
-
-    const setTxt = (id, txt) => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = txt;
-    };
-
-    setTxt('display-numero', 'Orçamento ' + numOs);
-    setTxt('display-cliente', cliNome);
-    setTxt('subtitulo', 'Ordem de Serviço ' + numOs);
-    setTxt('contrato-texto', data.texto || '');
-
-    // Link de ajuste via WhatsApp pré-configurado
-    const btnAjustar = document.getElementById('btn-ajustar-zap');
-    if (btnAjustar) {
-      const licAtivaAjuste = obterLicencaAtiva();
-      const zapMsg = 'Olá ' + (licAtivaAjuste.nome || 'SD Vidros') + '! Recebi a proposta ' + numOs + ' (' + cliNome + '), mas gostaria de tirar algumas dúvidas e falar sobre ajustes antes de aprovar.';
-      btnAjustar.href = 'https://wa.me/5585996119824?text=' + encodeURIComponent(zapMsg);
-    }
-
-    // Configura botões de acesso à Área do Cliente para o cliente atual
-    try {
-      const telCliInicial = data.cliente_tel || data.tel || data.t || '';
-      atualizarCardPortalCliente(numOs, cliNome, telCliInicial);
-    } catch (_) {}
-
-    if (telaLoading) telaLoading.classList.add('hidden');
-    if (telaForm) telaForm.classList.remove('hidden');
-
-    try {
-      let valorProposta = data.total || data.v || '';
-      if (!valorProposta && data.texto) {
-        const m = data.texto.match(/Valor Total:\s*(R\$\s*[\d\.,]+)/i);
-        if (m) valorProposta = m[1];
-      }
-      popularParcelasCartao(valorProposta);
-      renderizarDadosRecebedor();
-
-      // Pré-preenche titular do cartão se disponível
-      const cardNomeInp = document.getElementById('card-nome-input');
-      if (cardNomeInp && cliNome && cliNome !== 'Não informado' && !cardNomeInp.value) {
-        cardNomeInp.value = cliNome.toUpperCase();
-        dadosCartaoCliente.nome = cliNome.toUpperCase();
-        const elMock = document.getElementById('mockup-name');
-        if (elMock) elMock.textContent = cliNome.toUpperCase();
-      }
-    } catch (_) {}
-
-    requestAnimationFrame(() => iniciarCanvas(numOs, cliNome));
-  }
-
-  function montarTextoContrato(d) {
-    d = d || {};
-    const hoje = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-    const endCliente = [d.end || d.e, d.num, d.apto, d.bairro || d.b].filter(Boolean).join(', ');
-
-    let itensRaw = Array.isArray(d.itens) ? d.itens : (Array.isArray(d.i) ? d.i : []);
-    const itensStr = itensRaw.map((it, i) => {
-      if (Array.isArray(it)) {
-        // Formato compacto [desc, qtd, larg, alt, m2, v_unit, total, cor, bizt]
-        const desc = it[0] || '';
-        const qtd = it[1] || 1;
-        const larg = it[2] || '';
-        const alt = it[3] || '';
-        const m2 = it[4] || '';
-        const tot = it[6] || it[it.length - 1] || '';
-        let detalhe = '';
-        if (alt && larg) detalhe += ` [Dimensões: ${alt}m x ${larg}m${m2 ? ' = ' + m2 : ''}]`;
-        return `  ${i + 1}. ${desc}${detalhe} - Qtd: ${qtd} - Total: ${tot}`;
-      } else if (it && typeof it === 'object') {
-        const desc = it.d || it.desc || '';
-        const qtd = it.q || it.qtd || 1;
-        const larg = it.l || it.larg || '';
-        const alt = it.a || it.alt || '';
-        const m2 = it.m || it.m2 || '';
-        const tot = it.t || it.total || '';
-        const cor = it.c || it.cor || '';
-        const bizt = it.z || it.bizt || '';
-        let detalhe = '';
-        if (alt && larg) detalhe += ` [Dimensões: ${alt}m x ${larg}m${m2 ? ' = ' + m2 : ''}]`;
-        if (cor) detalhe += ` [Cor: ${cor}]`;
-        if (bizt) detalhe += ` [Lapidação/Bizotê: ${bizt}]`;
-        return `  ${i + 1}. ${desc}${detalhe} - Qtd: ${qtd} - Total: ${tot}`;
-      }
-      return `  ${i + 1}. ${String(it)}`;
-    }).join('\n') || '  (itens conforme orçamento aprovado)';
-
-    return `CONTRATO DE PRESTAÇÃO DE SERVIÇOS
-N° ${d.numero || d.n || '0001'}
-Itaitinga - CE, ${hoje}
-
-══════════════════════════════════════════════════════════════
-
-CONTRATADA:
-Razão Social.....: ${(obterLicencaAtiva().nome || 'SD Vidros')}
-WhatsApp.........: (85) 99611-9824
-Instagram........: @sdvidros
-Cidade...........: Itaitinga - CE
-
-CONTRATANTE (CLIENTE):
-Nome.............: ${d.nome || d.c || 'Não informado'}
-${(d.cnpj) ? 'CPF/CNPJ.........: ' + d.cnpj + '\n' : ''}WhatsApp/Tel.....: ${d.tel || d.t || 'Não informado'}
-Endereço.........: ${endCliente || 'Não informado'}
-${(d.resp) ? 'Responsável......: ' + d.resp : ''}
-
-══════════════════════════════════════════════════════════════
-
-CLÁUSULA 1ª – DO OBJETO
-
-A CONTRATADA obriga-se a fornecer e instalar ao CONTRATANTE os seguintes
-serviços de vidraçaria e esquadrias:
-
-${itensStr}
-
-══════════════════════════════════════════════════════════════
-
-CLÁUSULA 2ª – DO VALOR E FORMA DE PAGAMENTO
-
-Valor Total: ${d.total || d.v || 'R$ 0,00'}
-Forma de Pagamento: ${d.forma || d.f || 'À vista'}
-${(d.obs || d.o) ? '\nObservações: ' + (d.obs || d.o) : ''}
-
-A CONTRATANTE efetuará o pagamento conforme a forma descrita acima.
-Chave Pix para pagamento: (85) 99760-2237
-
-══════════════════════════════════════════════════════════════
-
-CLÁUSULA 3ª – DO PRAZO DE ENTREGA E EXECUÇÃO
-
-O prazo para execução e entrega dos serviços é de ${d.prazo || d.p || '15 dias úteis'},
-contados a partir da confirmação do pagamento/sinal e da aprovação de
-todos os detalhes técnicos do projeto.
-
-══════════════════════════════════════════════════════════════
-
-CLÁUSULA 4ª – DA GARANTIA
-
-A CONTRATADA oferece garantia de ${d.garantia || d.g || '1 (um) ano'} contra defeitos de
-fabricação e instalação, excluindo danos causados por mau uso, vandalismo,
-acidentes ou fenômenos naturais.
-
-══════════════════════════════════════════════════════════════
-
-CLÁUSULA 5ª – DAS OBRIGAÇÕES DAS PARTES
-
-5.1 – A CONTRATADA executará os serviços com materiais de alta qualidade e mão de obra especializada;
-5.2 – A CONTRATANTE garantirá o acesso ao local nos dias combinados e efetuará o pagamento acordado.
-
-══════════════════════════════════════════════════════════════
-
-Itaitinga - CE, ${hoje}
-
-
-_________________________________________________
-CONTRATADA: ${(obterLicencaAtiva().nome || 'SD Vidros')}
-WhatsApp: (85) 99611-9824
-
-
-_________________________________________________
-CONTRATANTE: ${d.nome || d.c || '_______________________________'}
-WhatsApp: ${d.tel || d.t || '_________________________________'}`;
-  }
-
-  function safeDecodeB64(str) {
-    if (!str) return null;
-    let s = String(str).trim();
-    while (s.includes('%')) {
-      try { s = decodeURIComponent(s); } catch(_) { break; }
-    }
-    s = s.replace(/ /g, '+').replace(/-/g, '+').replace(/_/g, '/');
-    while (s.length % 4 !== 0) s += '=';
-
-    let jsonParsed = null;
-
-    // Tentativa 1: UTF-8 moderno via TextDecoder
-    try {
-      const binary = atob(s);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
-      }
-      jsonParsed = JSON.parse(new TextDecoder().decode(bytes));
-    } catch (_) {}
-
-    // Tentativa 2: decodeURIComponent(escape(atob(s)))
-    if (!jsonParsed) {
-      try {
-        jsonParsed = JSON.parse(decodeURIComponent(escape(atob(s))));
-      } catch (_) {}
-    }
-
-    // Tentativa 3: atob direto
-    if (!jsonParsed) {
-      try {
-        jsonParsed = JSON.parse(atob(s));
-      } catch (_) {}
-    }
-
-    // Tentativa 4: Recuperação de payload parcial caso o link tenha sido truncado no WhatsApp
-    if (!jsonParsed) {
-      try {
-        const raw = atob(s);
-        const res = {};
-        const nM = raw.match(/"n"\s*:\s*"([^"]+)"/);
-        if (nM) res.n = nM[1];
-        const cM = raw.match(/"c"\s*:\s*"([^"]+)"/);
-        if (cM) res.c = cM[1];
-        const tM = raw.match(/"t"\s*:\s*"([^"]+)"/);
-        if (tM) res.t = tM[1];
-        const vM = raw.match(/"v"\s*:\s*"([^"]+)"/);
-        if (vM) res.v = vM[1];
-        const fM = raw.match(/"f"\s*:\s*"([^"]+)"/);
-        if (fM) res.f = fM[1];
-        if (res.n || res.c || res.v) jsonParsed = res;
-      } catch (_) {}
-    }
-
-    return jsonParsed;
-  }
-
-  if (dParam) {
     try {
       const parsed = safeDecodeB64(dParam);
       if (parsed) {
@@ -2765,12 +2536,16 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
         if (!textoFinal) {
           textoFinal = montarTextoContrato(parsed);
         }
+        const numOsIdent = parsed.n || parsed.numero_os || osParam || 'Proposta';
+        const jaAssinadoInfo = verificarSeOsJaAssinada(numOsIdent, parsed);
         const data = {
-          numero_os: parsed.n || parsed.numero_os || 'Proposta',
+          numero_os: numOsIdent,
           cliente_nome: parsed.c || parsed.cliente_nome || 'Cliente',
           cliente_tel: parsed.t || parsed.cliente_tel || '',
           texto: textoFinal,
-          assinado: false
+          assinado: !!jaAssinadoInfo,
+          assinante_nome: jaAssinadoInfo ? jaAssinadoInfo.assinante_nome : (parsed.assinante_nome || ''),
+          assinado_em: jaAssinadoInfo ? jaAssinadoInfo.assinado_em : (parsed.assinado_em || '')
         };
         renderizarProposta(data);
         return;
@@ -3061,6 +2836,258 @@ WhatsApp: ${d.tel || d.t || '_________________________________'}`;
     });
   }
 })();
+
+  // ═════════════════════════════════════════════════════════════
+  // SISTEMA DE BLOQUEIO DE ASSINATURA & SOLICITAÇÃO DE ALTERAÇÃO
+  // ═════════════════════════════════════════════════════════════
+  let contratoAssinadoBloqueado = false;
+  let infoAssinaturaAtual = null;
+
+  function verificarSeOsJaAssinada(numOs, parsedData) {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('assinado') === '1' || urlParams.get('assinado') === 'true') {
+      return {
+        assinado: true,
+        assinante_nome: urlParams.get('assinante') || (parsedData && parsedData.cliente_nome) || 'Cliente',
+        assinado_em: urlParams.get('data') || ''
+      };
+    }
+
+    if (parsedData && (parsedData.assinado || parsedData.assinado_por || parsedData.assinante_nome)) {
+      return {
+        assinado: true,
+        assinante_nome: parsedData.assinante_nome || parsedData.assinado_por || parsedData.cliente_nome || 'Cliente',
+        assinado_em: parsedData.assinado_em || ''
+      };
+    }
+
+    const numLimpo = String(numOs || '').replace(/\D/g, '');
+    if (!numLimpo) return null;
+
+    try {
+      const s = localStorage.getItem('sdv_assinatura_' + numLimpo);
+      if (s) {
+        const parsed = JSON.parse(s);
+        if (parsed && (parsed.rubrica || parsed.nome || parsed.data)) {
+          return {
+            assinado: true,
+            assinante_nome: parsed.nome || '',
+            assinado_em: parsed.data || '',
+            assinatura_base64: parsed.rubrica || ''
+          };
+        }
+      }
+    } catch (_) {}
+
+    try {
+      const map = JSON.parse(localStorage.getItem('sdv_assinaturas_map') || '{}');
+      if (map[numLimpo]) {
+        const a = map[numLimpo];
+        return {
+          assinado: true,
+          assinante_nome: a.nome || '',
+          assinado_em: a.data || '',
+          assinatura_base64: a.rubrica || ''
+        };
+      }
+    } catch (_) {}
+
+    try {
+      const ordens = JSON.parse(localStorage.getItem('sdv_ordens') || '[]');
+      const o = ordens.find(x => String(x.numero || '').replace(/\D/g, '') === numLimpo);
+      if (o) {
+        const st = String(o.status || '').toLowerCase();
+        if (st === 'aprovado' || o.assinado || o.assinado_por || o.autorizado_por || o.assinatura_digital) {
+          return {
+            assinado: true,
+            assinante_nome: o.assinado_por || o.autorizado_por || o.nome || '',
+            assinado_em: o.assinado_em || o.aprovado_em || '',
+            assinatura_base64: (o.assinatura_digital && o.assinatura_digital.rubrica) || ''
+          };
+        }
+      }
+    } catch (_) {}
+
+    return null;
+  }
+
+  function aplicarBloqueioAssinado(infoAssinatura) {
+    contratoAssinadoBloqueado = true;
+    infoAssinaturaAtual = infoAssinatura;
+
+    // 1. Atualiza pílula de status
+    const stEl = document.getElementById('display-status');
+    if (stEl) {
+      stEl.className = 'status-pill status-aprovado';
+      stEl.innerHTML = '🔒 Assinada & Aprovada';
+    }
+
+    // 2. Exibe o banner de aviso no topo da proposta
+    const banner = document.getElementById('banner-bloqueio-assinado');
+    const txtAlerta = document.getElementById('texto-alerta-bloqueio-assinado');
+    if (banner) banner.classList.remove('hidden');
+    if (txtAlerta) {
+      const nomeAssinante = infoAssinatura.assinante_nome || (contratoCache && contratoCache.cliente_nome) || 'Cliente';
+      const dataFmt = infoAssinatura.assinado_em ? ' em ' + new Date(infoAssinatura.assinado_em).toLocaleDateString('pt-BR') : '';
+      txtAlerta.innerHTML = 'Esta Ordem de Serviço já foi <strong>aprovada e assinada com validade jurídica</strong> por <strong style="color:#fff;">' + nomeAssinante + '</strong>' + dataFmt + '. O documento está bloqueado para novas assinaturas.';
+    }
+
+    // 3. Ajusta botões do cabeçalho da proposta
+    const btnAprovarDoc = document.getElementById('btn-doc-aprovar-assinar');
+    const btnAltDoc = document.getElementById('btn-doc-solicitar-alteracao');
+    if (btnAprovarDoc) {
+      btnAprovarDoc.style.display = 'none';
+    }
+    if (btnAltDoc) {
+      btnAltDoc.classList.remove('hidden');
+    }
+
+    // 4. Alterna bloco inferior de decisão
+    const blocoPend = document.getElementById('decisao-bloco-pendente');
+    const blocoAss = document.getElementById('decisao-bloco-assinado');
+    if (blocoPend) blocoPend.classList.add('hidden');
+    if (blocoAss) {
+      blocoAss.classList.remove('hidden');
+      const detEl = document.getElementById('decisao-assinado-detalhe');
+      if (detEl) {
+        const nomeAssinante = infoAssinatura.assinante_nome || (contratoCache && contratoCache.cliente_nome) || 'Cliente';
+        detEl.innerHTML = 'Ordem de Serviço autorizada por <strong>' + nomeAssinante + '</strong>. O documento está bloqueado para novas assinaturas. Caso precise de mudanças, use o botão abaixo para enviar à empresa:';
+      }
+    }
+
+    // 5. Configura links de WhatsApp da empresa nos botões de bloqueio
+    try {
+      const lic = obterLicencaAtiva();
+      const zapLimpo = String(lic.telefone || '85996119824').replace(/\D/g, '');
+      const zapDest = zapLimpo.startsWith('55') ? zapLimpo : ('55' + zapLimpo);
+      const btnZapBloq = document.getElementById('btn-decisao-bloq-zap');
+      if (btnZapBloq) {
+        btnZapBloq.href = 'https://wa.me/' + zapDest + '?text=' + encodeURIComponent('Olá ' + lic.nome + '! Estou com a minha O.S. #' + (contratoCache ? contratoCache.numero_os : '') + ' já assinada e gostaria de tirar uma dúvida.');
+      }
+    } catch (_) {}
+
+    // 6. Garante que os cards de pagamento e assinatura fiquem ocultos
+    const cardPagamento = document.getElementById('card-pagamento');
+    const cardAssinatura = document.getElementById('card-assinatura');
+    if (cardPagamento) cardPagamento.classList.add('hidden');
+    if (cardAssinatura) cardAssinatura.classList.add('hidden');
+  }
+
+  window.abrirModalSolicitarAlteracao = function() {
+    const m = document.getElementById('modal-solicitar-alteracao');
+    const tit = document.getElementById('modal-alt-titulo');
+    const numOs = (contratoCache && contratoCache.numero_os) || osParam || '0001';
+    if (tit) tit.textContent = 'Solicitar Alteração na O.S. ' + (String(numOs).startsWith('#') ? numOs : '#' + numOs);
+    if (m) m.classList.remove('hidden');
+  };
+
+  window.fecharModalSolicitarAlteracao = function() {
+    const m = document.getElementById('modal-solicitar-alteracao');
+    if (m) m.classList.add('hidden');
+  };
+
+  window.inserirAtalhoAlteracao = function(texto) {
+    const txtArea = document.getElementById('input-detalhe-alteracao');
+    if (!txtArea) return;
+    if (txtArea.value.trim()) {
+      txtArea.value = txtArea.value.trim() + '; ' + texto;
+    } else {
+      txtArea.value = texto;
+    }
+    txtArea.focus();
+  };
+
+  window.confirmarEnviarAlteracaoEmpresa = function() {
+    const txtArea = document.getElementById('input-detalhe-alteracao');
+    const texto = (txtArea ? txtArea.value : '').trim();
+    if (!texto) {
+      alert('Por favor, descreva as alterações que você gostaria de solicitar.');
+      if (txtArea) txtArea.focus();
+      return;
+    }
+
+    const lic = (typeof obterLicencaAtiva === 'function') ? obterLicencaAtiva() : { nome: 'SD Vidros', telefone: '85996119824' };
+    const numOs = (contratoCache && contratoCache.numero_os) || osParam || '0001';
+    const cliNome = (contratoCache && contratoCache.cliente_nome) || 'Cliente';
+    const numLimpo = String(numOs || '').replace(/\D/g, '');
+
+    // 1. Grava solicitação em sdv_ordens no storage local da empresa
+    try {
+      const ordens = JSON.parse(localStorage.getItem('sdv_ordens') || '[]');
+      const idx = ordens.findIndex(x => String(x.numero || '').replace(/\D/g, '') === numLimpo);
+      if (idx !== -1) {
+        ordens[idx].status = 'reajustar';
+        ordens[idx].reajuste_solicitado_em = new Date().toISOString();
+        ordens[idx].solicitacao_alteracao_cliente = {
+          data: new Date().toISOString(),
+          texto: texto,
+          cliente: cliNome
+        };
+        localStorage.setItem('sdv_ordens', JSON.stringify(ordens));
+      }
+    } catch (_) {}
+
+    // 2. Prepara mensagem no WhatsApp para a empresa
+    const zapLimpo = String(lic.telefone || '85996119824').replace(/\D/g, '');
+    const zapDest = zapLimpo.startsWith('55') ? zapLimpo : ('55' + zapLimpo);
+    const msgZap = '⚠️ *SOLICITAÇÃO DE ALTERAÇÃO EM O.S. ASSINADA*\n\n'
+      + 'Olá *' + lic.nome + '*!\n'
+      + 'Gostaria de solicitar uma alteração na minha *Ordem de Serviço #' + numLimpo + '*, que já foi assinada anteriormente.\n\n'
+      + '👤 *Cliente:* ' + cliNome + '\n'
+      + '📝 *Alterações solicitadas:*\n"' + texto + '"\n\n'
+      + '🔗 *Link da O.S.:* ' + window.location.href + '\n\n'
+      + 'Por favor, confirmem o recebimento para avaliarmos os detalhes. Obrigado!';
+
+    fecharModalSolicitarAlteracao();
+    alert('✅ Sua solicitação de alteração foi registrada com sucesso! Você será redirecionado para o WhatsApp da empresa para confirmação imediata.');
+    window.open('https://wa.me/' + zapDest + '?text=' + encodeURIComponent(msgZap), '_blank');
+  };
+
 </script>
+
+  <!-- Modal: Querer Alterar e Enviar à Empresa -->
+  <div id="modal-solicitar-alteracao" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;">
+    <div style="background:#0f172a;border:1.5px solid rgba(56,189,248,0.45);border-radius:16px;max-width:480px;width:100%;padding:22px;box-shadow:0 20px 45px rgba(0,0,0,0.7);color:#fff;position:relative;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:24px;">📝</span>
+          <div>
+            <h3 style="font-size:16px;font-weight:800;color:#fff;margin:0;" id="modal-alt-titulo">Solicitar Alteração na O.S.</h3>
+            <p style="font-size:12px;color:#94a3b8;margin:2px 0 0;">Descreva o que deseja mudar para avaliarmos com a equipe.</p>
+          </div>
+        </div>
+        <button type="button" onclick="fecharModalSolicitarAlteracao()" style="background:transparent;border:none;color:#94a3b8;font-size:18px;font-weight:700;cursor:pointer;padding:4px 8px;">✕</button>
+      </div>
+
+      <div style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:#fef08a;line-height:1.4;">
+        ⚠️ <strong>Atenção:</strong> Como a O.S. já foi assinada, qualquer alteração precisa ser avaliada pela empresa antes de ajustar o pedido na fábrica.
+      </div>
+
+      <div style="font-size:11px;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Sugestões Rápidas:</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+        <button type="button" onclick="inserirAtalhoAlteracao('Ajustar medidas de um dos itens')" style="font-size:11px;padding:5px 9px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#cbd5e1;cursor:pointer;">📐 Ajustar Medidas</button>
+        <button type="button" onclick="inserirAtalhoAlteracao('Trocar cor ou modelo do acabamento')" style="font-size:11px;padding:5px 9px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#cbd5e1;cursor:pointer;">🎨 Trocar Cor/Acabamento</button>
+        <button type="button" onclick="inserirAtalhoAlteracao('Adicionar novos itens ou complementos')" style="font-size:11px;padding:5px 9px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#cbd5e1;cursor:pointer;">➕ Adicionar Item</button>
+        <button type="button" onclick="inserirAtalhoAlteracao('Ajustar forma ou parcelamento de pagamento')" style="font-size:11px;padding:5px 9px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#cbd5e1;cursor:pointer;">💳 Forma de Pagamento</button>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label for="input-detalhe-alteracao" style="display:block;font-size:12px;font-weight:700;color:#cbd5e1;margin-bottom:5px;">
+          Descreva as alterações desejadas:
+        </label>
+        <textarea id="input-detalhe-alteracao" rows="4" style="width:100%;box-sizing:border-box;background:#090d16;border:1.5px solid rgba(255,255,255,0.18);border-radius:10px;padding:10px;color:#fff;font-family:inherit;font-size:13px;resize:vertical;" placeholder="Ex: Gostaria de alterar a cor do vidro/perfil para preto e confirmar se a entrega pode ser no sábado..."></textarea>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button type="button" onclick="fecharModalSolicitarAlteracao()" style="flex:1;padding:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#cbd5e1;font-weight:700;cursor:pointer;">
+          Cancelar
+        </button>
+        <button type="button" onclick="confirmarEnviarAlteracaoEmpresa()" style="flex:1.8;padding:10px;background:linear-gradient(135deg,#0284c7,#0369a1);border:none;border-radius:8px;color:#fff;font-weight:800;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 14px rgba(2,132,199,0.35);">
+          📲 Enviar à Empresa no WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

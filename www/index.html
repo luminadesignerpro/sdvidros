@@ -1532,6 +1532,9 @@
           </div>
         </div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <button type="button" id="btn-toggle-alarme-rapido" onclick="alternarAlarmePontoRapido()" style="background:rgba(16,185,129,0.18);border:1px solid rgba(16,185,129,0.45);color:#34d399;font-size:11.5px;font-weight:800;padding:6px 12px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;" title="Clique para Ligar ou Desligar o Alarme de Ponto">
+            <span id="btn-toggle-alarme-icone">🔔</span> <span id="btn-toggle-alarme-txt">Alarme: ATIVO</span>
+          </button>
           <button type="button" onclick="abrirConfigHorariosAlarmePonto()" style="background:rgba(56,189,248,0.18);border:1px solid rgba(56,189,248,0.45);color:#38bdf8;font-size:11.5px;font-weight:800;padding:6px 12px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" title="Configurar horários do alarme do ponto">
             ⏰ Editar Alarme
           </button>
@@ -3028,19 +3031,61 @@
 
 <!-- ══ MODAL CONFIGURAÇÃO HORÁRIOS DO ALARME DE PONTO ══ -->
 <div id="modal-config-alarme-ponto" class="modal-overlay" style="display:none;z-index:1000100;" onclick="fecharConfigHorariosAlarmePonto(event)">
-  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:460px;padding:22px 20px;">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:480px;padding:22px 20px;">
     <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:8px;">
         <span style="font-size:22px;">⚙️ ⏰</span>
-        <span style="font-size:15px;font-weight:900;color:#fff;">Horários do Alarme de Ponto</span>
+        <span style="font-size:16px;font-weight:900;color:#fff;">Configurações do Alarme de Ponto</span>
       </div>
       <button class="modal-close" onclick="fecharConfigHorariosAlarmePonto()">✕</button>
     </div>
 
-    <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.3);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.4;">
-      💡 O alarme sonoro tocará automaticamente <strong>5 minutos antes</strong> de cada um dos 4 horários abaixo. Colaboradores com status <strong>Falta</strong> ou <strong>Doente</strong> serão ignorados.
+    <!-- 1. CHAVE GERAL: LIGAR OU DESLIGAR O ALARME -->
+    <div style="background:linear-gradient(135deg,rgba(56,189,248,0.14),rgba(14,165,233,0.06));border:1.5px solid rgba(56,189,248,0.45);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 4px 15px rgba(0,0,0,0.2);">
+      <div>
+        <div style="font-size:13.5px;font-weight:900;color:#fff;display:flex;align-items:center;gap:6px;">
+          <span id="cfg-ponto-icone-status">🔔</span> <span id="cfg-ponto-titulo-status">Alarme de Ponto Sonoro</span>
+        </div>
+        <div id="cfg-ponto-subtitulo-status" style="font-size:11.5px;color:#94a3b8;margin-top:2px;">
+          Permite escolher se você quer colocar o alarme ou não
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;background:rgba(0,0,0,0.3);padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);">
+        <input type="checkbox" id="cfg-ponto-ativo" onchange="aoAlternarCheckboxAtivoAlarmePonto()" style="width:20px;height:20px;accent-color:#10b981;cursor:pointer;" />
+        <span id="cfg-ponto-ativo-badge" style="font-size:12px;font-weight:900;color:#10b981;">LIGADO</span>
+      </label>
     </div>
 
+    <!-- 2. OPÇÃO SÁBADO E DOMINGO: ESCOLHER SE ALARMA OU NÃO -->
+    <div style="background:rgba(255,255,255,0.03);border:1.5px solid rgba(201,168,76,0.35);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:800;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span>📅</span> <span>Dias de Alarme (Finais de Semana):</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.04);padding:8px 10px;border-radius:8px;">
+          <span style="font-size:12.5px;color:#fff;font-weight:600;">Segunda a Sexta-feira</span>
+          <span style="font-size:11px;color:#10b981;font-weight:800;background:rgba(16,185,129,0.15);padding:3px 8px;border-radius:6px;">✓ Dias úteis (Padrão)</span>
+        </div>
+        
+        <label style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.04);padding:9px 10px;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.08);transition:all .2s;" id="label-box-sabado">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" id="cfg-ponto-tocar-sabado" onchange="aoMudarCheckboxSabadoDomingo()" style="width:18px;height:18px;accent-color:#38bdf8;cursor:pointer;" />
+            <span style="font-size:12.5px;color:#fff;font-weight:800;">Tocar no Sábado</span>
+          </div>
+          <span id="badge-sabado-status" style="font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;background:rgba(148,163,184,0.15);color:#94a3b8;">Desativado</span>
+        </label>
+
+        <label style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.04);padding:9px 10px;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.08);transition:all .2s;" id="label-box-domingo">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" id="cfg-ponto-tocar-domingo" onchange="aoMudarCheckboxSabadoDomingo()" style="width:18px;height:18px;accent-color:#38bdf8;cursor:pointer;" />
+            <span style="font-size:12.5px;color:#fff;font-weight:800;">Tocar no Domingo</span>
+          </div>
+          <span id="badge-domingo-status" style="font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;background:rgba(148,163,184,0.15);color:#94a3b8;">Desativado</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- 3. HORÁRIOS DOS TURNOS -->
     <div class="field-row" style="margin-bottom:12px;">
       <div class="field">
         <label>1ª Entrada (Manhã)</label>
@@ -3073,16 +3118,26 @@
       </select>
     </div>
 
-    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 12px;margin-bottom:16px;">
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 12px;margin-bottom:14px;">
       <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#fff;cursor:pointer;">
-        <input type="checkbox" id="cfg-ponto-bloquear-inativos" checked disabled style="width:17px;height:17px;accent-color:#10b981;" />
-        <span><strong>Regra ativa:</strong> Não alarmar quando colaborador estiver de Falta, Ausente, Doente ou Atestado</span>
+        <input type="checkbox" id="cfg-ponto-bloquear-inativos" checked style="width:17px;height:17px;accent-color:#10b981;" />
+        <span><strong>Regra inteligente:</strong> Silenciar se todos colaboradores estiverem de Falta ou Doente</span>
       </label>
+    </div>
+
+    <!-- BOTÕES DE TESTE DIRETO -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <button type="button" class="btn btn-sec btn-sm" onclick="testarSomAlarmePonto()" style="flex:1;padding:9px 8px;font-size:11.5px;font-weight:800;color:#38bdf8;border-color:rgba(56,189,248,0.4);display:inline-flex;align-items:center;justify-content:center;gap:4px;" title="Testar sirene sonora em alto volume">
+        🔊 Testar Som da Sirene
+      </button>
+      <button type="button" class="btn btn-sec btn-sm" onclick="simularDisparoAlarmePonto()" style="flex:1;padding:9px 8px;font-size:11.5px;font-weight:800;color:var(--gold-light);border-color:rgba(201,168,76,0.4);display:inline-flex;align-items:center;justify-content:center;gap:4px;" title="Simular tela cheia do alarme tocando">
+        🚨 Simular Alarme na Tela
+      </button>
     </div>
 
     <div style="display:flex;gap:8px;justify-content:flex-end;">
       <button type="button" class="btn btn-sec btn-sm" onclick="fecharConfigHorariosAlarmePonto()">Cancelar</button>
-      <button type="button" class="btn btn-primary btn-sm" onclick="salvarConfigHorariosAlarmePonto()">💾 Salvar Horários</button>
+      <button type="button" class="btn btn-primary btn-sm" onclick="salvarConfigHorariosAlarmePonto()">💾 Salvar Configurações</button>
     </div>
   </div>
 </div>
@@ -4654,6 +4709,11 @@ function gerarParametroD(d) {
       t: d.tel || d.fone || "",
       v: d.total || ""
     };
+    if (d.status === "aprovado" || d.status === "Aprovado" || d.assinado || d.assinado_por || d.autorizado_por) {
+      payloadCompacto.assinado = true;
+      payloadCompacto.assinante_nome = d.assinado_por || d.autorizado_por || d.nome || "";
+      payloadCompacto.assinado_em = d.assinado_em || d.aprovado_em || "";
+    }
     if (d.data) payloadCompacto.d = d.data;
     if (d.forma) payloadCompacto.f = d.forma;
     if (d.prazo) payloadCompacto.p = d.prazo;
@@ -4700,9 +4760,16 @@ function gerarMensagemWhatsAppAprovacao(o) {
     : "https://sdvidros.vercel.app";
 
   const numLimpo = String(numOs || "").replace(/\D/g, "");
+  const ehAssinado = (o.status === "aprovado" || o.status === "Aprovado" || o.assinado || o.assinado_por || o.autorizado_por);
   const dParam = gerarParametroD(o);
   const queryParams = [`os=${encodeURIComponent(numLimpo)}`];
   if (dParam) queryParams.push(`d=${dParam}`);
+  if (ehAssinado) {
+    queryParams.push("assinado=1");
+    if (o.assinado_por || o.autorizado_por) {
+      queryParams.push(`assinante=${encodeURIComponent(o.assinado_por || o.autorizado_por)}`);
+    }
+  }
   queryParams.push(`empresa=${encodeURIComponent(lic.id || "sdmoveis")}`);
   const linkVisualizarEAssinar = `${baseUrl}/assinar.html?${queryParams.join("&")}`;
 
@@ -5364,12 +5431,14 @@ function copiarLinkPortalFuncionario(link, btn, inputId) {
 }
 
 // ══════════════════════════════════════════════
-//  SISTEMA DE ALARME DE PONTO (5 MIN ANTES)
-//  REGRA: NÃO ALARMAR SE ESTIVER FALTA OU DOENTE
+//  SISTEMA DE ALARME DE PONTO ELETRÔNICO
+//  OPÇÕES: ATIVAR/DESATIVAR, SÁBADO, DOMINGO, ANTECEDÊNCIA E SOM
 // ══════════════════════════════════════════════
 const CHAVE_STORAGE_ALARME = 'sdv_config_alarme_ponto';
 const CONFIG_ALARME_PADRAO = {
   ativo: true,
+  tocarSabado: false,
+  tocarDomingo: false,
   antecedenciaMin: 5,
   ent: '08:00',
   alm: '12:00',
@@ -5381,11 +5450,37 @@ const CONFIG_ALARME_PADRAO = {
 
 let _audioCtxAlarme = null;
 let _timerLoopAlarme = null;
+let _timerTituloAlarme = null;
+let _tituloOriginalSite = document.title;
+
+// Desbloqueia e prepara o AudioContext no primeiro toque/clique do usuário
+function _garantirAudioCtxDesbloqueado() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return null;
+    if (!_audioCtxAlarme) {
+      _audioCtxAlarme = new AudioCtx();
+    }
+    if (_audioCtxAlarme.state === 'suspended') {
+      _audioCtxAlarme.resume().catch(() => {});
+    }
+    return _audioCtxAlarme;
+  } catch (_) {
+    return null;
+  }
+}
+
+['click', 'touchstart', 'keydown'].forEach(ev => {
+  window.addEventListener(ev, () => { _garantirAudioCtxDesbloqueado(); }, { once: false, passive: true });
+});
 
 function obterConfigAlarmePonto() {
   try {
     const salvo = localStorage.getItem(CHAVE_STORAGE_ALARME);
-    if (salvo) return { ...CONFIG_ALARME_PADRAO, ...JSON.parse(salvo) };
+    if (salvo) {
+      const parsed = JSON.parse(salvo);
+      return { ...CONFIG_ALARME_PADRAO, ...parsed };
+    }
   } catch(_) {}
   return { ...CONFIG_ALARME_PADRAO };
 }
@@ -5395,6 +5490,29 @@ function salvarConfigAlarmePonto(cfg) {
     localStorage.setItem(CHAVE_STORAGE_ALARME, JSON.stringify(cfg));
   } catch(_) {}
   atualizarResumoHorariosAlarme();
+  sincronizarAlarmeComServiceWorker(cfg);
+}
+
+function sincronizarAlarmeComServiceWorker(cfg) {
+  try {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      const turnos = [
+        { hora: cfg.ent || '08:00', label: '1ª Entrada' },
+        { hora: cfg.alm || '12:00', label: 'Saída para Almoço' },
+        { hora: cfg.vol || '13:00', label: 'Volta do Almoço' },
+        { hora: cfg.sai || '17:00', label: 'Saída Final' }
+      ];
+      navigator.serviceWorker.controller.postMessage({
+        action: 'configurarAlarmesPonto',
+        ativo: cfg.ativo !== false,
+        antecedenciaMin: Number(cfg.antecedenciaMin) || 5,
+        tocarSabado: !!cfg.tocarSabado,
+        tocarDomingo: !!cfg.tocarDomingo,
+        alarmes: turnos,
+        nome: 'SD Vidros & SD Móveis'
+      });
+    }
+  } catch(_) {}
 }
 
 function atualizarResumoHorariosAlarme() {
@@ -5410,19 +5528,61 @@ function atualizarResumoHorariosAlarme() {
   if (elVol) elVol.textContent = cfg.vol || '13:00';
   if (elSai) elSai.textContent = cfg.sai || '17:00';
 
-  if (badgeStatus) {
-    if (cfg.ativo) {
-      badgeStatus.textContent = `ATIVO (${cfg.antecedenciaMin || 5} min antes)`;
+  const btnRapido = document.getElementById('btn-toggle-alarme-rapido');
+  const btnIcone = document.getElementById('btn-toggle-alarme-icone');
+  const btnTxt = document.getElementById('btn-toggle-alarme-txt');
+
+  if (cfg.ativo) {
+    let diasTxt = 'Seg-Sex';
+    if (cfg.tocarSabado && cfg.tocarDomingo) diasTxt = 'Todos os dias';
+    else if (cfg.tocarSabado) diasTxt = 'Seg-Sáb';
+    else if (cfg.tocarDomingo) diasTxt = 'Seg-Sex + Dom';
+
+    if (badgeStatus) {
+      badgeStatus.textContent = `ATIVO (${cfg.antecedenciaMin || 5} min antes · ${diasTxt})`;
       badgeStatus.style.background = '#10b981';
       badgeStatus.style.color = '#fff';
-    } else {
+    }
+    if (btnRapido) {
+      btnRapido.style.background = 'rgba(16,185,129,0.18)';
+      btnRapido.style.borderColor = 'rgba(16,185,129,0.45)';
+      btnRapido.style.color = '#34d399';
+    }
+    if (btnIcone) btnIcone.textContent = '🔔';
+    if (btnTxt) btnTxt.textContent = `Alarme: LIGADO (${diasTxt})`;
+  } else {
+    if (badgeStatus) {
       badgeStatus.textContent = 'DESATIVADO';
       badgeStatus.style.background = '#64748b';
       badgeStatus.style.color = '#fff';
     }
+    if (btnRapido) {
+      btnRapido.style.background = 'rgba(239,68,68,0.15)';
+      btnRapido.style.borderColor = 'rgba(239,68,68,0.4)';
+      btnRapido.style.color = '#f87171';
+    }
+    if (btnIcone) btnIcone.textContent = '🔕';
+    if (btnTxt) btnTxt.textContent = 'Alarme: DESLIGADO';
   }
 }
 
+// Alternador rápido na tela de ponto (com 1 clique liga ou desliga o alarme)
+function alternarAlarmePontoRapido() {
+  const cfg = obterConfigAlarmePonto();
+  cfg.ativo = !cfg.ativo;
+  salvarConfigAlarmePonto(cfg);
+
+  if (cfg.ativo) {
+    _garantirAudioCtxDesbloqueado();
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+    mostrarMsgPonto('🔔 Alarme de Ponto ATIVADO com sucesso!', true);
+  } else {
+    pararAlarmePonto();
+    mostrarMsgPonto('🔕 Alarme de Ponto DESATIVADO!', true);
+  }
+}
 
 function copiarHorariosColaboradorParaAlarme() {
   const sel = document.getElementById('ponto-sel-colaborador');
@@ -5443,19 +5603,90 @@ function copiarHorariosColaboradorParaAlarme() {
   mostrarMsgPonto('⚡ Horários copiados do colaborador ' + colab.nome + '!', true);
 }
 
+function aoAlternarCheckboxAtivoAlarmePonto() {
+  const chk = document.getElementById('cfg-ponto-ativo');
+  const badge = document.getElementById('cfg-ponto-ativo-badge');
+  const icone = document.getElementById('cfg-ponto-icone-status');
+  const sub = document.getElementById('cfg-ponto-subtitulo-status');
+
+  const ativo = chk ? chk.checked : true;
+  if (badge) {
+    badge.textContent = ativo ? 'LIGADO' : 'DESLIGADO';
+    badge.style.color = ativo ? '#10b981' : '#f87171';
+  }
+  if (icone) icone.textContent = ativo ? '🔔' : '🔕';
+  if (sub) {
+    sub.textContent = ativo ? 'Alarme tocará pontualmente nos dias configurados' : 'Alarme totalmente desativado (silencioso)';
+  }
+}
+
+function aoMudarCheckboxSabadoDomingo() {
+  const chkSab = document.getElementById('cfg-ponto-tocar-sabado');
+  const chkDom = document.getElementById('cfg-ponto-tocar-domingo');
+  const badgeSab = document.getElementById('badge-sabado-status');
+  const badgeDom = document.getElementById('badge-domingo-status');
+  const boxSab = document.getElementById('label-box-sabado');
+  const boxDom = document.getElementById('label-box-domingo');
+
+  if (chkSab && badgeSab) {
+    if (chkSab.checked) {
+      badgeSab.textContent = '✓ Ativo no Sábado';
+      badgeSab.style.background = 'rgba(56,189,248,0.2)';
+      badgeSab.style.color = '#38bdf8';
+      if (boxSab) boxSab.style.borderColor = 'rgba(56,189,248,0.4)';
+    } else {
+      badgeSab.textContent = 'Não toca no Sábado';
+      badgeSab.style.background = 'rgba(148,163,184,0.15)';
+      badgeSab.style.color = '#94a3b8';
+      if (boxSab) boxSab.style.borderColor = 'rgba(255,255,255,0.08)';
+    }
+  }
+
+  if (chkDom && badgeDom) {
+    if (chkDom.checked) {
+      badgeDom.textContent = '✓ Ativo no Domingo';
+      badgeDom.style.background = 'rgba(56,189,248,0.2)';
+      badgeDom.style.color = '#38bdf8';
+      if (boxDom) boxDom.style.borderColor = 'rgba(56,189,248,0.4)';
+    } else {
+      badgeDom.textContent = 'Não toca no Domingo';
+      badgeDom.style.background = 'rgba(148,163,184,0.15)';
+      badgeDom.style.color = '#94a3b8';
+      if (boxDom) boxDom.style.borderColor = 'rgba(255,255,255,0.08)';
+    }
+  }
+}
+
 function abrirConfigHorariosAlarmePonto() {
+  _garantirAudioCtxDesbloqueado();
+
   const cfg = obterConfigAlarmePonto();
+  const chkAtivo = document.getElementById('cfg-ponto-ativo');
+  const chkSab = document.getElementById('cfg-ponto-tocar-sabado');
+  const chkDom = document.getElementById('cfg-ponto-tocar-domingo');
   const inpEnt = document.getElementById('cfg-ponto-ent');
   const inpAlm = document.getElementById('cfg-ponto-alm');
   const inpVol = document.getElementById('cfg-ponto-vol');
   const inpSai = document.getElementById('cfg-ponto-sai');
   const selAnt = document.getElementById('cfg-ponto-antecedencia');
+  const chkInat = document.getElementById('cfg-ponto-bloquear-inativos');
 
+  if (chkAtivo) chkAtivo.checked = cfg.ativo !== false;
+  if (chkSab) chkSab.checked = !!cfg.tocarSabado;
+  if (chkDom) chkDom.checked = !!cfg.tocarDomingo;
   if (inpEnt) inpEnt.value = cfg.ent || '08:00';
   if (inpAlm) inpAlm.value = cfg.alm || '12:00';
   if (inpVol) inpVol.value = cfg.vol || '13:00';
   if (inpSai) inpSai.value = cfg.sai || '17:00';
   if (selAnt) selAnt.value = String(cfg.antecedenciaMin !== undefined ? cfg.antecedenciaMin : 5);
+  if (chkInat) chkInat.checked = cfg.bloquearInativos !== false;
+
+  aoAlternarCheckboxAtivoAlarmePonto();
+  aoMudarCheckboxSabadoDomingo();
+
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
 
   const m = document.getElementById('modal-config-alarme-ponto');
   if (m) m.style.display = 'flex';
@@ -5469,70 +5700,113 @@ function fecharConfigHorariosAlarmePonto(e) {
 
 function salvarConfigHorariosAlarmePonto() {
   const cfg = obterConfigAlarmePonto();
+  const chkAtivo = document.getElementById('cfg-ponto-ativo');
+  const chkSab = document.getElementById('cfg-ponto-tocar-sabado');
+  const chkDom = document.getElementById('cfg-ponto-tocar-domingo');
   const inpEnt = document.getElementById('cfg-ponto-ent');
   const inpAlm = document.getElementById('cfg-ponto-alm');
   const inpVol = document.getElementById('cfg-ponto-vol');
   const inpSai = document.getElementById('cfg-ponto-sai');
   const selAnt = document.getElementById('cfg-ponto-antecedencia');
+  const chkInat = document.getElementById('cfg-ponto-bloquear-inativos');
 
+  cfg.ativo = chkAtivo ? chkAtivo.checked : true;
+  cfg.tocarSabado = chkSab ? chkSab.checked : false;
+  cfg.tocarDomingo = chkDom ? chkDom.checked : false;
   if (inpEnt && inpEnt.value) cfg.ent = inpEnt.value;
   if (inpAlm && inpAlm.value) cfg.alm = inpAlm.value;
   if (inpVol && inpVol.value) cfg.vol = inpVol.value;
   if (inpSai && inpSai.value) cfg.sai = inpSai.value;
   if (selAnt) cfg.antecedenciaMin = Number(selAnt.value) || 5;
+  if (chkInat) cfg.bloquearInativos = chkInat.checked;
 
   salvarConfigAlarmePonto(cfg);
   fecharConfigHorariosAlarmePonto();
-  mostrarMsgPonto('✓ Horários do Alarme salvos com sucesso!', true);
+
+  const statusTxt = cfg.ativo ? 'LIGADO' : 'DESLIGADO';
+  const sabTxt = cfg.tocarSabado ? 'Sáb: SIM' : 'Sáb: NÃO';
+  const domTxt = cfg.tocarDomingo ? 'Dom: SIM' : 'Dom: NÃO';
+  mostrarMsgPonto(`✓ Configurações do Alarme salvas! [${statusTxt} · ${sabTxt} · ${domTxt}]`, true);
 }
 
 function testarSomAlarmePonto() {
+  _garantirAudioCtxDesbloqueado();
   tocarSireneAlarmePonto(true);
-  mostrarMsgPonto('🔊 Teste de som: Alarme programado para tocar 5 minutos antes dos turnos!', true);
+  mostrarMsgPonto('🔊 Testando som do alarme em alto volume!', true);
+}
+
+function simularDisparoAlarmePonto() {
+  _garantirAudioCtxDesbloqueado();
+  const cfg = obterConfigAlarmePonto();
+  const ant = Number(cfg.antecedenciaMin) || 5;
+  const listaSimulada = [
+    { nome: 'Colaborador Teste', status: 'Presente' }
+  ];
+  dispararAlarmePonto('Teste de Alarme (1ª Entrada)', cfg.ent || '08:00', ant, listaSimulada);
 }
 
 function tocarSireneAlarmePonto(modoTeste = false) {
   pararAudioAlarmePonto();
-  try {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
-    _audioCtxAlarme = new AudioCtx();
+  const ctx = _garantirAudioCtxDesbloqueado();
 
-    const emitirPulso = (freq, dur, atraso) => {
+  const emitirPulsoSirene = () => {
+    try {
+      if (!ctx || ctx.state === 'closed') return;
+      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+
+      const t0 = ctx.currentTime;
+      const dur = 0.45;
+
+      // 1. Tom penetrante (sirene de relógio eletrônico de fábrica)
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(880, t0);
+      osc.frequency.exponentialRampToValueAtTime(1320, t0 + 0.22);
+      osc.frequency.exponentialRampToValueAtTime(880, t0 + dur);
+
+      gain.gain.setValueAtTime(0.01, t0);
+      gain.gain.linearRampToValueAtTime(0.45, t0 + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.01, t0 + dur);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t0);
+      osc.stop(t0 + dur);
+
+      // 2. Beep complementar agudo para garantir audibilidade
       setTimeout(() => {
-        if (!_audioCtxAlarme || _audioCtxAlarme.state === 'closed') return;
         try {
-          const osc = _audioCtxAlarme.createOscillator();
-          const gain = _audioCtxAlarme.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, _audioCtxAlarme.currentTime);
-          osc.frequency.linearRampToValueAtTime(freq * 1.4, _audioCtxAlarme.currentTime + dur);
-          gain.gain.setValueAtTime(0.3, _audioCtxAlarme.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, _audioCtxAlarme.currentTime + dur);
-          osc.connect(gain);
-          gain.connect(_audioCtxAlarme.destination);
-          osc.start();
-          osc.stop(_audioCtxAlarme.currentTime + dur);
+          if (!ctx || ctx.state === 'closed') return;
+          const t1 = ctx.currentTime;
+          const osc2 = ctx.createOscillator();
+          const gain2 = ctx.createGain();
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(1760, t1);
+          gain2.gain.setValueAtTime(0.35, t1);
+          gain2.gain.exponentialRampToValueAtTime(0.01, t1 + 0.18);
+          osc2.connect(gain2);
+          gain2.connect(ctx.destination);
+          osc2.start(t1);
+          osc2.stop(t1 + 0.18);
         } catch(_) {}
-      }, atraso);
-    };
+      }, 160);
 
-    const tocarCiclo = () => {
-      emitirPulso(800, 0.22, 0);
-      emitirPulso(1000, 0.22, 260);
-      emitirPulso(1200, 0.3, 520);
+      // 3. Vibração para celulares e tablets
       if (navigator.vibrate) {
-        try { navigator.vibrate([200, 100, 200, 100, 400]); } catch(_) {}
+        try { navigator.vibrate([350, 150, 350, 150, 600]); } catch(_) {}
       }
-    };
+    } catch(_) {}
+  };
 
-    tocarCiclo();
-    if (modoTeste) {
-      setTimeout(() => { pararAudioAlarmePonto(); }, 2500);
-    } else {
-      _timerLoopAlarme = setInterval(tocarCiclo, 1100);
-    }
-  } catch(_) {}
+  emitirPulsoSirene();
+
+  if (modoTeste) {
+    _timerLoopAlarme = setInterval(emitirPulsoSirene, 650);
+    setTimeout(() => { pararAudioAlarmePonto(); }, 3200);
+  } else {
+    _timerLoopAlarme = setInterval(emitirPulsoSirene, 750);
+  }
 }
 
 function pararAudioAlarmePonto() {
@@ -5540,29 +5814,36 @@ function pararAudioAlarmePonto() {
     clearInterval(_timerLoopAlarme);
     _timerLoopAlarme = null;
   }
-  if (_audioCtxAlarme) {
-    try { _audioCtxAlarme.close(); } catch(_) {}
-    _audioCtxAlarme = null;
+  if (_timerTituloAlarme) {
+    clearInterval(_timerTituloAlarme);
+    _timerTituloAlarme = null;
+    document.title = _tituloOriginalSite;
   }
 }
 
 // ═════════════════════════════════════════════════════════
-// REGRA MANDATÓRIA: QUANDO ESTIVER FALTA OU DOENTE, NÃO ALARMAR!
+// REGRA: SE COLABORADOR ESTIVER DE FALTA OU DOENTE, FILTRAR
 // ═════════════════════════════════════════════════════════
 function funcionarioElegivelParaAlarme(f) {
   if (!f) return false;
   const st = String(f.status || 'Presente').toLowerCase().trim();
   if (st.includes('falta') || st.includes('doente') || st.includes('atestado') || st.includes('ausente') || st.includes('folga')) {
-    return false; // NÃO ALARMAR!
+    return false;
   }
   return true;
 }
 
 function verificarAlarmePontoAutomatico() {
   const cfg = obterConfigAlarmePonto();
-  if (!cfg.ativo) return;
+  if (!cfg.ativo) return; // Se usuário optou por desligar alarme, não toca!
 
   const now = new Date();
+  const diaSemana = now.getDay(); // 0 = Domingo, 6 = Sábado
+
+  // Verificação de Sábado e Domingo conforme escolha do usuário
+  if (diaSemana === 6 && !cfg.tocarSabado) return;
+  if (diaSemana === 0 && !cfg.tocarDomingo) return;
+
   const minutosAgora = now.getHours() * 60 + now.getMinutes();
   const dataHoje = now.toISOString().split('T')[0];
   const antecedencia = Number(cfg.antecedenciaMin) !== undefined ? Number(cfg.antecedenciaMin) : 5;
@@ -5581,22 +5862,28 @@ function verificarAlarmePontoAutomatico() {
     const disparoMinutos = turnoMinutos - antecedencia;
     if (disparoMinutos < 0) continue;
 
-    if (minutosAgora === disparoMinutos) {
+    // Janela de 2 minutos para garantir disparo mesmo se a aba estiver em segundo plano
+    if (minutosAgora >= disparoMinutos && minutosAgora <= disparoMinutos + 2) {
       const chaveEvento = `${dataHoje}_${t.chave}_${t.hora}`;
       if (cfg.ultimoDisparo === chaveEvento) {
         continue; // Já tocou neste horário hoje
       }
 
-      // CRÍTICO: Filtrar funcionários elegíveis (ignora Falta e Doente)
-      const todos = Array.isArray(funcionariosLista) ? funcionariosLista : [];
-      const elegiveis = todos.filter(funcionarioElegivelParaAlarme);
-
-      if (elegiveis.length === 0) {
-        // Se todos estiverem com falta ou doente, NÃO ALARMAR!
-        cfg.ultimoDisparo = chaveEvento;
-        salvarConfigAlarmePonto(cfg);
-        console.log(`[Alarme de Ponto] Ignorado (${t.label} às ${t.hora}): Nenhum colaborador elegível (todos de Falta/Doente/Folga).`);
-        continue;
+      // Filtrar funcionários elegíveis
+      let elegiveis = [];
+      const todos = (typeof funcionariosLista !== 'undefined' && Array.isArray(funcionariosLista)) ? funcionariosLista : [];
+      if (todos.length > 0) {
+        elegiveis = todos.filter(funcionarioElegivelParaAlarme);
+        if (cfg.bloquearInativos && elegiveis.length === 0) {
+          // Todos da empresa estão de falta/doente
+          cfg.ultimoDisparo = chaveEvento;
+          salvarConfigAlarmePonto(cfg);
+          console.log(`[Alarme de Ponto] Ignorado (${t.label} às ${t.hora}): Nenhum colaborador presente.`);
+          continue;
+        }
+      } else {
+        // Se a lista de colaboradores não tiver sido carregada ainda, alarme geral toca normalmente
+        elegiveis = [{ nome: 'Equipe da Empresa', status: 'Presente' }];
       }
 
       // Disparar alarme sonoro e visual
@@ -5609,7 +5896,27 @@ function verificarAlarmePontoAutomatico() {
 }
 
 function dispararAlarmePonto(labelTurno, horaTurno, antecedencia, elegiveis) {
+  _garantirAudioCtxDesbloqueado();
   tocarSireneAlarmePonto(false);
+
+  // Piscar título da aba para chamar atenção
+  if (_timerTituloAlarme) clearInterval(_timerTituloAlarme);
+  let pisca = false;
+  _timerTituloAlarme = setInterval(() => {
+    document.title = pisca ? `⏰ BATER PONTO! (${horaTurno})` : `🚨 ALARME DE PONTO - SD Vidros`;
+    pisca = !pisca;
+  }, 900);
+
+  // Notificação do navegador no Windows/Android se disponível
+  try {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(`⏰ Alarme de Ponto: ${labelTurno} às ${horaTurno}`, {
+        body: antecedencia > 0 ? `Faltam ${antecedencia} minutos para registrar o ponto oficial!` : 'Horário de bater o ponto agora!',
+        icon: 'logo.jpg',
+        badge: 'logo.jpg'
+      });
+    }
+  } catch(_) {}
 
   const tit = document.getElementById('alarme-ponto-titulo');
   const badge = document.getElementById('alarme-ponto-tempo-badge');
@@ -5645,8 +5952,10 @@ function adiarAlarmePonto(minutos = 5) {
   pararAlarmePonto();
   mostrarMsgPonto(`⏰ Alarme adiado por ${minutos} minutos.`, true);
   setTimeout(() => {
-    const todos = Array.isArray(funcionariosLista) ? funcionariosLista : [];
-    const elegiveis = todos.filter(funcionarioElegivelParaAlarme);
+    const cfg = obterConfigAlarmePonto();
+    if (!cfg.ativo) return;
+    const todos = (typeof funcionariosLista !== 'undefined' && Array.isArray(funcionariosLista)) ? funcionariosLista : [];
+    const elegiveis = todos.length > 0 ? todos.filter(funcionarioElegivelParaAlarme) : [{ nome: 'Equipe da Empresa', status: 'Presente' }];
     if (elegiveis.length > 0) {
       dispararAlarmePonto('Lembrete de Ponto (Soneca)', 'Agora', 0, elegiveis);
     }
@@ -5655,6 +5964,8 @@ function adiarAlarmePonto(minutos = 5) {
 
 // Inicia verificação automática a cada 15 segundos
 setInterval(verificarAlarmePontoAutomatico, 15000);
+setTimeout(verificarAlarmePontoAutomatico, 2000);
+setTimeout(atualizarResumoHorariosAlarme, 1000);
 
 function irParaGestaoFuncionarios() {
   fecharModalLinksFuncionarios();

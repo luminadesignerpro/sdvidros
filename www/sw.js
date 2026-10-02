@@ -22,6 +22,10 @@ let alarmesPontoConfig = [
 ];
 let colaboradorNome = 'Colaborador';
 let alarmesDisparadosHoje = {};
+let alarmePontoAtivo = true;
+let antecedenciaMinConfig = 5;
+let tocarSabadoConfig = false;
+let tocarDomingoConfig = false;
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
@@ -68,9 +72,13 @@ self.addEventListener('message', (e) => {
     if (Array.isArray(e.data.alarmes)) {
       alarmesPontoConfig = e.data.alarmes;
     }
+    if (typeof e.data.ativo === 'boolean') alarmePontoAtivo = e.data.ativo;
+    if (typeof e.data.antecedenciaMin === 'number') antecedenciaMinConfig = e.data.antecedenciaMin;
+    if (typeof e.data.tocarSabado === 'boolean') tocarSabadoConfig = e.data.tocarSabado;
+    if (typeof e.data.tocarDomingo === 'boolean') tocarDomingoConfig = e.data.tocarDomingo;
     if (e.data.nome) colaboradorNome = e.data.nome;
     if (e.data.testar) {
-      dispararNotificacaoAlarme('Teste de Alarme de Ponto', 'O alarme do ponto está ativo e tocará 5 minutos antes de cada turno mesmo com o aplicativo fechado!');
+      dispararNotificacaoAlarme('Teste de Alarme de Ponto', 'O alarme do ponto está ativo e tocará ' + antecedenciaMinConfig + ' minutos antes de cada turno mesmo com o aplicativo fechado!');
     }
   }
 });
@@ -78,7 +86,7 @@ self.addEventListener('message', (e) => {
 // Periodic Background Sync (quando suportado pelo navegador)
 self.addEventListener('periodicsync', (e) => {
   if (e.tag === 'alarme-ponto-sync') {
-    e.waitUntil(verificarAlarmesPonto());
+    e.waitUntil(checarHorarioAtual());
   }
 });
 
@@ -103,13 +111,15 @@ self.addEventListener('notificationclick', (e) => {
 
 // Checador de alarme em segundo plano a cada 30 segundos
 function checarHorarioAtual() {
+  if (!alarmePontoAtivo) return;
   const agora = new Date();
   const dia = agora.toISOString().slice(0, 10);
   if (!alarmesDisparadosHoje[dia]) alarmesDisparadosHoje = { [dia]: {} };
 
   const diaSem = agora.getDay();
-  // Não dispara no domingo se for folga (pode configurar)
-  if (diaSem === 0) return;
+  // Respeita a escolha do usuário para Sábado e Domingo
+  if (diaSem === 6 && !tocarSabadoConfig) return;
+  if (diaSem === 0 && !tocarDomingoConfig) return;
 
   const minTotaisAgora = agora.getHours() * 60 + agora.getMinutes();
 
@@ -117,14 +127,15 @@ function checarHorarioAtual() {
     if (!item.hora) return;
     const partes = item.hora.split(':');
     const minAlvo = parseInt(partes[0]) * 60 + parseInt(partes[1]);
-    const minAlarme = minAlvo - 5; // 5 minutos antes
+    const minAlarme = minAlvo - (antecedenciaMinConfig !== undefined ? antecedenciaMinConfig : 5);
 
     const chaveAlarme = `${dia}_${item.hora}`;
-    if (minTotaisAgora === minAlarme && !alarmesDisparadosHoje[dia][chaveAlarme]) {
+    if (minTotaisAgora >= minAlarme && minTotaisAgora <= minAlarme + 2 && !alarmesDisparadosHoje[dia][chaveAlarme]) {
       alarmesDisparadosHoje[dia][chaveAlarme] = true;
+      const avisoMin = antecedenciaMinConfig > 0 ? `Faltam ${antecedenciaMinConfig} minutos para` : 'Horário de';
       dispararNotificacaoAlarme(
         `⏰ Alarme de Ponto: ${item.label} (${item.hora})`,
-        `Atenção ${colaboradorNome}! Faltam 5 minutos para o seu horário de ${item.label}. Toque aqui para registrar o ponto agora.`
+        `Atenção ${colaboradorNome}! ${avisoMin} o seu horário de ${item.label}. Toque aqui para registrar o ponto agora.`
       );
     }
   });

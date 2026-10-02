@@ -2,6 +2,12 @@
   "name": "sdvidros",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "sync": "npx cap sync",
+    "copy": "npx cap copy",
+    "open": "npx cap open android",
+    "build:apk": "cd android && .\\gradlew assembleDebug"
+  },
   "dependencies": {
     "@capacitor/android": "^8.5.0",
     "@capacitor/cli": "^8.5.0",
