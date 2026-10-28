@@ -430,11 +430,9 @@ async function gerarPdfOrcamento(dados, fetchLogo, empInfo) {
 
   totY -= 14;
   page.drawText('Mão de Obra e Instalação:', { x: rightCardX + 10, y: totY, size: 7, font: fontRegular, color: GRAY });
-  page.drawText('Inclusa', { x: rightCardX + rightCardW - 10 - fontRegular.widthOfTextAtSize('Inclusa', 7), y: totY, size: 7, font: fontRegular, color: DARK });
 
   totY -= 14;
   page.drawText('Frete e Deslocamento:', { x: rightCardX + 10, y: totY, size: 7, font: fontRegular, color: GRAY });
-  page.drawText('Incluso', { x: rightCardX + rightCardW - 10 - fontRegular.widthOfTextAtSize('Incluso', 7), y: totY, size: 7, font: fontRegular, color: DARK });
 
   // Bloco de destaque do VALOR TOTAL
   const totalBoxH = 50;

@@ -10445,14 +10445,18 @@ async function gerarPdfOrcamentoDoc(dados) {
   page.drawText(txtValProdutos, { x: rightCardX + rightCardW - 10 - fontBold.widthOfTextAtSize(txtValProdutos, 7.2), y: totY, size: 7.2, font: fontBold, color: DARK });
 
   totY -= 13;
-  const txtValServico = valServicoFinal > 0 ? ('R$ ' + formatarValorPtBr(valServicoFinal)) : 'Inclusa';
   page.drawText('Mão de Obra e Instalação:', { x: rightCardX + 10, y: totY, size: 6.8, font: fontRegular, color: GRAY });
-  page.drawText(txtValServico, { x: rightCardX + rightCardW - 10 - (valServicoFinal > 0 ? fontBold : fontRegular).widthOfTextAtSize(txtValServico, 7.2), y: totY, size: 7.2, font: valServicoFinal > 0 ? fontBold : fontRegular, color: DARK });
+  if (valServicoFinal > 0) {
+    const txtValServico = 'R$ ' + formatarValorPtBr(valServicoFinal);
+    page.drawText(txtValServico, { x: rightCardX + rightCardW - 10 - fontBold.widthOfTextAtSize(txtValServico, 7.2), y: totY, size: 7.2, font: fontBold, color: DARK });
+  }
 
   totY -= 13;
-  const txtValFrete = valFreteNum > 0 ? ('R$ ' + formatarValorPtBr(valFreteNum)) : 'Incluso';
   page.drawText('Frete e Deslocamento:', { x: rightCardX + 10, y: totY, size: 6.8, font: fontRegular, color: GRAY });
-  page.drawText(txtValFrete, { x: rightCardX + rightCardW - 10 - (valFreteNum > 0 ? fontBold : fontRegular).widthOfTextAtSize(txtValFrete, 7.2), y: totY, size: 7.2, font: valFreteNum > 0 ? fontBold : fontRegular, color: DARK });
+  if (valFreteNum > 0) {
+    const txtValFrete = 'R$ ' + formatarValorPtBr(valFreteNum);
+    page.drawText(txtValFrete, { x: rightCardX + rightCardW - 10 - fontBold.widthOfTextAtSize(txtValFrete, 7.2), y: totY, size: 7.2, font: fontBold, color: DARK });
+  }
 
   if (valDescNum > 0) {
     totY -= 13;
