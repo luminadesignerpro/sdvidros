@@ -23,16 +23,17 @@ module.exports = async (req, res) => {
           const item = JSON.parse(line);
           if (item.event === 'message' && item.message) {
             const dados = JSON.parse(item.message);
-            if (dados.numero_os) {
+            if (dados.numero_os && (dados.tipo === 'assinatura_real' || dados.assinatura_base64)) {
               contratosMap.set(dados.numero_os, {
                 id: item.id || dados.numero_os,
                 numero_os: dados.numero_os,
-                cliente_nome: dados.cliente || 'Cliente',
+                cliente_nome: dados.cliente || dados.assinante_nome || 'Cliente',
                 cliente_tel: '',
                 assinado: true,
-                assinante_nome: dados.assinante_nome || dados.cliente || 'Confirmado via WhatsApp',
+                assinante_nome: dados.assinante_nome || 'Cliente',
+                assinatura_base64: dados.assinatura_base64 || '',
                 assinado_em: dados.assinado_em || (item.time ? new Date(item.time * 1000).toISOString() : new Date().toISOString()),
-                texto: `Orçamento ${dados.numero_os} aprovado via WhatsApp.`
+                texto: `Orçamento ${dados.numero_os} assinado digitalmente pelo cliente.`
               });
             }
           }
@@ -53,7 +54,7 @@ module.exports = async (req, res) => {
 
     if (Array.isArray(dbData)) {
       dbData.forEach(c => {
-        if (c && c.numero_os) {
+        if (c && c.numero_os && c.assinado && c.assinatura_base64) {
           const anterior = contratosMap.get(c.numero_os) || {};
           contratosMap.set(c.numero_os, { ...anterior, ...c });
         }

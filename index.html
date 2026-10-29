@@ -6123,19 +6123,26 @@ function aplicarNovoStatusOs(novoStatus) {
   const idx = historico.findIndex(x => String(x.id) === String(osIdEditandoStatus) || String(x.numero) === String(osIdEditandoStatus));
   if (idx === -1) return;
 
+  const numLimpo = String(historico[idx].numero || '').replace(/\D/g, '');
   historico[idx].status = novoStatus;
-  if (novoStatus === 'aprovado' || novoStatus === 'modificacao_aprovada') {
-    historico[idx].assinado_por = historico[idx].assinado_por || (novoStatus === 'modificacao_aprovada' ? 'Modificação Aprovada' : 'Aprovado pelo Usuário');
+  if (novoStatus === 'pendente') {
+    historico[idx].assinado_por = '';
+    historico[idx].assinado_em = '';
+    historico[idx].assinatura_digital = null;
+    historico[idx].assinatura_base64 = '';
+    historico[idx].rubrica_base64 = '';
+    historico[idx].assinado = false;
+    try {
+      localStorage.removeItem('sdv_assinatura_' + numLimpo);
+      const mapa = JSON.parse(localStorage.getItem('sdv_assinaturas_map') || '{}');
+      delete mapa[numLimpo];
+      localStorage.setItem('sdv_assinaturas_map', JSON.stringify(mapa));
+    } catch (_) {}
+  } else if (novoStatus === 'aprovado' || novoStatus === 'modificacao_aprovada') {
+    if (!historico[idx].assinado_por) {
+      historico[idx].assinado_por = historico[idx].nome || 'Cliente';
+    }
     if (!historico[idx].assinado_em) historico[idx].assinado_em = new Date().toISOString();
-    fetch('/api/aprovar-orcamento', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        os: historico[idx].numero,
-        cliente: historico[idx].nome,
-        total: historico[idx].total
-      })
-    }).catch(() => {});
   }
 
   save(K.orders, historico);
@@ -6471,24 +6478,37 @@ async function visualizarPdfOrcamentoAtual() {
 //  VISUALIZAR ASSINATURA DIGITAL DO CLIENTE
 // ══════════════════════════════════════════════
 
-// Gera uma assinatura digital vetorizada estilizada caso a visualização seja requisitada
-function criarRubricaDigitalSvgPadrao(nome) {
-  const nLimpo = (nome || 'Cliente').trim();
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="90" viewBox="0 0 320 90">
-    <path d="M 15 55 Q 35 15 65 50 T 115 45 T 160 40 T 205 55 Q 245 20 290 40" fill="none" stroke="#1d4ed8" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="25" y="76" font-family="'Brush Script MT', cursive, sans-serif" font-size="28" font-style="italic" fill="#0f172a">${nLimpo}</text>
-  </svg>`;
-  return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
-}
-
 function verificarAtualizacoesAprovacoesPendentes() {
   let alterou = false;
   if (!Array.isArray(historico)) return;
 
+  const mapa = JSON.parse(localStorage.getItem('sdv_assinaturas_map') || '{}');
+
+  // 1. Limpeza de assinaturas falsas/automáticas anteriores
   historico.forEach(o => {
     const numLimpo = String(o.numero || '').replace(/\D/g, '');
-    const ehTaciane = (o.nome || '').toLowerCase().includes('taciane') || numLimpo === '0003' || numLimpo === '3';
+    const assinadoPorAdmin = o.assinado_por && o.assinado_por.toUpperCase().includes('SAMUEL') && !(o.nome || '').toLowerCase().includes('samuel');
+    const rubricaSvgFalsa = o.assinatura_digital && String(o.assinatura_digital.rubrica || '').includes('image/svg+xml');
     
+    // Se a OS foi marcada como aprovada automaticamente sem assinatura real do cliente, reverte para pendente
+    if (assinadoPorAdmin || rubricaSvgFalsa) {
+      o.status = 'pendente';
+      o.assinado_por = '';
+      o.assinado_em = '';
+      o.assinatura_digital = null;
+      o.assinatura_base64 = '';
+      o.rubrica_base64 = '';
+      o.assinado = false;
+      localStorage.removeItem('sdv_assinatura_' + numLimpo);
+      delete mapa[numLimpo];
+      alterou = true;
+    }
+  });
+  localStorage.setItem('sdv_assinaturas_map', JSON.stringify(mapa));
+
+  // 2. Sincronização estrita: apenas se houver assinatura REAL (canvas/imagem) registrada
+  historico.forEach(o => {
+    const numLimpo = String(o.numero || '').replace(/\D/g, '');
     let regAssinatura = o.assinatura_digital || null;
     if (!regAssinatura) {
       try {
@@ -6496,37 +6516,18 @@ function verificarAtualizacoesAprovacoesPendentes() {
         if (salvo) regAssinatura = JSON.parse(salvo);
       } catch (_) {}
     }
-    if (!regAssinatura) {
-      try {
-        const mapa = JSON.parse(localStorage.getItem('sdv_assinaturas_map') || '{}');
-        if (mapa[numLimpo]) regAssinatura = mapa[numLimpo];
-      } catch (_) {}
+    if (!regAssinatura && mapa[numLimpo]) {
+      regAssinatura = mapa[numLimpo];
     }
 
-    if (ehTaciane || regAssinatura) {
-      const nomeFinal = (regAssinatura && regAssinatura.nome) || o.assinado_por || (ehTaciane ? 'Taciane Pereira' : (o.nome || 'Cliente'));
-      if (o.status !== 'aprovado') {
+    const temRubricaReal = regAssinatura && regAssinatura.rubrica && !String(regAssinatura.rubrica).includes('image/svg+xml');
+
+    if (temRubricaReal) {
+      const nomeFinal = regAssinatura.nome || o.nome || 'Cliente';
+      if (o.status !== 'aprovado' || o.assinado_por !== nomeFinal) {
         o.status = 'aprovado';
         o.assinado_por = nomeFinal;
-        o.assinado_em = (regAssinatura && regAssinatura.data) || o.assinado_em || new Date().toISOString();
-        alterou = true;
-      }
-      if (!regAssinatura) {
-        regAssinatura = {
-          nome: nomeFinal,
-          rubrica: criarRubricaDigitalSvgPadrao(nomeFinal),
-          data: o.assinado_em || new Date().toISOString(),
-          os: o.numero || ('#' + numLimpo.padStart(4, '0'))
-        };
-        o.assinatura_digital = regAssinatura;
-        try {
-          localStorage.setItem('sdv_assinatura_' + numLimpo, JSON.stringify(regAssinatura));
-          const mapa = JSON.parse(localStorage.getItem('sdv_assinaturas_map') || '{}');
-          mapa[numLimpo] = regAssinatura;
-          localStorage.setItem('sdv_assinaturas_map', JSON.stringify(mapa));
-        } catch(_) {}
-        alterou = true;
-      } else if (!o.assinatura_digital) {
+        o.assinado_em = regAssinatura.data || o.assinado_em || new Date().toISOString();
         o.assinatura_digital = regAssinatura;
         alterou = true;
       }
@@ -6539,8 +6540,33 @@ function verificarAtualizacoesAprovacoesPendentes() {
   }
 }
 
+function removerAssinaturaOs(id) {
+  const o = historico.find(x => String(x.id) === String(id) || String(x.numero) === String(id));
+  if (!o) return;
+  if (!confirm(`Deseja realmente remover a assinatura da O.S. ${o.numero} e voltar para Aguardando Resposta?`)) return;
+
+  const numLimpo = String(o.numero || '').replace(/\D/g, '');
+  o.status = 'pendente';
+  o.assinado_por = '';
+  o.assinado_em = '';
+  o.assinatura_digital = null;
+  o.assinatura_base64 = '';
+  o.rubrica_base64 = '';
+  o.assinado = false;
+  try {
+    localStorage.removeItem('sdv_assinatura_' + numLimpo);
+    const mapa = JSON.parse(localStorage.getItem('sdv_assinaturas_map') || '{}');
+    delete mapa[numLimpo];
+    localStorage.setItem('sdv_assinaturas_map', JSON.stringify(mapa));
+  } catch (_) {}
+  save(K.orders, historico);
+  renderHist();
+  fecharModalAssinatura();
+  mostrarToastAprovacao(`O.S. ${o.numero} voltou para Aguardando Resposta.`);
+}
+
 function abrirModalAssinaturaOs(id, versaoNum = null) {
-  const o = historico.find(x => String(x.id) === String(id));
+  const o = historico.find(x => String(x.id) === String(id) || String(x.numero) === String(id));
   if (!o) {
     alert('Ordem de serviço não localizada no histórico.');
     return;
@@ -6574,32 +6600,8 @@ function abrirModalAssinaturaOs(id, versaoNum = null) {
       os: o.numero
     };
   }
-  if (!reg && typeof listaContratosCache !== 'undefined' && Array.isArray(listaContratosCache)) {
-    const c = listaContratosCache.find(x => String(x.numero_os || '').replace(/\D/g, '') === numLimpo && x.assinado);
-    if (c) {
-      reg = {
-        nome: c.assinante_nome || c.cliente_nome || (v && v.assinado_por) || o.assinado_por || 'Cliente',
-        rubrica: c.assinatura_base64 || '',
-        data: c.assinado_em || (v && v.data) || o.assinado_em || '',
-        os: o.numero
-      };
-    }
-  }
 
-  // Se a ordem for aprovada ou for Taciane Pereira e ainda não tinha rubrica, gera a assinatura digital certificada
-  if (!reg && (o.status === 'aprovado' || (o.nome||'').toLowerCase().includes('taciane') || numLimpo === '0003')) {
-    const nomeFinal = o.assinado_por || o.nome || 'Cliente';
-    reg = {
-      nome: nomeFinal,
-      rubrica: criarRubricaDigitalSvgPadrao(nomeFinal),
-      data: o.assinado_em || new Date().toISOString(),
-      os: o.numero
-    };
-    o.assinatura_digital = reg;
-    try {
-      localStorage.setItem('sdv_assinatura_' + numLimpo, JSON.stringify(reg));
-    } catch (_) {}
-  }
+  const temRubricaReal = reg && reg.rubrica && !String(reg.rubrica).includes('image/svg+xml');
 
   const modal = document.getElementById('modal-assinatura');
   const conteudo = document.getElementById('modal-assinatura-conteudo');
@@ -6615,119 +6617,146 @@ function abrirModalAssinaturaOs(id, versaoNum = null) {
     dataHora = (v && v.data) || o.data_orc || new Date().toLocaleDateString('pt-BR');
   }
 
-  const rubricaImg = (reg && reg.rubrica) ? reg.rubrica : (o.assinatura_base64 || o.rubrica_base64 || (v && v.assinatura_base64) || '');
+  const rubricaImg = temRubricaReal ? reg.rubrica : '';
   const hashComprovante = 'SDV-' + numLimpo.padStart(4, '0') + '-' + Math.abs((o.id || 1000) * 31).toString(16).toUpperCase();
   const valorTotal = (v && v.total) || o.total || 'R$ 0,00';
   const versaoStr = v ? ` (${v.titulo || 'Versão ' + v.versao})` : '';
 
-  conteudo.innerHTML = `
-    <div style="background:linear-gradient(135deg, rgba(37,211,102,0.08), rgba(201,168,76,0.05)); border:1.5px solid rgba(74,222,128,0.3); border-radius:14px; padding:18px; margin-bottom:14px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-        <div>
-          <span style="font-size:11px; font-weight:800; color:#34d399; text-transform:uppercase; letter-spacing:0.05em; display:flex; align-items:center; gap:6px;">
-            🛡️ Certificado de Assinatura Digital
+  if (temRubricaReal) {
+    conteudo.innerHTML = `
+      <div style="background:linear-gradient(135deg, rgba(37,211,102,0.08), rgba(201,168,76,0.05)); border:1.5px solid rgba(74,222,128,0.3); border-radius:14px; padding:18px; margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+          <div>
+            <span style="font-size:11px; font-weight:800; color:#34d399; text-transform:uppercase; letter-spacing:0.05em; display:flex; align-items:center; gap:6px;">
+              🛡️ Certificado de Assinatura Digital
+            </span>
+            <div style="font-size:16px; font-weight:900; color:#fff; margin-top:2px;">
+              Ordem de Serviço ${esc(o.numero)}${versaoStr}
+            </div>
+          </div>
+          <div style="background:rgba(37,211,102,0.2); border:1px solid #10b981; color:#4ade80; font-size:11px; font-weight:800; padding:4px 10px; border-radius:20px;">
+            ✓ Aprovado e Assinado pelo Cliente
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:12.5px; margin-bottom:14px;">
+          <div>
+            <span style="color:var(--muted); display:block; font-size:11px;">Assinado por:</span>
+            <strong style="color:#fff; font-size:13.5px;">${esc(nomeAssinante)}</strong>
+          </div>
+          <div>
+            <span style="color:var(--muted); display:block; font-size:11px;">Data e Horário:</span>
+            <strong style="color:var(--gold-light);">${esc(dataHora)}</strong>
+          </div>
+          <div>
+            <span style="color:var(--muted); display:block; font-size:11px;">Cliente:</span>
+            <strong style="color:#fff;">${esc(o.nome || '')}</strong>
+          </div>
+          <div>
+            <span style="color:var(--muted); display:block; font-size:11px;">Valor Aprovado:</span>
+            <strong style="color:var(--gold); font-size:13px;">${esc(valorTotal)}</strong>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <span style="color:var(--muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; display:block; margin-bottom:6px;">
+            ✍️ Rubrica / Assinatura do Cliente:
           </span>
-          <div style="font-size:16px; font-weight:900; color:#fff; margin-top:2px;">
-            Ordem de Serviço ${esc(o.numero)}${versaoStr}
+          <div id="area-rubrica-exibicao">
+            <div style="background:#ffffff; border-radius:12px; padding:14px; text-align:center; border:2px dashed rgba(201,168,76,0.7); box-shadow:0 6px 20px rgba(0,0,0,0.4);">
+              <div style="display:inline-block; max-width:100%; min-height:80px;">
+                <img id="img-rubrica-preview" src="${rubricaImg}" style="max-height:130px; max-width:100%; object-fit:contain; filter:contrast(1.15);" alt="Assinatura Digital do Cliente" />
+              </div>
+              <div style="border-top:1px solid #e2e8f0; margin-top:8px; padding-top:6px; font-size:11px; color:#475569; font-weight:600;">
+                ✍️ ${esc(nomeAssinante)} • Assinatura Capturada Digitalmente
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-sm" onclick="alternarDesenhoAssinaturaModal('${o.id}', ${versaoNum || 'null'})" style="flex:1; background:rgba(201,168,76,0.18); border:1px solid rgba(201,168,76,0.5); color:var(--gold-light); font-weight:700; font-size:11.5px; padding:7px 10px; border-radius:8px;">
+              ✍️ Redesenhar Assinatura
+            </button>
+            <button type="button" class="btn btn-sm" onclick="removerAssinaturaOs('${o.id}')" style="background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#f87171; font-weight:700; font-size:11.5px; padding:7px 10px; border-radius:8px;" title="Cancela a assinatura e volta o status para Aguardando">
+              🗑️ Cancelar Assinatura
+            </button>
+          </div>
+
+          <div id="box-desenho-assinatura-modal" style="display:none; margin-top:10px; background:#1c1c28; border:1px solid rgba(201,168,76,0.4); border-radius:12px; padding:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:11px; font-weight:800; color:var(--gold-light);">✍️ Desenhe a rubrica abaixo:</span>
+              <button type="button" onclick="limparCanvasAssinaturaModal()" style="background:none; border:none; color:#f87171; font-size:11px; font-weight:700; cursor:pointer;">🧹 Limpar</button>
+            </div>
+            <div style="background:#ffffff; border-radius:8px; border:2px solid #c9a84c; overflow:hidden; touch-action:none;">
+              <canvas id="canvas-rubrica-modal" width="460" height="150" style="width:100%; height:130px; display:block; background:#ffffff; cursor:crosshair;"></canvas>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+              <button type="button" class="btn btn-gold btn-sm" onclick="salvarCanvasAssinaturaModal('${o.id}', ${versaoNum || 'null'})" style="flex:1; font-weight:800;">
+                💾 Salvar Nova Rubrica
+              </button>
+              <button type="button" class="btn btn-sec btn-sm" onclick="alternarDesenhoAssinaturaModal('${o.id}')" style="padding:6px 12px;">
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
-        <div style="background:rgba(37,211,102,0.2); border:1px solid #10b981; color:#4ade80; font-size:11px; font-weight:800; padding:4px 10px; border-radius:20px;">
-          ✓ Aprovado e Assinado
+
+        <div style="margin-top:14px; background:rgba(0,0,0,0.3); border-radius:8px; padding:8px 12px; font-size:11px; color:var(--muted); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
+          <span>Código de Autenticação: <code style="color:var(--gold-light);">${hashComprovante}</code></span>
+          <span>Canal: <span style="color:#4ade80;">Portal / Assinatura Online</span></span>
         </div>
       </div>
-
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:12.5px; margin-bottom:14px;">
-        <div>
-          <span style="color:var(--muted); display:block; font-size:11px;">Assinado por:</span>
-          <strong style="color:#fff; font-size:13.5px;">${esc(nomeAssinante)}</strong>
+    `;
+  } else {
+    conteudo.innerHTML = `
+      <div style="background:rgba(234,179,8,0.08); border:1.5px solid rgba(234,179,8,0.3); border-radius:14px; padding:20px; margin-bottom:14px; text-align:center;">
+        <div style="font-size:36px; margin-bottom:8px;">⏳</div>
+        <div style="font-size:16px; font-weight:800; color:#facc15; margin-bottom:6px;">
+          Aguardando Assinatura do Cliente
         </div>
-        <div>
-          <span style="color:var(--muted); display:block; font-size:11px;">Data e Horário:</span>
-          <strong style="color:var(--gold-light);">${esc(dataHora)}</strong>
+        <div style="font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:16px;">
+          A Ordem de Serviço <strong>${esc(o.numero)}</strong> ainda não foi assinada pelo cliente <strong>${esc(o.nome || 'Cliente')}</strong>.<br>
+          O status só mudará para <span style="color:#4ade80;font-weight:700;">🟢 Aprovado</span> após o cliente realmente assinar no link ou presencialmente.
         </div>
-        <div>
-          <span style="color:var(--muted); display:block; font-size:11px;">Cliente:</span>
-          <strong style="color:#fff;">${esc(o.nome || '')}</strong>
-        </div>
-        <div>
-          <span style="color:var(--muted); display:block; font-size:11px;">Valor Aprovado:</span>
-          <strong style="color:var(--gold); font-size:13px;">${esc(valorTotal)}</strong>
-        </div>
-      </div>
-
-      <!-- Rubrica desenhada pelo cliente ou Assinatura Digitalizada -->
-      <div style="margin-top:14px;">
-        <span style="color:var(--muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; display:block; margin-bottom:6px;">
-          ✍️ Rubrica / Assinatura do Cliente:
-        </span>
-        
-        <div id="area-rubrica-exibicao">
-        ${rubricaImg ? `
-          <div style="background:#ffffff; border-radius:12px; padding:14px; text-align:center; border:2px dashed rgba(201,168,76,0.7); box-shadow:0 6px 20px rgba(0,0,0,0.4);">
-            <div style="display:inline-block; max-width:100%; min-height:80px;">
-              <img id="img-rubrica-preview" src="${rubricaImg}" style="max-height:130px; max-width:100%; object-fit:contain; filter:contrast(1.15);" alt="Assinatura Digital do Cliente" />
-            </div>
-            <div style="border-top:1px solid #e2e8f0; margin-top:8px; padding-top:6px; font-size:11px; color:#475569; font-weight:600;">
-              ✍️ ${esc(nomeAssinante)} • Assinatura Capturada Digitalmente
-            </div>
-          </div>
-        ` : `
-          <div style="background:#ffffff; border-radius:12px; padding:18px 14px; text-align:center; border:2px dashed rgba(201,168,76,0.7); box-shadow:0 6px 20px rgba(0,0,0,0.4); position:relative; overflow:hidden;">
-            <div style="position:absolute; right:10px; top:10px; border:1.5px solid rgba(16,185,129,0.4); color:#059669; font-size:9px; font-weight:800; padding:2px 6px; border-radius:6px; transform:rotate(6deg); text-transform:uppercase; pointer-events:none; background:rgba(209,250,229,0.5);">
-              ✓ Autenticado
-            </div>
-            <div style="font-family:'Caveat', cursive, sans-serif; font-size:38px; color:#0f172a; font-weight:700; transform:rotate(-2deg); line-height:1.1; margin:6px 0; letter-spacing:0.5px;">
-              ${esc(nomeAssinante)}
-            </div>
-            <div style="width:65%; max-width:200px; height:1.5px; background:linear-gradient(90deg, transparent, #475569, transparent); margin:4px auto 8px auto;"></div>
-            <div style="font-size:10.5px; color:#64748b; font-weight:600;">
-              Assinatura Eletrônica Certificada via WhatsApp / Portal
-            </div>
-          </div>
-        `}
-        </div>
-
-        <!-- Botões de ação rápida para desenhar ou reenviar -->
-        <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
-          <button type="button" class="btn btn-sm" onclick="alternarDesenhoAssinaturaModal(${o.id}, ${versaoNum || 'null'})" style="flex:1; background:rgba(201,168,76,0.18); border:1px solid rgba(201,168,76,0.5); color:var(--gold-light); font-weight:700; font-size:11.5px; padding:7px 10px; border-radius:8px;">
-            ✍️ ${rubricaImg ? 'Redesenhar com o Dedo' : 'Desenhar Rubrica com o Dedo'}
+        <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+          <button type="button" class="btn btn-whats btn-sm" onclick="enviarLinkAssinarComDedo('${o.id}')">
+            📱 Enviar Link p/ Cliente Assinar
           </button>
-          <button type="button" class="btn btn-sm" onclick="enviarLinkAssinarComDedo(${o.id})" style="flex:1; background:rgba(37,211,102,0.18); border:1px solid rgba(37,211,102,0.5); color:#4ade80; font-weight:700; font-size:11.5px; padding:7px 10px; border-radius:8px;">
-            📱 Link p/ Cliente Assinar
+          <button type="button" class="btn btn-gold btn-sm" onclick="alternarDesenhoAssinaturaModal('${o.id}')">
+            ✍️ Coletar Assinatura Agora
+          </button>
+          <button type="button" class="btn btn-sec btn-sm" onclick="removerAssinaturaOs('${o.id}')">
+            🟡 Manter Aguardando
           </button>
         </div>
 
-        <!-- Box interativo de desenho na tela (aberto via botão) -->
-        <div id="box-desenho-assinatura-modal" style="display:none; margin-top:10px; background:#1c1c28; border:1px solid rgba(201,168,76,0.4); border-radius:12px; padding:12px;">
+        <div id="box-desenho-assinatura-modal" style="display:none; margin-top:14px; background:#1c1c28; border:1px solid rgba(201,168,76,0.4); border-radius:12px; padding:12px; text-align:left;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span style="font-size:11px; font-weight:800; color:var(--gold-light);">✍️ Desenhe sua rubrica com o dedo abaixo:</span>
+            <span style="font-size:11px; font-weight:800; color:var(--gold-light);">✍️ Desenhe a assinatura com o dedo abaixo:</span>
             <button type="button" onclick="limparCanvasAssinaturaModal()" style="background:none; border:none; color:#f87171; font-size:11px; font-weight:700; cursor:pointer;">🧹 Limpar</button>
           </div>
           <div style="background:#ffffff; border-radius:8px; border:2px solid #c9a84c; overflow:hidden; touch-action:none;">
             <canvas id="canvas-rubrica-modal" width="460" height="150" style="width:100%; height:130px; display:block; background:#ffffff; cursor:crosshair;"></canvas>
           </div>
           <div style="display:flex; gap:8px; margin-top:10px;">
-            <button type="button" class="btn btn-gold btn-sm" onclick="salvarCanvasAssinaturaModal(${o.id}, ${versaoNum || 'null'})" style="flex:1; font-weight:800;">
-              💾 Salvar Assinatura na O.S.
+            <button type="button" class="btn btn-gold btn-sm" onclick="salvarCanvasAssinaturaModal('${o.id}', ${versaoNum || 'null'})" style="flex:1; font-weight:800;">
+              💾 Confirmar e Salvar Assinatura
             </button>
-            <button type="button" class="btn btn-sec btn-sm" onclick="alternarDesenhoAssinaturaModal(${o.id})" style="padding:6px 12px;">
+            <button type="button" class="btn btn-sec btn-sm" onclick="alternarDesenhoAssinaturaModal('${o.id}')" style="padding:6px 12px;">
               Cancelar
             </button>
           </div>
         </div>
       </div>
+    `;
+  }
 
-      <div style="margin-top:14px; background:rgba(0,0,0,0.3); border-radius:8px; padding:8px 12px; font-size:11px; color:var(--muted); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
-        <span>Código de Autenticação: <code style="color:var(--gold-light);">${hashComprovante}</code></span>
-        <span>Canal: <span style="color:#4ade80;">Portal / Assinatura Online</span></span>
-      </div>
-    </div>
-
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button type="button" class="btn btn-gold btn-sm" onclick="fecharModalAssinatura(); visualizarPdfOs(${o.id}, ${versaoNum || 'null'});" style="flex:1;">
+  conteudo.innerHTML += `
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+      <button type="button" class="btn btn-gold btn-sm" onclick="fecharModalAssinatura(); visualizarPdfOs('${o.id}', ${versaoNum || 'null'});" style="flex:1;">
         👁️ Ver PDF desta O.S.
       </button>
-      <button type="button" class="btn btn-whats btn-sm" onclick="enviarWhatsOs(${o.id})" style="flex:1;">
+      <button type="button" class="btn btn-whats btn-sm" onclick="enviarWhatsOs('${o.id}')" style="flex:1;">
         📱 Reenviar WhatsApp
       </button>
     </div>
@@ -6735,43 +6764,6 @@ function abrirModalAssinaturaOs(id, versaoNum = null) {
 
   modal.style.zIndex = '99999';
   modal.style.display = 'flex';
-
-  // Buscar assinatura em segundo plano no Supabase se ainda não tiver imagem de rubrica
-  if (!rubricaImg) {
-    fetch(`/api/contrato?os=${encodeURIComponent(numLimpo)}`)
-      .then(r => r.json())
-      .then(d => {
-        if (d && d.assinatura_base64) {
-          o.assinatura_base64 = d.assinatura_base64;
-          o.rubrica_base64 = d.assinatura_base64;
-          if (v) v.assinatura_base64 = d.assinatura_base64;
-          const area = document.getElementById('area-rubrica-exibicao');
-          if (area) {
-            area.innerHTML = `
-              <div style="background:#ffffff; border-radius:12px; padding:14px; text-align:center; border:2px dashed rgba(201,168,76,0.7); box-shadow:0 6px 20px rgba(0,0,0,0.4);">
-                <div style="display:inline-block; max-width:100%; min-height:80px;">
-                  <img id="img-rubrica-preview" src="${d.assinatura_base64}" style="max-height:130px; max-width:100%; object-fit:contain; filter:contrast(1.15);" alt="Assinatura Digital do Cliente" />
-                </div>
-                <div style="border-top:1px solid #e2e8f0; margin-top:8px; padding-top:6px; font-size:11px; color:#475569; font-weight:600;">
-                  ✍️ ${esc(d.assinante_nome || nomeAssinante)} • Assinatura Capturada Digitalmente
-                </div>
-              </div>
-            `;
-          }
-          try {
-            const regAtualizado = {
-              nome: d.assinante_nome || nomeAssinante,
-              rubrica: d.assinatura_base64,
-              data: d.assinado_em || o.assinado_em,
-              os: o.numero
-            };
-            localStorage.setItem('sdv_assinatura_' + numLimpo, JSON.stringify(regAtualizado));
-            salvarHistorico();
-          } catch (e) {}
-        }
-      })
-      .catch(() => {});
-  }
 }
 
 let modalCanvasDrawing = false;

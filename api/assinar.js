@@ -56,6 +56,24 @@ module.exports = async (req, res) => {
       }
       throw error;
     }
+    const NTFY_TOPIC = 'sdvidros_aprovacoes_85996119824';
+    const numFinalOs = String(numero_os || (existente && existente.numero_os) || '').trim();
+    if (numFinalOs) {
+      try {
+        await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+          method: 'POST',
+          headers: { 'Title': `Orçamento ${numFinalOs} Assinado pelo Cliente`, 'Tags': 'white_check_mark,writing_hand' },
+          body: JSON.stringify({
+            numero_os: numFinalOs.startsWith('#') ? numFinalOs : '#' + numFinalOs.replace(/\D/g, '').padStart(4, '0'),
+            assinante_nome: assinante_nome,
+            assinatura_base64: assinatura_base64,
+            tipo: 'assinatura_real',
+            assinado_em: new Date().toISOString()
+          })
+        });
+      } catch (_) {}
+    }
+
     res.status(200).json({ ok: true });
   } catch (e) {
     console.error('Erro em assinar:', e);
